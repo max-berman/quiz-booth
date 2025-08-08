@@ -1,0 +1,202 @@
+import { useState } from "react";
+import { useParams, useLocation } from "wouter";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Trophy, RotateCcw, Share, Eye } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import type { Game, InsertPlayer } from "@shared/schema";
+
+export default function Results() {
+  const { id } = useParams();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [playerName, setPlayerName] = useState("");
+  const [playerCompany, setPlayerCompany] = useState("");
+  const [isScoreSaved, setIsScoreSaved] = useState(false);
+
+  // Get URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const score = parseInt(urlParams.get("score") || "0");
+  const correctAnswers = parseInt(urlParams.get("correct") || "0");
+  const totalQuestions = parseInt(urlParams.get("total") || "0");
+  const timeSpent = parseInt(urlParams.get("time") || "0");
+
+  const { data: game } = useQuery<Game>({
+    queryKey: ["/api/games", id],
+  });
+
+  const saveScoreMutation = useMutation({
+    mutationFn: async (playerData: InsertPlayer) => {
+      const response = await apiRequest("POST", `/api/games/${id}/players`, playerData);
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsScoreSaved(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/games", id, "leaderboard"] });
+      toast({
+        title: "Success!",
+        description: "Your score has been saved to the leaderboard.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to save score. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSaveScore = () => {
+    if (!playerName.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter your name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const playerData: InsertPlayer = {
+      name: playerName.trim(),
+      company: playerCompany.trim() || undefined,
+      gameId: id!,
+      score,
+      correctAnswers,
+      totalQuestions,
+      timeSpent,
+    };
+
+    saveScoreMutation.mutate(playerData);
+  };
+
+  const handleShare = () => {
+    const shareData = {
+      title: `${game?.companyName} Trivia Challenge`,
+      text: `I just scored ${score} points in the ${game?.companyName} trivia challenge! Can you beat my score?`,
+      url: window.location.origin + `/game/${id}`,
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData);
+    } else {
+      navigator.clipboard.writeText(shareData.url);
+      toast({
+        title: "Link copied!",
+        description: "Game link has been copied to your clipboard.",
+      });
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Card className="shadow-xl">
+          <CardContent className="p-8 text-center">
+            <div className="mb-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trophy className="text-white text-3xl" />
+              </div>
+              <h3 className="text-3xl font-bold text-dark mb-2">Game Complete!</h3>
+              <p className="text-gray-600">Here are your results</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-accent/10 to-accent/20 p-6 rounded-xl">
+                <div className="text-3xl font-bold text-accent mb-2">{score}</div>
+                <div className="text-sm font-medium text-gray-700">Final Score</div>
+              </div>
+              <div className="bg-gradient-to-br from-primary/10 to-primary/20 p-6 rounded-xl">
+                <div className="text-3xl font-bold text-primary mb-2">
+                  {correctAnswers}/{totalQuestions}
+                </div>
+                <div className="text-sm font-medium text-gray-700">Correct Answers</div>
+              </div>
+              <div className="bg-gradient-to-br from-secondary/10 to-secondary/20 p-6 rounded-xl">
+                <div className="text-3xl font-bold text-secondary mb-2">
+                  {formatTime(timeSpent)}
+                </div>
+                <div className="text-sm font-medium text-gray-700">Time Taken</div>
+              </div>
+            </div>
+
+            {/* Player Registration */}
+            {!isScoreSaved && (
+              <div className="bg-gray-50 p-6 rounded-xl mb-6">
+                <h4 className="text-lg font-semibold text-dark mb-4">Save Your Score to Leaderboard</h4>
+                <div className="grid sm:grid-cols-2 gap-4 max-w-md mx-auto mb-4">
+                  <div>
+                    <Label htmlFor="playerName">Name *</Label>
+                    <Input
+                      id="playerName"
+                      placeholder="Enter your name"
+                      value={playerName}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="playerCompany">Company (Optional)</Label>
+                    <Input
+                      id="playerCompany"
+                      placeholder="Your company"
+                      value={playerCompany}
+                      onChange={(e) => setPlayerCompany(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button
+                  onClick={handleSaveScore}
+                  disabled={saveScoreMutation.isPending}
+                  className="px-6 py-3"
+                >
+                  Save Score
+                </Button>
+              </div>
+            )}
+
+            {isScoreSaved && (
+              <div className="bg-accent/10 p-4 rounded-xl mb-6">
+                <p className="text-accent font-semibold">✅ Score saved successfully!</p>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => setLocation("/setup")}
+                className="px-6 py-3 bg-secondary hover:bg-secondary/90"
+              >
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Play Again
+              </Button>
+              <Button
+                onClick={() => setLocation(`/leaderboard/${id}`)}
+                className="px-6 py-3 bg-primary hover:bg-primary/90"
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                View Leaderboard
+              </Button>
+              <Button
+                onClick={handleShare}
+                variant="outline"
+                className="px-6 py-3"
+              >
+                <Share className="mr-2 h-4 w-4" />
+                Share Game
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
