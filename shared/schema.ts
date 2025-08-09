@@ -43,6 +43,7 @@ export const players = pgTable("players", {
 export const insertGameSchema = createInsertSchema(games).omit({
   id: true,
   createdAt: true,
+  creatorKey: true, // Server-generated, not provided by client
 });
 
 export const insertQuestionSchema = createInsertSchema(questions).omit({
