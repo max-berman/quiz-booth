@@ -97,19 +97,21 @@ export default function GamePage() {
   };
 
   const getAnswerButtonClass = (answerIndex: number) => {
+    const baseClasses = "w-full p-4 text-left border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2";
+    
     if (!isAnswered) {
-      return "w-full p-4 text-left border-2 border-gray-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all duration-200";
+      return `${baseClasses} border-gray-200 hover:border-primary hover:bg-primary/5`;
     }
     
     if (answerIndex === currentQuestion?.correctAnswer) {
-      return "w-full p-4 text-left border-2 border-accent bg-accent/10 rounded-xl text-accent";
+      return `${baseClasses} border-green-500 bg-green-50 text-green-800`;
     }
     
     if (answerIndex === selectedAnswer && answerIndex !== currentQuestion?.correctAnswer) {
-      return "w-full p-4 text-left border-2 border-warning bg-warning/10 rounded-xl text-warning";
+      return `${baseClasses} border-red-500 bg-red-50 text-red-800`;
     }
     
-    return "w-full p-4 text-left border-2 border-gray-200 rounded-xl opacity-50";
+    return `${baseClasses} border-gray-200 opacity-50`;
   };
 
   if (isLoading || !questions || !game) {
@@ -156,9 +158,11 @@ export default function GamePage() {
                 {currentQuestion?.options.map((option, index) => (
                   <button
                     key={index}
+                    type="button"
                     className={getAnswerButtonClass(index)}
                     onClick={() => handleAnswerSelect(index)}
                     disabled={isAnswered}
+                    onFocus={(e) => e.currentTarget.blur()}
                   >
                     <span className="font-medium">
                       {String.fromCharCode(65 + index)}.
@@ -183,9 +187,11 @@ export default function GamePage() {
                 Time: {timeLeft}s
               </div>
               <Button
+                type="button"
                 onClick={handleNextQuestion}
                 disabled={!isAnswered}
-                className="px-6 py-3"
+                className="px-6 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                onFocus={(e) => e.currentTarget.blur()}
               >
                 {currentQuestionIndex < questions.length - 1 ? "Next Question" : "Finish Game"}
               </Button>
