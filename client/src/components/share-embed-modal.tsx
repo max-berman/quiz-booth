@@ -65,6 +65,7 @@ export function ShareEmbedModal({ gameId, gameTitle, isBuilder = false }: ShareE
           <DialogTitle>
             {isBuilder ? "Share Trivia Builder" : `Share ${gameTitle} Trivia`}
           </DialogTitle>
+
         </DialogHeader>
         
         <Tabs defaultValue="link" className="w-full">

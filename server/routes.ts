@@ -43,10 +43,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "DeepSeek API key not configured" });
       }
 
-      const prompt = `Generate ${game.questionCount} multiple choice trivia questions about ${game.companyName} in the ${game.industry} industry. 
+      // Create category-specific instructions
+      const categoryInstructions = game.categories.map(category => {
+        switch (category) {
+          case "Company Facts":
+            return `Create questions specifically about ${game.companyName} and their business practices, history, products, or services.`;
+          case "Industry Knowledge":
+            return `Create questions about the ${game.industry} industry in general, including trends, terminology, best practices, key players, innovations, and industry-specific knowledge.`;
+          case "Fun Facts":
+            return `Create entertaining trivia questions with fun or historical facts about the ${game.industry} industry, interesting stories, lesser-known facts, or amusing industry-related trivia.`;
+          case "General Knowledge":
+            return `Create general knowledge questions that any visitor might enjoy answering, not specifically related to the company or industry.`;
+          default:
+            return `Create questions about: ${category} (related to ${game.industry} industry context)`;
+        }
+      }).join(" ");
+
+      const prompt = `Generate ${game.questionCount} multiple choice trivia questions based on these requirements:
+      
+      Company: ${game.companyName}
+      Industry: ${game.industry}
       Company description: ${game.productDescription || 'Not provided'}
       Difficulty: ${game.difficulty}
-      Categories: ${game.categories.join(', ')}
+      
+      IMPORTANT - Question Category Instructions:
+      ${categoryInstructions}
       
       Return ONLY a JSON object with a "questions" array containing the questions in this exact format:
       {
@@ -61,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       Make sure:
-      - Questions are relevant to the company/industry
+      - Follow the category instructions precisely - if "Company Facts" is selected, questions must be about the specific company; if "Industry Knowledge" is selected, questions must be about the industry in general; if "Fun Facts" is selected, questions must be entertaining industry-related trivia
       - Each question has exactly 4 options
       - correctAnswer is the index (0-3) of the correct option
       - Include a brief explanation for each answer
@@ -192,6 +213,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(leaderboard);
     } catch (error) {
       res.status(500).json({ message: "Failed to get global leaderboard", error: error.message });
+    }
+  });
+
+  // Get all players for a game (raw submissions data)
+  app.get("/api/games/:id/players", async (req, res) => {
+    try {
+      const players = await storage.getAllPlayersForGame(req.params.id);
+      res.json(players);
+    } catch (error) {
+      console.error('Players fetch error:', error);
+      res.status(500).json({ message: "Failed to get players" });
     }
   });
 

@@ -15,6 +15,7 @@ export interface IStorage {
   getPlayersByGameId(gameId: string): Promise<Player[]>;
   getLeaderboardByGameId(gameId: string): Promise<Player[]>;
   getAllLeaderboard(): Promise<Player[]>;
+  getAllPlayersForGame(gameId: string): Promise<Player[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -102,6 +103,12 @@ export class MemStorage implements IStorage {
         }
         return a.timeSpent - b.timeSpent;
       });
+  }
+
+  async getAllPlayersForGame(gameId: string): Promise<Player[]> {
+    return Array.from(this.players.values())
+      .filter(player => player.gameId === gameId)
+      .sort((a, b) => (b.completedAt?.getTime() || 0) - (a.completedAt?.getTime() || 0));
   }
 }
 

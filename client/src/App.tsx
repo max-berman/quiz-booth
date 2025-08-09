@@ -8,6 +8,7 @@ import Setup from "@/pages/setup";
 import GamePage from "@/pages/game";
 import Results from "@/pages/results";
 import Leaderboard from "@/pages/leaderboard";
+import Submissions from "@/pages/submissions";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/game/:id" component={GamePage} />
       <Route path="/results/:id" component={Results} />
       <Route path="/leaderboard/:id?" component={Leaderboard} />
+      <Route path="/submissions/:id" component={Submissions} />
       <Route component={NotFound} />
     </Switch>
   );

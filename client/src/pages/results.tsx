@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, RotateCcw, Eye } from "lucide-react";
+import { Trophy, RotateCcw, Eye, Database } from "lucide-react";
+import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ShareEmbedModal } from "@/components/share-embed-modal";
@@ -175,6 +176,12 @@ export default function Results() {
                 gameId={id} 
                 gameTitle={game?.companyName}
               />
+              <Link href={`/submissions/${id}`}>
+                <Button variant="outline" className="px-6 py-3">
+                  <Database className="mr-2 h-4 w-4" />
+                  View Raw Data
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

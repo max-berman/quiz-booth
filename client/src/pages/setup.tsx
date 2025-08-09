@@ -169,12 +169,13 @@ export default function Setup() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Technology">Technology</SelectItem>
-                        <SelectItem value="Healthcare">Healthcare</SelectItem>
-                        <SelectItem value="Finance">Finance</SelectItem>
+                        <SelectItem value="Gaming">Gaming</SelectItem>
+                        <SelectItem value="Entertainment">Entertainment</SelectItem>
+                        <SelectItem value="Agriculture">Agriculture</SelectItem>
+                        <SelectItem value="Education">Education</SelectItem>
                         <SelectItem value="Manufacturing">Manufacturing</SelectItem>
                         <SelectItem value="Retail">Retail</SelectItem>
                         <SelectItem value="Food and Beverage">Food and Beverage</SelectItem>
-                        <SelectItem value="Education">Education</SelectItem>
                         <SelectItem value="Real Estate">Real Estate</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
