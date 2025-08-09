@@ -16,9 +16,29 @@ export default function Submissions() {
     enabled: !!id,
   });
 
-  const { data: players = [], isLoading } = useQuery({
+  const { data: players = [], isLoading, error } = useQuery({
     queryKey: ['/api/games', id, 'players'],
     enabled: !!id,
+    queryFn: async () => {
+      const creatorKey = localStorage.getItem(`game-${id}-creator-key`);
+      
+      if (!creatorKey) {
+        throw new Error("No access key found. Only the game creator can view submissions.");
+      }
+      
+      const response = await fetch(`/api/games/${id}/players`, {
+        headers: {
+          'X-Creator-Key': creatorKey,
+        },
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errorData.message || `Failed to fetch data: ${response.status}`);
+      }
+      
+      return response.json();
+    },
   });
 
   const formatTime = (seconds: number) => {
@@ -71,6 +91,32 @@ export default function Submissions() {
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
             <div className="h-64 bg-gray-200 rounded"></div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="p-8 text-center">
+              <h2 className="text-2xl font-bold text-red-800 mb-4">Access Denied</h2>
+              <p className="text-red-700 mb-6">
+                {error.message || "You don't have permission to view this data."}
+              </p>
+              <p className="text-sm text-red-600 mb-6">
+                Only the person who created this trivia game can view the submission data.
+              </p>
+              <Link href="/">
+                <Button variant="outline">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Home
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

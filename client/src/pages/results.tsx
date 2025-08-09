@@ -176,12 +176,17 @@ export default function Results() {
                 gameId={id} 
                 gameTitle={game?.companyName}
               />
-              <Link href={`/submissions/${id}`}>
-                <Button variant="outline" className="px-6 py-3">
+              {/* Creator-only link to view raw submissions data */}
+              {localStorage.getItem(`game-${id}-creator-key`) && (
+                <Button
+                  onClick={() => setLocation(`/submissions/${id}`)}
+                  variant="outline"
+                  className="px-6 py-3"
+                >
                   <Database className="mr-2 h-4 w-4" />
                   View Raw Data
                 </Button>
-              </Link>
+              )}
             </div>
           </CardContent>
         </Card>

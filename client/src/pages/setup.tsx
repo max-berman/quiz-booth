@@ -45,6 +45,9 @@ export default function Setup() {
       return response.json();
     },
     onSuccess: async (game) => {
+      // Store the creator key in localStorage for later access to submissions
+      localStorage.setItem(`game-${game.id}-creator-key`, game.creatorKey);
+      
       setIsGenerating(true);
       try {
         await apiRequest("POST", `/api/games/${game.id}/generate-questions`);

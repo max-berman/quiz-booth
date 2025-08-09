@@ -5,6 +5,7 @@ export interface IStorage {
   // Game methods
   createGame(game: InsertGame): Promise<Game>;
   getGame(id: string): Promise<Game | undefined>;
+  verifyGameAccess(gameId: string, creatorKey: string): Promise<boolean>;
   
   // Question methods
   createQuestions(questions: InsertQuestion[]): Promise<Question[]>;
@@ -15,7 +16,7 @@ export interface IStorage {
   getPlayersByGameId(gameId: string): Promise<Player[]>;
   getLeaderboardByGameId(gameId: string): Promise<Player[]>;
   getAllLeaderboard(): Promise<Player[]>;
-  getAllPlayersForGame(gameId: string): Promise<Player[]>;
+  getAllPlayersForGame(gameId: string, creatorKey?: string): Promise<Player[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -31,13 +32,20 @@ export class MemStorage implements IStorage {
 
   async createGame(insertGame: InsertGame): Promise<Game> {
     const id = randomUUID();
+    const creatorKey = randomUUID(); // Generate a unique access key
     const game: Game = {
       ...insertGame,
       id,
+      creatorKey,
       createdAt: new Date(),
     };
     this.games.set(id, game);
     return game;
+  }
+
+  async verifyGameAccess(gameId: string, creatorKey: string): Promise<boolean> {
+    const game = this.games.get(gameId);
+    return game?.creatorKey === creatorKey;
   }
 
   async getGame(id: string): Promise<Game | undefined> {
@@ -105,7 +113,12 @@ export class MemStorage implements IStorage {
       });
   }
 
-  async getAllPlayersForGame(gameId: string): Promise<Player[]> {
+  async getAllPlayersForGame(gameId: string, creatorKey?: string): Promise<Player[]> {
+    // Only return data if creator key is provided and valid
+    if (!creatorKey || !(await this.verifyGameAccess(gameId, creatorKey))) {
+      throw new Error("Unauthorized access to game submissions");
+    }
+    
     return Array.from(this.players.values())
       .filter(player => player.gameId === gameId)
       .sort((a, b) => (b.completedAt?.getTime() || 0) - (a.completedAt?.getTime() || 0));

@@ -216,14 +216,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all players for a game (raw submissions data)
+  // Get all players for a game (raw submissions data) - requires creator key
   app.get("/api/games/:id/players", async (req, res) => {
     try {
-      const players = await storage.getAllPlayersForGame(req.params.id);
+      const creatorKey = req.headers['x-creator-key'] as string;
+      
+      if (!creatorKey) {
+        return res.status(401).json({ message: "Creator key required for submissions data" });
+      }
+      
+      const players = await storage.getAllPlayersForGame(req.params.id, creatorKey);
       res.json(players);
     } catch (error) {
       console.error('Players fetch error:', error);
-      res.status(500).json({ message: "Failed to get players" });
+      if (error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Access denied. Only the game creator can view submissions." });
+      } else {
+        res.status(500).json({ message: "Failed to get players" });
+      }
     }
   });
 

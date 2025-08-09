@@ -14,6 +14,7 @@ export const games = pgTable("games", {
   firstPrize: text("first_prize"),
   secondPrize: text("second_prize"),
   thirdPrize: text("third_prize"),
+  creatorKey: text("creator_key").notNull(), // Access key for the game creator
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
