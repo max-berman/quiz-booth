@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { Building, Settings, Gift, Wand2 } from "lucide-react";
+import { Building, Settings, Gift, Wand2, Home, Trophy } from "lucide-react";
+import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/loading-spinner";
@@ -24,7 +25,9 @@ export default function Setup() {
     industryKnowledge: true,
     funFacts: false,
     generalKnowledge: false,
+    other: false,
   });
+  const [customCategory, setCustomCategory] = useState("");
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -85,6 +88,7 @@ export default function Setup() {
           case "industryKnowledge": return "Industry Knowledge";
           case "funFacts": return "Fun Facts";
           case "generalKnowledge": return "General Knowledge";
+          case "other": return customCategory.trim() || "Custom Questions";
           default: return key;
         }
       });
@@ -114,6 +118,22 @@ export default function Setup() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Navigation */}
+        <div className="flex justify-between items-center mb-6">
+          <Link href="/">
+            <Button variant="outline" className="px-4 py-2">
+              <Home className="mr-2 h-4 w-4" />
+              Home
+            </Button>
+          </Link>
+          <Link href="/leaderboard">
+            <Button variant="outline" className="px-4 py-2">
+              <Trophy className="mr-2 h-4 w-4" />
+              Leaderboard
+            </Button>
+          </Link>
+        </div>
+
         <Card className="shadow-xl">
           <CardContent className="p-8">
             <div className="text-center mb-8">
@@ -153,6 +173,9 @@ export default function Setup() {
                         <SelectItem value="Finance">Finance</SelectItem>
                         <SelectItem value="Manufacturing">Manufacturing</SelectItem>
                         <SelectItem value="Retail">Retail</SelectItem>
+                        <SelectItem value="Food and Beverage">Food and Beverage</SelectItem>
+                        <SelectItem value="Education">Education</SelectItem>
+                        <SelectItem value="Real Estate">Real Estate</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>
@@ -224,11 +247,24 @@ export default function Setup() {
                             {key === "companyFacts" ? "Company Facts" :
                              key === "industryKnowledge" ? "Industry Knowledge" :
                              key === "funFacts" ? "Fun Facts" :
+                             key === "other" ? "Custom Questions" :
                              "General Knowledge"}
                           </Label>
                         </div>
                       ))}
                     </div>
+                    {categories.other && (
+                      <div className="mt-3">
+                        <Label htmlFor="customCategory">Describe your custom questions</Label>
+                        <Textarea
+                          id="customCategory"
+                          placeholder="e.g., provide some historical facts about the advergames"
+                          value={customCategory}
+                          onChange={(e) => setCustomCategory(e.target.value)}
+                          rows={2}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

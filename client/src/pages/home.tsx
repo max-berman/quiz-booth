@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Trophy, Rocket, Gamepad2 } from "lucide-react";
+import { ShareEmbedModal } from "@/components/share-embed-modal";
 
 export default function Home() {
   return (
@@ -54,6 +55,10 @@ export default function Home() {
                   View Leaderboard
                 </Button>
               </Link>
+            </div>
+            
+            <div className="mt-6 flex justify-center">
+              <ShareEmbedModal isBuilder={true} />
             </div>
           </div>
         </section>

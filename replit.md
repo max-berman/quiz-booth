@@ -8,6 +8,28 @@ The system generates trivia questions using the DeepSeek AI API based on company
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes and Improvements (January 2025)
+
+✓ Enhanced Setup Form:
+- Added more industry options (9 total including Food & Beverage, Education, Real Estate)
+- Added custom question category with text input for specific requirements
+- Added navigation links to Home and Leaderboard pages
+
+✓ Improved Player Registration:
+- Changed Company field to Email field for better lead capture
+- Added email validation and proper input type
+
+✓ Share & Embed Features:
+- Created comprehensive share/embed modal component
+- Added game-specific sharing with direct links
+- Added embed code generation for website integration
+- Added builder sharing option on home page
+
+✓ Enhanced User Experience:
+- Better navigation between pages
+- Improved form validation and error handling
+- More intuitive UI flow from setup to game completion
+
 # System Architecture
 
 ## Frontend Architecture

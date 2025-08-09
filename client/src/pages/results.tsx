@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, RotateCcw, Share, Eye } from "lucide-react";
+import { Trophy, RotateCcw, Eye } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { ShareEmbedModal } from "@/components/share-embed-modal";
 import type { Game, InsertPlayer } from "@shared/schema";
 
 export default function Results() {
@@ -15,7 +16,7 @@ export default function Results() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [playerName, setPlayerName] = useState("");
-  const [playerCompany, setPlayerCompany] = useState("");
+  const [playerEmail, setPlayerEmail] = useState("");
   const [isScoreSaved, setIsScoreSaved] = useState(false);
 
   // Get URL parameters
@@ -63,7 +64,7 @@ export default function Results() {
 
     const playerData: InsertPlayer = {
       name: playerName.trim(),
-      company: playerCompany.trim() || undefined,
+      company: playerEmail.trim() || undefined, // Using company field to store email for now
       gameId: id!,
       score,
       correctAnswers,
@@ -74,23 +75,7 @@ export default function Results() {
     saveScoreMutation.mutate(playerData);
   };
 
-  const handleShare = () => {
-    const shareData = {
-      title: `${game?.companyName} Trivia Challenge`,
-      text: `I just scored ${score} points in the ${game?.companyName} trivia challenge! Can you beat my score?`,
-      url: window.location.origin + `/game/${id}`,
-    };
 
-    if (navigator.share) {
-      navigator.share(shareData);
-    } else {
-      navigator.clipboard.writeText(shareData.url);
-      toast({
-        title: "Link copied!",
-        description: "Game link has been copied to your clipboard.",
-      });
-    }
-  };
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -145,12 +130,13 @@ export default function Results() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="playerCompany">Company (Optional)</Label>
+                    <Label htmlFor="playerEmail">Email (Optional)</Label>
                     <Input
-                      id="playerCompany"
-                      placeholder="Your company"
-                      value={playerCompany}
-                      onChange={(e) => setPlayerCompany(e.target.value)}
+                      id="playerEmail"
+                      type="email"
+                      placeholder="your.email@company.com"
+                      value={playerEmail}
+                      onChange={(e) => setPlayerEmail(e.target.value)}
                     />
                   </div>
                 </div>
@@ -185,14 +171,10 @@ export default function Results() {
                 <Eye className="mr-2 h-4 w-4" />
                 View Leaderboard
               </Button>
-              <Button
-                onClick={handleShare}
-                variant="outline"
-                className="px-6 py-3"
-              >
-                <Share className="mr-2 h-4 w-4" />
-                Share Game
-              </Button>
+              <ShareEmbedModal 
+                gameId={id} 
+                gameTitle={game?.companyName}
+              />
             </div>
           </CardContent>
         </Card>
