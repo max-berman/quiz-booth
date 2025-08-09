@@ -48,22 +48,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       Difficulty: ${game.difficulty}
       Categories: ${game.categories.join(', ')}
       
-      Return ONLY a JSON array with this exact format:
-      [
-        {
-          "questionText": "Question here?",
-          "options": ["Option A", "Option B", "Option C", "Option D"],
-          "correctAnswer": 0,
-          "explanation": "Brief explanation of the answer"
-        }
-      ]
+      Return ONLY a JSON object with a "questions" array containing the questions in this exact format:
+      {
+        "questions": [
+          {
+            "questionText": "Question here?",
+            "options": ["Option A", "Option B", "Option C", "Option D"],
+            "correctAnswer": 0,
+            "explanation": "Brief explanation of the answer"
+          }
+        ]
+      }
       
       Make sure:
       - Questions are relevant to the company/industry
       - Each question has exactly 4 options
       - correctAnswer is the index (0-3) of the correct option
       - Include a brief explanation for each answer
-      - Vary the position of correct answers`;
+      - Vary the position of correct answers
+      - Return valid JSON only, no additional text`;
 
       const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
         method: 'POST',
@@ -88,26 +91,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const data = await response.json();
+      console.log('DeepSeek API response:', JSON.stringify(data, null, 2));
+      
       let generatedQuestions;
 
       try {
         const content = data.choices[0].message.content;
+        console.log('DeepSeek content:', content);
+        
         // Try to parse the JSON response
         const parsed = JSON.parse(content);
-        generatedQuestions = Array.isArray(parsed) ? parsed : parsed.questions || [parsed];
+        console.log('Parsed JSON:', JSON.stringify(parsed, null, 2));
+        
+        // Handle different response formats
+        if (Array.isArray(parsed)) {
+          generatedQuestions = parsed;
+        } else if (parsed.questions && Array.isArray(parsed.questions)) {
+          generatedQuestions = parsed.questions;
+        } else if (parsed.question || parsed.questionText) {
+          // Single question object
+          generatedQuestions = [parsed];
+        } else {
+          throw new Error(`Unexpected response format: ${JSON.stringify(parsed)}`);
+        }
+        
+        console.log('Generated questions:', JSON.stringify(generatedQuestions, null, 2));
+        
       } catch (parseError) {
-        throw new Error("Failed to parse DeepSeek response as JSON");
+        console.error('JSON Parse error:', parseError);
+        throw new Error(`Failed to parse DeepSeek response as JSON: ${parseError.message}`);
       }
 
-      // Validate and create questions
-      const questionsToInsert = generatedQuestions.map((q: any, index: number) => ({
-        gameId: game.id,
-        questionText: q.questionText || q.question,
-        options: q.options || [],
-        correctAnswer: q.correctAnswer || 0,
-        explanation: q.explanation || '',
-        order: index + 1,
-      }));
+      // Validate and create questions with better error handling
+      const questionsToInsert = generatedQuestions.map((q: any, index: number) => {
+        const questionData = {
+          gameId: game.id,
+          questionText: q.questionText || q.question || q.text,
+          options: q.options || q.choices || [],
+          correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : (q.correct || 0),
+          explanation: q.explanation || q.answer_explanation || '',
+          order: index + 1,
+        };
+        
+        console.log(`Question ${index + 1}:`, JSON.stringify(questionData, null, 2));
+        return questionData;
+      });
 
       // Validate each question
       const validatedQuestions = questionsToInsert.map(q => insertQuestionSchema.parse(q));
