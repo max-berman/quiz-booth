@@ -126,32 +126,66 @@ export default function GamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Game Header */}
-        <Card className="mb-4">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-center mb-4">
+        <Card className="game-card animate-slide-up">
+          <CardContent className="p-8">
+            <div className="flex justify-between items-center mb-6">
               <div>
-                <h3 className="text-2xl font-bold text-dark">{game.companyName} Trivia Challenge</h3>
-                <p className="text-gray-600">
+                <h3 className="text-naknick-h3 text-foreground">
+                  <span className="text-gaming-gradient">{game.companyName}</span> Trivia Challenge
+                </h3>
+                <p className="text-muted-foreground text-lg">
                   Question {currentQuestionIndex + 1} of {questions.length}
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-primary">{score}</div>
-                <div className="text-sm text-gray-600">Score</div>
+                <div className="text-4xl font-bold text-primary animate-glow-pulse">{score}</div>
+                <div className="text-sm text-muted-foreground">Score</div>
               </div>
             </div>
-            <Progress value={progressPercentage} className="h-3" />
+            <Progress value={progressPercentage} className="h-4 bg-muted" />
           </CardContent>
         </Card>
 
+        {/* Timer and Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <div className="stat-card bg-gradient-naknick">
+            <div className="text-center text-white p-4">
+              <Clock className="h-6 w-6 mx-auto mb-2" />
+              <div className={`text-2xl font-bold ${timeLeft <= 10 ? 'animate-pulse' : ''}`}>{timeLeft}s</div>
+              <div className="text-sm opacity-90">Time Left</div>
+            </div>
+          </div>
+          <div className="stat-card bg-gradient-success">
+            <div className="text-center text-white p-4">
+              <CheckCircle className="h-6 w-6 mx-auto mb-2" />
+              <div className="text-2xl font-bold">{correctAnswers}</div>
+              <div className="text-sm opacity-90">Correct</div>
+            </div>
+          </div>
+          <div className="stat-card bg-gradient-secondary">
+            <div className="text-center text-white p-4">
+              <XCircle className="h-6 w-6 mx-auto mb-2" />
+              <div className="text-2xl font-bold">{wrongAnswers}</div>
+              <div className="text-sm opacity-90">Wrong</div>
+            </div>
+          </div>
+          <div className="stat-card bg-gradient-gaming">
+            <div className="text-center text-white p-4">
+              <Zap className="h-6 w-6 mx-auto mb-2" />
+              <div className="text-2xl font-bold">{streak}</div>
+              <div className="text-sm opacity-90">Streak</div>
+            </div>
+          </div>
+        </div>
+
         {/* Question Card */}
-        <Card className="mb-4">
+        <Card className="game-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
           <CardContent className="p-8">
             <div className="mb-8">
-              <h4 className="text-2xl font-semibold text-dark mb-6">
+              <h4 className="text-naknick-h3 text-foreground mb-8 leading-relaxed">
                 {currentQuestion?.questionText}
               </h4>
               <div className="space-y-4">
@@ -159,63 +193,67 @@ export default function GamePage() {
                   <button
                     key={index}
                     type="button"
-                    className={getAnswerButtonClass(index)}
+                    className={`answer-btn ${
+                      isAnswered
+                        ? selectedAnswer === index
+                          ? index === currentQuestion.correctAnswer
+                            ? 'correct'
+                            : 'incorrect'
+                          : index === currentQuestion.correctAnswer
+                            ? 'correct'
+                            : ''
+                        : ''
+                    }`}
                     onClick={() => handleAnswerSelect(index)}
                     disabled={isAnswered}
                     onFocus={(e) => e.currentTarget.blur()}
                   >
-                    <span className="font-medium">
-                      {String.fromCharCode(65 + index)}.
-                    </span>{" "}
-                    {option}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="w-8 h-8 bg-muted rounded-full flex items-center justify-center font-bold text-sm">
+                          {String.fromCharCode(65 + index)}
+                        </span>
+                        <span>{option}</span>
+                      </div>
+                      {isAnswered && selectedAnswer === index && (
+                        index === currentQuestion.correctAnswer ? (
+                          <CheckCircle className="h-6 w-6 text-accent" />
+                        ) : (
+                          <XCircle className="h-6 w-6 text-destructive" />
+                        )
+                      )}
+                      {isAnswered && selectedAnswer !== index && index === currentQuestion.correctAnswer && (
+                        <CheckCircle className="h-6 w-6 text-accent" />
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
               
               {showExplanation && currentQuestion?.explanation && (
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    <strong>Explanation:</strong> {currentQuestion.explanation}
+                <div className="mt-8 p-6 bg-gradient-secondary rounded-2xl animate-slide-up">
+                  <h3 className="font-bold text-white text-lg mb-3 flex items-center gap-2">
+                    💡 Explanation
+                  </h3>
+                  <p className="text-white/90 leading-relaxed">
+                    {currentQuestion.explanation}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-500 flex items-center">
-                <Clock className="mr-1 h-4 w-4" />
-                Time: {timeLeft}s
+            {isAnswered && (
+              <div className="text-center animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                <Button
+                  type="button"
+                  onClick={handleNextQuestion}
+                  className="btn-naknick px-12 py-4 text-lg"
+                  onFocus={(e) => e.currentTarget.blur()}
+                >
+                  {currentQuestionIndex < questions.length - 1 ? "Next Question →" : "Finish Game 🎉"}
+                </Button>
               </div>
-              <Button
-                type="button"
-                onClick={handleNextQuestion}
-                disabled={!isAnswered}
-                className="px-6 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                onFocus={(e) => e.currentTarget.blur()}
-              >
-                {currentQuestionIndex < questions.length - 1 ? "Next Question" : "Finish Game"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Game Stats */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex justify-center space-x-8 text-sm">
-              <div className="flex items-center text-accent">
-                <CheckCircle className="mr-1 h-4 w-4" />
-                Correct: {correctAnswers}
-              </div>
-              <div className="flex items-center text-warning">
-                <XCircle className="mr-1 h-4 w-4" />
-                Wrong: {wrongAnswers}
-              </div>
-              <div className="flex items-center text-gray-600">
-                <Zap className="mr-1 h-4 w-4" />
-                Streak: {streak}
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
