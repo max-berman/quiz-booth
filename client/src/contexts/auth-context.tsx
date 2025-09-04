@@ -59,9 +59,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signInWithGoogle = async (): Promise<void> => {
     try {
       const provider = new GoogleAuthProvider();
+      
+      // Log current domain for debugging
+      console.log('Current domain:', window.location.origin);
+      console.log('Auth domain:', import.meta.env.VITE_FIREBASE_AUTH_DOMAIN);
+      
       await signInWithPopup(auth, provider);
     } catch (error: any) {
       console.error('Google sign-in error:', error);
+      
+      if (error.code === 'auth/unauthorized-domain') {
+        throw new Error(`This domain (${window.location.origin}) is not authorized for Firebase authentication. Please add it to your Firebase project's authorized domains in the Firebase Console under Authentication > Settings > Authorized domains.`);
+      }
+      
       throw error;
     }
   };

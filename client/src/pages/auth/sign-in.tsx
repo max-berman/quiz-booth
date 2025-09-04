@@ -153,6 +153,11 @@ export default function SignIn() {
               )}
             </Button>
             
+            <div className="text-xs text-center text-gray-500">
+              <p>Current domain: <code className="text-xs bg-gray-100 px-1 rounded">{window.location.origin}</code></p>
+              <p className="mt-1">If authentication fails, add this domain to Firebase Console → Authentication → Settings → Authorized domains</p>
+            </div>
+            
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <Separator className="w-full" />
