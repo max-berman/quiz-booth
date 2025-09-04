@@ -11,8 +11,12 @@ import {
   Calendar, 
   Building, 
   Plus,
-  ArrowLeft 
+  ArrowLeft,
+  Database,
+  Share2
 } from "lucide-react";
+import { QRCodeModal } from "@/components/qr-code-modal";
+import { ShareEmbedModal } from "@/components/share-embed-modal";
 import type { Game } from "@shared/firebase-types";
 
 export default function Dashboard() {
@@ -183,7 +187,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="grid grid-cols-1 gap-2 pt-2">
+                  <div className="space-y-2 pt-2">
                     <Button
                       variant="default"
                       size="sm"
@@ -194,6 +198,7 @@ export default function Dashboard() {
                       <Edit3 className="mr-2 h-4 w-4" />
                       Edit Questions
                     </Button>
+                    
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         variant="outline"
@@ -210,9 +215,14 @@ export default function Dashboard() {
                         onClick={() => setLocation(`/submissions/${game.id}`)}
                         data-testid={`button-submissions-${game.id}`}
                       >
-                        <Users className="mr-1 h-4 w-4" />
-                        Submissions
+                        <Database className="mr-1 h-4 w-4" />
+                        Raw Data
                       </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <QRCodeModal gameId={game.id} gameTitle={game.companyName} />
+                      <ShareEmbedModal gameId={game.id} gameTitle={game.companyName} />
                     </div>
                   </div>
 

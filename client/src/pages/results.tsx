@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, RotateCcw, Eye, Database, Edit3 } from "lucide-react";
+import { Trophy, RotateCcw, Eye, Edit3 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -157,46 +157,46 @@ export default function Results() {
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={() => setLocation("/setup")}
-                className="px-6 py-3 bg-secondary hover:bg-secondary/90"
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Play Again
-              </Button>
-              <Button
-                onClick={() => setLocation(`/leaderboard/${id}`)}
-                className="px-6 py-3 bg-primary hover:bg-primary/90"
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                View Leaderboard
-              </Button>
-              <ShareEmbedModal 
-                gameId={id} 
-                gameTitle={game?.companyName}
-              />
-              {/* Creator-only links */}
-              {localStorage.getItem(`game-${id}-creator-key`) && (
-                <>
+            <div className="flex flex-col gap-3 max-w-sm mx-auto">
+              {/* Primary Actions Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Button
+                  onClick={() => setLocation("/setup")}
+                  className="px-6 py-3 bg-secondary hover:bg-secondary/90 w-full"
+                  data-testid="button-play-again"
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Play Again
+                </Button>
+                <Button
+                  onClick={() => setLocation(`/leaderboard/${id}`)}
+                  className="px-6 py-3 bg-primary hover:bg-primary/90 w-full"
+                  data-testid="button-view-leaderboard"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Leaderboard
+                </Button>
+              </div>
+              
+              {/* Share and Creator Actions */}
+              <div className="grid grid-cols-1 gap-3">
+                <ShareEmbedModal 
+                  gameId={id} 
+                  gameTitle={game?.companyName}
+                />
+                {/* Creator-only links */}
+                {localStorage.getItem(`game-${id}-creator-key`) && (
                   <Button
                     onClick={() => setLocation(`/edit-questions/${id}`)}
                     variant="outline"
-                    className="px-6 py-3"
+                    className="px-6 py-3 w-full"
+                    data-testid="button-edit-questions"
                   >
                     <Edit3 className="mr-2 h-4 w-4" />
                     Edit Questions
                   </Button>
-                  <Button
-                    onClick={() => setLocation(`/submissions/${id}`)}
-                    variant="outline"
-                    className="px-6 py-3"
-                  >
-                    <Database className="mr-2 h-4 w-4" />
-                    View Raw Data
-                  </Button>
-                </>
-              )}
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
