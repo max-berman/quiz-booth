@@ -34,7 +34,7 @@ export class FirebaseStorage implements IStorage {
       const id = randomUUID();
       const creatorKey = randomUUID(); // Generate a unique access key
       const now = new Date();
-      const gameData = {
+      const gameData: any = {
         id,
         companyName: insertGame.companyName,
         industry: insertGame.industry,
@@ -46,16 +46,33 @@ export class FirebaseStorage implements IStorage {
         secondPrize: insertGame.secondPrize || null,
         thirdPrize: insertGame.thirdPrize || null,
         creatorKey,
-        userId: userId || undefined,
         createdAt: Timestamp.fromDate(now),
       };
       
+      // Only add userId if it exists (avoid undefined fields in Firestore)
+      if (userId) {
+        gameData.userId = userId;
+      }
+      
       const game: Game = {
-        ...gameData,
+        id: gameData.id,
+        companyName: gameData.companyName,
+        industry: gameData.industry,
+        productDescription: gameData.productDescription,
+        questionCount: gameData.questionCount,
+        difficulty: gameData.difficulty,
+        categories: gameData.categories,
+        firstPrize: gameData.firstPrize,
+        secondPrize: gameData.secondPrize,
+        thirdPrize: gameData.thirdPrize,
+        creatorKey: gameData.creatorKey,
+        userId: gameData.userId,
         createdAt: now, // For the returned object, use JS Date
       };
       
       console.log('Creating game in Firebase:', JSON.stringify(gameData, null, 2));
+      console.log('Game data keys:', Object.keys(gameData));
+      console.log('Game data types:', Object.keys(gameData).map(key => `${key}: ${typeof gameData[key as keyof typeof gameData]}`));
       await db.collection(collections.games).doc(id).set(gameData);
       console.log('Game created successfully in Firebase');
       return game;

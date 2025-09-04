@@ -10,14 +10,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/games", optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
     try {
       console.log('Received game creation request:', JSON.stringify(req.body, null, 2));
+      console.log('Request headers:', req.headers);
+      console.log('User authenticated?', !!req.user);
+      
       const gameData = insertGameSchema.parse(req.body);
       console.log('Parsed game data:', JSON.stringify(gameData, null, 2));
+      console.log('Game data types:', Object.keys(gameData).map(key => `${key}: ${typeof gameData[key]} - ${Array.isArray(gameData[key]) ? 'array' : 'not array'}`));
       
       // Pass userId if authenticated, otherwise use legacy creator key approach
       const game = await storage.createGame(gameData, req.user?.uid);
       res.json(game);
     } catch (error) {
       console.error('Game creation error:', error);
+      if (error instanceof Error) {
+        console.error('Error stack:', error.stack);
+      }
       res.status(400).json({ message: "Invalid game data", error: error instanceof Error ? error.message : String(error) });
     }
   });
