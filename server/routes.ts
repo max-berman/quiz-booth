@@ -32,6 +32,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get games by creator key
+  app.get("/api/creator/games", async (req, res) => {
+    try {
+      const creatorKey = req.headers['x-creator-key'] as string;
+      
+      if (!creatorKey) {
+        return res.status(401).json({ message: "Creator key required" });
+      }
+      
+      const games = await storage.getGamesByCreator(creatorKey);
+      res.json(games);
+    } catch (error) {
+      console.error('Creator games fetch error:', error);
+      res.status(500).json({ message: "Failed to get creator games" });
+    }
+  });
+
   // Generate questions using DeepSeek API
   app.post("/api/games/:id/generate-questions", async (req, res) => {
     try {

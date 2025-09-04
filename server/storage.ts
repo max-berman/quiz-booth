@@ -7,6 +7,7 @@ export interface IStorage {
   createGame(game: InsertGame): Promise<Game>;
   getGame(id: string): Promise<Game | undefined>;
   verifyGameAccess(gameId: string, creatorKey: string): Promise<boolean>;
+  getGamesByCreator(creatorKey: string): Promise<Game[]>;
   
   // Question methods
   createQuestions(questions: InsertQuestion[]): Promise<Question[]>;
@@ -53,6 +54,18 @@ export class FirebaseStorage implements IStorage {
     if (!gameDoc.exists) return false;
     const game = gameDoc.data() as Game;
     return game.creatorKey === creatorKey;
+  }
+
+  async getGamesByCreator(creatorKey: string): Promise<Game[]> {
+    const gamesSnapshot = await db
+      .collection(collections.games)
+      .where('creatorKey', '==', creatorKey)
+      .get();
+    
+    const games = gamesSnapshot.docs.map(doc => doc.data() as Game);
+    
+    // Sort by creation date (newest first)
+    return games.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   async getGame(id: string): Promise<Game | undefined> {
