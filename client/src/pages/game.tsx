@@ -31,7 +31,9 @@ export default function GamePage() {
   });
 
   const currentQuestion = questions?.[currentQuestionIndex];
-  const progressPercentage = questions ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
+  const progressPercentage = questions
+    ? ((currentQuestionIndex + 1) / questions.length) * 100
+    : 0;
 
   // Timer effect
   useEffect(() => {
@@ -54,34 +56,34 @@ export default function GamePage() {
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (isAnswered) return;
-    
+
     setSelectedAnswer(answerIndex);
     setIsAnswered(true);
     setShowExplanation(true);
-    
+
     const timeSpent = 30 - timeLeft;
     const isCorrect = answerIndex === currentQuestion?.correctAnswer;
-    
+
     if (isCorrect) {
       const basePoints = 100;
       const timeBonus = Math.max(0, 30 - timeSpent) * 2; // Up to 60 bonus points for speed
       const streakBonus = streak * 10; // 10 points per streak
       const questionPoints = basePoints + timeBonus + streakBonus;
-      
-      setScore(prev => prev + questionPoints);
-      setCorrectAnswers(prev => prev + 1);
-      setStreak(prev => prev + 1);
+
+      setScore((prev) => prev + questionPoints);
+      setCorrectAnswers((prev) => prev + 1);
+      setStreak((prev) => prev + 1);
     } else {
-      setWrongAnswers(prev => prev + 1);
+      setWrongAnswers((prev) => prev + 1);
       setStreak(0);
     }
-    
-    setTotalTime(prev => prev + timeSpent);
+
+    setTotalTime((prev) => prev + timeSpent);
   };
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < (questions?.length || 0) - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
+      setCurrentQuestionIndex((prev) => prev + 1);
     } else {
       // Game finished
       const finalTimeSpent = Math.floor((Date.now() - gameStartTime) / 1000);
@@ -91,11 +93,12 @@ export default function GamePage() {
         totalQuestions: questions?.length || 0,
         timeSpent: finalTimeSpent,
       };
-      
-      setLocation(`/results/${id}?score=${score}&correct=${correctAnswers}&total=${questions?.length}&time=${finalTimeSpent}`);
+
+      setLocation(
+        `/results/${id}?score=${score}&correct=${correctAnswers}&total=${questions?.length}&time=${finalTimeSpent}`,
+      );
     }
   };
-
 
   if (isLoading || !questions || !game) {
     return (
@@ -112,19 +115,24 @@ export default function GamePage() {
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Game Header */}
-        <Card className="game-card animate-slide-up">
+        <Card className="game-card">
           <CardContent className="p-8">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h3 className="text-naknick-h3 text-foreground">
-                  <span className="text-gaming-gradient">{game.companyName}</span> Trivia Challenge
+                  <span className="text-gaming-gradient">
+                    {game.companyName}
+                  </span>{" "}
+                  Trivia Challenge
                 </h3>
                 <p className="text-muted-foreground text-lg">
                   Question {currentQuestionIndex + 1} of {questions.length}
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-4xl font-bold text-primary animate-glow-pulse">{score}</div>
+                <div className="text-4xl font-bold text-primary ">
+                  {score}
+                </div>
                 <div className="text-sm text-muted-foreground">Score</div>
               </div>
             </div>
@@ -133,25 +141,36 @@ export default function GamePage() {
         </Card>
 
         {/* Timer and Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <div
+          className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          style={{ animationDelay: "0.1s" }}
+        >
           <div className="stat-card bg-white border-2 border-red-200">
             <div className="text-center p-4">
               <Clock className="h-6 w-6 mx-auto mb-2 text-red-600" />
-              <div className={`text-2xl font-bold text-red-600 ${timeLeft <= 10 ? 'animate-pulse' : ''}`}>{timeLeft}s</div>
+              <div
+                className={`text-2xl font-bold text-red-600 ${timeLeft <= 10 ? "animate-pulse" : ""}`}
+              >
+                {timeLeft}s
+              </div>
               <div className="text-sm text-red-600">Time Left</div>
             </div>
           </div>
           <div className="stat-card bg-white border-2 border-green-200">
             <div className="text-center p-4">
               <CheckCircle className="h-6 w-6 mx-auto mb-2 text-green-600" />
-              <div className="text-2xl font-bold text-green-600">{correctAnswers}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {correctAnswers}
+              </div>
               <div className="text-sm text-green-600">Correct</div>
             </div>
           </div>
           <div className="stat-card bg-white border-2 border-blue-200">
             <div className="text-center p-4">
               <XCircle className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-              <div className="text-2xl font-bold text-blue-600">{wrongAnswers}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {wrongAnswers}
+              </div>
               <div className="text-sm text-blue-600">Wrong</div>
             </div>
           </div>
@@ -165,7 +184,10 @@ export default function GamePage() {
         </div>
 
         {/* Question Card */}
-        <Card className="game-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
+        <Card
+          className="game-card animate-slide-up"
+          style={{ animationDelay: "0.2s" }}
+        >
           <CardContent className="p-8">
             <div className="mb-8">
               <h4 className="text-naknick-h3 text-foreground mb-8 leading-relaxed">
@@ -180,12 +202,12 @@ export default function GamePage() {
                       isAnswered
                         ? selectedAnswer === index
                           ? index === currentQuestion.correctAnswer
-                            ? 'correct'
-                            : 'incorrect'
+                            ? "correct"
+                            : "incorrect"
                           : index === currentQuestion.correctAnswer
-                            ? 'correct'
-                            : ''
-                        : ''
+                            ? "correct"
+                            : ""
+                        : ""
                     }`}
                     onClick={() => handleAnswerSelect(index)}
                     disabled={isAnswered}
@@ -198,21 +220,23 @@ export default function GamePage() {
                         </span>
                         <span>{option}</span>
                       </div>
-                      {isAnswered && selectedAnswer === index && (
-                        index === currentQuestion.correctAnswer ? (
+                      {isAnswered &&
+                        selectedAnswer === index &&
+                        (index === currentQuestion.correctAnswer ? (
                           <CheckCircle className="h-6 w-6 text-accent" />
                         ) : (
                           <XCircle className="h-6 w-6 text-destructive" />
-                        )
-                      )}
-                      {isAnswered && selectedAnswer !== index && index === currentQuestion.correctAnswer && (
-                        <CheckCircle className="h-6 w-6 text-accent" />
-                      )}
+                        ))}
+                      {isAnswered &&
+                        selectedAnswer !== index &&
+                        index === currentQuestion.correctAnswer && (
+                          <CheckCircle className="h-6 w-6 text-accent" />
+                        )}
                     </div>
                   </button>
                 ))}
               </div>
-              
+
               {showExplanation && currentQuestion?.explanation && (
                 <div className="mt-8 p-6 bg-gradient-secondary rounded-2xl animate-slide-up">
                   <h3 className="font-bold text-white text-lg mb-3 flex items-center gap-2">
@@ -226,14 +250,19 @@ export default function GamePage() {
             </div>
 
             {isAnswered && (
-              <div className="text-center animate-slide-up" style={{ animationDelay: '0.3s' }}>
+              <div
+                className="text-center animate-slide-up"
+                style={{ animationDelay: "0.3s" }}
+              >
                 <Button
                   type="button"
                   onClick={handleNextQuestion}
                   className="btn-naknick px-12 py-4 text-lg"
                   onFocus={(e) => e.currentTarget.blur()}
                 >
-                  {currentQuestionIndex < questions.length - 1 ? "Next Question →" : "Finish Game 🎉"}
+                  {currentQuestionIndex < questions.length - 1
+                    ? "Next Question →"
+                    : "Finish Game 🎉"}
                 </Button>
               </div>
             )}
