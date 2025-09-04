@@ -1,0 +1,75 @@
+import { z } from "zod";
+
+// Firebase-compatible types (without Drizzle dependencies)
+export interface Game {
+  id: string;
+  companyName: string;
+  industry: string;
+  productDescription: string | null;
+  questionCount: number;
+  difficulty: string;
+  categories: string[];
+  firstPrize: string | null;
+  secondPrize: string | null;
+  thirdPrize: string | null;
+  creatorKey: string;
+  createdAt: Date;
+}
+
+export interface Question {
+  id: string;
+  gameId: string;
+  questionText: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string | null;
+  order: number;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  company: string | null;
+  gameId: string;
+  score: number;
+  correctAnswers: number;
+  totalQuestions: number;
+  timeSpent: number; // in seconds
+  completedAt: Date;
+}
+
+// Insert schemas
+export const insertGameSchema = z.object({
+  companyName: z.string(),
+  industry: z.string(),
+  productDescription: z.string().optional().nullable(),
+  questionCount: z.number().default(10),
+  difficulty: z.string().default("easy"),
+  categories: z.array(z.string()),
+  firstPrize: z.string().optional().nullable(),
+  secondPrize: z.string().optional().nullable(),
+  thirdPrize: z.string().optional().nullable(),
+});
+
+export const insertQuestionSchema = z.object({
+  gameId: z.string(),
+  questionText: z.string(),
+  options: z.array(z.string()),
+  correctAnswer: z.number(),
+  explanation: z.string().optional().nullable(),
+  order: z.number(),
+});
+
+export const insertPlayerSchema = z.object({
+  name: z.string(),
+  company: z.string().optional().nullable(),
+  gameId: z.string(),
+  score: z.number().default(0),
+  correctAnswers: z.number().default(0),
+  totalQuestions: z.number().default(0),
+  timeSpent: z.number().default(0),
+});
+
+export type InsertGame = z.infer<typeof insertGameSchema>;
+export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
+export type InsertPlayer = z.infer<typeof insertPlayerSchema>;

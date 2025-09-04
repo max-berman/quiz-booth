@@ -1,7 +1,6 @@
-import { type Game, type InsertGame, type Question, type InsertQuestion, type Player, type InsertPlayer, games, questions, players } from "@shared/schema";
+import { type Game, type InsertGame, type Question, type InsertQuestion, type Player, type InsertPlayer } from "@shared/firebase-types";
 import { randomUUID } from "crypto";
-import { db } from "./db";
-import { eq, desc, asc } from "drizzle-orm";
+import { db, collections } from "./firebase";
 
 export interface IStorage {
   // Game methods
@@ -21,81 +20,110 @@ export interface IStorage {
   getAllPlayersForGame(gameId: string, creatorKey?: string): Promise<Player[]>;
 }
 
-export class DatabaseStorage implements IStorage {
+export class FirebaseStorage implements IStorage {
   async createGame(insertGame: InsertGame): Promise<Game> {
+    const id = randomUUID();
     const creatorKey = randomUUID(); // Generate a unique access key
-    const [game] = await db
-      .insert(games)
-      .values({
-        ...insertGame,
-        creatorKey: creatorKey,
-      } as any)
-      .returning();
+    const game: Game = {
+      id,
+      ...insertGame,
+      productDescription: insertGame.productDescription || null,
+      firstPrize: insertGame.firstPrize || null,
+      secondPrize: insertGame.secondPrize || null,
+      thirdPrize: insertGame.thirdPrize || null,
+      creatorKey,
+      createdAt: new Date(),
+    };
+    
+    await db.collection(collections.games).doc(id).set(game);
     return game;
   }
 
   async verifyGameAccess(gameId: string, creatorKey: string): Promise<boolean> {
-    const [game] = await db
-      .select({ creatorKey: games.creatorKey })
-      .from(games)
-      .where(eq(games.id, gameId))
-      .limit(1);
-    return game?.creatorKey === creatorKey;
+    const gameDoc = await db.collection(collections.games).doc(gameId).get();
+    if (!gameDoc.exists) return false;
+    const game = gameDoc.data() as Game;
+    return game.creatorKey === creatorKey;
   }
 
   async getGame(id: string): Promise<Game | undefined> {
-    const [game] = await db
-      .select()
-      .from(games)
-      .where(eq(games.id, id))
-      .limit(1);
-    return game || undefined;
+    const gameDoc = await db.collection(collections.games).doc(id).get();
+    if (!gameDoc.exists) return undefined;
+    return gameDoc.data() as Game;
   }
 
   async createQuestions(insertQuestions: InsertQuestion[]): Promise<Question[]> {
-    const createdQuestions = await db
-      .insert(questions)
-      .values(insertQuestions as any)
-      .returning();
-    return createdQuestions;
+    const batch = db.batch();
+    const questions: Question[] = [];
+    
+    for (const insertQuestion of insertQuestions) {
+      const id = randomUUID();
+      const question: Question = {
+        id,
+        ...insertQuestion,
+        explanation: insertQuestion.explanation || null,
+      };
+      
+      const questionRef = db.collection(collections.questions).doc(id);
+      batch.set(questionRef, question);
+      questions.push(question);
+    }
+    
+    await batch.commit();
+    return questions;
   }
 
   async getQuestionsByGameId(gameId: string): Promise<Question[]> {
-    return await db
-      .select()
-      .from(questions)
-      .where(eq(questions.gameId, gameId))
-      .orderBy(questions.order);
+    const questionsSnapshot = await db
+      .collection(collections.questions)
+      .where('gameId', '==', gameId)
+      .orderBy('order', 'asc')
+      .get();
+    
+    return questionsSnapshot.docs.map(doc => doc.data() as Question);
   }
 
   async createPlayer(insertPlayer: InsertPlayer): Promise<Player> {
-    const [player] = await db
-      .insert(players)
-      .values(insertPlayer)
-      .returning();
+    const id = randomUUID();
+    const player: Player = {
+      id,
+      ...insertPlayer,
+      company: insertPlayer.company || null,
+      completedAt: new Date(),
+    };
+    
+    await db.collection(collections.players).doc(id).set(player);
     return player;
   }
 
   async getPlayersByGameId(gameId: string): Promise<Player[]> {
-    return await db
-      .select()
-      .from(players)
-      .where(eq(players.gameId, gameId));
+    const playersSnapshot = await db
+      .collection(collections.players)
+      .where('gameId', '==', gameId)
+      .get();
+    
+    return playersSnapshot.docs.map(doc => doc.data() as Player);
   }
 
   async getLeaderboardByGameId(gameId: string): Promise<Player[]> {
-    return await db
-      .select()
-      .from(players)
-      .where(eq(players.gameId, gameId))
-      .orderBy(desc(players.score), asc(players.timeSpent));
+    const playersSnapshot = await db
+      .collection(collections.players)
+      .where('gameId', '==', gameId)
+      .orderBy('score', 'desc')
+      .orderBy('timeSpent', 'asc')
+      .get();
+    
+    return playersSnapshot.docs.map(doc => doc.data() as Player);
   }
 
   async getAllLeaderboard(): Promise<Player[]> {
-    return await db
-      .select()
-      .from(players)
-      .orderBy(desc(players.score), asc(players.timeSpent));
+    const playersSnapshot = await db
+      .collection(collections.players)
+      .orderBy('score', 'desc')
+      .orderBy('timeSpent', 'asc')
+      .get();
+    
+    return playersSnapshot.docs.map(doc => doc.data() as Player);
   }
 
   async getAllPlayersForGame(gameId: string, creatorKey?: string): Promise<Player[]> {
@@ -104,12 +132,14 @@ export class DatabaseStorage implements IStorage {
       throw new Error("Unauthorized access to game submissions");
     }
     
-    return await db
-      .select()
-      .from(players)
-      .where(eq(players.gameId, gameId))
-      .orderBy(desc(players.completedAt));
+    const playersSnapshot = await db
+      .collection(collections.players)
+      .where('gameId', '==', gameId)
+      .orderBy('completedAt', 'desc')
+      .get();
+    
+    return playersSnapshot.docs.map(doc => doc.data() as Player);
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new FirebaseStorage();
