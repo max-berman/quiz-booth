@@ -11,10 +11,13 @@ import {
   Zap,
   Sparkles,
   Play,
+  LogIn,
 } from "lucide-react";
 import { ShareEmbedModal } from "@/components/share-embed-modal";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function Home() {
+  const { isAuthenticated, user } = useAuth();
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -58,6 +61,15 @@ export default function Home() {
                   View Leaderboard
                 </Button>
               </Link>
+              
+              {!isAuthenticated && (
+                <Link href="/auth/sign-in">
+                  <Button variant="outline" className="px-8 py-3">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Sign In
+                  </Button>
+                </Link>
+              )}
             </div>
 
             <div
