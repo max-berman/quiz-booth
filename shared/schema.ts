@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 import { pgTable, text, varchar, integer, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -54,6 +54,26 @@ export const insertPlayerSchema = createInsertSchema(players).omit({
   id: true,
   completedAt: true,
 });
+
+// Relations
+export const gamesRelations = relations(games, ({ many }) => ({
+  questions: many(questions),
+  players: many(players),
+}));
+
+export const questionsRelations = relations(questions, ({ one }) => ({
+  game: one(games, {
+    fields: [questions.gameId],
+    references: [games.id],
+  }),
+}));
+
+export const playersRelations = relations(players, ({ one }) => ({
+  game: one(games, {
+    fields: [players.gameId],
+    references: [games.id],
+  }),
+}));
 
 export type InsertGame = z.infer<typeof insertGameSchema>;
 export type Game = typeof games.$inferSelect;

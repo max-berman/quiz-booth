@@ -1,5 +1,7 @@
-import { type Game, type InsertGame, type Question, type InsertQuestion, type Player, type InsertPlayer } from "@shared/schema";
+import { type Game, type InsertGame, type Question, type InsertQuestion, type Player, type InsertPlayer, games, questions, players } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { db } from "./db";
+import { eq, desc, asc } from "drizzle-orm";
 
 export interface IStorage {
   // Game methods
@@ -19,98 +21,81 @@ export interface IStorage {
   getAllPlayersForGame(gameId: string, creatorKey?: string): Promise<Player[]>;
 }
 
-export class MemStorage implements IStorage {
-  private games: Map<string, Game>;
-  private questions: Map<string, Question>;
-  private players: Map<string, Player>;
-
-  constructor() {
-    this.games = new Map();
-    this.questions = new Map();
-    this.players = new Map();
-  }
-
+export class DatabaseStorage implements IStorage {
   async createGame(insertGame: InsertGame): Promise<Game> {
-    const id = randomUUID();
     const creatorKey = randomUUID(); // Generate a unique access key
-    const game: Game = {
-      ...insertGame,
-      id,
-      creatorKey,
-      createdAt: new Date(),
-    };
-    this.games.set(id, game);
+    const [game] = await db
+      .insert(games)
+      .values({
+        ...insertGame,
+        creatorKey: creatorKey,
+      } as any)
+      .returning();
     return game;
   }
 
   async verifyGameAccess(gameId: string, creatorKey: string): Promise<boolean> {
-    const game = this.games.get(gameId);
+    const [game] = await db
+      .select({ creatorKey: games.creatorKey })
+      .from(games)
+      .where(eq(games.id, gameId))
+      .limit(1);
     return game?.creatorKey === creatorKey;
   }
 
   async getGame(id: string): Promise<Game | undefined> {
-    return this.games.get(id);
+    const [game] = await db
+      .select()
+      .from(games)
+      .where(eq(games.id, id))
+      .limit(1);
+    return game || undefined;
   }
 
   async createQuestions(insertQuestions: InsertQuestion[]): Promise<Question[]> {
-    const questions: Question[] = [];
-    
-    for (const insertQuestion of insertQuestions) {
-      const id = randomUUID();
-      const question: Question = {
-        ...insertQuestion,
-        id,
-      };
-      this.questions.set(id, question);
-      questions.push(question);
-    }
-    
-    return questions;
+    const createdQuestions = await db
+      .insert(questions)
+      .values(insertQuestions as any)
+      .returning();
+    return createdQuestions;
   }
 
   async getQuestionsByGameId(gameId: string): Promise<Question[]> {
-    return Array.from(this.questions.values())
-      .filter(question => question.gameId === gameId)
-      .sort((a, b) => a.order - b.order);
+    return await db
+      .select()
+      .from(questions)
+      .where(eq(questions.gameId, gameId))
+      .orderBy(questions.order);
   }
 
   async createPlayer(insertPlayer: InsertPlayer): Promise<Player> {
-    const id = randomUUID();
-    const player: Player = {
-      ...insertPlayer,
-      id,
-      completedAt: new Date(),
-    };
-    this.players.set(id, player);
+    const [player] = await db
+      .insert(players)
+      .values(insertPlayer)
+      .returning();
     return player;
   }
 
   async getPlayersByGameId(gameId: string): Promise<Player[]> {
-    return Array.from(this.players.values())
-      .filter(player => player.gameId === gameId);
+    return await db
+      .select()
+      .from(players)
+      .where(eq(players.gameId, gameId));
   }
 
   async getLeaderboardByGameId(gameId: string): Promise<Player[]> {
-    return Array.from(this.players.values())
-      .filter(player => player.gameId === gameId)
-      .sort((a, b) => {
-        // Sort by score descending, then by time ascending (faster is better)
-        if (b.score !== a.score) {
-          return b.score - a.score;
-        }
-        return a.timeSpent - b.timeSpent;
-      });
+    return await db
+      .select()
+      .from(players)
+      .where(eq(players.gameId, gameId))
+      .orderBy(desc(players.score), asc(players.timeSpent));
   }
 
   async getAllLeaderboard(): Promise<Player[]> {
-    return Array.from(this.players.values())
-      .sort((a, b) => {
-        // Sort by score descending, then by time ascending (faster is better)
-        if (b.score !== a.score) {
-          return b.score - a.score;
-        }
-        return a.timeSpent - b.timeSpent;
-      });
+    return await db
+      .select()
+      .from(players)
+      .orderBy(desc(players.score), asc(players.timeSpent));
   }
 
   async getAllPlayersForGame(gameId: string, creatorKey?: string): Promise<Player[]> {
@@ -119,10 +104,12 @@ export class MemStorage implements IStorage {
       throw new Error("Unauthorized access to game submissions");
     }
     
-    return Array.from(this.players.values())
-      .filter(player => player.gameId === gameId)
-      .sort((a, b) => (b.completedAt?.getTime() || 0) - (a.completedAt?.getTime() || 0));
+    return await db
+      .select()
+      .from(players)
+      .where(eq(players.gameId, gameId))
+      .orderBy(desc(players.completedAt));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
