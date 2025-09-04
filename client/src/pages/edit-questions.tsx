@@ -23,7 +23,7 @@ export default function EditQuestions() {
   const [questionEdits, setQuestionEdits] = useState<Record<string, Partial<Question>>>({});
 
   // Get creator key from localStorage
-  const creatorKey = localStorage.getItem(`creatorKey_${currentGameId}`);
+  const creatorKey = localStorage.getItem(`game-${currentGameId}-creator-key`);
 
   const { data: game } = useQuery<Game>({
     queryKey: ['/api/games', currentGameId],

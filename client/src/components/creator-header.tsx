@@ -21,7 +21,7 @@ export function CreatorHeader() {
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith('creatorKey_')) {
+      if (key?.startsWith('game-') && key?.endsWith('-creator-key')) {
         const creatorKey = localStorage.getItem(key);
         if (creatorKey) {
           keys.push(creatorKey);

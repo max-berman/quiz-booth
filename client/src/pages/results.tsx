@@ -177,7 +177,7 @@ export default function Results() {
                 gameTitle={game?.companyName}
               />
               {/* Creator-only links */}
-              {localStorage.getItem(`creatorKey_${id}`) && (
+              {localStorage.getItem(`game-${id}-creator-key`) && (
                 <>
                   <Button
                     onClick={() => setLocation(`/edit-questions/${id}`)}
