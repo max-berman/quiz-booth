@@ -1,6 +1,7 @@
 import { type Game, type InsertGame, type Question, type InsertQuestion, type Player, type InsertPlayer } from "@shared/firebase-types";
 import { randomUUID } from "crypto";
 import { db, collections } from "./firebase";
+import { Timestamp } from 'firebase-admin/firestore';
 
 export interface IStorage {
   // Game methods
@@ -32,20 +33,30 @@ export class FirebaseStorage implements IStorage {
     try {
       const id = randomUUID();
       const creatorKey = randomUUID(); // Generate a unique access key
-      const game: Game = {
+      const now = new Date();
+      const gameData = {
         id,
-        ...insertGame,
+        companyName: insertGame.companyName,
+        industry: insertGame.industry,
         productDescription: insertGame.productDescription || null,
+        questionCount: insertGame.questionCount,
+        difficulty: insertGame.difficulty,
+        categories: insertGame.categories,
         firstPrize: insertGame.firstPrize || null,
         secondPrize: insertGame.secondPrize || null,
         thirdPrize: insertGame.thirdPrize || null,
         creatorKey,
         userId: userId || undefined,
-        createdAt: new Date(),
+        createdAt: Timestamp.fromDate(now),
       };
       
-      console.log('Creating game in Firebase:', JSON.stringify(game, null, 2));
-      await db.collection(collections.games).doc(id).set(game);
+      const game: Game = {
+        ...gameData,
+        createdAt: now, // For the returned object, use JS Date
+      };
+      
+      console.log('Creating game in Firebase:', JSON.stringify(gameData, null, 2));
+      await db.collection(collections.games).doc(id).set(gameData);
       console.log('Game created successfully in Firebase');
       return game;
     } catch (error) {
@@ -74,7 +85,13 @@ export class FirebaseStorage implements IStorage {
       .where('creatorKey', '==', creatorKey)
       .get();
     
-    const games = gamesSnapshot.docs.map(doc => doc.data() as Game);
+    const games = gamesSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+      } as Game;
+    });
     
     // Sort by creation date (newest first)
     return games.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -86,7 +103,13 @@ export class FirebaseStorage implements IStorage {
       .where('userId', '==', userId)
       .get();
     
-    const games = gamesSnapshot.docs.map(doc => doc.data() as Game);
+    const games = gamesSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+      } as Game;
+    });
     
     // Sort by creation date (newest first)
     return games.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -95,7 +118,14 @@ export class FirebaseStorage implements IStorage {
   async getGame(id: string): Promise<Game | undefined> {
     const gameDoc = await db.collection(collections.games).doc(id).get();
     if (!gameDoc.exists) return undefined;
-    return gameDoc.data() as Game;
+    const data = gameDoc.data();
+    if (!data) return undefined;
+    
+    // Convert Firestore Timestamp to JavaScript Date
+    return {
+      ...data,
+      createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+    } as Game;
   }
 
   async createQuestions(insertQuestions: InsertQuestion[]): Promise<Question[]> {
@@ -164,15 +194,20 @@ export class FirebaseStorage implements IStorage {
 
   async createPlayer(insertPlayer: InsertPlayer): Promise<Player> {
     const id = randomUUID();
-    const player: Player = {
+    const now = new Date();
+    const playerData = {
       id,
       ...insertPlayer,
       company: insertPlayer.company || null,
-      completedAt: new Date(),
+      completedAt: Timestamp.fromDate(now),
     };
     
-    await db.collection(collections.players).doc(id).set(player);
-    return player;
+    await db.collection(collections.players).doc(id).set(playerData);
+    
+    return {
+      ...playerData,
+      completedAt: now, // Return JS Date for the response
+    } as Player;
   }
 
   async getPlayersByGameId(gameId: string): Promise<Player[]> {
@@ -181,7 +216,13 @@ export class FirebaseStorage implements IStorage {
       .where('gameId', '==', gameId)
       .get();
     
-    return playersSnapshot.docs.map(doc => doc.data() as Player);
+    return playersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        completedAt: data.completedAt?.toDate ? data.completedAt.toDate() : new Date(data.completedAt),
+      } as Player;
+    });
   }
 
   async getLeaderboardByGameId(gameId: string): Promise<Player[]> {
@@ -190,7 +231,13 @@ export class FirebaseStorage implements IStorage {
       .where('gameId', '==', gameId)
       .get();
     
-    const players = playersSnapshot.docs.map(doc => doc.data() as Player);
+    const players = playersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        completedAt: data.completedAt?.toDate ? data.completedAt.toDate() : new Date(data.completedAt),
+      } as Player;
+    });
     
     // Sort by score (desc) and then timeSpent (asc) in memory
     return players.sort((a, b) => {
@@ -206,7 +253,13 @@ export class FirebaseStorage implements IStorage {
       .collection(collections.players)
       .get();
     
-    const players = playersSnapshot.docs.map(doc => doc.data() as Player);
+    const players = playersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        completedAt: data.completedAt?.toDate ? data.completedAt.toDate() : new Date(data.completedAt),
+      } as Player;
+    });
     
     // Sort by score (desc) and then timeSpent (asc) in memory
     return players.sort((a, b) => {
@@ -251,7 +304,13 @@ export class FirebaseStorage implements IStorage {
       .where('gameId', '==', gameId)
       .get();
     
-    const players = playersSnapshot.docs.map(doc => doc.data() as Player);
+    const players = playersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        completedAt: data.completedAt?.toDate ? data.completedAt.toDate() : new Date(data.completedAt),
+      } as Player;
+    });
     
     // Sort by completedAt (desc) in memory
     return players.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
@@ -269,7 +328,13 @@ export class FirebaseStorage implements IStorage {
       .where('gameId', '==', gameId)
       .get();
     
-    const players = playersSnapshot.docs.map(doc => doc.data() as Player);
+    const players = playersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        completedAt: data.completedAt?.toDate ? data.completedAt.toDate() : new Date(data.completedAt),
+      } as Player;
+    });
     
     // Sort by completedAt (desc) in memory
     return players.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
