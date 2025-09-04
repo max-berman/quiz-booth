@@ -40,9 +40,9 @@ export default function Setup() {
     industry: "Technology",
     productDescription: "",
     questionCount: 10,
-    firstPrize: "",
-    secondPrize: "",
-    thirdPrize: "",
+    firstPrize: "75",
+    secondPrize: "50",
+    thirdPrize: "25",
   });
 
   const createGameMutation = useMutation({

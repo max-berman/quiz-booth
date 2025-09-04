@@ -22,21 +22,28 @@ export interface IStorage {
 
 export class FirebaseStorage implements IStorage {
   async createGame(insertGame: InsertGame): Promise<Game> {
-    const id = randomUUID();
-    const creatorKey = randomUUID(); // Generate a unique access key
-    const game: Game = {
-      id,
-      ...insertGame,
-      productDescription: insertGame.productDescription || null,
-      firstPrize: insertGame.firstPrize || null,
-      secondPrize: insertGame.secondPrize || null,
-      thirdPrize: insertGame.thirdPrize || null,
-      creatorKey,
-      createdAt: new Date(),
-    };
-    
-    await db.collection(collections.games).doc(id).set(game);
-    return game;
+    try {
+      const id = randomUUID();
+      const creatorKey = randomUUID(); // Generate a unique access key
+      const game: Game = {
+        id,
+        ...insertGame,
+        productDescription: insertGame.productDescription || null,
+        firstPrize: insertGame.firstPrize || null,
+        secondPrize: insertGame.secondPrize || null,
+        thirdPrize: insertGame.thirdPrize || null,
+        creatorKey,
+        createdAt: new Date(),
+      };
+      
+      console.log('Creating game in Firebase:', JSON.stringify(game, null, 2));
+      await db.collection(collections.games).doc(id).set(game);
+      console.log('Game created successfully in Firebase');
+      return game;
+    } catch (error) {
+      console.error('Firebase createGame error:', error);
+      throw error;
+    }
   }
 
   async verifyGameAccess(gameId: string, creatorKey: string): Promise<boolean> {
