@@ -13,6 +13,7 @@ export interface Game {
   secondPrize: string | null;
   thirdPrize: string | null;
   creatorKey: string;
+  userId?: string; // Firebase UID - optional for backward compatibility
   createdAt: Date;
 }
 

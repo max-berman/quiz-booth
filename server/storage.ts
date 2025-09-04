@@ -4,15 +4,18 @@ import { db, collections } from "./firebase";
 
 export interface IStorage {
   // Game methods
-  createGame(game: InsertGame): Promise<Game>;
+  createGame(game: InsertGame, userId?: string): Promise<Game>;
   getGame(id: string): Promise<Game | undefined>;
   verifyGameAccess(gameId: string, creatorKey: string): Promise<boolean>;
+  verifyGameAccessByUser(gameId: string, userId: string): Promise<boolean>;
   getGamesByCreator(creatorKey: string): Promise<Game[]>;
+  getGamesByUser(userId: string): Promise<Game[]>;
   
   // Question methods
   createQuestions(questions: InsertQuestion[]): Promise<Question[]>;
   getQuestionsByGameId(gameId: string): Promise<Question[]>;
   updateQuestion(id: string, updates: Partial<Question>, creatorKey: string): Promise<Question>;
+  updateQuestionByUser(id: string, updates: Partial<Question>, userId: string): Promise<Question>;
   getQuestion(id: string): Promise<Question | undefined>;
   
   // Player methods
@@ -21,10 +24,11 @@ export interface IStorage {
   getLeaderboardByGameId(gameId: string): Promise<Player[]>;
   getAllLeaderboard(): Promise<Player[]>;
   getAllPlayersForGame(gameId: string, creatorKey?: string): Promise<Player[]>;
+  getAllPlayersForGameByUser(gameId: string, userId: string): Promise<Player[]>;
 }
 
 export class FirebaseStorage implements IStorage {
-  async createGame(insertGame: InsertGame): Promise<Game> {
+  async createGame(insertGame: InsertGame, userId?: string): Promise<Game> {
     try {
       const id = randomUUID();
       const creatorKey = randomUUID(); // Generate a unique access key
@@ -36,6 +40,7 @@ export class FirebaseStorage implements IStorage {
         secondPrize: insertGame.secondPrize || null,
         thirdPrize: insertGame.thirdPrize || null,
         creatorKey,
+        userId: userId || undefined,
         createdAt: new Date(),
       };
       
@@ -56,10 +61,29 @@ export class FirebaseStorage implements IStorage {
     return game.creatorKey === creatorKey;
   }
 
+  async verifyGameAccessByUser(gameId: string, userId: string): Promise<boolean> {
+    const gameDoc = await db.collection(collections.games).doc(gameId).get();
+    if (!gameDoc.exists) return false;
+    const game = gameDoc.data() as Game;
+    return game.userId === userId;
+  }
+
   async getGamesByCreator(creatorKey: string): Promise<Game[]> {
     const gamesSnapshot = await db
       .collection(collections.games)
       .where('creatorKey', '==', creatorKey)
+      .get();
+    
+    const games = gamesSnapshot.docs.map(doc => doc.data() as Game);
+    
+    // Sort by creation date (newest first)
+    return games.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async getGamesByUser(userId: string): Promise<Game[]> {
+    const gamesSnapshot = await db
+      .collection(collections.games)
+      .where('userId', '==', userId)
       .get();
     
     const games = gamesSnapshot.docs.map(doc => doc.data() as Game);
@@ -193,9 +217,50 @@ export class FirebaseStorage implements IStorage {
     });
   }
 
+  async updateQuestionByUser(id: string, updates: Partial<Question>, userId: string): Promise<Question> {
+    // First verify the user owns the game that this question belongs to
+    const question = await this.getQuestion(id);
+    if (!question) {
+      throw new Error("Question not found");
+    }
+    
+    const hasAccess = await this.verifyGameAccessByUser(question.gameId, userId);
+    if (!hasAccess) {
+      throw new Error("Unauthorized access to question");
+    }
+    
+    const updatedQuestion = {
+      ...question,
+      ...updates,
+      id, // Ensure ID cannot be changed
+      gameId: question.gameId, // Ensure gameId cannot be changed
+    };
+    
+    await db.collection(collections.questions).doc(id).update(updates);
+    return updatedQuestion;
+  }
+
   async getAllPlayersForGame(gameId: string, creatorKey?: string): Promise<Player[]> {
     // Only return data if creator key is provided and valid
     if (!creatorKey || !(await this.verifyGameAccess(gameId, creatorKey))) {
+      throw new Error("Unauthorized access to game submissions");
+    }
+    
+    const playersSnapshot = await db
+      .collection(collections.players)
+      .where('gameId', '==', gameId)
+      .get();
+    
+    const players = playersSnapshot.docs.map(doc => doc.data() as Player);
+    
+    // Sort by completedAt (desc) in memory
+    return players.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+  }
+
+  async getAllPlayersForGameByUser(gameId: string, userId: string): Promise<Player[]> {
+    // Only return data if user owns the game
+    const hasAccess = await this.verifyGameAccessByUser(gameId, userId);
+    if (!hasAccess) {
       throw new Error("Unauthorized access to game submissions");
     }
     

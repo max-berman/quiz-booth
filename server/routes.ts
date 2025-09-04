@@ -3,15 +3,18 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertGameSchema, insertQuestionSchema, insertPlayerSchema } from "@shared/firebase-types";
 import { z } from "zod";
+import { verifyFirebaseToken, optionalFirebaseAuth, type AuthenticatedRequest } from "./firebase-auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Create a new game
-  app.post("/api/games", async (req, res) => {
+  // Create a new game (with optional Firebase auth)
+  app.post("/api/games", optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
     try {
       console.log('Received game creation request:', JSON.stringify(req.body, null, 2));
       const gameData = insertGameSchema.parse(req.body);
       console.log('Parsed game data:', JSON.stringify(gameData, null, 2));
-      const game = await storage.createGame(gameData);
+      
+      // Pass userId if authenticated, otherwise use legacy creator key approach
+      const game = await storage.createGame(gameData, req.user?.uid);
       res.json(game);
     } catch (error) {
       console.error('Game creation error:', error);
@@ -32,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get games by creator key
+  // Get games by creator key (legacy)
   app.get("/api/creator/games", async (req, res) => {
     try {
       const creatorKey = req.headers['x-creator-key'] as string;
@@ -46,6 +49,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Creator games fetch error:', error);
       res.status(500).json({ message: "Failed to get creator games" });
+    }
+  });
+
+  // Get games by authenticated user (Firebase auth)
+  app.get("/api/user/games", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const games = await storage.getGamesByUser(req.user.uid);
+      res.json(games);
+    } catch (error) {
+      console.error('User games fetch error:', error);
+      res.status(500).json({ message: "Failed to get user games" });
+    }
+  });
+
+  // Combined endpoint that supports both creator keys and Firebase auth
+  app.get("/api/my-games", optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const creatorKey = req.headers['x-creator-key'] as string;
+      
+      // If authenticated with Firebase, get games by user
+      if (req.user) {
+        const games = await storage.getGamesByUser(req.user.uid);
+        return res.json(games);
+      }
+      
+      // Fall back to creator key method
+      if (creatorKey) {
+        const games = await storage.getGamesByCreator(creatorKey);
+        return res.json(games);
+      }
+      
+      return res.status(401).json({ message: "Authentication required" });
+    } catch (error) {
+      console.error('Games fetch error:', error);
+      res.status(500).json({ message: "Failed to get games" });
     }
   });
 
@@ -202,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update a question (requires creator key)
+  // Update a question (requires creator key - legacy)
   app.put("/api/questions/:id", async (req, res) => {
     try {
       const creatorKey = req.headers['x-creator-key'] as string;
@@ -225,6 +267,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const updatedQuestion = await storage.updateQuestion(questionId, filteredUpdates, creatorKey);
       res.json(updatedQuestion);
+    } catch (error) {
+      console.error('Question update error:', error);
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Access denied. Only the game creator can edit questions." });
+      } else if (error instanceof Error && error.message.includes("not found")) {
+        res.status(404).json({ message: "Question not found" });
+      } else {
+        res.status(500).json({ message: "Failed to update question" });
+      }
+    }
+  });
+
+  // Update a question (Firebase auth)
+  app.put("/api/user/questions/:id", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const questionId = req.params.id;
+      const updates = req.body;
+      
+      // Validate the updates
+      const allowedFields = ['questionText', 'options', 'correctAnswer', 'explanation'];
+      const filteredUpdates = Object.keys(updates)
+        .filter(key => allowedFields.includes(key))
+        .reduce((obj: any, key) => {
+          obj[key] = updates[key];
+          return obj;
+        }, {});
+      
+      const updatedQuestion = await storage.updateQuestionByUser(questionId, filteredUpdates, req.user.uid);
+      res.json(updatedQuestion);
+    } catch (error) {
+      console.error('Question update error:', error);
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Access denied. Only the game creator can edit questions." });
+      } else if (error instanceof Error && error.message.includes("not found")) {
+        res.status(404).json({ message: "Question not found" });
+      } else {
+        res.status(500).json({ message: "Failed to update question" });
+      }
+    }
+  });
+
+  // Combined question update endpoint
+  app.put("/api/my-questions/:id", optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const creatorKey = req.headers['x-creator-key'] as string;
+      const questionId = req.params.id;
+      const updates = req.body;
+      
+      // Validate the updates
+      const allowedFields = ['questionText', 'options', 'correctAnswer', 'explanation'];
+      const filteredUpdates = Object.keys(updates)
+        .filter(key => allowedFields.includes(key))
+        .reduce((obj: any, key) => {
+          obj[key] = updates[key];
+          return obj;
+        }, {});
+      
+      // If authenticated with Firebase, use user-based access
+      if (req.user) {
+        const updatedQuestion = await storage.updateQuestionByUser(questionId, filteredUpdates, req.user.uid);
+        return res.json(updatedQuestion);
+      }
+      
+      // Fall back to creator key method
+      if (creatorKey) {
+        const updatedQuestion = await storage.updateQuestion(questionId, filteredUpdates, creatorKey);
+        return res.json(updatedQuestion);
+      }
+      
+      return res.status(401).json({ message: "Authentication required" });
     } catch (error) {
       console.error('Question update error:', error);
       if (error instanceof Error && error.message.includes("Unauthorized")) {

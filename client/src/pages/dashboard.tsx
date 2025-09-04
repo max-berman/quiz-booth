@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/auth-context";
+import { getAuthHeaders } from "@/lib/auth-utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +24,7 @@ import type { Game } from "@shared/firebase-types";
 export default function Dashboard() {
   const [location, setLocation] = useLocation();
   const [creatorKeys, setCreatorKeys] = useState<string[]>([]);
+  const { user, isAuthenticated } = useAuth();
 
   // Get all creator keys from localStorage
   useEffect(() => {
@@ -38,39 +41,29 @@ export default function Dashboard() {
     setCreatorKeys(keys);
   }, []);
 
-  // Fetch games for all creator keys
+  // Fetch games using new authentication system
   const { data: allGames = [], isLoading } = useQuery<Game[]>({
-    queryKey: ['/api/creator/games', creatorKeys],
+    queryKey: ['/api/my-games', user?.uid, creatorKeys],
     queryFn: async () => {
-      const allGamesData: Game[] = [];
-      
-      for (const creatorKey of creatorKeys) {
-        try {
-          const response = await fetch('/api/creator/games', {
-            headers: {
-              'X-Creator-Key': creatorKey,
-            },
-          });
-          
-          if (response.ok) {
-            const games = await response.json();
-            allGamesData.push(...games);
-          }
-        } catch (error) {
-          console.error('Failed to fetch games for creator key:', error);
+      try {
+        const headers = await getAuthHeaders();
+        const response = await fetch('/api/my-games', { headers });
+        
+        if (response.ok) {
+          const games = await response.json();
+          return games.sort((a: Game, b: Game) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        } else {
+          console.error('Failed to fetch games:', response.statusText);
+          return [];
         }
+      } catch (error) {
+        console.error('Error fetching games:', error);
+        return [];
       }
-      
-      // Remove duplicates and sort by creation date
-      const uniqueGames = allGamesData.filter((game, index, self) => 
-        index === self.findIndex(g => g.id === game.id)
-      );
-      
-      return uniqueGames.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
     },
-    enabled: creatorKeys.length > 0,
+    enabled: isAuthenticated || creatorKeys.length > 0,
   });
 
   if (creatorKeys.length === 0) {
