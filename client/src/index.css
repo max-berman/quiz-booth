@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=Roboto:wght@400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,23 +12,27 @@
   --card-foreground: hsl(222 84% 5%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(222 84% 5%);
-  
+
   /* Gaming-inspired primary colors */
-  --primary: hsl(0 84% 60%); /* Naknick red */
+  --primary: hsl(0 84% 60%);
+  /* Naknick red */
   --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(217 91% 60%); /* Bright blue */
+  --secondary: hsl(217 91% 60%);
+  /* Bright blue */
   --secondary-foreground: hsl(0 0% 98%);
-  --accent: hsl(142 71% 45%); /* Success green */
+  --accent: hsl(142 71% 45%);
+  /* Success green */
   --accent-foreground: hsl(0 0% 98%);
-  --warning: hsl(38 92% 50%); /* Warning orange */
+  --warning: hsl(38 92% 50%);
+  /* Warning orange */
   --warning-foreground: hsl(0 0% 98%);
-  
+
   /* Additional gaming colors */
   --gaming-purple: hsl(271 81% 56%);
   --gaming-cyan: hsl(188 94% 43%);
   --gaming-yellow: hsl(54 91% 68%);
   --gaming-pink: hsl(330 81% 60%);
-  
+
   --dark: hsl(222 84% 5%);
   --dark-foreground: hsl(0 0% 98%);
   --muted: hsl(210 40% 98%);
@@ -37,17 +42,17 @@
   --border: hsl(214 32% 91%);
   --input: hsl(214 32% 91%);
   --ring: hsl(0 84% 60%);
-  
+
   /* Enhanced design system */
   --radius: 1rem;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  
+  --font-sans: 'Play', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
   /* Gradient definitions */
   --gradient-primary: linear-gradient(135deg, hsl(0 84% 60%) 0%, hsl(271 81% 56%) 100%);
   --gradient-secondary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(188 94% 43%) 100%);
   --gradient-success: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(54 91% 68%) 100%);
   --gradient-gaming: linear-gradient(135deg, hsl(330 81% 60%) 0%, hsl(271 81% 56%) 100%);
-  
+
   /* Shadows for depth */
   --shadow-glow: 0 0 20px hsl(0 84% 60% / 0.3);
   --shadow-glow-blue: 0 0 20px hsl(217 91% 60% / 0.3);
@@ -87,97 +92,112 @@
     @apply font-sans antialiased bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-  
+
   /* Gaming-inspired animations */
   @keyframes glow-pulse {
-    0%, 100% { 
+
+    0%,
+    100% {
       box-shadow: 0 0 20px hsl(0 84% 60% / 0.4);
       transform: scale(1);
     }
-    50% { 
+
+    50% {
       box-shadow: 0 0 30px hsl(0 84% 60% / 0.7);
       transform: scale(1.02);
     }
   }
-  
+
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
   }
-  
+
   @keyframes slide-up {
     from {
       opacity: 0;
       transform: translateY(30px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
-  
+
   @keyframes gradient-x {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateX(0%);
     }
+
     50% {
       transform: translateX(100%);
     }
   }
-  
+
   .animate-glow-pulse {
     animation: glow-pulse 2s ease-in-out infinite;
   }
-  
+
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
-  
+
   .animate-slide-up {
     animation: slide-up 0.5s ease-out;
   }
-  
+
   .animate-gradient-x {
     animation: gradient-x 2s ease infinite;
   }
 }
 
 @layer components {
+
   /* Naknick-style gradient backgrounds */
   .bg-gradient-naknick {
     background: var(--gradient-primary);
   }
-  
+
   .bg-gradient-secondary {
     background: var(--gradient-secondary);
   }
-  
+
   .bg-gradient-success {
     background: var(--gradient-success);
   }
-  
+
   .bg-gradient-gaming {
     background: var(--gradient-gaming);
   }
-  
+
   /* Hero section styling */
   .hero-gradient {
-    background: linear-gradient(135deg, 
-      hsl(0 84% 60% / 0.1) 0%, 
-      hsl(271 81% 56% / 0.1) 50%, 
-      hsl(217 91% 60% / 0.1) 100%);
+    background: linear-gradient(135deg,
+        hsl(0 84% 60% / 0.1) 0%,
+        hsl(271 81% 56% / 0.1) 50%,
+        hsl(217 91% 60% / 0.1) 100%);
   }
-  
+
   /* Gaming card effects */
   .game-card {
     @apply relative overflow-hidden rounded-2xl transition-all duration-300;
-    background: linear-gradient(135deg, 
-      hsl(0 0% 100%) 0%, 
-      hsl(210 40% 98%) 100%);
+    background: linear-gradient(135deg,
+        hsl(0 0% 100%) 0%,
+        hsl(210 40% 98%) 100%);
     border: 2px solid transparent;
     background-clip: padding-box;
   }
-  
+
   .game-card::before {
     content: '';
     @apply absolute inset-0 rounded-2xl;
@@ -185,56 +205,56 @@
     z-index: -1;
     margin: -2px;
   }
-  
+
   .game-card:hover {
     @apply shadow-2xl;
     transform: translateY(-4px);
     box-shadow: var(--shadow-glow);
   }
-  
+
   /* Naknick-style buttons */
   .btn-naknick {
     @apply relative px-8 py-4 rounded-full font-bold text-white transition-all duration-300 transform overflow-hidden;
     background: var(--gradient-primary);
     box-shadow: 0 4px 20px hsl(0 84% 60% / 0.3);
   }
-  
+
   .btn-naknick::before {
     content: '';
     @apply absolute inset-0 bg-white opacity-0 transition-opacity duration-300;
   }
-  
+
   .btn-naknick:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 30px hsl(0 84% 60% / 0.5);
   }
-  
+
   .btn-naknick:hover::before {
     opacity: 0.1;
   }
-  
+
   .btn-secondary-naknick {
     @apply relative px-8 py-4 rounded-full font-bold text-white transition-all duration-300 transform overflow-hidden;
     background: var(--gradient-secondary);
     box-shadow: 0 4px 20px hsl(217 91% 60% / 0.3);
   }
-  
+
   .btn-secondary-naknick:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 30px hsl(217 91% 60% / 0.5);
   }
-  
+
   .btn-success-naknick {
     @apply relative px-8 py-4 rounded-full font-bold text-white transition-all duration-300 transform;
     background: var(--gradient-success);
     box-shadow: 0 4px 20px hsl(142 71% 45% / 0.3);
   }
-  
+
   .btn-success-naknick:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 30px hsl(142 71% 45% / 0.5);
   }
-  
+
   /* Gaming UI elements */
   .gaming-border {
     @apply relative;
@@ -242,52 +262,52 @@
     border: 2px solid;
     border-image: var(--gradient-primary) 1;
   }
-  
+
   .stat-card {
     @apply relative p-6 rounded-2xl transition-all duration-300;
-    background: linear-gradient(135deg, 
-      hsl(0 0% 100%) 0%, 
-      hsl(210 40% 98%) 100%);
+    background: linear-gradient(135deg,
+        hsl(0 0% 100%) 0%,
+        hsl(210 40% 98%) 100%);
     border: 1px solid hsl(214 32% 91%);
   }
-  
+
   .stat-card:hover {
     @apply shadow-lg;
     transform: translateY(-2px);
   }
-  
+
   /* Question answer buttons */
   .answer-btn {
     @apply w-full p-4 text-left border-2 rounded-xl transition-all duration-200 font-medium;
     border-color: hsl(214 32% 91%);
     background: hsl(0 0% 100%);
   }
-  
+
   .answer-btn:hover {
     border-color: hsl(0 84% 60%);
     background: hsl(0 84% 60% / 0.05);
     transform: translateX(4px);
   }
-  
+
   .answer-btn.correct {
     border-color: hsl(142 71% 45%);
     background: hsl(142 71% 45% / 0.1);
     color: hsl(142 71% 35%);
   }
-  
+
   .answer-btn.incorrect {
     border-color: hsl(0 84% 60%);
     background: hsl(0 84% 60% / 0.1);
     color: hsl(0 84% 50%);
   }
-  
+
   /* Loading spinner */
   .spinner-naknick {
     @apply w-8 h-8 border-4 rounded-full animate-spin;
     border-color: hsl(0 84% 60%);
     border-top-color: transparent;
   }
-  
+
   /* Glass morphism effect */
   .glass-effect {
     background: rgba(255, 255, 255, 0.1);
@@ -301,15 +321,15 @@
   .text-naknick-h1 {
     @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight;
   }
-  
+
   .text-naknick-h2 {
     @apply text-3xl md:text-4xl font-bold leading-tight;
   }
-  
+
   .text-naknick-h3 {
     @apply text-2xl md:text-3xl font-semibold leading-tight;
   }
-  
+
   .text-gaming-gradient {
     background: var(--gradient-primary);
     -webkit-background-clip: text;
