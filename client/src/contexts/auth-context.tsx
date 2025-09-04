@@ -43,12 +43,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
       handleCodeInApp: true,
     };
 
+    console.log('Sending sign-in link to:', email);
+    console.log('Action code settings:', actionCodeSettings);
+    console.log('Auth object:', auth);
+    console.log('Firebase config check:', {
+      apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? 'Set' : 'Missing',
+      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? 'Set' : 'Missing',
+      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ? 'Set' : 'Missing',
+    });
+
     try {
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      console.log('Sign-in link sent successfully');
       // Store email in localStorage for completing sign-in
       localStorage.setItem('emailForSignIn', email);
-    } catch (error) {
-      console.error('Error sending sign-in link:', error);
+    } catch (error: any) {
+      console.error('Detailed error sending sign-in link:', {
+        code: error?.code,
+        message: error?.message,
+        customData: error?.customData,
+        stack: error?.stack
+      });
       throw error;
     }
   };
