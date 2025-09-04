@@ -5,82 +5,63 @@
 @tailwind utilities;
 
 :root {
-  /* Naknick.com inspired color palette */
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(222 84% 5%);
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(222 84% 5%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(222 84% 5%);
+  /* Clean blue-based color palette */
+  --background: #fdfdfe;
+  --foreground: #1d2e5c;
+  --card: #fdfdfe;
+  --card-foreground: #1d2e5c;
+  --popover: #fdfdfe;
+  --popover-foreground: #1d2e5c;
 
-  /* Gaming-inspired primary colors */
-  --primary: hsl(0 84% 60%);
-  /* Naknick red */
-  --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(217 91% 60%);
-  /* Bright blue */
-  --secondary-foreground: hsl(0 0% 98%);
-  --accent: hsl(142 71% 45%);
-  /* Success green */
-  --accent-foreground: hsl(0 0% 98%);
-  --warning: hsl(38 92% 50%);
-  /* Warning orange */
-  --warning-foreground: hsl(0 0% 98%);
+  /* Blue theme colors */
+  --primary: #3d63dd;
+  --primary-foreground: #ffffff;
+  --secondary: #87a5ef;
+  --secondary-foreground: #1d2e5c;
+  --accent: #a6bff9;
+  --accent-foreground: #1d2e5c;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 
-  /* Additional gaming colors */
-  --gaming-purple: hsl(271 81% 56%);
-  --gaming-cyan: hsl(188 94% 43%);
-  --gaming-yellow: hsl(54 91% 68%);
-  --gaming-pink: hsl(330 81% 60%);
+  --muted: #f7f9ff;
+  --muted-foreground: #64748b;
+  --border: #edf2fe;
+  --input: #edf2fe;
+  --ring: #3d63dd;
 
-  --dark: hsl(222 84% 5%);
-  --dark-foreground: hsl(0 0% 98%);
-  --muted: hsl(210 40% 98%);
-  --muted-foreground: hsl(215 16% 47%);
-  --destructive: hsl(0 84% 60%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(214 32% 91%);
-  --input: hsl(214 32% 91%);
-  --ring: hsl(0 84% 60%);
-
-  /* Enhanced design system */
-  --radius: 1rem;
-  --font-sans: 'Play', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-  /* Gradient definitions */
-  --gradient-primary: linear-gradient(135deg, hsl(0 84% 60%) 0%, hsl(271 81% 56%) 100%);
-  --gradient-secondary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(188 94% 43%) 100%);
-  --gradient-success: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(54 91% 68%) 100%);
-  --gradient-gaming: linear-gradient(135deg, hsl(330 81% 60%) 0%, hsl(271 81% 56%) 100%);
-
-  /* Shadows for depth */
-  --shadow-glow: 0 0 20px hsl(0 84% 60% / 0.3);
-  --shadow-glow-blue: 0 0 20px hsl(217 91% 60% / 0.3);
-  --shadow-glow-green: 0 0 20px hsl(142 71% 45% / 0.3);
+  /* Simple design system */
+  --radius: 0.5rem;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .dark {
-  --background: hsl(222 84% 5%);
-  --foreground: hsl(210 40% 98%);
-  --card: hsl(222 84% 8%);
-  --card-foreground: hsl(210 40% 98%);
-  --popover: hsl(222 84% 5%);
-  --popover-foreground: hsl(210 40% 98%);
-  --primary: hsl(0 84% 60%);
-  --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(217 91% 60%);
-  --secondary-foreground: hsl(0 0% 98%);
-  --accent: hsl(142 71% 45%);
-  --accent-foreground: hsl(0 0% 98%);
-  --warning: hsl(38 92% 50%);
-  --warning-foreground: hsl(222 84% 5%);
-  --muted: hsl(217 32% 17%);
-  --muted-foreground: hsl(215 20% 65%);
-  --destructive: hsl(0 84% 60%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(217 32% 17%);
-  --input: hsl(217 32% 17%);
-  --ring: hsl(0 84% 60%);
+  --background: #1d2e5c;
+  --foreground: #fdfdfe;
+  --card: #3657c3;
+  --card-foreground: #fdfdfe;
+  --popover: #1d2e5c;
+  --popover-foreground: #fdfdfe;
+  --primary: #87a5ef;
+  --primary-foreground: #1d2e5c;
+  --secondary: #a6bff9;
+  --secondary-foreground: #1d2e5c;
+  --accent: #bdd1ff;
+  --accent-foreground: #1d2e5c;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --muted: #3657c3;
+  --muted-foreground: #bdd1ff;
+  --border: #3657c3;
+  --input: #3657c3;
+  --ring: #87a5ef;
 }
 
 @layer base {
@@ -93,37 +74,11 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Gaming-inspired animations */
-  @keyframes glow-pulse {
-
-    0%,
-    100% {
-      box-shadow: 0 0 20px hsl(0 84% 60% / 0.4);
-      transform: scale(1);
-    }
-
-    50% {
-      box-shadow: 0 0 30px hsl(0 84% 60% / 0.7);
-      transform: scale(1.02);
-    }
-  }
-
-  @keyframes float {
-
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-
+  /* Simple animations */
   @keyframes slide-up {
     from {
       opacity: 0;
-      transform: translateY(30px);
+      transform: translateY(20px);
     }
 
     to {
@@ -132,148 +87,39 @@
     }
   }
 
-  @keyframes gradient-x {
-
-    0%,
-    100% {
-      transform: translateX(0%);
-    }
-
-    50% {
-      transform: translateX(100%);
-    }
-  }
-
-  .animate-glow-pulse {
-    animation: glow-pulse 2s ease-in-out infinite;
-  }
-
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-
   .animate-slide-up {
-    animation: slide-up 0.5s ease-out;
-  }
-
-  .animate-gradient-x {
-    animation: gradient-x 2s ease infinite;
+    animation: slide-up 0.3s ease-out;
   }
 }
 
 @layer components {
 
-  /* Naknick-style gradient backgrounds */
-  .bg-gradient-naknick {
-    background: var(--gradient-primary);
-  }
-
-  .bg-gradient-secondary {
-    background: var(--gradient-secondary);
-  }
-
-  .bg-gradient-success {
-    background: var(--gradient-success);
-  }
-
-  .bg-gradient-gaming {
-    background: var(--gradient-gaming);
-  }
-
-  /* Hero section styling */
-  .hero-gradient {
-    background: linear-gradient(135deg,
-        hsl(0 84% 60% / 0.1) 0%,
-        hsl(271 81% 56% / 0.1) 50%,
-        hsl(217 91% 60% / 0.1) 100%);
-  }
-
-  /* Gaming card effects */
+  /* Simple card styling */
   .game-card {
-    @apply relative overflow-hidden rounded-2xl transition-all duration-300;
-    background: linear-gradient(135deg,
-        hsl(0 0% 100%) 0%,
-        hsl(210 40% 98%) 100%);
-    border: 2px solid transparent;
-    background-clip: padding-box;
-  }
-
-  .game-card::before {
-    content: '';
-    @apply absolute inset-0 rounded-2xl;
-    background: var(--gradient-primary);
-    z-index: -1;
-    margin: -2px;
+    @apply bg-card border border-border rounded-lg shadow-sm transition-all duration-200;
   }
 
   .game-card:hover {
-    @apply shadow-2xl;
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-glow);
+    @apply shadow-md;
+    transform: translateY(-1px);
   }
 
-  /* Naknick-style buttons */
-  .btn-naknick {
-    @apply relative px-8 py-4 rounded-full font-bold text-white transition-all duration-300 transform overflow-hidden;
-    background: var(--gradient-primary);
-    box-shadow: 0 4px 20px hsl(0 84% 60% / 0.3);
+  /* Simple button styling */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground px-6 py-3 rounded-md font-medium transition-all duration-200 hover:opacity-90;
   }
 
-  .btn-naknick::before {
-    content: '';
-    @apply absolute inset-0 bg-white opacity-0 transition-opacity duration-300;
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground px-6 py-3 rounded-md font-medium transition-all duration-200 hover:opacity-90;
   }
 
-  .btn-naknick:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px hsl(0 84% 60% / 0.5);
-  }
-
-  .btn-naknick:hover::before {
-    opacity: 0.1;
-  }
-
-  .btn-secondary-naknick {
-    @apply relative px-8 py-4 rounded-full font-bold text-white transition-all duration-300 transform overflow-hidden;
-    background: var(--gradient-secondary);
-    box-shadow: 0 4px 20px hsl(217 91% 60% / 0.3);
-  }
-
-  .btn-secondary-naknick:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px hsl(217 91% 60% / 0.5);
-  }
-
-  .btn-success-naknick {
-    @apply relative px-8 py-4 rounded-full font-bold text-white transition-all duration-300 transform;
-    background: var(--gradient-success);
-    box-shadow: 0 4px 20px hsl(142 71% 45% / 0.3);
-  }
-
-  .btn-success-naknick:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px hsl(142 71% 45% / 0.5);
-  }
-
-  /* Gaming UI elements */
-  .gaming-border {
-    @apply relative;
-    background: linear-gradient(135deg, transparent 0%, hsl(0 84% 60% / 0.1) 50%, transparent 100%);
-    border: 2px solid;
-    border-image: var(--gradient-primary) 1;
-  }
-
+  /* Simple stat card styling */
   .stat-card {
-    @apply relative p-6 rounded-2xl transition-all duration-300;
-    background: linear-gradient(135deg,
-        hsl(0 0% 100%) 0%,
-        hsl(210 40% 98%) 100%);
-    border: 1px solid hsl(214 32% 91%);
+    @apply bg-card border border-border rounded-md transition-all duration-200;
   }
 
   .stat-card:hover {
-    @apply shadow-lg;
-    transform: translateY(-2px);
+    @apply shadow-sm;
   }
 
   /* Question answer buttons */
@@ -299,39 +145,25 @@
     color: hsl(0 84% 50%);
   }
 
-  /* Loading spinner */
-  .spinner-naknick {
+  /* Simple loading spinner */
+  .spinner {
     @apply w-8 h-8 border-4 rounded-full animate-spin;
-    border-color: hsl(0 84% 60%);
+    border-color: hsl(var(--primary));
     border-top-color: transparent;
-  }
-
-  /* Glass morphism effect */
-  .glass-effect {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 }
 
-/* Responsive typography */
+/* Simple typography */
 @layer utilities {
-  .text-naknick-h1 {
-    @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight;
+  .text-h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold leading-tight;
   }
 
-  .text-naknick-h2 {
-    @apply text-3xl md:text-4xl font-bold leading-tight;
+  .text-h2 {
+    @apply text-2xl md:text-3xl font-bold leading-tight;
   }
 
-  .text-naknick-h3 {
-    @apply text-2xl md:text-3xl font-semibold leading-tight;
-  }
-
-  .text-gaming-gradient {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .text-h3 {
+    @apply text-xl md:text-2xl font-semibold leading-tight;
   }
 }

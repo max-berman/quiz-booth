@@ -119,8 +119,8 @@ export default function GamePage() {
           <CardContent className="p-8">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h3 className="text-naknick-h3 text-foreground">
-                  <span className="text-gaming-gradient">
+                <h3 className="text-h3 text-foreground">
+                  <span className="text-primary">
                     {game.companyName}
                   </span>{" "}
                   Trivia Challenge
@@ -145,40 +145,40 @@ export default function GamePage() {
           className="grid grid-cols-2 md:grid-cols-4 gap-4"
           style={{ animationDelay: "0.1s" }}
         >
-          <div className="stat-card bg-white border-2 border-red-200">
-            <div className="text-center p-4">
-              <Clock className="h-6 w-6 mx-auto mb-2 text-red-600" />
+          <div className="stat-card bg-card border border-border p-4">
+            <div className="text-center">
+              <Clock className="h-5 w-5 mx-auto mb-2 text-primary" />
               <div
-                className={`text-2xl font-bold text-red-600 ${timeLeft <= 10 ? "animate-pulse" : ""}`}
+                className={`text-xl font-bold text-primary ${timeLeft <= 10 ? "animate-pulse" : ""}`}
               >
                 {timeLeft}s
               </div>
-              <div className="text-sm text-red-600">Time Left</div>
+              <div className="text-sm text-muted-foreground">Time Left</div>
             </div>
           </div>
-          <div className="stat-card bg-white border-2 border-green-200">
-            <div className="text-center p-4">
-              <CheckCircle className="h-6 w-6 mx-auto mb-2 text-green-600" />
-              <div className="text-2xl font-bold text-green-600">
+          <div className="stat-card bg-card border border-border p-4">
+            <div className="text-center">
+              <CheckCircle className="h-5 w-5 mx-auto mb-2 text-success" />
+              <div className="text-xl font-bold text-success">
                 {correctAnswers}
               </div>
-              <div className="text-sm text-green-600">Correct</div>
+              <div className="text-sm text-muted-foreground">Correct</div>
             </div>
           </div>
-          <div className="stat-card bg-white border-2 border-blue-200">
-            <div className="text-center p-4">
-              <XCircle className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-              <div className="text-2xl font-bold text-blue-600">
+          <div className="stat-card bg-card border border-border p-4">
+            <div className="text-center">
+              <XCircle className="h-5 w-5 mx-auto mb-2 text-destructive" />
+              <div className="text-xl font-bold text-destructive">
                 {wrongAnswers}
               </div>
-              <div className="text-sm text-blue-600">Wrong</div>
+              <div className="text-sm text-muted-foreground">Wrong</div>
             </div>
           </div>
-          <div className="stat-card bg-white border-2 border-purple-200">
-            <div className="text-center p-4">
-              <Zap className="h-6 w-6 mx-auto mb-2 text-purple-600" />
-              <div className="text-2xl font-bold text-purple-600">{streak}</div>
-              <div className="text-sm text-purple-600">Streak</div>
+          <div className="stat-card bg-card border border-border p-4">
+            <div className="text-center">
+              <Zap className="h-5 w-5 mx-auto mb-2 text-secondary" />
+              <div className="text-xl font-bold text-secondary">{streak}</div>
+              <div className="text-sm text-muted-foreground">Streak</div>
             </div>
           </div>
         </div>
