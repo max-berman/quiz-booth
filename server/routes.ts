@@ -185,6 +185,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update a question (requires creator key)
+  app.put("/api/questions/:id", async (req, res) => {
+    try {
+      const creatorKey = req.headers['x-creator-key'] as string;
+      
+      if (!creatorKey) {
+        return res.status(401).json({ message: "Creator key required to update questions" });
+      }
+      
+      const questionId = req.params.id;
+      const updates = req.body;
+      
+      // Validate the updates
+      const allowedFields = ['questionText', 'options', 'correctAnswer', 'explanation'];
+      const filteredUpdates = Object.keys(updates)
+        .filter(key => allowedFields.includes(key))
+        .reduce((obj: any, key) => {
+          obj[key] = updates[key];
+          return obj;
+        }, {});
+      
+      const updatedQuestion = await storage.updateQuestion(questionId, filteredUpdates, creatorKey);
+      res.json(updatedQuestion);
+    } catch (error) {
+      console.error('Question update error:', error);
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Access denied. Only the game creator can edit questions." });
+      } else if (error instanceof Error && error.message.includes("not found")) {
+        res.status(404).json({ message: "Question not found" });
+      } else {
+        res.status(500).json({ message: "Failed to update question" });
+      }
+    }
+  });
+
   // Submit player score
   app.post("/api/games/:id/players", async (req, res) => {
     try {

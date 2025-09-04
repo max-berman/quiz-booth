@@ -11,6 +11,8 @@ export interface IStorage {
   // Question methods
   createQuestions(questions: InsertQuestion[]): Promise<Question[]>;
   getQuestionsByGameId(gameId: string): Promise<Question[]>;
+  updateQuestion(id: string, updates: Partial<Question>, creatorKey: string): Promise<Question>;
+  getQuestion(id: string): Promise<Question | undefined>;
   
   // Player methods
   createPlayer(player: InsertPlayer): Promise<Player>;
@@ -90,6 +92,37 @@ export class FirebaseStorage implements IStorage {
     
     // Sort by order in memory to avoid needing a composite index
     return questions.sort((a, b) => (a.order || 0) - (b.order || 0));
+  }
+
+  async getQuestion(id: string): Promise<Question | undefined> {
+    const questionDoc = await db.collection(collections.questions).doc(id).get();
+    if (!questionDoc.exists) return undefined;
+    return questionDoc.data() as Question;
+  }
+
+  async updateQuestion(id: string, updates: Partial<Question>, creatorKey: string): Promise<Question> {
+    // First verify that the user has access to edit this question
+    const question = await this.getQuestion(id);
+    if (!question) {
+      throw new Error("Question not found");
+    }
+    
+    // Verify game access using creator key
+    const hasAccess = await this.verifyGameAccess(question.gameId, creatorKey);
+    if (!hasAccess) {
+      throw new Error("Unauthorized access to edit this question");
+    }
+    
+    // Update the question
+    const updatedQuestion: Question = {
+      ...question,
+      ...updates,
+      id, // Ensure ID cannot be changed
+      gameId: question.gameId, // Ensure gameId cannot be changed
+    };
+    
+    await db.collection(collections.questions).doc(id).update(updates);
+    return updatedQuestion;
   }
 
   async createPlayer(insertPlayer: InsertPlayer): Promise<Player> {

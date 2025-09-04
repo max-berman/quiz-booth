@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, RotateCcw, Eye, Database } from "lucide-react";
+import { Trophy, RotateCcw, Eye, Database, Edit3 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -176,16 +176,26 @@ export default function Results() {
                 gameId={id} 
                 gameTitle={game?.companyName}
               />
-              {/* Creator-only link to view raw submissions data */}
-              {localStorage.getItem(`game-${id}-creator-key`) && (
-                <Button
-                  onClick={() => setLocation(`/submissions/${id}`)}
-                  variant="outline"
-                  className="px-6 py-3"
-                >
-                  <Database className="mr-2 h-4 w-4" />
-                  View Raw Data
-                </Button>
+              {/* Creator-only links */}
+              {localStorage.getItem(`creatorKey_${id}`) && (
+                <>
+                  <Button
+                    onClick={() => setLocation(`/edit-questions/${id}`)}
+                    variant="outline"
+                    className="px-6 py-3"
+                  >
+                    <Edit3 className="mr-2 h-4 w-4" />
+                    Edit Questions
+                  </Button>
+                  <Button
+                    onClick={() => setLocation(`/submissions/${id}`)}
+                    variant="outline"
+                    className="px-6 py-3"
+                  >
+                    <Database className="mr-2 h-4 w-4" />
+                    View Raw Data
+                  </Button>
+                </>
               )}
             </div>
           </CardContent>

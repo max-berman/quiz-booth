@@ -120,9 +120,7 @@ export default function GamePage() {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h3 className="text-h3 text-foreground">
-                  <span className="text-primary">
-                    {game.companyName}
-                  </span>{" "}
+                  <span className="text-primary">{game.companyName}</span>{" "}
                   Trivia Challenge
                 </h3>
                 <p className="text-muted-foreground text-lg">
@@ -130,9 +128,7 @@ export default function GamePage() {
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-4xl font-bold text-primary ">
-                  {score}
-                </div>
+                <div className="text-4xl font-bold text-primary ">{score}</div>
                 <div className="text-sm text-muted-foreground">Score</div>
               </div>
             </div>
@@ -239,10 +235,10 @@ export default function GamePage() {
 
               {showExplanation && currentQuestion?.explanation && (
                 <div className="mt-8 p-6 bg-gradient-secondary rounded-2xl animate-slide-up">
-                  <h3 className="font-bold text-white text-lg mb-3 flex items-center gap-2">
+                  <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
                     💡 Explanation
                   </h3>
-                  <p className="text-white/90 leading-relaxed">
+                  <p className=" leading-relaxed">
                     {currentQuestion.explanation}
                   </p>
                 </div>
