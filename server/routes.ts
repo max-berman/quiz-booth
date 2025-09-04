@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertGameSchema, insertQuestionSchema, insertPlayerSchema } from "@shared/schema";
+import { insertGameSchema, insertQuestionSchema, insertPlayerSchema } from "@shared/firebase-types";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -12,7 +12,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const game = await storage.createGame(gameData);
       res.json(game);
     } catch (error) {
-      res.status(400).json({ message: "Invalid game data", error: error.message });
+      res.status(400).json({ message: "Invalid game data", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -25,7 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(game);
     } catch (error) {
-      res.status(500).json({ message: "Failed to get game", error: error.message });
+      res.status(500).json({ message: "Failed to get game", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -140,7 +140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
       } catch (parseError) {
         console.error('JSON Parse error:', parseError);
-        throw new Error(`Failed to parse DeepSeek response as JSON: ${parseError.message}`);
+        throw new Error(`Failed to parse DeepSeek response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
       }
 
       // Validate and create questions with better error handling
@@ -159,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Validate each question
-      const validatedQuestions = questionsToInsert.map(q => insertQuestionSchema.parse(q));
+      const validatedQuestions = questionsToInsert.map((q: any) => insertQuestionSchema.parse(q));
       
       const questions = await storage.createQuestions(validatedQuestions);
       res.json(questions);
@@ -167,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Question generation error:', error);
       res.status(500).json({ 
         message: "Failed to generate questions", 
-        error: error.message 
+        error: error instanceof Error ? error.message : String(error) 
       });
     }
   });
@@ -178,7 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const questions = await storage.getQuestionsByGameId(req.params.id);
       res.json(questions);
     } catch (error) {
-      res.status(500).json({ message: "Failed to get questions", error: error.message });
+      res.status(500).json({ message: "Failed to get questions", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -192,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const player = await storage.createPlayer(playerData);
       res.json(player);
     } catch (error) {
-      res.status(400).json({ message: "Invalid player data", error: error.message });
+      res.status(400).json({ message: "Invalid player data", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -202,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const leaderboard = await storage.getLeaderboardByGameId(req.params.id);
       res.json(leaderboard);
     } catch (error) {
-      res.status(500).json({ message: "Failed to get leaderboard", error: error.message });
+      res.status(500).json({ message: "Failed to get leaderboard", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -212,7 +212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const leaderboard = await storage.getAllLeaderboard();
       res.json(leaderboard);
     } catch (error) {
-      res.status(500).json({ message: "Failed to get global leaderboard", error: error.message });
+      res.status(500).json({ message: "Failed to get global leaderboard", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -229,7 +229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(players);
     } catch (error) {
       console.error('Players fetch error:', error);
-      if (error.message.includes("Unauthorized")) {
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
         res.status(403).json({ message: "Access denied. Only the game creator can view submissions." });
       } else {
         res.status(500).json({ message: "Failed to get players" });

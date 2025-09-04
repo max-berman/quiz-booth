@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building, Settings, Gift, Wand2, Home, Trophy } from "lucide-react";
@@ -47,7 +53,7 @@ export default function Setup() {
     onSuccess: async (game) => {
       // Store the creator key in localStorage for later access to submissions
       localStorage.setItem(`game-${game.id}-creator-key`, game.creatorKey);
-      
+
       setIsGenerating(true);
       try {
         await apiRequest("POST", `/api/games/${game.id}/generate-questions`);
@@ -73,7 +79,7 @@ export default function Setup() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.companyName.trim()) {
       toast({
         title: "Error",
@@ -87,12 +93,18 @@ export default function Setup() {
       .filter(([, selected]) => selected)
       .map(([key]) => {
         switch (key) {
-          case "companyFacts": return "Company Facts";
-          case "industryKnowledge": return "Industry Knowledge";
-          case "funFacts": return "Fun Facts";
-          case "generalKnowledge": return "General Knowledge";
-          case "other": return customCategory.trim() || "Custom Questions";
-          default: return key;
+          case "companyFacts":
+            return "Company Facts";
+          case "industryKnowledge":
+            return "Industry Knowledge";
+          case "funFacts":
+            return "Fun Facts";
+          case "generalKnowledge":
+            return "General Knowledge";
+          case "other":
+            return customCategory.trim() || "Custom Questions";
+          default:
+            return key;
         }
       });
 
@@ -140,8 +152,12 @@ export default function Setup() {
         <Card className="shadow-xl">
           <CardContent className="p-8">
             <div className="text-center mb-8">
-              <h3 className="text-3xl font-bold text-dark mb-2">Setup Your Trivia Game</h3>
-              <p className="text-gray-600">Customize your questions and game settings</p>
+              <h3 className="text-3xl font-bold text-dark mb-2">
+                Setup Your Trivia Game
+              </h3>
+              <p className="text-gray-600">
+                Customize your questions and game settings
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -152,46 +168,105 @@ export default function Setup() {
                     <Building className="text-primary mr-2 h-5 w-5" />
                     Company Information
                   </h4>
-                  
+
                   <div>
                     <Label htmlFor="companyName">Company Name</Label>
                     <Input
                       id="companyName"
                       placeholder="Enter your company name"
                       value={formData.companyName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          companyName: e.target.value,
+                        }))
+                      }
                       required
                     />
                   </div>
 
                   <div>
                     <Label htmlFor="industry">Industry</Label>
-                    <Select value={formData.industry} onValueChange={(value) => setFormData(prev => ({ ...prev, industry: value }))}>
+                    <Select
+                      value={formData.industry}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, industry: value }))
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Technology">Technology</SelectItem>
-                        <SelectItem value="Gaming">Gaming</SelectItem>
-                        <SelectItem value="Entertainment">Entertainment</SelectItem>
+                        <SelectItem value="Advertising and Marketing">
+                          Advertising and Marketing
+                        </SelectItem>
                         <SelectItem value="Agriculture">Agriculture</SelectItem>
+                        <SelectItem value="Art and Design">
+                          Art and Design
+                        </SelectItem>
+                        <SelectItem value="Automotive">Automotive</SelectItem>
+                        <SelectItem value="Beauty and Cosmetics">
+                          Beauty and Cosmetics
+                        </SelectItem>
+                        <SelectItem value="Construction">
+                          Construction
+                        </SelectItem>
                         <SelectItem value="Education">Education</SelectItem>
-                        <SelectItem value="Manufacturing">Manufacturing</SelectItem>
-                        <SelectItem value="Retail">Retail</SelectItem>
-                        <SelectItem value="Food and Beverage">Food and Beverage</SelectItem>
+                        <SelectItem value="Energy">Energy</SelectItem>
+                        <SelectItem value="Entertainment">
+                          Entertainment
+                        </SelectItem>
+                        <SelectItem value="Environmental Services">
+                          Environmental Services
+                        </SelectItem>
+                        <SelectItem value="Fashion">Fashion</SelectItem>
+                        <SelectItem value="Finance and Banking">
+                          Finance and Banking
+                        </SelectItem>
+                        <SelectItem value="Food and Beverage">
+                          Food and Beverage
+                        </SelectItem>
+                        <SelectItem value="Gaming">Gaming</SelectItem>
+                        <SelectItem value="Healthcare">Healthcare</SelectItem>
+                        <SelectItem value="Logistics and Transport">
+                          Logistics and Transport
+                        </SelectItem>
+                        <SelectItem value="Manufacturing">
+                          Manufacturing
+                        </SelectItem>
+                        <SelectItem value="Media and Communications">
+                          Media and Communications
+                        </SelectItem>
                         <SelectItem value="Real Estate">Real Estate</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
+                        <SelectItem value="Retail">Retail</SelectItem>
+                        <SelectItem value="Sports and Fitness">
+                          Sports and Fitness
+                        </SelectItem>
+                        <SelectItem value="Technology">Technology</SelectItem>
+                        <SelectItem value="Tourism and Hospitality">
+                          Tourism and Hospitality
+                        </SelectItem>
+                        <SelectItem value="Wellness and Lifestyle">
+                          Wellness and Lifestyle
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <Label htmlFor="productDescription">Product/Service Focus</Label>
+                    <Label htmlFor="productDescription">
+                      Product/Service Focus
+                    </Label>
                     <Textarea
                       id="productDescription"
                       placeholder="Describe your main products or services..."
                       value={formData.productDescription}
-                      onChange={(e) => setFormData(prev => ({ ...prev, productDescription: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          productDescription: e.target.value,
+                        }))
+                      }
                       rows={3}
                     />
                   </div>
@@ -206,14 +281,26 @@ export default function Setup() {
 
                   <div>
                     <Label htmlFor="questionCount">Number of Questions</Label>
-                    <Select value={formData.questionCount.toString()} onValueChange={(value) => setFormData(prev => ({ ...prev, questionCount: parseInt(value) }))}>
+                    <Select
+                      value={formData.questionCount.toString()}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          questionCount: parseInt(value),
+                        }))
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="5">5 Questions (Quick)</SelectItem>
-                        <SelectItem value="10">10 Questions (Standard)</SelectItem>
-                        <SelectItem value="15">15 Questions (Extended)</SelectItem>
+                        <SelectItem value="10">
+                          10 Questions (Standard)
+                        </SelectItem>
+                        <SelectItem value="15">
+                          15 Questions (Extended)
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -226,7 +313,11 @@ export default function Setup() {
                           key={level}
                           type="button"
                           variant={difficulty === level ? "default" : "outline"}
-                          className={difficulty === level ? "bg-accent hover:bg-accent/90" : ""}
+                          className={
+                            difficulty === level
+                              ? "bg-accent hover:bg-accent/90"
+                              : ""
+                          }
                           onClick={() => setDifficulty(level)}
                         >
                           {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -243,23 +334,32 @@ export default function Setup() {
                           <Checkbox
                             id={key}
                             checked={checked}
-                            onCheckedChange={(checked) => 
-                              setCategories(prev => ({ ...prev, [key]: checked as boolean }))
+                            onCheckedChange={(checked) =>
+                              setCategories((prev) => ({
+                                ...prev,
+                                [key]: checked as boolean,
+                              }))
                             }
                           />
                           <Label htmlFor={key} className="text-sm">
-                            {key === "companyFacts" ? "Company Facts" :
-                             key === "industryKnowledge" ? "Industry Knowledge" :
-                             key === "funFacts" ? "Fun Facts" :
-                             key === "other" ? "Custom Questions" :
-                             "General Knowledge"}
+                            {key === "companyFacts"
+                              ? "Company Facts"
+                              : key === "industryKnowledge"
+                                ? "Industry Knowledge"
+                                : key === "funFacts"
+                                  ? "Fun Facts"
+                                  : key === "other"
+                                    ? "Custom Questions"
+                                    : "General Knowledge"}
                           </Label>
                         </div>
                       ))}
                     </div>
                     {categories.other && (
                       <div className="mt-3">
-                        <Label htmlFor="customCategory">Describe your custom questions</Label>
+                        <Label htmlFor="customCategory">
+                          Describe your custom questions
+                        </Label>
                         <Textarea
                           id="customCategory"
                           placeholder="e.g., provide some historical facts about the advergames"
@@ -286,7 +386,12 @@ export default function Setup() {
                       id="firstPrize"
                       placeholder="e.g., $100 Gift Card"
                       value={formData.firstPrize}
-                      onChange={(e) => setFormData(prev => ({ ...prev, firstPrize: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          firstPrize: e.target.value,
+                        }))
+                      }
                     />
                   </div>
                   <div>
@@ -295,7 +400,12 @@ export default function Setup() {
                       id="secondPrize"
                       placeholder="e.g., $50 Gift Card"
                       value={formData.secondPrize}
-                      onChange={(e) => setFormData(prev => ({ ...prev, secondPrize: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          secondPrize: e.target.value,
+                        }))
+                      }
                     />
                   </div>
                   <div>
@@ -304,15 +414,20 @@ export default function Setup() {
                       id="thirdPrize"
                       placeholder="e.g., Company Swag"
                       value={formData.thirdPrize}
-                      onChange={(e) => setFormData(prev => ({ ...prev, thirdPrize: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          thirdPrize: e.target.value,
+                        }))
+                      }
                     />
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-center pt-4">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="px-8 py-4 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                   disabled={createGameMutation.isPending}
                 >
