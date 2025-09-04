@@ -84,10 +84,12 @@ export class FirebaseStorage implements IStorage {
     const questionsSnapshot = await db
       .collection(collections.questions)
       .where('gameId', '==', gameId)
-      .orderBy('order', 'asc')
       .get();
     
-    return questionsSnapshot.docs.map(doc => doc.data() as Question);
+    const questions = questionsSnapshot.docs.map(doc => doc.data() as Question);
+    
+    // Sort by order in memory to avoid needing a composite index
+    return questions.sort((a, b) => (a.order || 0) - (b.order || 0));
   }
 
   async createPlayer(insertPlayer: InsertPlayer): Promise<Player> {
@@ -116,21 +118,33 @@ export class FirebaseStorage implements IStorage {
     const playersSnapshot = await db
       .collection(collections.players)
       .where('gameId', '==', gameId)
-      .orderBy('score', 'desc')
-      .orderBy('timeSpent', 'asc')
       .get();
     
-    return playersSnapshot.docs.map(doc => doc.data() as Player);
+    const players = playersSnapshot.docs.map(doc => doc.data() as Player);
+    
+    // Sort by score (desc) and then timeSpent (asc) in memory
+    return players.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score; // Higher score first
+      }
+      return a.timeSpent - b.timeSpent; // Lower time first (faster completion)
+    });
   }
 
   async getAllLeaderboard(): Promise<Player[]> {
     const playersSnapshot = await db
       .collection(collections.players)
-      .orderBy('score', 'desc')
-      .orderBy('timeSpent', 'asc')
       .get();
     
-    return playersSnapshot.docs.map(doc => doc.data() as Player);
+    const players = playersSnapshot.docs.map(doc => doc.data() as Player);
+    
+    // Sort by score (desc) and then timeSpent (asc) in memory
+    return players.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score; // Higher score first
+      }
+      return a.timeSpent - b.timeSpent; // Lower time first (faster completion)
+    });
   }
 
   async getAllPlayersForGame(gameId: string, creatorKey?: string): Promise<Player[]> {
@@ -142,10 +156,12 @@ export class FirebaseStorage implements IStorage {
     const playersSnapshot = await db
       .collection(collections.players)
       .where('gameId', '==', gameId)
-      .orderBy('completedAt', 'desc')
       .get();
     
-    return playersSnapshot.docs.map(doc => doc.data() as Player);
+    const players = playersSnapshot.docs.map(doc => doc.data() as Player);
+    
+    // Sort by completedAt (desc) in memory
+    return players.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
   }
 }
 
