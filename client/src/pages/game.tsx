@@ -96,23 +96,6 @@ export default function GamePage() {
     }
   };
 
-  const getAnswerButtonClass = (answerIndex: number) => {
-    const baseClasses = "w-full p-4 text-left border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2";
-    
-    if (!isAnswered) {
-      return `${baseClasses} border-gray-200 hover:border-primary hover:bg-primary/5`;
-    }
-    
-    if (answerIndex === currentQuestion?.correctAnswer) {
-      return `${baseClasses} border-green-500 bg-green-50 text-green-800`;
-    }
-    
-    if (answerIndex === selectedAnswer && answerIndex !== currentQuestion?.correctAnswer) {
-      return `${baseClasses} border-red-500 bg-red-50 text-red-800`;
-    }
-    
-    return `${baseClasses} border-gray-200 opacity-50`;
-  };
 
   if (isLoading || !questions || !game) {
     return (
@@ -151,32 +134,32 @@ export default function GamePage() {
 
         {/* Timer and Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="stat-card bg-gradient-naknick">
-            <div className="text-center text-white p-4">
-              <Clock className="h-6 w-6 mx-auto mb-2" />
-              <div className={`text-2xl font-bold ${timeLeft <= 10 ? 'animate-pulse' : ''}`}>{timeLeft}s</div>
-              <div className="text-sm opacity-90">Time Left</div>
+          <div className="stat-card bg-white border-2 border-red-200">
+            <div className="text-center p-4">
+              <Clock className="h-6 w-6 mx-auto mb-2 text-red-600" />
+              <div className={`text-2xl font-bold text-red-600 ${timeLeft <= 10 ? 'animate-pulse' : ''}`}>{timeLeft}s</div>
+              <div className="text-sm text-red-600">Time Left</div>
             </div>
           </div>
-          <div className="stat-card bg-gradient-success">
-            <div className="text-center text-white p-4">
-              <CheckCircle className="h-6 w-6 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{correctAnswers}</div>
-              <div className="text-sm opacity-90">Correct</div>
+          <div className="stat-card bg-white border-2 border-green-200">
+            <div className="text-center p-4">
+              <CheckCircle className="h-6 w-6 mx-auto mb-2 text-green-600" />
+              <div className="text-2xl font-bold text-green-600">{correctAnswers}</div>
+              <div className="text-sm text-green-600">Correct</div>
             </div>
           </div>
-          <div className="stat-card bg-gradient-secondary">
-            <div className="text-center text-white p-4">
-              <XCircle className="h-6 w-6 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{wrongAnswers}</div>
-              <div className="text-sm opacity-90">Wrong</div>
+          <div className="stat-card bg-white border-2 border-blue-200">
+            <div className="text-center p-4">
+              <XCircle className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+              <div className="text-2xl font-bold text-blue-600">{wrongAnswers}</div>
+              <div className="text-sm text-blue-600">Wrong</div>
             </div>
           </div>
-          <div className="stat-card bg-gradient-gaming">
-            <div className="text-center text-white p-4">
-              <Zap className="h-6 w-6 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{streak}</div>
-              <div className="text-sm opacity-90">Streak</div>
+          <div className="stat-card bg-white border-2 border-purple-200">
+            <div className="text-center p-4">
+              <Zap className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+              <div className="text-2xl font-bold text-purple-600">{streak}</div>
+              <div className="text-sm text-purple-600">Streak</div>
             </div>
           </div>
         </div>

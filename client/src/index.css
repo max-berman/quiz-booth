@@ -284,9 +284,7 @@
   }
 
   .answer-btn:hover {
-    border-color: hsl(0 84% 60%);
-    background: hsl(0 84% 60% / 0.05);
-    transform: translateX(4px);
+    /* Hover effects removed as requested */
   }
 
   .answer-btn.correct {
