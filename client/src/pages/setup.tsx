@@ -432,7 +432,7 @@ export default function Setup() {
                   disabled={createGameMutation.isPending}
                 >
                   <Wand2 className="mr-2 h-4 w-4" />
-                  Generate Questions with AI
+                  Generate Questions
                 </Button>
               </div>
             </form>
