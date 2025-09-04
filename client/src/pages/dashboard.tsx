@@ -41,23 +41,50 @@ export default function Dashboard() {
     setCreatorKeys(keys);
   }, []);
 
-  // Fetch games using new authentication system
+  // Fetch games using both authentication methods
   const { data: allGames = [], isLoading } = useQuery<Game[]>({
-    queryKey: ['/api/my-games', user?.uid, creatorKeys],
+    queryKey: ['/api/games', user?.uid, creatorKeys],
     queryFn: async () => {
+      const allGamesData: Game[] = [];
+      
       try {
-        const headers = await getAuthHeaders();
-        const response = await fetch('/api/my-games', { headers });
-        
-        if (response.ok) {
-          const games = await response.json();
-          return games.sort((a: Game, b: Game) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        } else {
-          console.error('Failed to fetch games:', response.statusText);
-          return [];
+        // First, try Firebase authentication
+        if (isAuthenticated) {
+          const headers = await getAuthHeaders();
+          const response = await fetch('/api/my-games', { headers });
+          
+          if (response.ok) {
+            const games = await response.json();
+            allGamesData.push(...games);
+          }
         }
+        
+        // Also fetch games using creator keys (for backward compatibility)
+        for (const creatorKey of creatorKeys) {
+          try {
+            const response = await fetch('/api/creator/games', {
+              headers: {
+                'X-Creator-Key': creatorKey,
+              },
+            });
+            
+            if (response.ok) {
+              const games = await response.json();
+              allGamesData.push(...games);
+            }
+          } catch (error) {
+            console.error('Failed to fetch games for creator key:', error);
+          }
+        }
+        
+        // Remove duplicates and sort by creation date
+        const uniqueGames = allGamesData.filter((game, index, self) => 
+          index === self.findIndex(g => g.id === game.id)
+        );
+        
+        return uniqueGames.sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       } catch (error) {
         console.error('Error fetching games:', error);
         return [];
