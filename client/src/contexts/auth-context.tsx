@@ -4,6 +4,8 @@ import {
   sendSignInLinkToEmail,
   isSignInWithEmailLink,
   signInWithEmailLink,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged
 } from 'firebase/auth';
@@ -13,6 +15,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   sendSignInLink: (email: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   completeSignIn: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
@@ -38,32 +41,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const sendSignInLink = async (email: string): Promise<void> => {
+    // For now, let's use a simple approach that works with any domain
     const actionCodeSettings = {
       url: `${window.location.origin}/auth/complete`,
       handleCodeInApp: true,
     };
 
-    console.log('Sending sign-in link to:', email);
-    console.log('Action code settings:', actionCodeSettings);
-    console.log('Auth object:', auth);
-    console.log('Firebase config check:', {
-      apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? 'Set' : 'Missing',
-      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? 'Set' : 'Missing',
-      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ? 'Set' : 'Missing',
-    });
-
     try {
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-      console.log('Sign-in link sent successfully');
-      // Store email in localStorage for completing sign-in
       localStorage.setItem('emailForSignIn', email);
     } catch (error: any) {
-      console.error('Detailed error sending sign-in link:', {
-        code: error?.code,
-        message: error?.message,
-        customData: error?.customData,
-        stack: error?.stack
-      });
+      console.error('Email link error:', error);
+      throw new Error('Email authentication is not configured. Please use Google sign-in instead.');
+    }
+  };
+
+  const signInWithGoogle = async (): Promise<void> => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch (error: any) {
+      console.error('Google sign-in error:', error);
       throw error;
     }
   };
@@ -96,6 +94,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user,
     loading,
     sendSignInLink,
+    signInWithGoogle,
     completeSignIn,
     signOut,
     isAuthenticated: !!user,

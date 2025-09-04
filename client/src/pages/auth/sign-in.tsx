@@ -4,17 +4,41 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Mail, ArrowLeft } from 'lucide-react';
+import { FaGoogle } from 'react-icons/fa';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useLocation } from 'wouter';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const { sendSignInLink } = useAuth();
+  const { sendSignInLink, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      toast({
+        title: 'Welcome!',
+        description: 'You have been signed in successfully.',
+      });
+      setLocation('/dashboard');
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to sign in with Google. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,11 +61,11 @@ export default function SignIn() {
         title: 'Sign-in link sent!',
         description: 'Check your email for the sign-in link.',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign-in error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to send sign-in link. Please try again.',
+        description: error.message || 'Failed to send sign-in link. Please try Google sign-in instead.',
         variant: 'destructive',
       });
     } finally {
@@ -104,10 +128,41 @@ export default function SignIn() {
           <CardHeader>
             <CardTitle className="text-center">Sign In</CardTitle>
             <p className="text-center text-gray-600 text-sm">
-              Enter your email to get a sign-in link
+              Choose your preferred sign-in method
             </p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
+            {/* Google Sign-in (Primary) */}
+            <Button
+              onClick={handleGoogleSignIn}
+              disabled={isGoogleLoading}
+              className="w-full"
+              size="lg"
+              data-testid="button-google-signin"
+            >
+              {isGoogleLoading ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  <FaGoogle className="mr-2 h-4 w-4" />
+                  Continue with Google
+                </>
+              )}
+            </Button>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-gray-50 px-2 text-gray-500">Or</span>
+              </div>
+            </div>
+
+            {/* Email Sign-in (Alternative) */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="email">Email Address</Label>
@@ -125,12 +180,13 @@ export default function SignIn() {
               <Button
                 type="submit"
                 disabled={isLoading}
+                variant="outline"
                 className="w-full"
                 data-testid="button-send-link"
               >
                 {isLoading ? (
                   <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                    <div className="animate-spin w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full mr-2" />
                     Sending...
                   </>
                 ) : (
