@@ -11,6 +11,7 @@ import Results from "@/pages/results";
 import Leaderboard from "@/pages/leaderboard";
 import Submissions from "@/pages/submissions";
 import EditQuestions from "@/pages/edit-questions";
+import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/leaderboard/:id?" component={Leaderboard} />
       <Route path="/submissions/:id" component={Submissions} />
       <Route path="/edit-questions/:id" component={EditQuestions} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route component={NotFound} />
     </Switch>
   );
