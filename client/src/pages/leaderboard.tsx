@@ -124,9 +124,6 @@ export default function Leaderboard() {
                       </div>
                       <div>
                         <div className="font-semibold text-dark">{player.name}</div>
-                        {player.company && (
-                          <div className="text-sm text-gray-500">{player.company}</div>
-                        )}
                         <div className="text-xs text-gray-400">
                           {formatTime(player.timeSpent)} • {new Date(player.completedAt).toLocaleDateString()}
                         </div>
