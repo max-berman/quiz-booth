@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/auth-context";
@@ -172,11 +172,11 @@ export default function Setup() {
     return selectedCategories && formData.questionCount;
   };
   
-  const steps = [
+  const steps = useMemo(() => [
     { id: 1, title: "Company Info", icon: Building, complete: checkCompanyComplete() },
     { id: 2, title: "Game Settings", icon: Settings, complete: checkSettingsComplete() },
     { id: 3, title: "Prizes (Optional)", icon: Gift, complete: true },
-  ];
+  ], [formData.companyName, formData.industry, formData.questionCount, categories]);
 
   if (isGenerating) {
     return <LoadingSpinner message="Generating Your Trivia Questions" />;
