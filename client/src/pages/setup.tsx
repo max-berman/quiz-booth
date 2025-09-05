@@ -186,29 +186,31 @@ export default function Setup() {
     return selectedCategories && formData.questionCount;
   };
 
-  const steps = useMemo(
-    () => [
+  const steps = useMemo(() => {
+    const companyComplete = formData.companyName.trim() && formData.industry;
+    const settingsComplete = Object.values(categories).some(Boolean) && formData.questionCount;
+    
+    return [
       {
         id: 1,
         title: "Company Info",
         icon: Building,
-        complete: checkCompanyComplete(),
+        complete: companyComplete,
       },
       {
         id: 2,
         title: "Game Settings",
         icon: Settings,
-        complete: checkSettingsComplete(),
+        complete: settingsComplete,
       },
       { id: 3, title: "Prizes (Optional)", icon: Gift, complete: true },
-    ],
-    [
-      formData.companyName,
-      formData.industry,
-      formData.questionCount,
-      categories,
-    ],
-  );
+    ];
+  }, [
+    formData.companyName,
+    formData.industry,
+    formData.questionCount,
+    categories,
+  ]);
 
   if (isGenerating) {
     return <LoadingSpinner message="Generating Your Trivia Questions" />;
