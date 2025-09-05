@@ -29,6 +29,7 @@ import {
   Gift,
   Save,
   X,
+  Play,
 } from "lucide-react";
 import { QRCodeModal } from "@/components/qr-code-modal";
 import { ShareEmbedModal } from "@/components/share-embed-modal";
@@ -262,13 +263,13 @@ export default function Dashboard() {
         {allGames.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {allGames.map((game) => (
-              <Card key={game.id} className="hover:shadow-lg transition-shadow">
+              <Card key={game.id} className="hover:shadow-xl hover:scale-[1.02] transition-all duration-200 border-2">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg line-clamp-2">
+                    <CardTitle className="text-xl font-bold line-clamp-2 text-foreground">
                       {game.companyName}
                     </CardTitle>
-                    <Badge variant="secondary" className="ml-2">
+                    <Badge variant="secondary" className="ml-2 font-semibold">
                       {game.industry}
                     </Badge>
                   </div>
@@ -301,10 +302,22 @@ export default function Dashboard() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="space-y-2 pt-2">
+                  <div className="space-y-3 pt-4">
+                    {/* Primary Action - Play Game */}
+                    <Button
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                      size="sm"
+                      onClick={() => setLocation(`/game/${game.id}`)}
+                      data-testid={`button-play-game-${game.id}`}
+                    >
+                      <Play className="mr-2 h-4 w-4" />
+                      Play Game
+                    </Button>
+
+                    {/* Management Actions */}
                     <div className="grid grid-cols-2 gap-2">
                       <Button
-                        variant="default"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
                         size="sm"
                         onClick={() => setLocation(`/edit-questions/${game.id}`)}
                         data-testid={`button-edit-questions-${game.id}`}
@@ -313,7 +326,7 @@ export default function Dashboard() {
                         Questions
                       </Button>
                       <Button
-                        variant="outline"
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
                         size="sm"
                         onClick={() => {
                           // Initialize prizes for this game
@@ -339,9 +352,10 @@ export default function Dashboard() {
                       </Button>
                     </div>
 
+                    {/* Analytics Actions */}
                     <div className="grid grid-cols-2 gap-2">
                       <Button
-                        variant="outline"
+                        className="bg-green-600 hover:bg-green-700 text-white"
                         size="sm"
                         onClick={() => setLocation(`/leaderboard/${game.id}`)}
                         data-testid={`button-leaderboard-${game.id}`}
@@ -350,9 +364,13 @@ export default function Dashboard() {
                         Leaderboard
                       </Button>
                       <Button
-                        variant="outline"
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
                         size="sm"
-                        onClick={() => setLocation(`/submissions/${game.id}`)}
+                        onClick={() => {
+                          // Store creator access for raw data
+                          localStorage.setItem(`game-${game.id}-creator-key`, game.creatorKey || '');
+                          setLocation(`/submissions/${game.id}`);
+                        }}
                         data-testid={`button-submissions-${game.id}`}
                       >
                         <Database className="mr-1 h-4 w-4" />
@@ -360,6 +378,7 @@ export default function Dashboard() {
                       </Button>
                     </div>
 
+                    {/* Sharing Actions */}
                     <div className="grid grid-cols-2 gap-2">
                       <QRCodeModal
                         gameId={game.id}

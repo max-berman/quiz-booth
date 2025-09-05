@@ -67,9 +67,9 @@ export function ShareEmbedModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="px-4 py-2">
-          <Share className="mr-2 h-4 w-4" />
-          {isBuilder ? "Share Trivia Builder" : "Share & Embed"}
+        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white" size="sm">
+          <Share className="mr-1 h-4 w-4" />
+          {isBuilder ? "Share Builder" : "Share"}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
