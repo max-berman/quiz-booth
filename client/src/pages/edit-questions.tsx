@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Save, Edit3, AlertCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/contexts/auth-context";
+import { getAuthHeaders } from "@/lib/auth-utils";
 import type { Question, Game } from "@shared/firebase-types";
 
 export default function EditQuestions() {
@@ -16,14 +18,12 @@ export default function EditQuestions() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { id: gameId } = useParams();
+  const { user, loading } = useAuth();
   
   // Get gameId from URL
   const currentGameId = gameId;
   const [editingQuestion, setEditingQuestion] = useState<string | null>(null);
   const [questionEdits, setQuestionEdits] = useState<Record<string, Partial<Question>>>({});
-
-  // Get creator key from localStorage
-  const creatorKey = localStorage.getItem(`game-${currentGameId}-creator-key`);
 
   const { data: game } = useQuery<Game>({
     queryKey: ['/api/games', currentGameId],
@@ -37,15 +37,16 @@ export default function EditQuestions() {
 
   const updateQuestionMutation = useMutation({
     mutationFn: async ({ questionId, updates }: { questionId: string; updates: Partial<Question> }) => {
-      if (!creatorKey) {
-        throw new Error("Creator key required to edit questions");
+      if (!user) {
+        throw new Error("Authentication required to edit questions");
       }
       
-      const response = await fetch(`/api/questions/${questionId}`, {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/user/questions/${questionId}`, {
         method: 'PUT',
         headers: {
+          ...headers,
           'Content-Type': 'application/json',
-          'X-Creator-Key': creatorKey,
         },
         body: JSON.stringify(updates),
       });
@@ -128,20 +129,36 @@ export default function EditQuestions() {
     });
   };
 
-  if (!creatorKey) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <div className="min-h-screen bg-background py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card>
             <CardContent className="p-8 text-center">
               <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-4">Access Required</h2>
+              <h2 className="text-2xl font-bold mb-4">Sign In Required</h2>
               <p className="text-muted-foreground mb-6">
-                You need the creator key to edit questions. This key was provided when you created the game.
+                You must be signed in to edit questions. Only the game creator can make changes.
               </p>
-              <Button onClick={() => setLocation('/')}>
-                Return to Home
-              </Button>
+              <div className="space-x-4">
+                <Button onClick={() => setLocation('/auth/sign-in')}>
+                  Sign In
+                </Button>
+                <Button variant="outline" onClick={() => setLocation('/')}>
+                  Return to Home
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -168,11 +185,11 @@ export default function EditQuestions() {
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={() => setLocation('/')}
+            onClick={() => setLocation('/dashboard')}
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
+            Back to Dashboard
           </Button>
           <div>
             <h1 className="text-h1 text-foreground">Edit Questions</h1>
