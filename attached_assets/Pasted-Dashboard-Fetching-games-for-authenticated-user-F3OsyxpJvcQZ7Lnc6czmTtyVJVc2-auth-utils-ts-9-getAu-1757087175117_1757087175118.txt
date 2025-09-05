@@ -1,0 +1,32 @@
+Dashboard: Fetching games for authenticated user: F3OsyxpJvcQZ7Lnc6czmTtyVJVc2
+auth-utils.ts:9 getAuthToken: Current user: F3OsyxpJvcQZ7Lnc6czmTtyVJVc2
+auth-utils.ts:16 getAuthToken: Token generated, length: 1164
+auth-utils.ts:31 getAuthHeaders: Auth token available? true
+auth-utils.ts:38 getAuthHeaders: Returning headers with Authorization
+dashboard.tsx:40 Dashboard: Using headers: {Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImUzZWU3ZTAyOGU…_IFsXhHftggLGvZ-55tV7vI58TwmILUD0fVWPE7w3zot3fAkA', Content-Type: 'application/json'}
+dashboard.tsx:42  GET https://0f21cac0-1805-47d1-8946-369921408d23-00-3qig001r4w9ro.picard.replit.dev/api/my-games 401 (Unauthorized)
+queryFn @ dashboard.tsx:42
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=daebb538:840
+run @ @tanstack_react-query.js?v=daebb538:494
+start @ @tanstack_react-query.js?v=daebb538:536
+fetch @ @tanstack_react-query.js?v=daebb538:926
+executeFetch_fn @ @tanstack_react-query.js?v=daebb538:2211
+onSubscribe @ @tanstack_react-query.js?v=daebb538:1898
+subscribe @ @tanstack_react-query.js?v=daebb538:24
+(anonymous) @ @tanstack_react-query.js?v=daebb538:3022
+subscribeToStore @ chunk-WERSD76P.js?v=daebb538:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=daebb538:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=daebb538:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=daebb538:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=daebb538:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=daebb538:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=daebb538:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=daebb538:19447
+commitRootImpl @ chunk-WERSD76P.js?v=daebb538:19416
+commitRoot @ chunk-WERSD76P.js?v=daebb538:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=daebb538:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=daebb538:9119
+(anonymous) @ chunk-WERSD76P.js?v=daebb538:18627Understand this error
+dashboard.tsx:43 Dashboard: Response status: 401
+dashboard.tsx:53 Dashboard: Failed to fetch games: 401 {"message":"Authentication required"}
