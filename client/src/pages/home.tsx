@@ -83,7 +83,9 @@ export default function Home() {
         </div>
       </section>
 
-      <ProfessionalFooter />
+      <div className="mt-16">
+        <ProfessionalFooter />
+      </div>
     </div>
   );
 }

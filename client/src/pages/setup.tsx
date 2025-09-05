@@ -796,7 +796,9 @@ export default function Setup() {
           </CardContent>
         </Card>
       </div>
-      <ProfessionalFooter />
+      <div className="mt-16">
+        <ProfessionalFooter />
+      </div>
     </div>
   );
 }
