@@ -67,7 +67,7 @@ export function ShareEmbedModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" size="sm">
+        <Button variant="secondary" size="sm" className="w-full">
           <Share className="mr-1 h-4 w-4" />
           {isBuilder ? "Share Builder" : "Share"}
         </Button>

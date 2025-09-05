@@ -52,7 +52,7 @@ export function QRCodeModal({ gameId, gameTitle }: QRCodeModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" size="sm" data-testid={`button-qr-code-${gameId}`}>
+        <Button variant="secondary" size="sm" className="w-full" data-testid={`button-qr-code-${gameId}`}>
           <QrCode className="mr-1 h-4 w-4" />
           QR Code
         </Button>

@@ -306,7 +306,8 @@ export default function Dashboard() {
                   <div className="space-y-3 pt-4">
                     {/* Primary Action - Play Game */}
                     <Button
-                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                      variant="default"
+                      className="w-full"
                       size="sm"
                       onClick={() => setLocation(`/game/${game.id}`)}
                       data-testid={`button-play-game-${game.id}`}
