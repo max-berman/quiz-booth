@@ -351,6 +351,8 @@ export default function Setup() {
 
                   {formData.industry === "Other" && (
                     <div>
+                      <div /></div>
+                      <div>
                       <Label htmlFor="customIndustry" className="text-base font-medium">
                         Custom Industry *
                       </Label>
@@ -363,6 +365,7 @@ export default function Setup() {
                         required
                       />
                     </div>
+                      </div>
                   )}
 
                   <div className="md:col-span-2">
