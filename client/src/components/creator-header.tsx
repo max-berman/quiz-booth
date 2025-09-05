@@ -13,25 +13,11 @@ import {
 
 export function CreatorHeader() {
   const [location, setLocation] = useLocation();
-  const [hasCreatorKeys, setHasCreatorKeys] = useState(false);
   const { user, isAuthenticated, signOut } = useAuth();
   const isHomePage = location === '/';
 
-  // Check if user has any creator keys
-  useEffect(() => {
-    let foundKeys = false;
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith("game-") && key?.endsWith("-creator-key")) {
-        foundKeys = true;
-        break;
-      }
-    }
-    setHasCreatorKeys(foundKeys);
-  }, [location]);
-
-  // Show header if: authenticated, has creator keys, or not on home page (for navigation)
-  const shouldShowHeader = isAuthenticated || hasCreatorKeys || !isHomePage;
+  // Show header if: authenticated or not on home page (for navigation)
+  const shouldShowHeader = isAuthenticated || !isHomePage;
   
   if (!shouldShowHeader) {
     return null;
@@ -64,8 +50,8 @@ export function CreatorHeader() {
             </Button>
           )}
           
-          {/* Show creator tools if user has access */}
-          {(isAuthenticated || hasCreatorKeys) && (
+          {/* Show creator tools if user is authenticated */}
+          {isAuthenticated && (
             <>
               <Button
                 variant="ghost"

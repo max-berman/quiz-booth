@@ -23,77 +23,71 @@ import type { Game } from "@shared/firebase-types";
 
 export default function Dashboard() {
   const [location, setLocation] = useLocation();
-  const [creatorKeys, setCreatorKeys] = useState<string[]>([]);
   const { user, isAuthenticated } = useAuth();
 
-  // Get all creator keys from localStorage
-  useEffect(() => {
-    const keys: string[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('game-') && key?.endsWith('-creator-key')) {
-        const creatorKey = localStorage.getItem(key);
-        if (creatorKey) {
-          keys.push(creatorKey);
-        }
-      }
-    }
-    setCreatorKeys(keys);
-  }, []);
-
-  // Fetch games using both authentication methods
+  // Fetch games using Firebase authentication only
   const { data: allGames = [], isLoading } = useQuery<Game[]>({
-    queryKey: ['/api/games', user?.uid, creatorKeys],
+    queryKey: ['/api/my-games', user?.uid],
     queryFn: async () => {
-      const allGamesData: Game[] = [];
+      if (!isAuthenticated) {
+        return [];
+      }
       
       try {
-        // First, try Firebase authentication
-        if (isAuthenticated) {
-          const headers = await getAuthHeaders();
-          const response = await fetch('/api/my-games', { headers });
-          
-          if (response.ok) {
-            const games = await response.json();
-            allGamesData.push(...games);
-          }
+        const headers = await getAuthHeaders();
+        const response = await fetch('/api/my-games', { headers });
+        
+        if (response.ok) {
+          const games = await response.json();
+          return games.sort((a: Game, b: Game) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        } else {
+          console.error('Failed to fetch games:', response.statusText);
+          return [];
         }
-        
-        // Also fetch games using creator keys (for backward compatibility)
-        for (const creatorKey of creatorKeys) {
-          try {
-            const response = await fetch('/api/creator/games', {
-              headers: {
-                'X-Creator-Key': creatorKey,
-              },
-            });
-            
-            if (response.ok) {
-              const games = await response.json();
-              allGamesData.push(...games);
-            }
-          } catch (error) {
-            console.error('Failed to fetch games for creator key:', error);
-          }
-        }
-        
-        // Remove duplicates and sort by creation date
-        const uniqueGames = allGamesData.filter((game, index, self) => 
-          index === self.findIndex(g => g.id === game.id)
-        );
-        
-        return uniqueGames.sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
       } catch (error) {
         console.error('Error fetching games:', error);
         return [];
       }
     },
-    enabled: isAuthenticated || creatorKeys.length > 0,
+    enabled: isAuthenticated,
   });
 
-  if (creatorKeys.length === 0) {
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4 mb-8">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setLocation('/')}
+              data-testid="button-back-home"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Building className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h2 className="text-2xl font-bold mb-4">Sign In Required</h2>
+              <p className="text-muted-foreground mb-6">
+                Please sign in to view and manage your trivia games.
+              </p>
+              <Button onClick={() => setLocation('/auth/sign-in')} data-testid="button-sign-in">
+                Sign In
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (allGames.length === 0 && !isLoading) {
     return (
       <div className="min-h-screen bg-background py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

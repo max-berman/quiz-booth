@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/auth-context";
+import { getAuthHeaders } from "@/lib/auth-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +26,7 @@ import type { InsertGame } from "@shared/schema";
 export default function Setup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);
   const [difficulty, setDifficulty] = useState("easy");
   const [categories, setCategories] = useState({
@@ -47,16 +50,30 @@ export default function Setup() {
 
   const createGameMutation = useMutation({
     mutationFn: async (gameData: InsertGame) => {
-      const response = await apiRequest("POST", "/api/games", gameData);
+      const headers = await getAuthHeaders();
+      const response = await fetch("/api/games", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...headers,
+        },
+        body: JSON.stringify(gameData),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to create game");
+      }
+      
       return response.json();
     },
     onSuccess: async (game) => {
-      // Store the creator key in localStorage for later access to submissions
-      localStorage.setItem(`game-${game.id}-creator-key`, game.creatorKey);
-
       setIsGenerating(true);
       try {
-        await apiRequest("POST", `/api/games/${game.id}/generate-questions`);
+        const headers = await getAuthHeaders();
+        await fetch(`/api/games/${game.id}/generate-questions`, {
+          method: "POST",
+          headers,
+        });
         setLocation(`/game/${game.id}`);
       } catch (error) {
         console.error("Question generation failed:", error);
@@ -79,6 +96,16 @@ export default function Setup() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a trivia game.",
+        variant: "destructive",
+      });
+      setLocation('/auth/sign-in');
+      return;
+    }
 
     if (!formData.companyName.trim()) {
       toast({
