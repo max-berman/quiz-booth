@@ -239,8 +239,8 @@ export default function Setup() {
                 <div
                   className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
                     step.complete
-                      ? "bg-green-500 border-green-500 text-white"
-                      : "bg-white border-gray-300 text-gray-400"
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : "bg-background border-border text-muted-foreground"
                   }`}
                 >
                   {step.complete ? (
@@ -263,7 +263,7 @@ export default function Setup() {
                 {index < steps.length - 1 && (
                   <div
                     className={`w-16 h-1 mx-4 rounded ${
-                      step.complete ? "bg-green-500" : "bg-gray-200"
+                      step.complete ? "bg-primary" : "bg-border"
                     }`}
                   />
                 )}
@@ -291,7 +291,7 @@ export default function Setup() {
                     <Building className="text-primary mr-3 h-6 w-6" />
                     Company Information
                     {checkCompanyComplete() && (
-                      <CheckCircle className="ml-2 h-5 w-5 text-green-500" />
+                      <CheckCircle className="ml-2 h-5 w-5 text-primary" />
                     )}
                   </h3>
                 </div>
@@ -315,7 +315,7 @@ export default function Setup() {
                         }))
                       }
                       className={`mt-2 h-12 text-base border-gray-300 ${
-                        formData.companyName.trim() ? "border-green-500" : ""
+                        formData.companyName.trim() ? "border-primary" : ""
                       }`}
                       required
                     />
@@ -458,7 +458,7 @@ export default function Setup() {
                     <Settings className="text-secondary mr-3 h-6 w-6" />
                     Game Settings
                     {checkSettingsComplete() && (
-                      <CheckCircle className="ml-2 h-5 w-5 text-green-500" />
+                      <CheckCircle className="ml-2 h-5 w-5 text-primary" />
                     )}
                   </h3>
                 </div>

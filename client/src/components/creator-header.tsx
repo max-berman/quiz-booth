@@ -33,7 +33,7 @@ export function CreatorHeader() {
   };
 
   return (
-    <div className="bg-primary text-primary-foreground px-4 py-2 border-b">
+    <div className="bg-card border-b border-border px-4 py-2">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* Show Home button when not on home page */}
@@ -41,7 +41,7 @@ export function CreatorHeader() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-primary-foreground hover:bg-primary-foreground/10"
+              className="text-foreground hover:bg-muted"
               onClick={() => setLocation("/")}
               data-testid="button-home"
             >
@@ -56,7 +56,7 @@ export function CreatorHeader() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-primary-foreground hover:bg-primary-foreground/10"
+                className="text-foreground hover:bg-muted"
                 onClick={() => setLocation("/dashboard")}
                 data-testid="button-dashboard"
               >
@@ -66,7 +66,7 @@ export function CreatorHeader() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-primary-foreground hover:bg-primary-foreground/10"
+                className="text-foreground hover:bg-muted"
                 onClick={() => setLocation("/setup")}
                 data-testid="button-create-game"
               >
@@ -86,7 +86,7 @@ export function CreatorHeader() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-primary-foreground hover:bg-primary-foreground/10"
+                  className="text-foreground hover:bg-muted"
                   data-testid="user-menu"
                 >
                   <User className="mr-2 h-4 w-4" />
@@ -116,7 +116,7 @@ export function CreatorHeader() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-primary-foreground hover:bg-primary-foreground/10"
+              className="text-foreground hover:bg-muted"
               onClick={() => setLocation("/auth/sign-in")}
               data-testid="button-sign-in"
             >
