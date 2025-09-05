@@ -74,7 +74,7 @@ export default function Setup() {
           method: "POST",
           headers,
         });
-        setLocation(`/game/${game.id}`);
+        setLocation(`/game-created/${game.id}`);
       } catch (error) {
         console.error("Question generation failed:", error);
         toast({

@@ -15,6 +15,7 @@ import EditQuestions from "@/pages/edit-questions";
 import Dashboard from "@/pages/dashboard";
 import SignIn from "@/pages/auth/sign-in";
 import CompleteSignIn from "@/pages/auth/complete";
+import GameCreated from "@/pages/game-created";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/submissions/:id" component={Submissions} />
       <Route path="/edit-questions/:id" component={EditQuestions} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/game-created/:id" component={GameCreated} />
       <Route path="/auth/sign-in" component={SignIn} />
       <Route path="/auth/complete" component={CompleteSignIn} />
       <Route component={NotFound} />

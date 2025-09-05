@@ -6,16 +6,16 @@ import { getAuthHeaders } from "@/lib/auth-utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Edit3, 
-  BarChart3, 
-  Users, 
-  Calendar, 
-  Building, 
+import {
+  Edit3,
+  BarChart3,
+  Users,
+  Calendar,
+  Building,
   Plus,
   ArrowLeft,
   Database,
-  Share2
+  Share2,
 } from "lucide-react";
 import { QRCodeModal } from "@/components/qr-code-modal";
 import { ShareEmbedModal } from "@/components/share-embed-modal";
@@ -27,34 +27,42 @@ export default function Dashboard() {
 
   // Fetch games using Firebase authentication only
   const { data: allGames = [], isLoading } = useQuery<Game[]>({
-    queryKey: ['/api/my-games', user?.uid],
+    queryKey: ["/api/my-games", user?.uid],
     queryFn: async () => {
       if (!isAuthenticated) {
-        console.log('Dashboard: User not authenticated');
+        console.log("Dashboard: User not authenticated");
         return [];
       }
-      
+
       try {
-        console.log('Dashboard: Fetching games for authenticated user:', user?.uid);
+        console.log(
+          "Dashboard: Fetching games for authenticated user:",
+          user?.uid,
+        );
         const headers = await getAuthHeaders();
-        console.log('Dashboard: Using headers:', headers);
-        
-        const response = await fetch('/api/my-games', { headers });
-        console.log('Dashboard: Response status:', response.status);
-        
+        console.log("Dashboard: Using headers:", headers);
+
+        const response = await fetch("/api/my-games", { headers });
+        console.log("Dashboard: Response status:", response.status);
+
         if (response.ok) {
           const games = await response.json();
-          console.log('Dashboard: Received games:', games);
-          return games.sort((a: Game, b: Game) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          console.log("Dashboard: Received games:", games);
+          return games.sort(
+            (a: Game, b: Game) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           );
         } else {
           const errorText = await response.text();
-          console.error('Dashboard: Failed to fetch games:', response.status, errorText);
+          console.error(
+            "Dashboard: Failed to fetch games:",
+            response.status,
+            errorText,
+          );
           return [];
         }
       } catch (error) {
-        console.error('Dashboard: Error fetching games:', error);
+        console.error("Dashboard: Error fetching games:", error);
         return [];
       }
     },
@@ -66,10 +74,10 @@ export default function Dashboard() {
       <div className="min-h-screen bg-background py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 mb-8">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
-              onClick={() => setLocation('/')}
+              onClick={() => setLocation("/")}
               data-testid="button-back-home"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -84,7 +92,10 @@ export default function Dashboard() {
               <p className="text-muted-foreground mb-6">
                 Please sign in to view and manage your trivia games.
               </p>
-              <Button onClick={() => setLocation('/auth/sign-in')} data-testid="button-sign-in">
+              <Button
+                onClick={() => setLocation("/auth/sign-in")}
+                data-testid="button-sign-in"
+              >
                 Sign In
               </Button>
             </CardContent>
@@ -99,10 +110,10 @@ export default function Dashboard() {
       <div className="min-h-screen bg-background py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 mb-8">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
-              onClick={() => setLocation('/')}
+              onClick={() => setLocation("/")}
               data-testid="button-back-home"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -115,9 +126,13 @@ export default function Dashboard() {
               <Building className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-4">No Games Created</h2>
               <p className="text-muted-foreground mb-6">
-                You haven't created any trivia games yet. Get started by creating your first game!
+                You haven't created any trivia games yet. Get started by
+                creating your first game!
               </p>
-              <Button onClick={() => setLocation('/setup')} data-testid="button-create-first-game">
+              <Button
+                onClick={() => setLocation("/setup")}
+                data-testid="button-create-first-game"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Game
               </Button>
@@ -145,24 +160,16 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setLocation('/')}
-              data-testid="button-back-home"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
             <div>
               <h1 className="text-h1 text-foreground">Creator Dashboard</h1>
               <p className="text-muted-foreground">
-                Manage your {allGames.length} trivia game{allGames.length !== 1 ? 's' : ''}
+                Manage your {allGames.length} trivia game
+                {allGames.length !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
-          <Button 
-            onClick={() => setLocation('/setup')} 
+          <Button
+            onClick={() => setLocation("/setup")}
             data-testid="button-create-new-game"
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -194,12 +201,17 @@ export default function Dashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Building className="h-4 w-4" />
-                      {game.questionCount} questions • {game.difficulty} difficulty
+                      {game.questionCount} questions • {game.difficulty}{" "}
+                      difficulty
                     </div>
                     {game.categories.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {game.categories.map((category, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {category}
                           </Badge>
                         ))}
@@ -219,7 +231,7 @@ export default function Dashboard() {
                       <Edit3 className="mr-2 h-4 w-4" />
                       Edit Questions
                     </Button>
-                    
+
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         variant="outline"
@@ -240,17 +252,25 @@ export default function Dashboard() {
                         Raw Data
                       </Button>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-2">
-                      <QRCodeModal gameId={game.id} gameTitle={game.companyName} />
-                      <ShareEmbedModal gameId={game.id} gameTitle={game.companyName} />
+                      <QRCodeModal
+                        gameId={game.id}
+                        gameTitle={game.companyName}
+                      />
+                      <ShareEmbedModal
+                        gameId={game.id}
+                        gameTitle={game.companyName}
+                      />
                     </div>
                   </div>
 
                   {/* Prizes if configured */}
                   {(game.firstPrize || game.secondPrize || game.thirdPrize) && (
                     <div className="pt-2 border-t border-border">
-                      <p className="text-xs font-medium text-muted-foreground mb-1">Prizes:</p>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">
+                        Prizes:
+                      </p>
                       <div className="text-xs space-y-1">
                         {game.firstPrize && <div>🥇 {game.firstPrize}</div>}
                         {game.secondPrize && <div>🥈 {game.secondPrize}</div>}
@@ -268,7 +288,8 @@ export default function Dashboard() {
               <Building className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-4">No Games Found</h2>
               <p className="text-muted-foreground mb-6">
-                There was an issue loading your games. Please try refreshing the page.
+                There was an issue loading your games. Please try refreshing the
+                page.
               </p>
               <Button onClick={() => window.location.reload()}>
                 Refresh Page
