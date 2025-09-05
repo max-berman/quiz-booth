@@ -72,7 +72,7 @@ export function ShareEmbedModal({
           {isBuilder ? "Share Builder" : "Share"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl bg-background border-2 border-border shadow-2xl">
         <DialogHeader>
           <DialogTitle>
             {isBuilder ? "Share Trivia Builder" : `Share ${gameTitle} Trivia`}
@@ -106,13 +106,13 @@ export function ShareEmbedModal({
             </div>
 
             <div className="flex gap-2">
-              <Button onClick={handleShare} className="flex-1">
+              <Button onClick={handleShare} className="flex-1 !bg-black !text-white hover:!bg-gray-800">
                 <LinkIcon className="mr-2 h-4 w-4" />
                 Share Link
               </Button>
             </div>
 
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-muted-foreground">
               {isBuilder
                 ? "Share this link to let others create their own trivia games"
                 : "Share this link to let others play the trivia game"}

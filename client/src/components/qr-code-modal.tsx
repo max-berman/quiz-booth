@@ -57,7 +57,7 @@ export function QRCodeModal({ gameId, gameTitle }: QRCodeModalProps) {
           QR Code
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-background border-2 border-border shadow-2xl">
         <DialogHeader>
           <DialogTitle>Game QR Code</DialogTitle>
         </DialogHeader>
