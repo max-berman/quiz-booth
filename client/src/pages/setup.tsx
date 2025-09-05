@@ -16,7 +16,17 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { Building, Settings, Gift, Wand2, Plus, X, CheckCircle, AlertCircle, Info } from "lucide-react";
+import {
+  Building,
+  Settings,
+  Gift,
+  Wand2,
+  Plus,
+  X,
+  CheckCircle,
+  AlertCircle,
+  Info,
+} from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/loading-spinner";
@@ -48,7 +58,7 @@ export default function Setup() {
     secondPrize: "50",
     thirdPrize: "25",
   });
-  
+
   const [prizes, setPrizes] = useState([
     { placement: "1st Place", prize: "" },
     { placement: "2nd Place", prize: "" },
@@ -66,11 +76,11 @@ export default function Setup() {
         },
         body: JSON.stringify(gameData),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to create game");
       }
-      
+
       return response.json();
     },
     onSuccess: async (game) => {
@@ -110,7 +120,7 @@ export default function Setup() {
         description: "Please sign in to create a trivia game.",
         variant: "destructive",
       });
-      setLocation('/auth/sign-in');
+      setLocation("/auth/sign-in");
       return;
     }
 
@@ -152,8 +162,10 @@ export default function Setup() {
     }
 
     // Filter out empty prizes
-    const validPrizes = prizes.filter(p => p.placement.trim() && p.prize.trim());
-    
+    const validPrizes = prizes.filter(
+      (p) => p.placement.trim() && p.prize.trim(),
+    );
+
     const gameData: InsertGame = {
       ...formData,
       difficulty,
@@ -168,17 +180,35 @@ export default function Setup() {
   const checkCompanyComplete = () => {
     return formData.companyName.trim() && formData.industry;
   };
-  
+
   const checkSettingsComplete = () => {
     const selectedCategories = Object.values(categories).some(Boolean);
     return selectedCategories && formData.questionCount;
   };
-  
-  const steps = useMemo(() => [
-    { id: 1, title: "Company Info", icon: Building, complete: checkCompanyComplete() },
-    { id: 2, title: "Game Settings", icon: Settings, complete: checkSettingsComplete() },
-    { id: 3, title: "Prizes (Optional)", icon: Gift, complete: true },
-  ], [formData.companyName, formData.industry, formData.questionCount, categories]);
+
+  const steps = useMemo(
+    () => [
+      {
+        id: 1,
+        title: "Company Info",
+        icon: Building,
+        complete: checkCompanyComplete(),
+      },
+      {
+        id: 2,
+        title: "Game Settings",
+        icon: Settings,
+        complete: checkSettingsComplete(),
+      },
+      { id: 3, title: "Prizes (Optional)", icon: Gift, complete: true },
+    ],
+    [
+      formData.companyName,
+      formData.industry,
+      formData.questionCount,
+      categories,
+    ],
+  );
 
   if (isGenerating) {
     return <LoadingSpinner message="Generating Your Trivia Questions" />;
@@ -187,14 +217,14 @@ export default function Setup() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-6">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Create Your <span className="text-primary">Trivia Game</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Generate engaging AI-powered trivia questions for your trade show booth in just a few minutes
+            Generate engaging AI-powered trivia questions for your trade show
+            booth in just a few minutes
           </p>
         </div>
 
@@ -203,11 +233,13 @@ export default function Setup() {
           <div className="flex items-center justify-center space-x-8 mb-6">
             {steps.map((step, index) => (
               <div key={step.id} className="flex items-center">
-                <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
-                  step.complete
-                    ? 'bg-green-500 border-green-500 text-white'
-                    : 'bg-white border-gray-300 text-gray-400'
-                }`}>
+                <div
+                  className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
+                    step.complete
+                      ? "bg-green-500 border-green-500 text-white"
+                      : "bg-white border-gray-300 text-gray-400"
+                  }`}
+                >
                   {step.complete ? (
                     <CheckCircle className="h-6 w-6" />
                   ) : (
@@ -215,16 +247,22 @@ export default function Setup() {
                   )}
                 </div>
                 <div className="ml-3 hidden sm:block">
-                  <p className={`text-sm font-medium ${
-                    step.complete ? 'text-foreground' : 'text-muted-foreground'
-                  }`}>
+                  <p
+                    className={`text-sm font-medium ${
+                      step.complete
+                        ? "text-foreground"
+                        : "text-muted-foreground"
+                    }`}
+                  >
                     {step.title}
                   </p>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`w-16 h-1 mx-4 rounded ${
-                    step.complete ? 'bg-green-500' : 'bg-gray-200'
-                  }`} />
+                  <div
+                    className={`w-16 h-1 mx-4 rounded ${
+                      step.complete ? "bg-green-500" : "bg-gray-200"
+                    }`}
+                  />
                 )}
               </div>
             ))}
@@ -233,26 +271,34 @@ export default function Setup() {
 
         <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
           <CardContent className="p-8 md:p-12">
-
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Company Information Section */}
-              <div className={`p-6 rounded-xl border-2 transition-all ${
-                focusedSection === 1 ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50'
-              }`}
-              onFocus={() => setFocusedSection(1)}
-              onBlur={() => setFocusedSection(null)}
-              tabIndex={0}>
+              <div
+                className={`p-6 rounded-xl border-2 transition-all ${
+                  focusedSection === 1
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 bg-gray-50"
+                }`}
+                onFocus={() => setFocusedSection(1)}
+                onBlur={() => setFocusedSection(null)}
+                tabIndex={0}
+              >
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-foreground flex items-center">
                     <Building className="text-primary mr-3 h-6 w-6" />
                     Company Information
-                    {checkCompanyComplete() && <CheckCircle className="ml-2 h-5 w-5 text-green-500" />}
+                    {checkCompanyComplete() && (
+                      <CheckCircle className="ml-2 h-5 w-5 text-green-500" />
+                    )}
                   </h3>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="companyName" className="text-base font-medium">
+                    <Label
+                      htmlFor="companyName"
+                      className="text-base font-medium"
+                    >
                       Company Name or Website *
                     </Label>
                     <Input
@@ -266,20 +312,23 @@ export default function Setup() {
                         }))
                       }
                       className={`mt-2 h-12 text-base border-gray-300 ${
-                        formData.companyName.trim() ? 'border-green-500' : ''
+                        formData.companyName.trim() ? "border-green-500" : ""
                       }`}
                       required
                     />
                     <div className="flex items-start gap-2 mt-2">
                       <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
                       <p className="text-sm text-muted-foreground">
-                        Provide a website URL for more relevant AI-generated questions, or enter your company name.
+                        Provide a website URL for more relevant AI-generated
+                        questions, or enter your company name.
                       </p>
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="industry" className="text-base font-medium">Industry *</Label>
+                    <Label htmlFor="industry" className="text-base font-medium">
+                      Industry *
+                    </Label>
                     <Select
                       value={formData.industry}
                       onValueChange={(value) =>
@@ -342,18 +391,17 @@ export default function Setup() {
                         <SelectItem value="Wellness and Lifestyle">
                           Wellness and Lifestyle
                         </SelectItem>
-                        <SelectItem value="Other">
-                          Other
-                        </SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   {formData.industry === "Other" && (
                     <div>
-                      <div /></div>
-                      <div>
-                      <Label htmlFor="customIndustry" className="text-base font-medium">
+                      <Label
+                        htmlFor="customIndustry"
+                        className="text-base font-medium"
+                      >
                         Custom Industry *
                       </Label>
                       <Input
@@ -365,11 +413,13 @@ export default function Setup() {
                         required
                       />
                     </div>
-                      </div>
                   )}
 
                   <div className="md:col-span-2">
-                    <Label htmlFor="productDescription" className="text-base font-medium">
+                    <Label
+                      htmlFor="productDescription"
+                      className="text-base font-medium"
+                    >
                       Product/Service Focus (Optional)
                     </Label>
                     <Textarea
@@ -390,23 +440,34 @@ export default function Setup() {
               </div>
 
               {/* Game Settings Section */}
-              <div className={`p-6 rounded-xl border-2 transition-all ${
-                focusedSection === 2 ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50'
-              }`}
-              onFocus={() => setFocusedSection(2)}
-              onBlur={() => setFocusedSection(null)}
-              tabIndex={0}>
+              <div
+                className={`p-6 rounded-xl border-2 transition-all ${
+                  focusedSection === 2
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 bg-gray-50"
+                }`}
+                onFocus={() => setFocusedSection(2)}
+                onBlur={() => setFocusedSection(null)}
+                tabIndex={0}
+              >
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-foreground flex items-center">
                     <Settings className="text-secondary mr-3 h-6 w-6" />
                     Game Settings
-                    {checkSettingsComplete() && <CheckCircle className="ml-2 h-5 w-5 text-green-500" />}
+                    {checkSettingsComplete() && (
+                      <CheckCircle className="ml-2 h-5 w-5 text-green-500" />
+                    )}
                   </h3>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="questionCount" className="text-base font-medium">Number of Questions</Label>
+                    <Label
+                      htmlFor="questionCount"
+                      className="text-base font-medium"
+                    >
+                      Number of Questions
+                    </Label>
                     <Select
                       value={formData.questionCount.toString()}
                       onValueChange={(value) =>
@@ -432,18 +493,32 @@ export default function Setup() {
                   </div>
 
                   <div>
-                    <Label className="text-base font-medium">Difficulty Level</Label>
+                    <Label className="text-base font-medium">
+                      Difficulty Level
+                    </Label>
                     <div className="grid grid-cols-3 gap-3 mt-3">
                       {[
-                        { level: "easy", label: "Easy", desc: "Basic questions" },
-                        { level: "medium", label: "Medium", desc: "Moderate difficulty" },
-                        { level: "hard", label: "Hard", desc: "Challenging questions" }
+                        {
+                          level: "easy",
+                          label: "Easy",
+                          desc: "Basic questions",
+                        },
+                        {
+                          level: "medium",
+                          label: "Medium",
+                          desc: "Moderate difficulty",
+                        },
+                        {
+                          level: "hard",
+                          label: "Hard",
+                          desc: "Challenging questions",
+                        },
                       ].map(({ level, label, desc }) => (
                         <Button
                           key={level}
                           type="button"
                           variant={difficulty === level ? "default" : "outline"}
-                          className={`h-16 flex flex-col ${
+                          className={`h-8 flex flex-col ${
                             difficulty === level
                               ? "bg-primary border-primary text-primary-foreground"
                               : "hover:border-primary/50"
@@ -451,36 +526,64 @@ export default function Setup() {
                           onClick={() => setDifficulty(level)}
                         >
                           <span className="font-medium">{label}</span>
-                          <span className="text-xs opacity-75">{desc}</span>
+                          {/* <span className="text-xs opacity-75">{desc}</span> */}
                         </Button>
                       ))}
                     </div>
                   </div>
 
                   <div className="md:col-span-2">
-                    <Label className="text-base font-medium">Question Categories *</Label>
+                    <Label className="text-base font-medium">
+                      Question Categories *
+                    </Label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                       {[
-                        { key: "companyFacts", label: "Company Facts", desc: "Questions about your company" },
-                        { key: "industryKnowledge", label: "Industry Knowledge", desc: "Questions about your industry" },
-                        { key: "funFacts", label: "Fun Facts", desc: "Entertaining trivia" },
-                        { key: "generalKnowledge", label: "General Knowledge", desc: "Broad topics" },
-                        { key: "other", label: "Custom Questions", desc: "Your specific topics" }
+                        {
+                          key: "companyFacts",
+                          label: "Company Facts",
+                          desc: "Questions about your company",
+                        },
+                        {
+                          key: "industryKnowledge",
+                          label: "Industry Knowledge",
+                          desc: "Questions about your industry",
+                        },
+                        {
+                          key: "funFacts",
+                          label: "Fun Facts",
+                          desc: "Entertaining trivia",
+                        },
+                        {
+                          key: "generalKnowledge",
+                          label: "General Knowledge",
+                          desc: "Broad topics",
+                        },
+                        {
+                          key: "other",
+                          label: "Custom Questions",
+                          desc: "Your specific topics",
+                        },
                       ].map(({ key, label, desc }) => (
-                        <div key={key} className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                          categories[key as keyof typeof categories]
-                            ? 'border-primary bg-primary/5'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                        onClick={() => setCategories((prev) => ({
-                          ...prev,
-                          [key]: !prev[key as keyof typeof prev],
-                        }))}
+                        <div
+                          key={key}
+                          className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            categories[key as keyof typeof categories]
+                              ? "border-primary bg-primary/5"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                          onClick={() =>
+                            setCategories((prev) => ({
+                              ...prev,
+                              [key]: !prev[key as keyof typeof prev],
+                            }))
+                          }
                         >
                           <div className="flex items-start space-x-3">
                             <Checkbox
                               id={key}
-                              checked={categories[key as keyof typeof categories]}
+                              checked={
+                                categories[key as keyof typeof categories]
+                              }
                               onCheckedChange={(checked) =>
                                 setCategories((prev) => ({
                                   ...prev,
@@ -489,10 +592,15 @@ export default function Setup() {
                               }
                             />
                             <div>
-                              <Label htmlFor={key} className="font-medium cursor-pointer">
+                              <Label
+                                htmlFor={key}
+                                className="font-medium cursor-pointer"
+                              >
                                 {label}
                               </Label>
-                              <p className="text-sm text-muted-foreground">{desc}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {desc}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -500,7 +608,10 @@ export default function Setup() {
                     </div>
                     {categories.other && (
                       <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                        <Label htmlFor="customCategory" className="text-base font-medium">
+                        <Label
+                          htmlFor="customCategory"
+                          className="text-base font-medium"
+                        >
                           Describe your custom questions
                         </Label>
                         <Textarea
@@ -516,7 +627,9 @@ export default function Setup() {
                     {!Object.values(categories).some(Boolean) && (
                       <div className="flex items-center gap-2 mt-2 text-red-600">
                         <AlertCircle className="h-4 w-4" />
-                        <span className="text-sm">Please select at least one category</span>
+                        <span className="text-sm">
+                          Please select at least one category
+                        </span>
                       </div>
                     )}
                   </div>
@@ -524,12 +637,16 @@ export default function Setup() {
               </div>
 
               {/* Prize Settings Section */}
-              <div className={`p-6 rounded-xl border-2 transition-all ${
-                focusedSection === 3 ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50'
-              }`}
-              onFocus={() => setFocusedSection(3)}
-              onBlur={() => setFocusedSection(null)}
-              tabIndex={0}>
+              <div
+                className={`p-6 rounded-xl border-2 transition-all ${
+                  focusedSection === 3
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 bg-gray-50"
+                }`}
+                onFocus={() => setFocusedSection(3)}
+                onBlur={() => setFocusedSection(null)}
+                tabIndex={0}
+              >
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-foreground flex items-center">
                     <Gift className="text-secondary mr-3 h-6 w-6" />
@@ -540,19 +657,29 @@ export default function Setup() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setPrizes([...prizes, { placement: "", prize: "" }])}
+                    onClick={() =>
+                      setPrizes([...prizes, { placement: "", prize: "" }])
+                    }
                     className="flex items-center gap-1"
                   >
                     <Plus className="h-4 w-4" />
                     Add Prize
                   </Button>
                 </div>
-                
+
                 <div className="space-y-4">
                   {prizes.map((prize, index) => (
-                    <div key={index} className="flex gap-3 items-end p-4 bg-white rounded-lg border">
+                    <div
+                      key={index}
+                      className="flex gap-3 items-end p-4 bg-white rounded-lg border"
+                    >
                       <div className="flex-1">
-                        <Label htmlFor={`placement-${index}`} className="text-base font-medium">Placement</Label>
+                        <Label
+                          htmlFor={`placement-${index}`}
+                          className="text-base font-medium"
+                        >
+                          Placement
+                        </Label>
                         <Input
                           id={`placement-${index}`}
                           placeholder="e.g., 1st Place, Top 10, etc."
@@ -566,7 +693,12 @@ export default function Setup() {
                         />
                       </div>
                       <div className="flex-1">
-                        <Label htmlFor={`prize-${index}`} className="text-base font-medium">Prize</Label>
+                        <Label
+                          htmlFor={`prize-${index}`}
+                          className="text-base font-medium"
+                        >
+                          Prize
+                        </Label>
                         <Input
                           id={`prize-${index}`}
                           placeholder="e.g., $100 Gift Card"
@@ -585,7 +717,9 @@ export default function Setup() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            const updatedPrizes = prizes.filter((_, i) => i !== index);
+                            const updatedPrizes = prizes.filter(
+                              (_, i) => i !== index,
+                            );
                             setPrizes(updatedPrizes);
                           }}
                           className="h-11 w-11 p-0"
@@ -598,7 +732,9 @@ export default function Setup() {
                   <div className="flex items-start gap-2 p-4 bg-blue-50 rounded-lg">
                     <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
                     <p className="text-sm text-blue-700">
-                      Add prizes to motivate participation. You can customize placements (e.g., "4th Place", "Top 10", "Best Score") to match your event needs.
+                      Add prizes to motivate participation. You can customize
+                      placements (e.g., "4th Place", "Top 10", "Best Score") to
+                      match your event needs.
                     </p>
                   </div>
                 </div>
@@ -609,30 +745,46 @@ export default function Setup() {
                 <div className="text-center space-y-4">
                   <div className="flex items-center justify-center gap-2 text-green-700">
                     <CheckCircle className="h-5 w-5" />
-                    <span className="font-medium">Ready to generate your trivia game!</span>
+                    <span className="font-medium">
+                      Ready to generate your trivia game!
+                    </span>
                   </div>
-                  
+
                   <div className="text-sm text-gray-600 max-w-md mx-auto">
-                    Our AI will create {formData.questionCount} {difficulty} questions
+                    Our AI will create {formData.questionCount} {difficulty}{" "}
+                    questions
                     {Object.values(categories).filter(Boolean).length > 0 && (
-                      <> covering {Object.values(categories).filter(Boolean).length} categories</>
+                      <>
+                        {" "}
+                        covering{" "}
+                        {Object.values(categories).filter(Boolean).length}{" "}
+                        categories
+                      </>
                     )}
                   </div>
-                  
+
                   <Button
                     type="submit"
                     size="lg"
                     className="px-12 py-4 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white font-bold text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-                    disabled={createGameMutation.isPending || !checkCompanyComplete() || !checkSettingsComplete()}
+                    disabled={
+                      createGameMutation.isPending ||
+                      !checkCompanyComplete() ||
+                      !checkSettingsComplete()
+                    }
                   >
                     <Wand2 className="mr-3 h-5 w-5" />
-                    {createGameMutation.isPending ? 'Creating...' : 'Generate Trivia Game'}
+                    {createGameMutation.isPending
+                      ? "Creating..."
+                      : "Generate Trivia Game"}
                   </Button>
-                  
+
                   {(!checkCompanyComplete() || !checkSettingsComplete()) && (
                     <div className="flex items-center justify-center gap-2 text-red-600">
                       <AlertCircle className="h-4 w-4" />
-                      <span className="text-sm">Please complete required sections above</span>
+                      <span className="text-sm">
+                        Please complete required sections above
+                      </span>
                     </div>
                   )}
                 </div>
