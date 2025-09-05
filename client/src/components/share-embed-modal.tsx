@@ -72,7 +72,7 @@ export function ShareEmbedModal({
           {isBuilder ? "Share Builder" : "Share"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl bg-background border-2 border-border shadow-2xl">
+      <DialogContent className="max-w-2xl !bg-white !text-black border-4 !border-black shadow-2xl z-50">
         <DialogHeader>
           <DialogTitle>
             {isBuilder ? "Share Trivia Builder" : `Share ${gameTitle} Trivia`}
