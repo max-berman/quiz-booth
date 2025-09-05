@@ -49,7 +49,7 @@ export default function Home() {
               style={{ animationDelay: "0.2s" }}
             >
               <Link href="/setup">
-                <Button className="px-8 py-3">
+                <Button variant="default" className="px-8 py-3">
                   <Sparkles className="mr-2 h-4 w-4" />
                   Create Your Game
                   <ArrowRight className="ml-2 h-4 w-4" />
