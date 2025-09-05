@@ -30,24 +30,31 @@ export default function Dashboard() {
     queryKey: ['/api/my-games', user?.uid],
     queryFn: async () => {
       if (!isAuthenticated) {
+        console.log('Dashboard: User not authenticated');
         return [];
       }
       
       try {
+        console.log('Dashboard: Fetching games for authenticated user:', user?.uid);
         const headers = await getAuthHeaders();
+        console.log('Dashboard: Using headers:', headers);
+        
         const response = await fetch('/api/my-games', { headers });
+        console.log('Dashboard: Response status:', response.status);
         
         if (response.ok) {
           const games = await response.json();
+          console.log('Dashboard: Received games:', games);
           return games.sort((a: Game, b: Game) => 
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
         } else {
-          console.error('Failed to fetch games:', response.statusText);
+          const errorText = await response.text();
+          console.error('Dashboard: Failed to fetch games:', response.status, errorText);
           return [];
         }
       } catch (error) {
-        console.error('Error fetching games:', error);
+        console.error('Dashboard: Error fetching games:', error);
         return [];
       }
     },
