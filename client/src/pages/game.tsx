@@ -140,7 +140,7 @@ export default function GamePage() {
               <Button
                 size="sm"
                 onClick={handleNextQuestion}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 !bg-black !text-white hover:!bg-gray-800"
               >
                 {currentQuestionIndex < questions.length - 1 ? (
                   <>
@@ -256,9 +256,9 @@ export default function GamePage() {
 
               {/* Explanation - Enhanced styling */}
               {showExplanation && currentQuestion?.explanation && (
-                <div className="mt-8 p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-2xl border border-blue-200 dark:border-blue-800 animate-slide-up">
+                <div className="mt-8 p-6 bg-muted rounded-2xl border border-border animate-slide-up">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-foreground rounded-full flex items-center justify-center">
                       <span className="text-white text-lg">💡</span>
                     </div>
                     <h3 className="font-bold text-lg text-foreground">Explanation</h3>
@@ -282,7 +282,7 @@ export default function GamePage() {
                   type="button"
                   onClick={handleNextQuestion}
                   size="lg"
-                  className="px-8 py-3 text-base font-semibold"
+                  className="px-8 py-3 text-base font-semibold !bg-black !text-white hover:!bg-gray-800"
                 >
                   {currentQuestionIndex < questions.length - 1
                     ? "Continue →"
