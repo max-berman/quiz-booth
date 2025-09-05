@@ -15,7 +15,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const gameData = insertGameSchema.parse(req.body);
       console.log('Parsed game data:', JSON.stringify(gameData, null, 2));
-      console.log('Game data types:', Object.keys(gameData).map(key => `${key}: ${typeof gameData[key]} - ${Array.isArray(gameData[key]) ? 'array' : 'not array'}`));
+      console.log('Game data types:', Object.keys(gameData).map(key => `${key}: ${typeof gameData[key as keyof typeof gameData]} - ${Array.isArray(gameData[key as keyof typeof gameData]) ? 'array' : 'not array'}`));
       
       // Pass userId if authenticated, otherwise use legacy creator key approach
       const game = await storage.createGame(gameData, req.user?.uid);
@@ -112,11 +112,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "DeepSeek API key not configured" });
       }
 
+      // Determine if company name contains a website URL
+      const isWebsite = game.companyName.includes('.') && (game.companyName.startsWith('http') || game.companyName.includes('.com') || game.companyName.includes('.org') || game.companyName.includes('.net'));
+      const companyInfo = isWebsite ? `Company website: ${game.companyName}` : `Company name: ${game.companyName}`;
+      const websiteInstruction = isWebsite ? 'IMPORTANT: If a website is provided, use your knowledge about that company from the web to create more accurate and specific questions about their business, products, services, and history.' : '';
+      
       // Create category-specific instructions
       const categoryInstructions = game.categories.map(category => {
         switch (category) {
           case "Company Facts":
-            return `Create questions specifically about ${game.companyName} and their business practices, history, products, or services.`;
+            return `Create questions specifically about ${game.companyName} and their business practices, history, products, or services. ${isWebsite ? 'Use information from the provided website to create accurate company-specific questions.' : ''}`;
           case "Industry Knowledge":
             return `Create questions about the ${game.industry} industry in general, including trends, terminology, best practices, key players, innovations, and industry-specific knowledge.`;
           case "Fun Facts":
@@ -130,10 +135,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const prompt = `Generate ${game.questionCount} multiple choice trivia questions based on these requirements:
       
-      Company: ${game.companyName}
+      ${companyInfo}
       Industry: ${game.industry}
       Company description: ${game.productDescription || 'Not provided'}
       Difficulty: ${game.difficulty}
+      
+      ${websiteInstruction}
       
       IMPORTANT - Question Category Instructions:
       ${categoryInstructions}

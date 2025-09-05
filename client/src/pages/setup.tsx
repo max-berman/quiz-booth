@@ -16,12 +16,12 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { Building, Settings, Gift, Wand2, Home, Trophy } from "lucide-react";
+import { Building, Settings, Gift, Wand2, Home, Trophy, Plus, X } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/loading-spinner";
-import type { InsertGame } from "@shared/schema";
+import type { InsertGame } from "@shared/firebase-types";
 
 export default function Setup() {
   const [, setLocation] = useLocation();
@@ -47,6 +47,12 @@ export default function Setup() {
     secondPrize: "50",
     thirdPrize: "25",
   });
+  
+  const [prizes, setPrizes] = useState([
+    { placement: "1st Place", prize: "" },
+    { placement: "2nd Place", prize: "" },
+    { placement: "3rd Place", prize: "" },
+  ]);
 
   const createGameMutation = useMutation({
     mutationFn: async (gameData: InsertGame) => {
@@ -110,7 +116,7 @@ export default function Setup() {
     if (!formData.companyName.trim()) {
       toast({
         title: "Error",
-        description: "Company name is required.",
+        description: "Company name or website is required.",
         variant: "destructive",
       });
       return;
@@ -144,10 +150,14 @@ export default function Setup() {
       return;
     }
 
+    // Filter out empty prizes
+    const validPrizes = prizes.filter(p => p.placement.trim() && p.prize.trim());
+    
     const gameData: InsertGame = {
       ...formData,
       difficulty,
       categories: selectedCategories,
+      prizes: validPrizes.length > 0 ? validPrizes : null,
     };
 
     createGameMutation.mutate(gameData);
@@ -197,10 +207,10 @@ export default function Setup() {
                   </h4>
 
                   <div>
-                    <Label htmlFor="companyName">Company Name</Label>
+                    <Label htmlFor="companyName">Company Name or Website</Label>
                     <Input
                       id="companyName"
-                      placeholder="Enter your company name"
+                      placeholder="Enter company name or website URL"
                       value={formData.companyName}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -210,6 +220,9 @@ export default function Setup() {
                       }
                       required
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      You can enter a company name or website URL. If you provide a website, AI will use it to generate more relevant questions.
+                    </p>
                   </div>
 
                   <div>
@@ -402,54 +415,71 @@ export default function Setup() {
 
               {/* Prize Settings */}
               <div className="bg-gradient-to-r from-secondary/10 to-primary/10 p-6 rounded-xl">
-                <h4 className="text-lg font-semibold text-dark flex items-center mb-4">
-                  <Gift className="text-secondary mr-2 h-5 w-5" />
-                  Prize Information (Optional)
-                </h4>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="firstPrize">1st Place Prize</Label>
-                    <Input
-                      id="firstPrize"
-                      placeholder="e.g., $100 Gift Card"
-                      value={formData.firstPrize}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          firstPrize: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="secondPrize">2nd Place Prize</Label>
-                    <Input
-                      id="secondPrize"
-                      placeholder="e.g., $50 Gift Card"
-                      value={formData.secondPrize}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          secondPrize: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="thirdPrize">3rd Place Prize</Label>
-                    <Input
-                      id="thirdPrize"
-                      placeholder="e.g., Company Swag"
-                      value={formData.thirdPrize}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          thirdPrize: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-semibold text-dark flex items-center">
+                    <Gift className="text-secondary mr-2 h-5 w-5" />
+                    Prize Information (Optional)
+                  </h4>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPrizes([...prizes, { placement: "", prize: "" }])}
+                    className="flex items-center gap-1"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Prize
+                  </Button>
                 </div>
+                <div className="space-y-3">
+                  {prizes.map((prize, index) => (
+                    <div key={index} className="flex gap-3 items-end">
+                      <div className="flex-1">
+                        <Label htmlFor={`placement-${index}`}>Placement</Label>
+                        <Input
+                          id={`placement-${index}`}
+                          placeholder="e.g., 1st Place, Top 10, etc."
+                          value={prize.placement}
+                          onChange={(e) => {
+                            const updatedPrizes = [...prizes];
+                            updatedPrizes[index].placement = e.target.value;
+                            setPrizes(updatedPrizes);
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <Label htmlFor={`prize-${index}`}>Prize</Label>
+                        <Input
+                          id={`prize-${index}`}
+                          placeholder="e.g., $100 Gift Card"
+                          value={prize.prize}
+                          onChange={(e) => {
+                            const updatedPrizes = [...prizes];
+                            updatedPrizes[index].prize = e.target.value;
+                            setPrizes(updatedPrizes);
+                          }}
+                        />
+                      </div>
+                      {prizes.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const updatedPrizes = prizes.filter((_, i) => i !== index);
+                            setPrizes(updatedPrizes);
+                          }}
+                          className="px-2"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Customize your prize placements. You can add prizes for any placement (e.g., 4th Place, Top 10, etc.)
+                </p>
               </div>
 
               <div className="flex justify-center pt-4">

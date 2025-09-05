@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 // Firebase-compatible types (without Drizzle dependencies)
+export interface PrizePlacement {
+  placement: string; // e.g., "1st Place", "4th Place", "Top 10", etc.
+  prize: string; // Prize description or amount
+}
+
 export interface Game {
   id: string;
   companyName: string;
@@ -12,6 +17,7 @@ export interface Game {
   firstPrize: string | null;
   secondPrize: string | null;
   thirdPrize: string | null;
+  prizes: PrizePlacement[] | null; // New flexible prize system
   creatorKey: string;
   userId?: string; // Firebase UID - optional for backward compatibility
   createdAt: Date;
@@ -40,6 +46,11 @@ export interface Player {
 }
 
 // Insert schemas
+export const prizePlacementSchema = z.object({
+  placement: z.string(),
+  prize: z.string(),
+});
+
 export const insertGameSchema = z.object({
   companyName: z.string(),
   industry: z.string(),
@@ -50,6 +61,7 @@ export const insertGameSchema = z.object({
   firstPrize: z.string().optional().nullable(),
   secondPrize: z.string().optional().nullable(),
   thirdPrize: z.string().optional().nullable(),
+  prizes: z.array(prizePlacementSchema).optional().nullable(),
 });
 
 export const insertQuestionSchema = z.object({

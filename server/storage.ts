@@ -46,6 +46,7 @@ export class FirebaseStorage implements IStorage {
         firstPrize: insertGame.firstPrize || null,
         secondPrize: insertGame.secondPrize || null,
         thirdPrize: insertGame.thirdPrize || null,
+        prizes: insertGame.prizes || null,
         creatorKey,
         createdAt: Timestamp.fromDate(now),
       };
@@ -66,6 +67,7 @@ export class FirebaseStorage implements IStorage {
         firstPrize: gameData.firstPrize,
         secondPrize: gameData.secondPrize,
         thirdPrize: gameData.thirdPrize,
+        prizes: gameData.prizes || null,
         creatorKey: gameData.creatorKey,
         userId: gameData.userId,
         createdAt: now, // For the returned object, use JS Date
