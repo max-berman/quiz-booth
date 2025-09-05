@@ -1,8 +1,8 @@
-import * as admin from 'firebase-admin';
+import { getAuth } from 'firebase-admin/auth';
 import type { Request, Response, NextFunction } from 'express';
 
 export interface AuthenticatedRequest extends Request {
-  user?: admin.auth.DecodedIdToken;
+  user?: any; // DecodedIdToken from firebase-admin
 }
 
 export async function verifyFirebaseToken(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -15,7 +15,8 @@ export async function verifyFirebaseToken(req: AuthenticatedRequest, res: Respon
   const idToken = authHeader.split('Bearer ')[1];
 
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const auth = getAuth();
+    const decodedToken = await auth.verifyIdToken(idToken);
     req.user = decodedToken;
     next();
   } catch (error) {
@@ -34,7 +35,8 @@ export async function optionalFirebaseAuth(req: AuthenticatedRequest, res: Respo
     
     try {
       // Try to verify the token without checking claims first
-      const decodedToken = await admin.auth().verifyIdToken(idToken, false);
+      const auth = getAuth();
+      const decodedToken = await auth.verifyIdToken(idToken, false);
       req.user = decodedToken;
       console.log('Auth middleware: Token verified successfully for user:', decodedToken.uid);
     } catch (error: any) {
