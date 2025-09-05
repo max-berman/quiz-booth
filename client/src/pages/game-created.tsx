@@ -15,8 +15,17 @@ import {
   Home
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { QRCodeModal } from "@/components/qr-code-modal";
-import { ShareEmbedModal } from "@/components/share-embed-modal";
+import QRCode from "qrcode";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { Game } from "@shared/firebase-types";
 
 export default function GameCreated() {
@@ -25,6 +34,7 @@ export default function GameCreated() {
   const { toast } = useToast();
   const [showQR, setShowQR] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [qrCodeDataURL, setQrCodeDataURL] = useState<string>("");
 
   const { data: game, isLoading } = useQuery<Game>({
     queryKey: [`/api/games/${id}`],
@@ -46,6 +56,61 @@ export default function GameCreated() {
       title: "Copied!",
       description: "Game URL copied to clipboard",
     });
+  };
+
+  const handleCopy = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: `${label} copied to clipboard.`,
+    });
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: `${game?.companyName} Trivia Challenge`,
+      text: `Test your knowledge with the ${game?.companyName} trivia challenge!`,
+      url: gameUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        handleCopy(gameUrl, "Game link");
+      }
+    } else {
+      handleCopy(gameUrl, "Game link");
+    }
+  };
+
+  // Generate QR code when modal opens
+  useEffect(() => {
+    if (showQR && !qrCodeDataURL) {
+      QRCode.toDataURL(gameUrl, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      })
+        .then(dataURL => {
+          setQrCodeDataURL(dataURL);
+        })
+        .catch(err => {
+          console.error('Failed to generate QR code:', err);
+        });
+    }
+  }, [showQR, gameUrl, qrCodeDataURL]);
+
+  const handleDownloadQR = () => {
+    if (qrCodeDataURL) {
+      const link = document.createElement('a');
+      link.download = `${game?.companyName || 'game'}-qr-code.png`;
+      link.href = qrCodeDataURL;
+      link.click();
+    }
   };
 
   if (isLoading) {
@@ -108,8 +173,8 @@ export default function GameCreated() {
                 <div className="text-sm text-muted-foreground">Difficulty</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{game.categories.length}</div>
-                <div className="text-sm text-muted-foreground">Categories</div>
+                <div className="text-2xl font-bold text-primary">{game.categories.join(', ').length > 20 ? game.categories.length + ' types' : game.categories.join(', ')}</div>
+                <div className="text-sm text-muted-foreground">Question Types</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">${game.firstPrize || '0'}</div>
@@ -140,7 +205,7 @@ export default function GameCreated() {
         </Card>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Button 
             onClick={() => setLocation(`/game/${id}`)}
             className="h-24 flex flex-col gap-2"
@@ -148,6 +213,16 @@ export default function GameCreated() {
           >
             <Play className="h-6 w-6" />
             <span>Play Game</span>
+          </Button>
+
+          <Button 
+            variant="outline"
+            onClick={() => setLocation(`/edit-questions/${id}`)}
+            className="h-24 flex flex-col gap-2"
+            data-testid="button-edit-questions"
+          >
+            <Edit3 className="h-6 w-6" />
+            <span>Edit Questions</span>
           </Button>
 
           <Button 
@@ -217,20 +292,136 @@ export default function GameCreated() {
           </Button>
         </div>
 
-        {/* Modals */}
-        <QRCodeModal 
-          isOpen={showQR}
-          onClose={() => setShowQR(false)}
-          gameUrl={gameUrl}
-          gameName={game.companyName}
-        />
+        {/* QR Code Modal */}
+        <Dialog open={showQR} onOpenChange={setShowQR}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Game QR Code</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Scan this QR code to play: {game?.companyName}
+                </p>
+                {qrCodeDataURL ? (
+                  <div className="bg-white p-4 rounded-lg inline-block">
+                    <img 
+                      src={qrCodeDataURL} 
+                      alt="QR Code" 
+                      className="w-64 h-64"
+                      data-testid="qr-code-image"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-64 h-64 bg-muted rounded-lg flex items-center justify-center mx-auto">
+                    <div className="text-center">
+                      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                      <p className="text-sm text-muted-foreground">Generating QR code...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="text-center space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Game URL: {gameUrl}
+                </p>
+                <Button 
+                  onClick={handleDownloadQR} 
+                  disabled={!qrCodeDataURL}
+                  className="w-full"
+                  data-testid="button-download-qr"
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Download QR Code
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
-        <ShareEmbedModal
-          isOpen={showShare}
-          onClose={() => setShowShare(false)}
-          gameId={id!}
-          gameName={game.companyName}
-        />
+        {/* Share & Embed Modal */}
+        <Dialog open={showShare} onOpenChange={setShowShare}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Share {game?.companyName} Trivia</DialogTitle>
+            </DialogHeader>
+
+            <Tabs defaultValue="link" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="link">Share Link</TabsTrigger>
+                <TabsTrigger value="embed">Embed Code</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="link" className="space-y-4">
+                <div>
+                  <Label htmlFor="shareUrl">Share URL</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      id="shareUrl"
+                      value={gameUrl}
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleCopy(gameUrl, "Share link")}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button onClick={handleShare} className="flex-1">
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share Link
+                  </Button>
+                </div>
+
+                <div className="text-sm text-muted-foreground">
+                  Share this link to let others play the trivia game
+                </div>
+              </TabsContent>
+
+              <TabsContent value="embed" className="space-y-4">
+                <div>
+                  <Label htmlFor="embedCode">Embed Code</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Textarea
+                      id="embedCode"
+                      value={`<iframe src="${gameUrl}" width="100%" height="600" frameborder="0" style="border-radius: 8px;"></iframe>`}
+                      readOnly
+                      rows={3}
+                      className="flex-1 font-mono text-sm"
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleCopy(`<iframe src="${gameUrl}" width="100%" height="600" frameborder="0" style="border-radius: 8px;"></iframe>`, "Embed code")}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Edit3 className="h-4 w-4 text-blue-600" />
+                    <span className="font-medium text-blue-800">How to use:</span>
+                  </div>
+                  <ul className="text-sm text-blue-700 space-y-1">
+                    <li>• Copy the embed code above</li>
+                    <li>• Paste it into your website's HTML</li>
+                    <li>• The trivia game will appear on your page</li>
+                    <li>• Customize width and height as needed</li>
+                  </ul>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
