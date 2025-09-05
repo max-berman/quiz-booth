@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { Building, Settings, Gift, Wand2, Home, Trophy, Plus, X, CheckCircle, AlertCircle, Info } from "lucide-react";
-import { Link } from "wouter";
+import { Building, Settings, Gift, Wand2, Plus, X, CheckCircle, AlertCircle, Info } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/loading-spinner";
@@ -46,13 +45,6 @@ export default function Setup() {
     firstPrize: "75",
     secondPrize: "50",
     thirdPrize: "25",
-  });
-  
-  const [currentStep, setCurrentStep] = useState(1);
-  const [completedSections, setCompletedSections] = useState({
-    company: false,
-    settings: false,
-    prizes: false,
   });
   
   const [prizes, setPrizes] = useState([
@@ -170,10 +162,6 @@ export default function Setup() {
     createGameMutation.mutate(gameData);
   };
 
-  if (isGenerating) {
-    return <LoadingSpinner message="Generating Your Trivia Questions" />;
-  }
-
   // Check if sections are complete
   const checkCompanyComplete = () => {
     return formData.companyName.trim() && formData.industry;
@@ -190,24 +178,13 @@ export default function Setup() {
     { id: 3, title: "Prizes (Optional)", icon: Gift, complete: true },
   ];
 
+  if (isGenerating) {
+    return <LoadingSpinner message="Generating Your Trivia Questions" />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-6">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Navigation */}
-        <div className="flex justify-between items-center mb-8">
-          <Link href="/">
-            <Button variant="outline" className="shadow-sm">
-              <Home className="mr-2 h-4 w-4" />
-              Home
-            </Button>
-          </Link>
-          <Link href="/leaderboard">
-            <Button variant="outline" className="shadow-sm">
-              <Trophy className="mr-2 h-4 w-4" />
-              Leaderboard
-            </Button>
-          </Link>
-        </div>
 
         {/* Header */}
         <div className="text-center mb-8">
@@ -227,9 +204,7 @@ export default function Setup() {
                 <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
                   step.complete
                     ? 'bg-green-500 border-green-500 text-white'
-                    : currentStep === step.id
-                      ? 'bg-primary border-primary text-white'
-                      : 'bg-white border-gray-300 text-gray-400'
+                    : 'bg-white border-gray-300 text-gray-400'
                 }`}>
                   {step.complete ? (
                     <CheckCircle className="h-6 w-6" />
@@ -239,7 +214,7 @@ export default function Setup() {
                 </div>
                 <div className="ml-3 hidden sm:block">
                   <p className={`text-sm font-medium ${
-                    step.complete || currentStep === step.id ? 'text-foreground' : 'text-muted-foreground'
+                    step.complete ? 'text-foreground' : 'text-muted-foreground'
                   }`}>
                     {step.title}
                   </p>
@@ -259,66 +234,54 @@ export default function Setup() {
 
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Company Information Section */}
-              <div className={`p-6 rounded-xl border-2 transition-all ${
-                currentStep === 1 ? 'border-primary bg-primary/5' : 'border-gray-200'
-              }`}>
-                <div className="flex items-center justify-between mb-6">
+              <div className="p-6 rounded-xl border-2 border-primary bg-primary/5">
+                <div className="mb-6">
                   <h3 className="text-xl font-bold text-foreground flex items-center">
                     <Building className="text-primary mr-3 h-6 w-6" />
                     Company Information
                     {checkCompanyComplete() && <CheckCircle className="ml-2 h-5 w-5 text-green-500" />}
                   </h3>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setCurrentStep(currentStep === 1 ? 0 : 1)}
-                  >
-                    {currentStep === 1 ? 'Collapse' : 'Expand'}
-                  </Button>
                 </div>
                 
-                {(currentStep === 1 || currentStep === 0) && (
-                  <div className="grid md:grid-cols-2 gap-6">
-
-                    <div>
-                      <Label htmlFor="companyName" className="text-base font-medium">
-                        Company Name or Website *
-                      </Label>
-                      <Input
-                        id="companyName"
-                        placeholder="Enter company name or website URL"
-                        value={formData.companyName}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            companyName: e.target.value,
-                          }))
-                        }
-                        className={`mt-2 h-12 text-base ${
-                          formData.companyName.trim() ? 'border-green-500' : ''
-                        }`}
-                        required
-                      />
-                      <div className="flex items-start gap-2 mt-2">
-                        <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-muted-foreground">
-                          Provide a website URL for more relevant AI-generated questions, or enter your company name.
-                        </p>
-                      </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="companyName" className="text-base font-medium">
+                      Company Name or Website *
+                    </Label>
+                    <Input
+                      id="companyName"
+                      placeholder="Enter company name or website URL"
+                      value={formData.companyName}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          companyName: e.target.value,
+                        }))
+                      }
+                      className={`mt-2 h-12 text-base ${
+                        formData.companyName.trim() ? 'border-green-500' : ''
+                      }`}
+                      required
+                    />
+                    <div className="flex items-start gap-2 mt-2">
+                      <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-muted-foreground">
+                        Provide a website URL for more relevant AI-generated questions, or enter your company name.
+                      </p>
                     </div>
+                  </div>
 
-                    <div>
-                      <Label htmlFor="industry" className="text-base font-medium">Industry *</Label>
-                      <Select
-                        value={formData.industry}
-                        onValueChange={(value) =>
-                          setFormData((prev) => ({ ...prev, industry: value }))
-                        }
-                      >
-                        <SelectTrigger className="mt-2 h-12 text-base">
-                          <SelectValue />
-                        </SelectTrigger>
+                  <div>
+                    <Label htmlFor="industry" className="text-base font-medium">Industry *</Label>
+                    <Select
+                      value={formData.industry}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, industry: value }))
+                      }
+                    >
+                      <SelectTrigger className="mt-2 h-12 text-base">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Advertising and Marketing">
                           Advertising and Marketing
@@ -376,65 +339,52 @@ export default function Setup() {
                     </Select>
                   </div>
 
-                    <div className="md:col-span-2">
-                      <Label htmlFor="productDescription" className="text-base font-medium">
-                        Product/Service Focus (Optional)
-                      </Label>
-                      <Textarea
-                        id="productDescription"
-                        placeholder="Describe your main products or services to get more targeted questions..."
-                        value={formData.productDescription}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            productDescription: e.target.value,
-                          }))
-                        }
-                        className="mt-2 text-base"
-                        rows={3}
-                      />
-                    </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="productDescription" className="text-base font-medium">
+                      Product/Service Focus (Optional)
+                    </Label>
+                    <Textarea
+                      id="productDescription"
+                      placeholder="Describe your main products or services to get more targeted questions..."
+                      value={formData.productDescription}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          productDescription: e.target.value,
+                        }))
+                      }
+                      className="mt-2 text-base"
+                      rows={3}
+                    />
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Game Settings Section */}
-              <div className={`p-6 rounded-xl border-2 transition-all ${
-                currentStep === 2 ? 'border-primary bg-primary/5' : 'border-gray-200'
-              }`}>
-                <div className="flex items-center justify-between mb-6">
+              <div className="p-6 rounded-xl border-2 border-primary bg-primary/5">
+                <div className="mb-6">
                   <h3 className="text-xl font-bold text-foreground flex items-center">
                     <Settings className="text-secondary mr-3 h-6 w-6" />
                     Game Settings
                     {checkSettingsComplete() && <CheckCircle className="ml-2 h-5 w-5 text-green-500" />}
                   </h3>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setCurrentStep(currentStep === 2 ? 0 : 2)}
-                  >
-                    {currentStep === 2 ? 'Collapse' : 'Expand'}
-                  </Button>
                 </div>
                 
-                {(currentStep === 2 || currentStep === 0) && (
-                  <div className="grid md:grid-cols-2 gap-6">
-
-                    <div>
-                      <Label htmlFor="questionCount" className="text-base font-medium">Number of Questions</Label>
-                      <Select
-                        value={formData.questionCount.toString()}
-                        onValueChange={(value) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            questionCount: parseInt(value),
-                          }))
-                        }
-                      >
-                        <SelectTrigger className="mt-2 h-12 text-base">
-                          <SelectValue />
-                        </SelectTrigger>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="questionCount" className="text-base font-medium">Number of Questions</Label>
+                    <Select
+                      value={formData.questionCount.toString()}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          questionCount: parseInt(value),
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="mt-2 h-12 text-base">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="5">5 Questions (Quick)</SelectItem>
                         <SelectItem value="10">
@@ -447,187 +397,172 @@ export default function Setup() {
                     </Select>
                   </div>
 
-                    <div>
-                      <Label className="text-base font-medium">Difficulty Level</Label>
-                      <div className="grid grid-cols-3 gap-3 mt-3">
-                        {[
-                          { level: "easy", label: "Easy", desc: "Basic questions" },
-                          { level: "medium", label: "Medium", desc: "Moderate difficulty" },
-                          { level: "hard", label: "Hard", desc: "Challenging questions" }
-                        ].map(({ level, label, desc }) => (
-                          <Button
-                            key={level}
-                            type="button"
-                            variant={difficulty === level ? "default" : "outline"}
-                            className={`h-16 flex flex-col ${
-                              difficulty === level
-                                ? "bg-primary border-primary text-primary-foreground"
-                                : "hover:border-primary/50"
-                            }`}
-                            onClick={() => setDifficulty(level)}
-                          >
-                            <span className="font-medium">{label}</span>
-                            <span className="text-xs opacity-75">{desc}</span>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <Label className="text-base font-medium">Question Categories *</Label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                        {[
-                          { key: "companyFacts", label: "Company Facts", desc: "Questions about your company" },
-                          { key: "industryKnowledge", label: "Industry Knowledge", desc: "Questions about your industry" },
-                          { key: "funFacts", label: "Fun Facts", desc: "Entertaining trivia" },
-                          { key: "generalKnowledge", label: "General Knowledge", desc: "Broad topics" },
-                          { key: "other", label: "Custom Questions", desc: "Your specific topics" }
-                        ].map(({ key, label, desc }) => (
-                          <div key={key} className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                            categories[key as keyof typeof categories]
-                              ? 'border-primary bg-primary/5'
-                              : 'border-gray-200 hover:border-gray-300'
+                  <div>
+                    <Label className="text-base font-medium">Difficulty Level</Label>
+                    <div className="grid grid-cols-3 gap-3 mt-3">
+                      {[
+                        { level: "easy", label: "Easy", desc: "Basic questions" },
+                        { level: "medium", label: "Medium", desc: "Moderate difficulty" },
+                        { level: "hard", label: "Hard", desc: "Challenging questions" }
+                      ].map(({ level, label, desc }) => (
+                        <Button
+                          key={level}
+                          type="button"
+                          variant={difficulty === level ? "default" : "outline"}
+                          className={`h-16 flex flex-col ${
+                            difficulty === level
+                              ? "bg-primary border-primary text-primary-foreground"
+                              : "hover:border-primary/50"
                           }`}
-                          onClick={() => setCategories((prev) => ({
-                            ...prev,
-                            [key]: !prev[key as keyof typeof prev],
-                          }))}
-                          >
-                            <div className="flex items-start space-x-3">
-                              <Checkbox
-                                id={key}
-                                checked={categories[key as keyof typeof categories]}
-                                onCheckedChange={(checked) =>
-                                  setCategories((prev) => ({
-                                    ...prev,
-                                    [key]: checked as boolean,
-                                  }))
-                                }
-                              />
-                              <div>
-                                <Label htmlFor={key} className="font-medium cursor-pointer">
-                                  {label}
-                                </Label>
-                                <p className="text-sm text-muted-foreground">{desc}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      {categories.other && (
-                        <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                          <Label htmlFor="customCategory" className="text-base font-medium">
-                            Describe your custom questions
-                          </Label>
-                          <Textarea
-                            id="customCategory"
-                            placeholder="e.g., questions about sustainable packaging, our company history, or specific product features"
-                            value={customCategory}
-                            onChange={(e) => setCustomCategory(e.target.value)}
-                            className="mt-2"
-                            rows={2}
-                          />
-                        </div>
-                      )}
-                      {!Object.values(categories).some(Boolean) && (
-                        <div className="flex items-center gap-2 mt-2 text-red-600">
-                          <AlertCircle className="h-4 w-4" />
-                          <span className="text-sm">Please select at least one category</span>
-                        </div>
-                      )}
+                          onClick={() => setDifficulty(level)}
+                        >
+                          <span className="font-medium">{label}</span>
+                          <span className="text-xs opacity-75">{desc}</span>
+                        </Button>
+                      ))}
                     </div>
                   </div>
-                )}
+
+                  <div className="md:col-span-2">
+                    <Label className="text-base font-medium">Question Categories *</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                      {[
+                        { key: "companyFacts", label: "Company Facts", desc: "Questions about your company" },
+                        { key: "industryKnowledge", label: "Industry Knowledge", desc: "Questions about your industry" },
+                        { key: "funFacts", label: "Fun Facts", desc: "Entertaining trivia" },
+                        { key: "generalKnowledge", label: "General Knowledge", desc: "Broad topics" },
+                        { key: "other", label: "Custom Questions", desc: "Your specific topics" }
+                      ].map(({ key, label, desc }) => (
+                        <div key={key} className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                          categories[key as keyof typeof categories]
+                            ? 'border-primary bg-primary/5'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => setCategories((prev) => ({
+                          ...prev,
+                          [key]: !prev[key as keyof typeof prev],
+                        }))}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <Checkbox
+                              id={key}
+                              checked={categories[key as keyof typeof categories]}
+                              onCheckedChange={(checked) =>
+                                setCategories((prev) => ({
+                                  ...prev,
+                                  [key]: checked as boolean,
+                                }))
+                              }
+                            />
+                            <div>
+                              <Label htmlFor={key} className="font-medium cursor-pointer">
+                                {label}
+                              </Label>
+                              <p className="text-sm text-muted-foreground">{desc}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {categories.other && (
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                        <Label htmlFor="customCategory" className="text-base font-medium">
+                          Describe your custom questions
+                        </Label>
+                        <Textarea
+                          id="customCategory"
+                          placeholder="e.g., questions about sustainable packaging, our company history, or specific product features"
+                          value={customCategory}
+                          onChange={(e) => setCustomCategory(e.target.value)}
+                          className="mt-2"
+                          rows={2}
+                        />
+                      </div>
+                    )}
+                    {!Object.values(categories).some(Boolean) && (
+                      <div className="flex items-center gap-2 mt-2 text-red-600">
+                        <AlertCircle className="h-4 w-4" />
+                        <span className="text-sm">Please select at least one category</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Prize Settings Section */}
-              <div className={`p-6 rounded-xl border-2 transition-all ${
-                currentStep === 3 ? 'border-primary bg-primary/5' : 'border-gray-200'
-              }`}>
+              <div className="p-6 rounded-xl border-2 border-primary bg-primary/5">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-foreground flex items-center">
                     <Gift className="text-secondary mr-3 h-6 w-6" />
                     Prize Information (Optional)
                     <CheckCircle className="ml-2 h-5 w-5 text-green-500" />
                   </h3>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPrizes([...prizes, { placement: "", prize: "" }])}
-                      className="flex items-center gap-1"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add Prize
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setCurrentStep(currentStep === 3 ? 0 : 3)}
-                    >
-                      {currentStep === 3 ? 'Collapse' : 'Expand'}
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPrizes([...prizes, { placement: "", prize: "" }])}
+                    className="flex items-center gap-1"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Prize
+                  </Button>
                 </div>
                 
-                {(currentStep === 3 || currentStep === 0) && (
-                  <div className="space-y-4">
-                    {prizes.map((prize, index) => (
-                      <div key={index} className="flex gap-3 items-end p-4 bg-white rounded-lg border">
-                        <div className="flex-1">
-                          <Label htmlFor={`placement-${index}`} className="text-base font-medium">Placement</Label>
-                          <Input
-                            id={`placement-${index}`}
-                            placeholder="e.g., 1st Place, Top 10, etc."
-                            value={prize.placement}
-                            onChange={(e) => {
-                              const updatedPrizes = [...prizes];
-                              updatedPrizes[index].placement = e.target.value;
-                              setPrizes(updatedPrizes);
-                            }}
-                            className="mt-2 h-11"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <Label htmlFor={`prize-${index}`} className="text-base font-medium">Prize</Label>
-                          <Input
-                            id={`prize-${index}`}
-                            placeholder="e.g., $100 Gift Card"
-                            value={prize.prize}
-                            onChange={(e) => {
-                              const updatedPrizes = [...prizes];
-                              updatedPrizes[index].prize = e.target.value;
-                              setPrizes(updatedPrizes);
-                            }}
-                            className="mt-2 h-11"
-                          />
-                        </div>
-                        {prizes.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const updatedPrizes = prizes.filter((_, i) => i !== index);
-                              setPrizes(updatedPrizes);
-                            }}
-                            className="h-11 w-11 p-0"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
+                <div className="space-y-4">
+                  {prizes.map((prize, index) => (
+                    <div key={index} className="flex gap-3 items-end p-4 bg-white rounded-lg border">
+                      <div className="flex-1">
+                        <Label htmlFor={`placement-${index}`} className="text-base font-medium">Placement</Label>
+                        <Input
+                          id={`placement-${index}`}
+                          placeholder="e.g., 1st Place, Top 10, etc."
+                          value={prize.placement}
+                          onChange={(e) => {
+                            const updatedPrizes = [...prizes];
+                            updatedPrizes[index].placement = e.target.value;
+                            setPrizes(updatedPrizes);
+                          }}
+                          className="mt-2 h-11"
+                        />
                       </div>
-                    ))}
-                    <div className="flex items-start gap-2 p-4 bg-blue-50 rounded-lg">
-                      <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-blue-700">
-                        Add prizes to motivate participation. You can customize placements (e.g., "4th Place", "Top 10", "Best Score") to match your event needs.
-                      </p>
+                      <div className="flex-1">
+                        <Label htmlFor={`prize-${index}`} className="text-base font-medium">Prize</Label>
+                        <Input
+                          id={`prize-${index}`}
+                          placeholder="e.g., $100 Gift Card"
+                          value={prize.prize}
+                          onChange={(e) => {
+                            const updatedPrizes = [...prizes];
+                            updatedPrizes[index].prize = e.target.value;
+                            setPrizes(updatedPrizes);
+                          }}
+                          className="mt-2 h-11"
+                        />
+                      </div>
+                      {prizes.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const updatedPrizes = prizes.filter((_, i) => i !== index);
+                            setPrizes(updatedPrizes);
+                          }}
+                          className="h-11 w-11 p-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
+                  ))}
+                  <div className="flex items-start gap-2 p-4 bg-blue-50 rounded-lg">
+                    <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-blue-700">
+                      Add prizes to motivate participation. You can customize placements (e.g., "4th Place", "Top 10", "Best Score") to match your event needs.
+                    </p>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Submit Section */}
