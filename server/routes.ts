@@ -459,6 +459,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update game prizes (authenticated users only)
+  app.put("/api/games/:id/prizes", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const gameId = req.params.id;
+      const { prizes } = req.body;
+      
+      // Validate prizes data
+      if (!Array.isArray(prizes)) {
+        return res.status(400).json({ message: "Prizes must be an array" });
+      }
+      
+      // Validate each prize has required fields
+      for (const prize of prizes) {
+        if (!prize.placement || !prize.prize) {
+          return res.status(400).json({ message: "Each prize must have placement and prize fields" });
+        }
+      }
+      
+      const updatedGame = await storage.updateGamePrizes(gameId, prizes, req.user.uid);
+      res.json(updatedGame);
+    } catch (error) {
+      console.error('Update prizes error:', error);
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Access denied. Only the game creator can edit prizes." });
+      } else if (error instanceof Error && error.message.includes("not found")) {
+        res.status(404).json({ message: "Game not found" });
+      } else {
+        res.status(500).json({ message: "Failed to update prizes" });
+      }
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

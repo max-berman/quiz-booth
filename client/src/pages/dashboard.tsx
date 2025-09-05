@@ -7,6 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
   Edit3,
   BarChart3,
   Users,
@@ -16,6 +26,9 @@ import {
   ArrowLeft,
   Database,
   Share2,
+  Gift,
+  Save,
+  X,
 } from "lucide-react";
 import { QRCodeModal } from "@/components/qr-code-modal";
 import { ShareEmbedModal } from "@/components/share-embed-modal";
@@ -24,6 +37,14 @@ import type { Game } from "@shared/firebase-types";
 export default function Dashboard() {
   const [location, setLocation] = useLocation();
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [editingPrizes, setEditingPrizes] = useState<string | null>(null);
+  const [prizes, setPrizes] = useState([
+    { placement: "1st Place", prize: "" },
+    { placement: "2nd Place", prize: "" },
+    { placement: "3rd Place", prize: "" },
+  ]);
 
   // Fetch games using Firebase authentication only
   const { data: allGames = [], isLoading } = useQuery<Game[]>({
@@ -68,6 +89,66 @@ export default function Dashboard() {
     },
     enabled: isAuthenticated,
   });
+
+  const updatePrizesMutation = useMutation({
+    mutationFn: async ({ gameId, updatedPrizes }: { gameId: string; updatedPrizes: { placement: string; prize: string }[] }) => {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/games/${gameId}/prizes`, {
+        method: 'PUT',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prizes: updatedPrizes }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to update prizes' }));
+        throw new Error(errorData.message || 'Failed to update prizes');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/my-games', user?.uid] });
+      toast({
+        title: "Prizes updated",
+        description: "Prize information has been saved successfully.",
+      });
+      setEditingPrizes(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to update prizes",
+        description: error.message || "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSavePrizes = () => {
+    if (!editingPrizes) return;
+    
+    // Filter out empty prizes
+    const validPrizes = prizes.filter(p => p.placement.trim() && p.prize.trim());
+    updatePrizesMutation.mutate({ gameId: editingPrizes, updatedPrizes: validPrizes });
+  };
+
+  const addPrize = () => {
+    setPrizes([...prizes, { placement: "", prize: "" }]);
+  };
+
+  const removePrize = (index: number) => {
+    if (prizes.length > 1) {
+      setPrizes(prizes.filter((_, i) => i !== index));
+    }
+  };
+
+  const updatePrize = (index: number, field: 'placement' | 'prize', value: string) => {
+    const updatedPrizes = [...prizes];
+    updatedPrizes[index][field] = value;
+    setPrizes(updatedPrizes);
+  };
 
   if (!isAuthenticated) {
     return (
@@ -221,16 +302,42 @@ export default function Dashboard() {
 
                   {/* Action Buttons */}
                   <div className="space-y-2 pt-2">
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => setLocation(`/edit-questions/${game.id}`)}
-                      className="w-full"
-                      data-testid={`button-edit-questions-${game.id}`}
-                    >
-                      <Edit3 className="mr-2 h-4 w-4" />
-                      Edit Questions
-                    </Button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => setLocation(`/edit-questions/${game.id}`)}
+                        data-testid={`button-edit-questions-${game.id}`}
+                      >
+                        <Edit3 className="mr-1 h-4 w-4" />
+                        Questions
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Initialize prizes for this game
+                          const existingPrizes = [];
+                          if (game.prizes && game.prizes.length > 0) {
+                            existingPrizes.push(...game.prizes);
+                          } else {
+                            // Legacy format
+                            if (game.firstPrize) existingPrizes.push({ placement: "1st Place", prize: game.firstPrize });
+                            if (game.secondPrize) existingPrizes.push({ placement: "2nd Place", prize: game.secondPrize });
+                            if (game.thirdPrize) existingPrizes.push({ placement: "3rd Place", prize: game.thirdPrize });
+                          }
+                          if (existingPrizes.length === 0) {
+                            existingPrizes.push({ placement: "1st Place", prize: "" });
+                          }
+                          setPrizes(existingPrizes);
+                          setEditingPrizes(game.id);
+                        }}
+                        data-testid={`button-edit-prizes-${game.id}`}
+                      >
+                        <Gift className="mr-1 h-4 w-4" />
+                        Prizes
+                      </Button>
+                    </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <Button
@@ -266,15 +373,25 @@ export default function Dashboard() {
                   </div>
 
                   {/* Prizes if configured */}
-                  {(game.firstPrize || game.secondPrize || game.thirdPrize) && (
+                  {((game.prizes && game.prizes.length > 0) || game.firstPrize || game.secondPrize || game.thirdPrize) && (
                     <div className="pt-2 border-t border-border">
                       <p className="text-xs font-medium text-muted-foreground mb-1">
                         Prizes:
                       </p>
                       <div className="text-xs space-y-1">
-                        {game.firstPrize && <div>🥇 {game.firstPrize}</div>}
-                        {game.secondPrize && <div>🥈 {game.secondPrize}</div>}
-                        {game.thirdPrize && <div>🥉 {game.thirdPrize}</div>}
+                        {game.prizes && game.prizes.length > 0 ? (
+                          game.prizes.map((prize, index) => (
+                            <div key={index}>
+                              {prize.placement}: {prize.prize}
+                            </div>
+                          ))
+                        ) : (
+                          <>
+                            {game.firstPrize && <div>🥇 {game.firstPrize}</div>}
+                            {game.secondPrize && <div>🥈 {game.secondPrize}</div>}
+                            {game.thirdPrize && <div>🥉 {game.thirdPrize}</div>}
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
@@ -297,6 +414,85 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* Prize Edit Modal */}
+        <Dialog open={!!editingPrizes} onOpenChange={() => setEditingPrizes(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Prize Information</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {prizes.map((prize, index) => (
+                  <div key={index} className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <Label htmlFor={`placement-${index}`} className="text-xs">Placement</Label>
+                      <Input
+                        id={`placement-${index}`}
+                        placeholder="e.g., 1st Place"
+                        value={prize.placement}
+                        onChange={(e) => updatePrize(index, 'placement', e.target.value)}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <Label htmlFor={`prize-${index}`} className="text-xs">Prize</Label>
+                      <Input
+                        id={`prize-${index}`}
+                        placeholder="e.g., $100 Gift Card"
+                        value={prize.prize}
+                        onChange={(e) => updatePrize(index, 'prize', e.target.value)}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    {prizes.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removePrize(index)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addPrize}
+                  className="flex-1"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add Prize
+                </Button>
+              </div>
+              
+              <div className="flex gap-2 pt-2">
+                <Button
+                  onClick={handleSavePrizes}
+                  disabled={updatePrizesMutation.isPending}
+                  className="flex-1"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {updatePrizesMutation.isPending ? 'Saving...' : 'Save Prizes'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditingPrizes(null)}
+                  disabled={updatePrizesMutation.isPending}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

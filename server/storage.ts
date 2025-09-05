@@ -11,6 +11,7 @@ export interface IStorage {
   verifyGameAccessByUser(gameId: string, userId: string): Promise<boolean>;
   getGamesByCreator(creatorKey: string): Promise<Game[]>;
   getGamesByUser(userId: string): Promise<Game[]>;
+  updateGamePrizes(gameId: string, prizes: PrizePlacement[], userId: string): Promise<Game>;
   
   // Question methods
   createQuestions(questions: InsertQuestion[]): Promise<Question[]>;
@@ -384,6 +385,31 @@ export class FirebaseStorage implements IStorage {
     
     await db.collection(collections.questions).doc(id).set(question);
     return question;
+  }
+
+  async updateGamePrizes(gameId: string, prizes: PrizePlacement[], userId: string): Promise<Game> {
+    // Verify user owns the game
+    const hasAccess = await this.verifyGameAccessByUser(gameId, userId);
+    if (!hasAccess) {
+      throw new Error('Unauthorized: Only the game creator can update prizes');
+    }
+    
+    // Get the current game
+    const game = await this.getGame(gameId);
+    if (!game) {
+      throw new Error('Game not found');
+    }
+    
+    // Update prizes in Firestore
+    await db.collection(collections.games).doc(gameId).update({
+      prizes: prizes
+    });
+    
+    // Return updated game
+    return {
+      ...game,
+      prizes: prizes
+    };
   }
 }
 
