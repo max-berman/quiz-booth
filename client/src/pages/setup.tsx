@@ -521,10 +521,10 @@ export default function Setup() {
                           key={level}
                           type="button"
                           variant={difficulty === level ? "default" : "outline"}
-                          className={`h-8 flex flex-col ${
+                          className={`h-8 flex flex-col hover:scale-100 ${
                             difficulty === level
                               ? "bg-primary border-primary text-primary-foreground"
-                              : "hover:border-primary/50"
+                              : ""
                           }`}
                           onClick={() => setDifficulty(level)}
                         >
@@ -769,7 +769,7 @@ export default function Setup() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="px-12 py-4 bg-primary text-primary-foreground font-bold text-lg rounded-xl transition-all duration-200 hover:opacity-90"
+                    className="px-12 py-4 font-bold text-lg rounded-xl"
                     disabled={
                       createGameMutation.isPending ||
                       !checkCompanyComplete() ||

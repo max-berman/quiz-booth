@@ -162,16 +162,18 @@ export default function Results() {
               {/* Primary Actions Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button
+                  variant="secondary"
                   onClick={() => setLocation("/setup")}
-                  className="px-6 py-3 bg-secondary hover:bg-secondary/90 w-full"
+                  className="px-6 py-3 w-full"
                   data-testid="button-play-again"
                 >
                   <RotateCcw className="mr-2 h-4 w-4" />
                   Play Again
                 </Button>
                 <Button
+                  variant="default"
                   onClick={() => setLocation(`/leaderboard/${id}`)}
-                  className="px-6 py-3 bg-primary hover:bg-primary/90 w-full"
+                  className="px-6 py-3 w-full"
                   data-testid="button-view-leaderboard"
                 >
                   <Eye className="mr-2 h-4 w-4" />
