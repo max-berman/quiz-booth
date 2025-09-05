@@ -6,44 +6,40 @@ import { auth } from './firebase';
 export async function getAuthToken(): Promise<string | null> {
   try {
     const user = auth.currentUser;
+    console.log('getAuthToken: Current user:', user?.uid);
     if (!user) {
+      console.log('getAuthToken: No current user found');
       return null;
     }
     
     const token = await user.getIdToken();
+    console.log('getAuthToken: Token generated, length:', token?.length);
     return token;
   } catch (error) {
-    console.error('Error getting auth token:', error);
+    console.error('getAuthToken: Error getting auth token:', error);
     return null;
   }
 }
 
 /**
  * Get authentication headers for API requests
- * Returns either Firebase auth or creator key headers
+ * Returns Firebase auth headers only
  */
 export async function getAuthHeaders(gameId?: string): Promise<Record<string, string>> {
-  // Try to get Firebase auth token first
+  // Get Firebase auth token
   const authToken = await getAuthToken();
+  console.log('getAuthHeaders: Auth token available?', !!authToken);
   
   if (authToken) {
-    return {
+    const headers = {
       'Authorization': `Bearer ${authToken}`,
       'Content-Type': 'application/json',
     };
+    console.log('getAuthHeaders: Returning headers with Authorization');
+    return headers;
   }
   
-  // Fall back to creator key if provided
-  if (gameId) {
-    const creatorKey = localStorage.getItem(`game-${gameId}-creator-key`);
-    if (creatorKey) {
-      return {
-        'X-Creator-Key': creatorKey,
-        'Content-Type': 'application/json',
-      };
-    }
-  }
-  
+  console.log('getAuthHeaders: No auth token available, returning basic headers');
   return {
     'Content-Type': 'application/json',
   };
