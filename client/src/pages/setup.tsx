@@ -36,6 +36,8 @@ export default function Setup() {
     other: false,
   });
   const [customCategory, setCustomCategory] = useState("");
+  const [customIndustry, setCustomIndustry] = useState("");
+  const [focusedSection, setFocusedSection] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -234,7 +236,12 @@ export default function Setup() {
 
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Company Information Section */}
-              <div className="p-6 rounded-xl border-2 border-primary bg-primary/5">
+              <div className={`p-6 rounded-xl border-2 transition-all ${
+                focusedSection === 1 ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50'
+              }`}
+              onFocus={() => setFocusedSection(1)}
+              onBlur={() => setFocusedSection(null)}
+              tabIndex={0}>
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-foreground flex items-center">
                     <Building className="text-primary mr-3 h-6 w-6" />
@@ -258,7 +265,7 @@ export default function Setup() {
                           companyName: e.target.value,
                         }))
                       }
-                      className={`mt-2 h-12 text-base ${
+                      className={`mt-2 h-12 text-base border-gray-300 ${
                         formData.companyName.trim() ? 'border-green-500' : ''
                       }`}
                       required
@@ -279,7 +286,7 @@ export default function Setup() {
                         setFormData((prev) => ({ ...prev, industry: value }))
                       }
                     >
-                      <SelectTrigger className="mt-2 h-12 text-base">
+                      <SelectTrigger className="mt-2 h-12 text-base border-gray-300">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -335,9 +342,28 @@ export default function Setup() {
                         <SelectItem value="Wellness and Lifestyle">
                           Wellness and Lifestyle
                         </SelectItem>
+                        <SelectItem value="Other">
+                          Other
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {formData.industry === "Other" && (
+                    <div>
+                      <Label htmlFor="customIndustry" className="text-base font-medium">
+                        Custom Industry *
+                      </Label>
+                      <Input
+                        id="customIndustry"
+                        placeholder="Enter your industry"
+                        value={customIndustry}
+                        onChange={(e) => setCustomIndustry(e.target.value)}
+                        className="mt-2 h-12 text-base border-gray-300"
+                        required
+                      />
+                    </div>
+                  )}
 
                   <div className="md:col-span-2">
                     <Label htmlFor="productDescription" className="text-base font-medium">
@@ -353,7 +379,7 @@ export default function Setup() {
                           productDescription: e.target.value,
                         }))
                       }
-                      className="mt-2 text-base"
+                      className="mt-2 text-base border-gray-300"
                       rows={3}
                     />
                   </div>
@@ -361,7 +387,12 @@ export default function Setup() {
               </div>
 
               {/* Game Settings Section */}
-              <div className="p-6 rounded-xl border-2 border-primary bg-primary/5">
+              <div className={`p-6 rounded-xl border-2 transition-all ${
+                focusedSection === 2 ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50'
+              }`}
+              onFocus={() => setFocusedSection(2)}
+              onBlur={() => setFocusedSection(null)}
+              tabIndex={0}>
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-foreground flex items-center">
                     <Settings className="text-secondary mr-3 h-6 w-6" />
@@ -382,7 +413,7 @@ export default function Setup() {
                         }))
                       }
                     >
-                      <SelectTrigger className="mt-2 h-12 text-base">
+                      <SelectTrigger className="mt-2 h-12 text-base border-gray-300">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -474,7 +505,7 @@ export default function Setup() {
                           placeholder="e.g., questions about sustainable packaging, our company history, or specific product features"
                           value={customCategory}
                           onChange={(e) => setCustomCategory(e.target.value)}
-                          className="mt-2"
+                          className="mt-2 border-gray-300"
                           rows={2}
                         />
                       </div>
@@ -490,7 +521,12 @@ export default function Setup() {
               </div>
 
               {/* Prize Settings Section */}
-              <div className="p-6 rounded-xl border-2 border-primary bg-primary/5">
+              <div className={`p-6 rounded-xl border-2 transition-all ${
+                focusedSection === 3 ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50'
+              }`}
+              onFocus={() => setFocusedSection(3)}
+              onBlur={() => setFocusedSection(null)}
+              tabIndex={0}>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-foreground flex items-center">
                     <Gift className="text-secondary mr-3 h-6 w-6" />
@@ -523,7 +559,7 @@ export default function Setup() {
                             updatedPrizes[index].placement = e.target.value;
                             setPrizes(updatedPrizes);
                           }}
-                          className="mt-2 h-11"
+                          className="mt-2 h-11 border-gray-300"
                         />
                       </div>
                       <div className="flex-1">
@@ -537,7 +573,7 @@ export default function Setup() {
                             updatedPrizes[index].prize = e.target.value;
                             setPrizes(updatedPrizes);
                           }}
-                          className="mt-2 h-11"
+                          className="mt-2 h-11 border-gray-300"
                         />
                       </div>
                       {prizes.length > 1 && (
