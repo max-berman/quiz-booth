@@ -415,6 +415,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add single question to game (authenticated users only)
+  app.post("/api/games/:id/add-question", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const gameId = req.params.id;
+      const questionData = req.body;
+      
+      // Validate required fields
+      if (!questionData.questionText || !questionData.options || questionData.correctAnswer === undefined) {
+        return res.status(400).json({ message: "Missing required fields: questionText, options, correctAnswer" });
+      }
+      
+      if (!Array.isArray(questionData.options) || questionData.options.length !== 4) {
+        return res.status(400).json({ message: "Options must be an array of exactly 4 strings" });
+      }
+      
+      if (questionData.correctAnswer < 0 || questionData.correctAnswer > 3) {
+        return res.status(400).json({ message: "Correct answer must be between 0 and 3" });
+      }
+      
+      const question = await storage.addQuestionToGame(gameId, questionData, req.user.uid);
+      res.json(question);
+    } catch (error) {
+      console.error('Add question error:', error);
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Access denied. Only the game creator can add questions." });
+      } else if (error instanceof Error && error.message.includes("not found")) {
+        res.status(404).json({ message: "Game not found" });
+      } else {
+        res.status(500).json({ message: "Failed to add question" });
+      }
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

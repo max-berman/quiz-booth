@@ -14,6 +14,7 @@ export interface IStorage {
   
   // Question methods
   createQuestions(questions: InsertQuestion[]): Promise<Question[]>;
+  addQuestionToGame(gameId: string, questionData: Omit<InsertQuestion, 'gameId'>, userId: string): Promise<Question>;
   getQuestionsByGameId(gameId: string): Promise<Question[]>;
   updateQuestion(id: string, updates: Partial<Question>, creatorKey: string): Promise<Question>;
   updateQuestionByUser(id: string, updates: Partial<Question>, userId: string): Promise<Question>;
@@ -355,6 +356,32 @@ export class FirebaseStorage implements IStorage {
     
     // Sort by completedAt (desc) in memory
     return players.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+  }
+
+  async addQuestionToGame(gameId: string, questionData: Omit<InsertQuestion, 'gameId'>, userId: string): Promise<Question> {
+    // Verify user owns the game
+    const hasAccess = await this.verifyGameAccessByUser(gameId, userId);
+    if (!hasAccess) {
+      throw new Error('Unauthorized: Only the game creator can add questions');
+    }
+    
+    // Get existing questions to determine order
+    const existingQuestions = await this.getQuestionsByGameId(gameId);
+    const maxOrder = Math.max(0, ...existingQuestions.map(q => q.order || 0));
+    
+    const id = randomUUID();
+    const question: Question = {
+      id,
+      gameId,
+      questionText: questionData.questionText,
+      options: questionData.options,
+      correctAnswer: questionData.correctAnswer,
+      explanation: questionData.explanation || null,
+      order: maxOrder + 1,
+    };
+    
+    await db.collection(collections.questions).doc(id).set(question);
+    return question;
   }
 }
 

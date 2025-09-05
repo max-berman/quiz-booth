@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Save, Edit3, AlertCircle } from "lucide-react";
+import { ArrowLeft, Save, Edit3, AlertCircle, Plus, X } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/contexts/auth-context";
 import { getAuthHeaders } from "@/lib/auth-utils";
@@ -24,6 +24,13 @@ export default function EditQuestions() {
   const currentGameId = gameId;
   const [editingQuestion, setEditingQuestion] = useState<string | null>(null);
   const [questionEdits, setQuestionEdits] = useState<Record<string, Partial<Question>>>({});
+  const [isAddingQuestion, setIsAddingQuestion] = useState(false);
+  const [newQuestion, setNewQuestion] = useState({
+    questionText: '',
+    options: ['', '', '', ''],
+    correctAnswer: 0,
+    explanation: ''
+  });
 
   const { data: game } = useQuery<Game>({
     queryKey: ['/api/games', currentGameId],
@@ -71,6 +78,53 @@ export default function EditQuestions() {
       console.error('Update question error:', error);
       toast({
         title: "Failed to update question",
+        description: error.message || "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const addQuestionMutation = useMutation({
+    mutationFn: async (questionData: { questionText: string; options: string[]; correctAnswer: number; explanation: string }) => {
+      if (!user || !currentGameId) {
+        throw new Error("Authentication required to add questions");
+      }
+      
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/games/${currentGameId}/add-question`, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(questionData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to add question' }));
+        throw new Error(errorData.message || 'Failed to add question');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/games', currentGameId, 'questions'] });
+      toast({
+        title: "Question added",
+        description: "Your new question has been added successfully.",
+      });
+      setIsAddingQuestion(false);
+      setNewQuestion({
+        questionText: '',
+        options: ['', '', '', ''],
+        correctAnswer: 0,
+        explanation: ''
+      });
+    },
+    onError: (error: any) => {
+      console.error('Add question error:', error);
+      toast({
+        title: "Failed to add question",
         description: error.message || "Please try again.",
         variant: "destructive",
       });
@@ -126,6 +180,50 @@ export default function EditQuestions() {
           options: newOptions,
         }
       };
+    });
+  };
+
+  const updateNewQuestionOption = (optionIndex: number, value: string) => {
+    setNewQuestion(prev => {
+      const newOptions = [...prev.options];
+      newOptions[optionIndex] = value;
+      return {
+        ...prev,
+        options: newOptions
+      };
+    });
+  };
+
+  const handleAddQuestion = () => {
+    // Validate the new question
+    if (!newQuestion.questionText.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Question text is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (newQuestion.options.some(option => !option.trim())) {
+      toast({
+        title: "Validation Error",
+        description: "All answer options must be filled.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    addQuestionMutation.mutate(newQuestion);
+  };
+
+  const handleCancelAdd = () => {
+    setIsAddingQuestion(false);
+    setNewQuestion({
+      questionText: '',
+      options: ['', '', '', ''],
+      correctAnswer: 0,
+      explanation: ''
     });
   };
 
@@ -198,6 +296,113 @@ export default function EditQuestions() {
             </p>
           </div>
         </div>
+
+        {/* Add Question Button */}
+        <div className="mb-6">
+          <Button 
+            onClick={() => setIsAddingQuestion(true)}
+            disabled={isAddingQuestion || editingQuestion !== null}
+            data-testid="button-add-question"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add New Question
+          </Button>
+        </div>
+
+        {/* Add New Question Form */}
+        {isAddingQuestion && (
+          <Card className="mb-6 border-primary">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Add New Question</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancelAdd}
+                  data-testid="button-cancel-add"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label htmlFor="new-question-text">Question Text</Label>
+                <Textarea
+                  id="new-question-text"
+                  value={newQuestion.questionText}
+                  onChange={(e) => setNewQuestion(prev => ({ ...prev, questionText: e.target.value }))}
+                  className="mt-1"
+                  rows={3}
+                  placeholder="Enter your trivia question..."
+                  data-testid="input-new-question-text"
+                />
+              </div>
+
+              <div>
+                <Label>Answer Options</Label>
+                <div className="space-y-3 mt-2">
+                  {newQuestion.options.map((option, optionIndex) => (
+                    <div key={optionIndex} className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        newQuestion.correctAnswer === optionIndex ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {String.fromCharCode(65 + optionIndex)}
+                      </div>
+                      <Input
+                        value={option}
+                        onChange={(e) => updateNewQuestionOption(optionIndex, e.target.value)}
+                        className="flex-1"
+                        placeholder={`Option ${String.fromCharCode(65 + optionIndex)}`}
+                        data-testid={`input-new-option-${optionIndex}`}
+                      />
+                      <Button
+                        variant={newQuestion.correctAnswer === optionIndex ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setNewQuestion(prev => ({ ...prev, correctAnswer: optionIndex }))}
+                        data-testid={`button-new-correct-${optionIndex}`}
+                      >
+                        {newQuestion.correctAnswer === optionIndex ? 'Correct' : 'Mark Correct'}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="new-explanation">Explanation (Optional)</Label>
+                <Textarea
+                  id="new-explanation"
+                  value={newQuestion.explanation}
+                  onChange={(e) => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
+                  className="mt-1"
+                  rows={2}
+                  placeholder="Explain why this is the correct answer..."
+                  data-testid="input-new-explanation"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  onClick={handleAddQuestion}
+                  disabled={addQuestionMutation.isPending}
+                  data-testid="button-save-new-question"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {addQuestionMutation.isPending ? 'Adding...' : 'Add Question'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleCancelAdd}
+                  disabled={addQuestionMutation.isPending}
+                  data-testid="button-cancel-new-question"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Questions List */}
         <div className="space-y-6">
