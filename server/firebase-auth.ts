@@ -33,11 +33,17 @@ export async function optionalFirebaseAuth(req: AuthenticatedRequest, res: Respo
     console.log('Auth middleware: Token extracted, length:', idToken?.length);
     
     try {
-      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      // Try to verify the token without checking claims first
+      const decodedToken = await admin.auth().verifyIdToken(idToken, false);
       req.user = decodedToken;
       console.log('Auth middleware: Token verified successfully for user:', decodedToken.uid);
-    } catch (error) {
-      console.log('Auth middleware: Optional auth failed, continuing without user context. Error:', error);
+    } catch (error: any) {
+      console.log('Auth middleware: Optional auth failed, continuing without user context.');
+      console.log('Auth middleware: Error details:', {
+        code: error?.code,
+        message: error?.message,
+        errorInfo: error?.errorInfo
+      });
     }
   } else {
     console.log('Auth middleware: No valid authorization header found');
