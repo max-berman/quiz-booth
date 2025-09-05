@@ -32,6 +32,7 @@ import {
   Play,
 } from "lucide-react";
 import { QRCodeModal } from "@/components/qr-code-modal";
+import { ProfessionalFooter } from "@/components/professional-footer";
 import { ShareEmbedModal } from "@/components/share-embed-modal";
 import type { Game } from "@shared/firebase-types";
 
@@ -317,7 +318,8 @@ export default function Dashboard() {
                     {/* Management Actions */}
                     <div className="grid grid-cols-2 gap-2">
                       <Button
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        variant="secondary"
+                        className="w-full"
                         size="sm"
                         onClick={() => setLocation(`/edit-questions/${game.id}`)}
                         data-testid={`button-edit-questions-${game.id}`}
@@ -326,7 +328,8 @@ export default function Dashboard() {
                         Questions
                       </Button>
                       <Button
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        variant="outline"
+                        className="w-full"
                         size="sm"
                         onClick={() => {
                           // Initialize prizes for this game
@@ -355,7 +358,8 @@ export default function Dashboard() {
                     {/* Analytics Actions */}
                     <div className="grid grid-cols-2 gap-2">
                       <Button
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        variant="secondary"
+                        className="w-full"
                         size="sm"
                         onClick={() => setLocation(`/leaderboard/${game.id}`)}
                         data-testid={`button-leaderboard-${game.id}`}
@@ -364,7 +368,8 @@ export default function Dashboard() {
                         Leaderboard
                       </Button>
                       <Button
-                        className="bg-orange-600 hover:bg-orange-700 text-white"
+                        variant="outline"
+                        className="w-full"
                         size="sm"
                         onClick={() => {
                           // Store creator access for raw data
@@ -513,6 +518,7 @@ export default function Dashboard() {
           </DialogContent>
         </Dialog>
       </div>
+      <ProfessionalFooter />
     </div>
   );
 }

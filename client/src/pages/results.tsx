@@ -10,6 +10,7 @@ import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ShareEmbedModal } from "@/components/share-embed-modal";
+import { ProfessionalFooter } from "@/components/professional-footer";
 import type { Game, InsertPlayer } from "@shared/schema";
 
 export default function Results() {
@@ -201,6 +202,7 @@ export default function Results() {
           </CardContent>
         </Card>
       </div>
+      <ProfessionalFooter />
     </div>
   );
 }

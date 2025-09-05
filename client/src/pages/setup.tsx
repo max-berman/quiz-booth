@@ -30,6 +30,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import { ProfessionalFooter } from "@/components/professional-footer";
 import type { InsertGame } from "@shared/firebase-types";
 
 export default function Setup() {
@@ -217,7 +218,7 @@ export default function Setup() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-6">
+    <div className="min-h-screen bg-background py-6">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -278,8 +279,8 @@ export default function Setup() {
               <div
                 className={`p-6 rounded-xl border-2 transition-all ${
                   focusedSection === 1
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 bg-gray-50"
+                    ? "border-primary bg-muted"
+                    : "border-border bg-muted"
                 }`}
                 onFocus={() => setFocusedSection(1)}
                 onBlur={() => setFocusedSection(null)}
@@ -319,7 +320,7 @@ export default function Setup() {
                       required
                     />
                     <div className="flex items-start gap-2 mt-2">
-                      <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                      <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                       <p className="text-sm text-muted-foreground">
                         Provide a website URL for more relevant AI-generated
                         questions, or enter your company name.
@@ -445,8 +446,8 @@ export default function Setup() {
               <div
                 className={`p-6 rounded-xl border-2 transition-all ${
                   focusedSection === 2
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 bg-gray-50"
+                    ? "border-primary bg-muted"
+                    : "border-border bg-muted"
                 }`}
                 onFocus={() => setFocusedSection(2)}
                 onBlur={() => setFocusedSection(null)}
@@ -609,7 +610,7 @@ export default function Setup() {
                       ))}
                     </div>
                     {categories.other && (
-                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                      <div className="mt-4 p-4 bg-muted rounded-lg">
                         <Label
                           htmlFor="customCategory"
                           className="text-base font-medium"
@@ -627,7 +628,7 @@ export default function Setup() {
                       </div>
                     )}
                     {!Object.values(categories).some(Boolean) && (
-                      <div className="flex items-center gap-2 mt-2 text-red-600">
+                      <div className="flex items-center gap-2 mt-2 text-destructive">
                         <AlertCircle className="h-4 w-4" />
                         <span className="text-sm">
                           Please select at least one category
@@ -642,8 +643,8 @@ export default function Setup() {
               <div
                 className={`p-6 rounded-xl border-2 transition-all ${
                   focusedSection === 3
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 bg-gray-50"
+                    ? "border-primary bg-muted"
+                    : "border-border bg-muted"
                 }`}
                 onFocus={() => setFocusedSection(3)}
                 onBlur={() => setFocusedSection(null)}
@@ -673,7 +674,7 @@ export default function Setup() {
                   {prizes.map((prize, index) => (
                     <div
                       key={index}
-                      className="flex gap-3 items-end p-4 bg-white rounded-lg border"
+                      className="flex gap-3 items-end p-4 bg-card rounded-lg border"
                     >
                       <div className="flex-1">
                         <Label
@@ -731,9 +732,9 @@ export default function Setup() {
                       )}
                     </div>
                   ))}
-                  <div className="flex items-start gap-2 p-4 bg-blue-50 rounded-lg">
-                    <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-blue-700">
+                  <div className="flex items-start gap-2 p-4 bg-muted rounded-lg">
+                    <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-muted-foreground">
                       Add prizes to motivate participation. You can customize
                       placements (e.g., "4th Place", "Top 10", "Best Score") to
                       match your event needs.
@@ -743,16 +744,16 @@ export default function Setup() {
               </div>
 
               {/* Submit Section */}
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-8 rounded-xl border border-green-200">
+              <div className="bg-muted p-8 rounded-xl border">
                 <div className="text-center space-y-4">
-                  <div className="flex items-center justify-center gap-2 text-green-700">
+                  <div className="flex items-center justify-center gap-2 text-primary">
                     <CheckCircle className="h-5 w-5" />
                     <span className="font-medium">
                       Ready to generate your trivia game!
                     </span>
                   </div>
 
-                  <div className="text-sm text-gray-600 max-w-md mx-auto">
+                  <div className="text-sm text-muted-foreground max-w-md mx-auto">
                     Our AI will create {formData.questionCount} {difficulty}{" "}
                     questions
                     {Object.values(categories).filter(Boolean).length > 0 && (
@@ -768,7 +769,7 @@ export default function Setup() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="px-12 py-4 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white font-bold text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                    className="px-12 py-4 bg-primary text-primary-foreground font-bold text-lg rounded-xl transition-all duration-200 hover:opacity-90"
                     disabled={
                       createGameMutation.isPending ||
                       !checkCompanyComplete() ||
@@ -782,7 +783,7 @@ export default function Setup() {
                   </Button>
 
                   {(!checkCompanyComplete() || !checkSettingsComplete()) && (
-                    <div className="flex items-center justify-center gap-2 text-red-600">
+                    <div className="flex items-center justify-center gap-2 text-destructive">
                       <AlertCircle className="h-4 w-4" />
                       <span className="text-sm">
                         Please complete required sections above
@@ -795,6 +796,7 @@ export default function Setup() {
           </CardContent>
         </Card>
       </div>
+      <ProfessionalFooter />
     </div>
   );
 }

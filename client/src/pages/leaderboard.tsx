@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, Home, Users } from "lucide-react";
 import { Link } from "wouter";
+import { ProfessionalFooter } from "@/components/professional-footer";
 import type { Player, Game } from "@shared/schema";
 
 export default function Leaderboard() {
@@ -24,13 +25,13 @@ export default function Leaderboard() {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return "bg-gradient-to-br from-secondary to-secondary rounded-full";
+        return "bg-primary text-primary-foreground rounded-full";
       case 2:
-        return "bg-gradient-to-br from-gray-400 to-gray-500 rounded-full";
+        return "bg-secondary text-secondary-foreground rounded-full";
       case 3:
-        return "bg-gradient-to-br from-amber-400 to-amber-600 rounded-full";
+        return "bg-muted-foreground text-background rounded-full";
       default:
-        return "bg-gray-300 rounded-full";
+        return "bg-muted text-muted-foreground rounded-full";
     }
   };
 
@@ -42,7 +43,7 @@ export default function Leaderboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
           <p>Loading leaderboard...</p>
@@ -52,10 +53,10 @@ export default function Leaderboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Card className="shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-primary to-purple-600 p-6 text-white">
+          <div className="bg-primary p-6 text-primary-foreground">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold mb-2 flex items-center">
@@ -81,25 +82,25 @@ export default function Leaderboard() {
 
           {/* Prize Information (only for game-specific leaderboard) */}
           {isGameSpecific && game && (game.firstPrize || game.secondPrize || game.thirdPrize) && (
-            <div className="bg-secondary/10 p-4 border-b">
+            <div className="bg-muted p-4 border-b">
               <div className="flex flex-wrap justify-center gap-4 text-sm">
                 {game.firstPrize && (
                   <div className="flex items-center">
-                    <div className="w-3 h-3 bg-secondary rounded-full mr-2"></div>
+                    <div className="w-3 h-3 bg-primary rounded-full mr-2"></div>
                     <span className="font-medium">1st:</span>
                     <span className="ml-1">{game.firstPrize}</span>
                   </div>
                 )}
                 {game.secondPrize && (
                   <div className="flex items-center">
-                    <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                    <div className="w-3 h-3 bg-secondary rounded-full mr-2"></div>
                     <span className="font-medium">2nd:</span>
                     <span className="ml-1">{game.secondPrize}</span>
                   </div>
                 )}
                 {game.thirdPrize && (
                   <div className="flex items-center">
-                    <div className="w-3 h-3 bg-amber-600 rounded-full mr-2"></div>
+                    <div className="w-3 h-3 bg-muted-foreground rounded-full mr-2"></div>
                     <span className="font-medium">3rd:</span>
                     <span className="ml-1">{game.thirdPrize}</span>
                   </div>
@@ -114,7 +115,7 @@ export default function Leaderboard() {
                 {leaderboard.map((player, index) => (
                   <div
                     key={player.id}
-                    className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+                    className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted transition-colors duration-150"
                   >
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
@@ -123,15 +124,15 @@ export default function Leaderboard() {
                         </div>
                       </div>
                       <div>
-                        <div className="font-semibold text-dark">{player.name}</div>
-                        <div className="text-xs text-gray-400">
+                        <div className="font-semibold text-foreground">{player.name}</div>
+                        <div className="text-xs text-muted-foreground">
                           {formatTime(player.timeSpent)} • {new Date(player.completedAt).toLocaleDateString()}
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-bold text-primary">{player.score}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-muted-foreground">
                         {player.correctAnswers}/{player.totalQuestions} correct
                       </div>
                     </div>
@@ -140,14 +141,14 @@ export default function Leaderboard() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Trophy className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h4 className="text-lg font-semibold text-gray-600 mb-2">No players yet</h4>
-                <p className="text-gray-500">Be the first to play and make it to the leaderboard!</p>
+                <Trophy className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h4 className="text-lg font-semibold text-foreground mb-2">No players yet</h4>
+                <p className="text-muted-foreground">Be the first to play and make it to the leaderboard!</p>
               </div>
             )}
           </CardContent>
 
-          <div className="bg-gray-50 p-4 text-center">
+          <div className="bg-muted p-4 text-center">
             <div className="flex justify-center gap-4">
               <Link href="/">
                 <Button className="px-6 py-3">
@@ -167,6 +168,7 @@ export default function Leaderboard() {
           </div>
         </Card>
       </div>
+      <ProfessionalFooter />
     </div>
   );
 }

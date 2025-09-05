@@ -14,6 +14,7 @@ import {
   LogIn,
 } from "lucide-react";
 import { ShareEmbedModal } from "@/components/share-embed-modal";
+import { ProfessionalFooter } from "@/components/professional-footer";
 import { useAuth } from "@/contexts/auth-context";
 
 export default function Home() {
@@ -82,20 +83,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-border">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Target className="h-5 w-5 text-primary" />
-              <span className="text-lg font-semibold text-foreground">Trade Show Trivia</span>
-            </div>
-            <p className="text-muted-foreground text-sm">
-              AI-powered trivia games for trade shows and events
-            </p>
-          </div>
-        </div>
-      </footer>
+      <ProfessionalFooter />
     </div>
   );
 }
