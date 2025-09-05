@@ -163,11 +163,6 @@ export default function GamePage() {
         {/* Game Progress */}
         <div className="space-y-4">
           <Progress value={progressPercentage} className="h-3 bg-muted" />
-          <div className="text-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-              <span className="text-primary">{game.companyName}</span> Trivia
-            </h1>
-          </div>
         </div>
 
         {/* Timer and Stats - Compact version */}
