@@ -519,7 +519,9 @@ export default function Dashboard() {
           </DialogContent>
         </Dialog>
       </div>
-      <ProfessionalFooter />
+      <div className="mt-16">
+        <ProfessionalFooter />
+      </div>
     </div>
   );
 }
