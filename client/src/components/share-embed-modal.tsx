@@ -67,7 +67,7 @@ export function ShareEmbedModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white" size="sm">
+        <Button variant="default" size="sm">
           <Share className="mr-1 h-4 w-4" />
           {isBuilder ? "Share Builder" : "Share"}
         </Button>
@@ -141,12 +141,12 @@ export function ShareEmbedModal({
                 </div>
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="bg-muted p-4 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <Code className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium text-blue-800">How to use:</span>
+                  <Code className="h-4 w-4 text-primary" />
+                  <span className="font-medium text-foreground">How to use:</span>
                 </div>
-                <ul className="text-sm text-blue-700 space-y-1">
+                <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• Copy the embed code above</li>
                   <li>• Paste it into your website's HTML</li>
                   <li>• The trivia game will appear on your page</li>
