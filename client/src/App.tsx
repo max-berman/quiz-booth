@@ -43,6 +43,7 @@ function App() {
       <TooltipProvider>
         <AuthProvider>
           <div className="min-h-screen bg-background">
+            {/* CreatorHeader is intentionally hidden on game pages to maintain immersive gameplay experience */}
             <CreatorHeader />
             <Router />
           </div>

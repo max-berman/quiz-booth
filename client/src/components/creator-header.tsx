@@ -15,9 +15,11 @@ export function CreatorHeader() {
   const [location, setLocation] = useLocation();
   const { user, isAuthenticated, signOut } = useAuth();
   const isHomePage = location === '/';
+  const isGamePage = location.startsWith('/game/');
 
+  // Hide header completely on game pages to avoid distractions during gameplay
   // Show header if: authenticated or not on home page (for navigation)
-  const shouldShowHeader = isAuthenticated || !isHomePage;
+  const shouldShowHeader = !isGamePage && (isAuthenticated || !isHomePage);
   
   if (!shouldShowHeader) {
     return null;
