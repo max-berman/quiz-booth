@@ -2,7 +2,7 @@ import { ExternalLink } from "lucide-react";
 
 export function ProfessionalFooter() {
   return (
-    <footer className="border-t bg-muted/50 py-6 mt-auto">
+    <footer className="border-t bg-muted/50 py-6 mt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <p className="text-sm text-muted-foreground">

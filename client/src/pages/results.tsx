@@ -34,12 +34,18 @@ export default function Results() {
 
   const saveScoreMutation = useMutation({
     mutationFn: async (playerData: InsertPlayer) => {
-      const response = await apiRequest("POST", `/api/games/${id}/players`, playerData);
+      const response = await apiRequest(
+        "POST",
+        `/api/games/${id}/players`,
+        playerData,
+      );
       return response.json();
     },
     onSuccess: () => {
       setIsScoreSaved(true);
-      queryClient.invalidateQueries({ queryKey: ["/api/games", id, "leaderboard"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/games", id, "leaderboard"],
+      });
       toast({
         title: "Success!",
         description: "Your score has been saved to the leaderboard.",
@@ -77,8 +83,6 @@ export default function Results() {
     saveScoreMutation.mutate(playerData);
   };
 
-
-
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -92,35 +96,47 @@ export default function Results() {
           <CardContent className="p-8 text-center">
             <div className="mb-8">
               <div className="w-20 h-20 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trophy className="text-white text-3xl" />
+                <Trophy className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-dark mb-2">Game Complete!</h3>
+              <h3 className="text-3xl font-bold text-dark mb-2">
+                Game Complete!
+              </h3>
               <p className="text-gray-600">Here are your results</p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="bg-gradient-to-br from-accent/10 to-accent/20 p-6 rounded-xl">
-                <div className="text-3xl font-bold text-accent mb-2">{score}</div>
-                <div className="text-sm font-medium text-gray-700">Final Score</div>
+                <div className="text-3xl font-bold text-accent mb-2">
+                  {score}
+                </div>
+                <div className="text-sm font-medium text-gray-700">
+                  Final Score
+                </div>
               </div>
               <div className="bg-gradient-to-br from-primary/10 to-primary/20 p-6 rounded-xl">
                 <div className="text-3xl font-bold text-primary mb-2">
                   {correctAnswers}/{totalQuestions}
                 </div>
-                <div className="text-sm font-medium text-gray-700">Correct Answers</div>
+                <div className="text-sm font-medium text-gray-700">
+                  Correct Answers
+                </div>
               </div>
               <div className="bg-gradient-to-br from-secondary/10 to-secondary/20 p-6 rounded-xl">
                 <div className="text-3xl font-bold text-secondary mb-2">
                   {formatTime(timeSpent)}
                 </div>
-                <div className="text-sm font-medium text-gray-700">Time Taken</div>
+                <div className="text-sm font-medium text-gray-700">
+                  Time Taken
+                </div>
               </div>
             </div>
 
             {/* Player Registration */}
             {!isScoreSaved && (
               <div className="bg-gray-50 p-6 rounded-xl mb-6">
-                <h4 className="text-lg font-semibold text-dark mb-4">Save Your Score to Leaderboard</h4>
+                <h4 className="text-lg font-semibold text-dark mb-4">
+                  Save Your Score to Leaderboard
+                </h4>
                 <div className="grid sm:grid-cols-2 gap-4 max-w-md mx-auto mb-4">
                   <div>
                     <Label htmlFor="playerName">Name *</Label>
@@ -146,6 +162,7 @@ export default function Results() {
                   onClick={handleSaveScore}
                   disabled={saveScoreMutation.isPending}
                   className="px-6 py-3"
+                  variant="secondary"
                 >
                   Save Score
                 </Button>
@@ -154,7 +171,9 @@ export default function Results() {
 
             {isScoreSaved && (
               <div className="bg-accent/10 p-4 rounded-xl mb-6">
-                <p className="text-accent font-semibold">✅ Score saved successfully!</p>
+                <p className="text-accent font-semibold">
+                  ✅ Score saved successfully!
+                </p>
               </div>
             )}
 
@@ -171,22 +190,19 @@ export default function Results() {
                   Play Again
                 </Button>
                 <Button
-                  variant="default"
+                  variant="secondary"
                   onClick={() => setLocation(`/leaderboard/${id}`)}
-                  className="px-6 py-3 w-full !bg-black !text-white hover:!bg-gray-800"
+                  className="px-6 py-3 w-full"
                   data-testid="button-view-leaderboard"
                 >
                   <Eye className="mr-2 h-4 w-4" />
                   View Leaderboard
                 </Button>
               </div>
-              
+
               {/* Share and Creator Actions */}
               <div className="grid grid-cols-1 gap-3">
-                <ShareEmbedModal 
-                  gameId={id} 
-                  gameTitle={game?.companyName}
-                />
+                <ShareEmbedModal gameId={id} gameTitle={game?.companyName} />
                 {/* Creator-only links */}
                 {localStorage.getItem(`game-${id}-creator-key`) && (
                   <Button
