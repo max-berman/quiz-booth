@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, XCircle, Zap, Clock, Home, ArrowRight } from "lucide-react";
+import { CheckCircle, XCircle, Zap, Clock } from "lucide-react";
 import type { Game, Question } from "@shared/schema";
 
 export default function GamePage() {
@@ -113,63 +113,27 @@ export default function GamePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLocation("/")}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <Home className="h-4 w-4" />
-              Home
-            </Button>
-            
-            <div className="text-center">
-              <div className="text-sm font-medium text-foreground">
-                Question {currentQuestionIndex + 1} of {questions.length}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Score: {score}
-              </div>
-            </div>
-            
-            {isAnswered && (
-              <Button
-                size="sm"
-                onClick={handleNextQuestion}
-                className="flex items-center gap-2 !bg-black !text-white hover:!bg-gray-800"
-              >
-                {currentQuestionIndex < questions.length - 1 ? (
-                  <>
-                    Next <ArrowRight className="h-4 w-4" />
-                  </>
-                ) : (
-                  "Finish"
-                )}
-              </Button>
-            )}
-            
-            {!isAnswered && (
-              <div className="w-[84px]" /> /* Placeholder to center the middle content */
-            )}
-          </div>
-        </div>
-      </div>
-      
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Game Progress */}
         <div className="space-y-4">
           <Progress value={progressPercentage} className="h-3 bg-muted" />
         </div>
 
+        {/* Question Progress */}
+        <div className="text-center mb-4">
+          <div className="text-sm font-medium text-foreground mb-1" data-testid="text-question-count">
+            Question {currentQuestionIndex + 1} of {questions.length}
+          </div>
+          <div className="text-xs text-muted-foreground" data-testid="text-score-value">
+            Score: {score} points
+          </div>
+        </div>
+        
         {/* Timer and Stats - Compact version */}
         <div className="grid grid-cols-4 gap-3 mb-6">
           <div className="text-center p-3 bg-card/50 rounded-lg border">
             <Clock className={`h-4 w-4 mx-auto mb-1 ${timeLeft <= 10 ? 'text-destructive animate-pulse' : 'text-primary'}`} />
-            <div className={`text-lg font-bold ${timeLeft <= 10 ? 'text-destructive animate-pulse' : 'text-primary'}`}>
+            <div className={`text-lg font-bold ${timeLeft <= 10 ? 'text-destructive animate-pulse' : 'text-primary'}`} data-testid="text-timer">
               {timeLeft}s
             </div>
             <div className="text-xs text-muted-foreground">Time</div>
@@ -221,6 +185,7 @@ export default function GamePage() {
                     }`}
                     onClick={() => handleAnswerSelect(index)}
                     disabled={isAnswered}
+                    data-testid={`button-answer-${String.fromCharCode(65 + index)}`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -270,7 +235,7 @@ export default function GamePage() {
               )}
             </div>
 
-            {/* Bottom Action - Only show if not answered (since we have top button) */}
+            {/* Bottom Action - Show after answering */}
             {isAnswered && (
               <div className="text-center pt-4 border-t border-border">
                 <p className="text-sm text-muted-foreground mb-3">
@@ -283,6 +248,7 @@ export default function GamePage() {
                   onClick={handleNextQuestion}
                   size="lg"
                   className="px-8 py-3 text-base font-semibold !bg-black !text-white hover:!bg-gray-800"
+                  data-testid="button-continue"
                 >
                   {currentQuestionIndex < questions.length - 1
                     ? "Continue →"
