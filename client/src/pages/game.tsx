@@ -4,7 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, XCircle, Zap, Clock } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Zap,
+  Clock,
+  Home,
+  ArrowRight,
+} from "lucide-react";
 import type { Game, Question } from "@shared/schema";
 
 export default function GamePage() {
@@ -113,39 +120,83 @@ export default function GamePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Top Navigation Bar */}
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation("/")}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <Home className="h-4 w-4" />
+              Home
+            </Button>
+
+            <div className="text-center">
+              <div className="text-sm font-medium text-foreground">
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Score: {score}
+              </div>
+            </div>
+
+            {isAnswered && (
+              <Button
+                size="sm"
+                onClick={handleNextQuestion}
+                className="flex items-center gap-2 !bg-black !text-white hover:!bg-gray-800"
+              >
+                {currentQuestionIndex < questions.length - 1 ? (
+                  <>
+                    Next <ArrowRight className="h-4 w-4" />
+                  </>
+                ) : (
+                  "Finish"
+                )}
+              </Button>
+            )}
+
+            {!isAnswered && (
+              <div className="w-[84px]" /> /* Placeholder to center the middle content */
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-4 lg:px-8 py-4 space-y-4">
         {/* Game Progress */}
         <div className="space-y-4">
           <Progress value={progressPercentage} className="h-3 bg-muted" />
         </div>
 
-        {/* Question Progress */}
-        <div className="text-center mb-4">
-          <div className="text-sm font-medium text-foreground mb-1" data-testid="text-question-count">
-            Question {currentQuestionIndex + 1} of {questions.length}
-          </div>
-          <div className="text-xs text-muted-foreground" data-testid="text-score-value">
-            Score: {score} points
-          </div>
-        </div>
-        
         {/* Timer and Stats - Compact version */}
         <div className="grid grid-cols-4 gap-3 mb-6">
           <div className="text-center p-3 bg-card/50 rounded-lg border">
-            <Clock className={`h-4 w-4 mx-auto mb-1 ${timeLeft <= 10 ? 'text-destructive animate-pulse' : 'text-primary'}`} />
-            <div className={`text-lg font-bold ${timeLeft <= 10 ? 'text-destructive animate-pulse' : 'text-primary'}`} data-testid="text-timer">
+            <Clock
+              className={`h-4 w-4 mx-auto mb-1 ${timeLeft <= 10 ? "text-destructive animate-pulse" : "text-primary"}`}
+            />
+            <div
+              className={`text-lg font-bold ${timeLeft <= 10 ? "text-destructive animate-pulse" : "text-primary"}`}
+              data-testid="text-timer"
+            >
               {timeLeft}s
             </div>
             <div className="text-xs text-muted-foreground">Time</div>
           </div>
           <div className="text-center p-3 bg-card/50 rounded-lg border">
             <CheckCircle className="h-4 w-4 mx-auto mb-1 text-success" />
-            <div className="text-lg font-bold text-success">{correctAnswers}</div>
+            <div className="text-lg font-bold text-success">
+              {correctAnswers}
+            </div>
             <div className="text-xs text-muted-foreground">Correct</div>
           </div>
           <div className="text-center p-3 bg-card/50 rounded-lg border">
             <XCircle className="h-4 w-4 mx-auto mb-1 text-destructive" />
-            <div className="text-lg font-bold text-destructive">{wrongAnswers}</div>
+            <div className="text-lg font-bold text-destructive">
+              {wrongAnswers}
+            </div>
             <div className="text-xs text-muted-foreground">Wrong</div>
           </div>
           <div className="text-center p-3 bg-card/50 rounded-lg border">
@@ -165,7 +216,7 @@ export default function GamePage() {
                   {currentQuestion?.questionText}
                 </h2>
               </div>
-              
+
               {/* Answer Options - Better spacing and visual hierarchy */}
               <div className="space-y-3">
                 {currentQuestion?.options.map((option, index) => (
@@ -189,18 +240,23 @@ export default function GamePage() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <span className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-                          isAnswered && selectedAnswer === index
-                            ? index === currentQuestion.correctAnswer
-                              ? "bg-success text-success-foreground"
-                              : "bg-destructive text-destructive-foreground"
-                            : isAnswered && index === currentQuestion.correctAnswer
-                              ? "bg-success text-success-foreground"
-                              : "bg-primary/20 text-primary"
-                        }`}>
+                        <span
+                          className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                            isAnswered && selectedAnswer === index
+                              ? index === currentQuestion.correctAnswer
+                                ? "bg-success text-success-foreground"
+                                : "bg-destructive text-destructive-foreground"
+                              : isAnswered &&
+                                  index === currentQuestion.correctAnswer
+                                ? "bg-success text-success-foreground"
+                                : "bg-primary/20 text-primary"
+                          }`}
+                        >
                           {String.fromCharCode(65 + index)}
                         </span>
-                        <span className="text-base md:text-lg font-medium">{option}</span>
+                        <span className="text-base md:text-lg font-medium">
+                          {option}
+                        </span>
                       </div>
                       {isAnswered &&
                         selectedAnswer === index &&
@@ -226,7 +282,9 @@ export default function GamePage() {
                     <div className="w-10 h-10 bg-foreground rounded-full flex items-center justify-center">
                       <span className="text-white text-lg">💡</span>
                     </div>
-                    <h3 className="font-bold text-lg text-foreground">Explanation</h3>
+                    <h3 className="font-bold text-lg text-foreground">
+                      Explanation
+                    </h3>
                   </div>
                   <p className="text-foreground leading-relaxed text-base">
                     {currentQuestion.explanation}
@@ -239,7 +297,7 @@ export default function GamePage() {
             {isAnswered && (
               <div className="text-center pt-4 border-t border-border">
                 <p className="text-sm text-muted-foreground mb-3">
-                  {currentQuestionIndex < questions.length - 1 
+                  {currentQuestionIndex < questions.length - 1
                     ? "Ready for the next question?"
                     : "Great job! See your final results."}
                 </p>

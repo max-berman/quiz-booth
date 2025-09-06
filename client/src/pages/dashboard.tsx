@@ -215,6 +215,7 @@ export default function Dashboard() {
               <Button
                 onClick={() => setLocation("/setup")}
                 data-testid="button-create-first-game"
+                className="!bg-black !text-white hover:!bg-gray-800 px-8 py-3"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Game
@@ -254,6 +255,7 @@ export default function Dashboard() {
           <Button
             onClick={() => setLocation("/setup")}
             data-testid="button-create-new-game"
+            className="!bg-black !text-white hover:!bg-gray-800"
           >
             <Plus className="mr-2 h-4 w-4" />
             Create New Game
