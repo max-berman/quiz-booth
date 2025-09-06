@@ -95,8 +95,8 @@ export default function Results() {
         <Card className="shadow-xl">
           <CardContent className="p-8 text-center">
             <div className="mb-8">
-              <div className="w-20 h-20 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trophy className="h-8 w-8 text-white" />
+              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                🏆
               </div>
               <h3 className="text-3xl font-bold text-dark mb-2">
                 Game Complete!
