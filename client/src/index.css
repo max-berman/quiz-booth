@@ -75,6 +75,13 @@
 
   .animate-slide-up {
     animation: slide-up 0.3s ease-out;
+    animation-fill-mode: both;
+  }
+  
+  /* Prevent initial flash before animations start */
+  .animate-slide-up {
+    opacity: 0;
+    transform: translateY(20px);
   }
 }
 

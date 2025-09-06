@@ -18,7 +18,7 @@ import { ProfessionalFooter } from "@/components/professional-footer";
 import { useAuth } from "@/contexts/auth-context";
 
 export default function Home() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -63,14 +63,17 @@ export default function Home() {
                 </Button>
               </Link>
               
-              {!isAuthenticated && (
-                <Link href="/auth/sign-in">
-                  <Button variant="outline" className="px-8 py-3">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Sign In
-                  </Button>
-                </Link>
-              )}
+              {/* Reserve space for auth button to prevent layout shift */}
+              <div className="h-[44px] min-w-[112px]">
+                {!loading && !isAuthenticated && (
+                  <Link href="/auth/sign-in">
+                    <Button variant="outline" className="px-8 py-3">
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Sign In
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
 
             <div
