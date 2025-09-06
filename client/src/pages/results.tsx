@@ -173,7 +173,7 @@ export default function Results() {
                 <Button
                   variant="default"
                   onClick={() => setLocation(`/leaderboard/${id}`)}
-                  className="px-6 py-3 w-full"
+                  className="px-6 py-3 w-full !bg-black !text-white hover:!bg-gray-800"
                   data-testid="button-view-leaderboard"
                 >
                   <Eye className="mr-2 h-4 w-4" />

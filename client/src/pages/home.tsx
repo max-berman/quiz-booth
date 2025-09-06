@@ -45,11 +45,11 @@ export default function Home() {
             </div>
 
             <div
-              className="flex flex-col sm:flex-row gap-6 justify-center mb-16 animate-slide-up"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up"
               style={{ animationDelay: "0.2s" }}
             >
               <Link href="/setup">
-                <Button variant="default" className="px-8 py-3 !bg-black !text-white hover:!bg-gray-800">
+                <Button variant="default" className="px-8 py-3 !bg-black !text-white hover:!bg-gray-800 w-full sm:w-auto">
                   <Sparkles className="mr-2 h-4 w-4" />
                   Create Your Game
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -57,17 +57,17 @@ export default function Home() {
               </Link>
 
               <Link href="/leaderboard">
-                <Button variant="secondary" className="px-8 py-3">
+                <Button variant="secondary" className="px-8 py-3 w-full sm:w-auto">
                   <Trophy className="mr-2 h-4 w-4" />
                   View Leaderboard
                 </Button>
               </Link>
               
               {/* Reserve space for auth button to prevent layout shift */}
-              <div className="h-[44px] min-w-[112px]">
+              <div className="min-h-[44px] w-full sm:min-w-[144px] sm:w-auto flex justify-center">
                 {!loading && !isAuthenticated && (
                   <Link href="/auth/sign-in">
-                    <Button variant="outline" className="px-8 py-3">
+                    <Button variant="outline" className="px-8 py-3 w-full sm:w-auto">
                       <LogIn className="mr-2 h-4 w-4" />
                       Sign In
                     </Button>
