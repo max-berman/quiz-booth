@@ -54,7 +54,7 @@ export default function Setup() {
     companyName: "",
     industry: "Technology",
     productDescription: "",
-    questionCount: 10,
+    questionCount: "10",
     firstPrize: "75",
     secondPrize: "50",
     thirdPrize: "25",
@@ -169,6 +169,7 @@ export default function Setup() {
 
     const gameData: InsertGame = {
       ...formData,
+      questionCount: parseInt(formData.questionCount),
       difficulty,
       categories: selectedCategories,
       prizes: validPrizes.length > 0 ? validPrizes : null,
@@ -472,11 +473,11 @@ export default function Setup() {
                       Number of Questions
                     </Label>
                     <Select
-                      value={formData.questionCount.toString()}
+                      value={formData.questionCount}
                       onValueChange={(value) =>
                         setFormData((prev) => ({
                           ...prev,
-                          questionCount: parseInt(value),
+                          questionCount: value,
                         }))
                       }
                     >

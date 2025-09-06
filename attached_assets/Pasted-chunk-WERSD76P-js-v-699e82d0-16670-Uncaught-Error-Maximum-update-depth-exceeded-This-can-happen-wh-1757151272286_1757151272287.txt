@@ -1,0 +1,65 @@
+chunk-WERSD76P.js?v=699e82d0:16670 Uncaught Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+    at checkForNestedUpdates (chunk-WERSD76P.js?v=699e82d0:19659:19)
+    at scheduleUpdateOnFiber (chunk-WERSD76P.js?v=699e82d0:18533:11)
+    at dispatchSetState (chunk-WERSD76P.js?v=699e82d0:12403:15)
+    at setRef (chunk-TKKDXAJF.js?v=699e82d0:12:12)
+    at chunk-TKKDXAJF.js?v=699e82d0:21:23
+    at Array.map (<anonymous>)
+    at chunk-TKKDXAJF.js?v=699e82d0:20:27
+    at setRef (chunk-TKKDXAJF.js?v=699e82d0:12:12)
+    at chunk-TKKDXAJF.js?v=699e82d0:21:23
+    at Array.map (<anonymous>)Understand this error
+chunk-WERSD76P.js?v=699e82d0:521 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+printWarning @ chunk-WERSD76P.js?v=699e82d0:521Understand this error
+chunk-WERSD76P.js?v=699e82d0:14032 The above error occurred in the <button> component:
+
+    at button
+    at http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-GCLFTVUM.js?v=699e82d0:42:13
+    at http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-Z7JUZCUR.js?v=699e82d0:43:13
+    at http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-Z7JUZCUR.js?v=699e82d0:20:13
+    at http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-GCLFTVUM.js?v=699e82d0:42:13
+    at http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-CIB6OPOJ.js?v=699e82d0:1929:13
+    at http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/@radix-ui_react-select.js?v=699e82d0:193:13
+    at _c (http://localhost:5000/src/components/ui/select.tsx:26:11)
+    at Provider (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=699e82d0:38:15)
+    at Provider (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=699e82d0:38:15)
+    at CollectionProvider (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-6TG6PFLG.js?v=699e82d0:31:13)
+    at Provider (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=699e82d0:38:15)
+    at Provider (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=699e82d0:38:15)
+    at Popper (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-CIB6OPOJ.js?v=699e82d0:1921:11)
+    at Select (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/@radix-ui_react-select.js?v=699e82d0:95:5)
+    at div
+    at div
+    at div
+    at form
+    at div
+    at _c9 (http://localhost:5000/src/components/ui/card.tsx:106:12)
+    at div
+    at _c (http://localhost:5000/src/components/ui/card.tsx:20:11)
+    at div
+    at div
+    at Setup (http://localhost:5000/src/pages/setup.tsx:52:27)
+    at Route (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/wouter.js?v=699e82d0:323:16)
+    at Switch (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/wouter.js?v=699e82d0:379:17)
+    at Router
+    at div
+    at AuthProvider (http://localhost:5000/src/contexts/auth-context.tsx:30:32)
+    at Provider (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=699e82d0:38:15)
+    at TooltipProvider (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=699e82d0:66:5)
+    at QueryClientProvider (http://localhost:5000/@fs/home/maxim/Dev/trivia-game-app/node_modules/.vite/deps/@tanstack_react-query.js?v=699e82d0:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-WERSD76P.js?v=699e82d0:14032Understand this error
+chunk-WERSD76P.js?v=699e82d0:9129 Uncaught Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+    at checkForNestedUpdates (chunk-WERSD76P.js?v=699e82d0:19659:19)
+    at scheduleUpdateOnFiber (chunk-WERSD76P.js?v=699e82d0:18533:11)
+    at dispatchSetState (chunk-WERSD76P.js?v=699e82d0:12403:15)
+    at setRef (chunk-TKKDXAJF.js?v=699e82d0:12:12)
+    at chunk-TKKDXAJF.js?v=699e82d0:21:23
+    at Array.map (<anonymous>)
+    at chunk-TKKDXAJF.js?v=699e82d0:20:27
+    at setRef (chunk-TKKDXAJF.js?v=699e82d0:12:12)
+    at chunk-TKKDXAJF.js?v=699e82d0:21:23
+    at Array.map (<anonymous>)
