@@ -1,133 +1,104 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Settings, BarChart3, LogOut, User, Home, LogIn } from "lucide-react";
-import { useAuth } from "@/contexts/auth-context";
+import { useLocation } from 'wouter'
+import { BarChart3, LogOut, User, Home, LogIn, ChevronDown } from 'lucide-react'
+import { useAuth } from '@/contexts/auth-context'
+import { MenuLink } from './menu-link'
+import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+	SimpleDropdown,
+	SimpleDropdownItem,
+	SimpleDropdownSeparator,
+} from './simple-dropdown'
 
 export function CreatorHeader() {
-  const [location, setLocation] = useLocation();
-  const { user, isAuthenticated, signOut } = useAuth();
-  const isHomePage = location === '/';
-  const isGamePage = location.startsWith('/game/');
+	const [location, setLocation] = useLocation()
+	const { user, isAuthenticated, signOut } = useAuth()
+	const isHomePage = location === '/'
+	const isGamePage = location.startsWith('/game/')
 
-  // Hide header completely on game pages to avoid distractions during gameplay
-  // Show header if: authenticated or not on home page (for navigation)
-  const shouldShowHeader = !isGamePage && (isAuthenticated || !isHomePage);
-  
-  if (!shouldShowHeader) {
-    return null;
-  }
+	// Hide header on game pages, show for authenticated users or non-home pages
+	//const shouldShowHeader = !isGamePage && (isAuthenticated || !isHomePage)
+	const shouldShowHeader = !isGamePage
+	if (!shouldShowHeader) return null
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      setLocation('/');
-    } catch (error) {
-      console.error('Sign out error:', error);
-    }
-  };
+	const handleSignOut = async () => {
+		try {
+			await signOut()
+			setLocation('/')
+		} catch (error) {
+			console.error('Sign out error:', error)
+		}
+	}
 
-  return (
-    <div className="bg-card border-b border-border px-4 py-2">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {/* Show Home button when not on home page */}
-          {!isHomePage && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-foreground hover:bg-muted"
-              onClick={() => setLocation("/")}
-              data-testid="button-home"
-            >
-              <Home className="mr-2 h-4 w-4" />
-              Home
-            </Button>
-          )}
-          
-          {/* Show creator tools if user is authenticated */}
-          {isAuthenticated && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-foreground hover:bg-muted"
-                onClick={() => setLocation("/dashboard")}
-                data-testid="button-dashboard"
-              >
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Dashboard
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-foreground hover:bg-muted"
-                onClick={() => setLocation("/setup")}
-                data-testid="button-create-game"
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Create Game
-              </Button>
-            </>
-          )}
-        </div>
-        
-        {/* Authentication section */}
-        <div className="flex items-center gap-2">
-          {isAuthenticated ? (
-            // Authenticated user dropdown
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-foreground hover:bg-muted"
-                  data-testid="user-menu"
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  {user?.email?.split('@')[0] || 'User'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem 
-                  onClick={() => setLocation('/dashboard')}
-                  className="cursor-pointer"
-                >
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={handleSignOut}
-                  className="cursor-pointer"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            // Sign in button for non-authenticated users
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-foreground hover:bg-muted"
-              onClick={() => setLocation("/auth/sign-in")}
-              data-testid="button-sign-in"
-            >
-              <LogIn className="mr-2 h-4 w-4" />
-              Sign In
-            </Button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+	return (
+		<div className='bg-card px-4 py-2'>
+			<div className='max-w-7xl mx-auto flex items-center justify-between'>
+				<div className='flex items-center gap-4'>
+					{/* Show Home button when not on home page */}
+					{!isHomePage && (
+						<MenuLink href='/' data-testid='button-home'>
+							<Home className='mr-2 h-4 w-4' />
+							Home
+						</MenuLink>
+					)}
+
+					{/* Dashboard for authenticated users */}
+					{isAuthenticated && (
+						<MenuLink href='/dashboard' data-testid='button-dashboard'>
+							<BarChart3 className='mr-2 h-4 w-4' />
+							Dashboard
+						</MenuLink>
+					)}
+				</div>
+
+				{/* Authentication section */}
+				<div className='flex items-center gap-2'>
+					{isAuthenticated ? (
+						// Authenticated user dropdown
+						<SimpleDropdown
+							trigger={(isOpen) => (
+								<Button
+									variant='link'
+									size='sm'
+									className='flex items-center gap-1'
+									data-testid='user-menu'
+								>
+									<User className='mr-1 h-4 w-4' />
+									{user?.email?.split('@')[0] || 'User'}
+									<ChevronDown
+										className={`h-4 w-4 transition-transform ${
+											isOpen ? 'rotate-180' : ''
+										}`}
+									/>
+								</Button>
+							)}
+							align='end'
+						>
+							<SimpleDropdownItem
+								onClick={() => setLocation('/dashboard')}
+								className='flex items-center'
+							>
+								<BarChart3 className='mr-2 h-4 w-4' />
+								Dashboard
+							</SimpleDropdownItem>
+							<SimpleDropdownSeparator />
+							<SimpleDropdownItem onClick={handleSignOut}>
+								<LogOut className='mr-2 h-4 w-4' />
+								Sign Out
+							</SimpleDropdownItem>
+						</SimpleDropdown>
+					) : (
+						// Sign in button for non-authenticated users
+						<MenuLink
+							href='/auth/sign-in'
+							variant='ghost'
+							data-testid='button-sign-in'
+						>
+							<LogIn className='mr-2 h-4 w-4' />
+							Sign In
+						</MenuLink>
+					)}
+				</div>
+			</div>
+		</div>
+	)
 }

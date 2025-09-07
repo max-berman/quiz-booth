@@ -4,26 +4,25 @@ import { storage } from "./storage";
 import { insertGameSchema, insertQuestionSchema, insertPlayerSchema } from "@shared/firebase-types";
 import { z } from "zod";
 import { verifyFirebaseToken, optionalFirebaseAuth, type AuthenticatedRequest } from "./firebase-auth";
+import { logger } from "./lib/logger";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new game (with optional Firebase auth)
   app.post("/api/games", optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      console.log('Received game creation request:', JSON.stringify(req.body, null, 2));
-      console.log('Request headers:', req.headers);
-      console.log('User authenticated?', !!req.user);
-      
+      logger.api.request('POST', '/api/games', req.body);
+      logger.log('User authenticated?', !!req.user);
+
       const gameData = insertGameSchema.parse(req.body);
-      console.log('Parsed game data:', JSON.stringify(gameData, null, 2));
-      console.log('Game data types:', Object.keys(gameData).map(key => `${key}: ${typeof gameData[key as keyof typeof gameData]} - ${Array.isArray(gameData[key as keyof typeof gameData]) ? 'array' : 'not array'}`));
-      
+      logger.log('Parsed game data:', gameData);
+
       // Pass userId if authenticated, otherwise use legacy creator key approach
       const game = await storage.createGame(gameData, req.user?.uid);
       res.json(game);
     } catch (error) {
-      console.error('Game creation error:', error);
+      logger.error('Game creation error:', error);
       if (error instanceof Error) {
-        console.error('Error stack:', error.stack);
+        logger.error('Error stack:', error.stack);
       }
       res.status(400).json({ message: "Invalid game data", error: error instanceof Error ? error.message : String(error) });
     }
@@ -46,15 +45,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/creator/games", async (req, res) => {
     try {
       const creatorKey = req.headers['x-creator-key'] as string;
-      
+
       if (!creatorKey) {
         return res.status(401).json({ message: "Creator key required" });
       }
-      
+
       const games = await storage.getGamesByCreator(creatorKey);
       res.json(games);
     } catch (error) {
-      console.error('Creator games fetch error:', error);
+      logger.error('Creator games fetch error:', error);
       res.status(500).json({ message: "Failed to get creator games" });
     }
   });
@@ -65,11 +64,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
+
       const games = await storage.getGamesByUser(req.user.uid);
       res.json(games);
     } catch (error) {
-      console.error('User games fetch error:', error);
+      logger.error('User games fetch error:', error);
       res.status(500).json({ message: "Failed to get user games" });
     }
   });
@@ -78,22 +77,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/my-games", optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const creatorKey = req.headers['x-creator-key'] as string;
-      
+
       // If authenticated with Firebase, get games by user
       if (req.user) {
         const games = await storage.getGamesByUser(req.user.uid);
         return res.json(games);
       }
-      
+
       // Fall back to creator key method
       if (creatorKey) {
         const games = await storage.getGamesByCreator(creatorKey);
         return res.json(games);
       }
-      
+
       return res.status(401).json({ message: "Authentication required" });
     } catch (error) {
-      console.error('Games fetch error:', error);
+      logger.error('Games fetch error:', error);
       res.status(500).json({ message: "Failed to get games" });
     }
   });
@@ -116,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isWebsite = game.companyName.includes('.') && (game.companyName.startsWith('http') || game.companyName.includes('.com') || game.companyName.includes('.org') || game.companyName.includes('.net'));
       const companyInfo = isWebsite ? `Company website: ${game.companyName}` : `Company name: ${game.companyName}`;
       const websiteInstruction = isWebsite ? 'IMPORTANT: If a website is provided, use your knowledge about that company from the web to create more accurate and specific questions about their business, products, services, and history.' : '';
-      
+
       // Create category-specific instructions
       const categoryInstructions = game.categories.map(category => {
         switch (category) {
@@ -188,18 +187,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const data = await response.json();
-      console.log('DeepSeek API response:', JSON.stringify(data, null, 2));
-      
+      logger.log('DeepSeek API response:', data);
+
       let generatedQuestions;
 
       try {
         const content = data.choices[0].message.content;
-        console.log('DeepSeek content:', content);
-        
+        logger.log('DeepSeek content:', content);
+
         // Try to parse the JSON response
         const parsed = JSON.parse(content);
-        console.log('Parsed JSON:', JSON.stringify(parsed, null, 2));
-        
+        logger.log('Parsed JSON:', parsed);
+
         // Handle different response formats
         if (Array.isArray(parsed)) {
           generatedQuestions = parsed;
@@ -211,11 +210,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           throw new Error(`Unexpected response format: ${JSON.stringify(parsed)}`);
         }
-        
-        console.log('Generated questions:', JSON.stringify(generatedQuestions, null, 2));
-        
+
+        logger.log('Generated questions:', generatedQuestions);
+
       } catch (parseError) {
-        console.error('JSON Parse error:', parseError);
+        logger.error('JSON Parse error:', parseError);
         throw new Error(`Failed to parse DeepSeek response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
       }
 
@@ -229,21 +228,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           explanation: q.explanation || q.answer_explanation || '',
           order: index + 1,
         };
-        
-        console.log(`Question ${index + 1}:`, JSON.stringify(questionData, null, 2));
+
+        logger.log(`Question ${index + 1}:`, questionData);
         return questionData;
       });
 
       // Validate each question
       const validatedQuestions = questionsToInsert.map((q: any) => insertQuestionSchema.parse(q));
-      
+
       const questions = await storage.createQuestions(validatedQuestions);
       res.json(questions);
     } catch (error) {
-      console.error('Question generation error:', error);
-      res.status(500).json({ 
-        message: "Failed to generate questions", 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error('Question generation error:', error);
+      res.status(500).json({
+        message: "Failed to generate questions",
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
@@ -262,14 +261,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/questions/:id", async (req, res) => {
     try {
       const creatorKey = req.headers['x-creator-key'] as string;
-      
+
       if (!creatorKey) {
         return res.status(401).json({ message: "Creator key required to update questions" });
       }
-      
+
       const questionId = req.params.id;
       const updates = req.body;
-      
+
       // Validate the updates
       const allowedFields = ['questionText', 'options', 'correctAnswer', 'explanation'];
       const filteredUpdates = Object.keys(updates)
@@ -278,11 +277,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           obj[key] = updates[key];
           return obj;
         }, {});
-      
+
       const updatedQuestion = await storage.updateQuestion(questionId, filteredUpdates, creatorKey);
       res.json(updatedQuestion);
     } catch (error) {
-      console.error('Question update error:', error);
+      logger.error('Question update error:', error);
       if (error instanceof Error && error.message.includes("Unauthorized")) {
         res.status(403).json({ message: "Access denied. Only the game creator can edit questions." });
       } else if (error instanceof Error && error.message.includes("not found")) {
@@ -299,10 +298,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
+
       const questionId = req.params.id;
       const updates = req.body;
-      
+
       // Validate the updates
       const allowedFields = ['questionText', 'options', 'correctAnswer', 'explanation'];
       const filteredUpdates = Object.keys(updates)
@@ -311,11 +310,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           obj[key] = updates[key];
           return obj;
         }, {});
-      
+
       const updatedQuestion = await storage.updateQuestionByUser(questionId, filteredUpdates, req.user.uid);
       res.json(updatedQuestion);
     } catch (error) {
-      console.error('Question update error:', error);
+      logger.error('Question update error:', error);
       if (error instanceof Error && error.message.includes("Unauthorized")) {
         res.status(403).json({ message: "Access denied. Only the game creator can edit questions." });
       } else if (error instanceof Error && error.message.includes("not found")) {
@@ -332,7 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const creatorKey = req.headers['x-creator-key'] as string;
       const questionId = req.params.id;
       const updates = req.body;
-      
+
       // Validate the updates
       const allowedFields = ['questionText', 'options', 'correctAnswer', 'explanation'];
       const filteredUpdates = Object.keys(updates)
@@ -341,22 +340,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           obj[key] = updates[key];
           return obj;
         }, {});
-      
+
       // If authenticated with Firebase, use user-based access
       if (req.user) {
         const updatedQuestion = await storage.updateQuestionByUser(questionId, filteredUpdates, req.user.uid);
         return res.json(updatedQuestion);
       }
-      
+
       // Fall back to creator key method
       if (creatorKey) {
         const updatedQuestion = await storage.updateQuestion(questionId, filteredUpdates, creatorKey);
         return res.json(updatedQuestion);
       }
-      
+
       return res.status(401).json({ message: "Authentication required" });
     } catch (error) {
-      console.error('Question update error:', error);
+      logger.error('Question update error:', error);
       if (error instanceof Error && error.message.includes("Unauthorized")) {
         res.status(403).json({ message: "Access denied. Only the game creator can edit questions." });
       } else if (error instanceof Error && error.message.includes("not found")) {
@@ -405,15 +404,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/games/:id/players", async (req, res) => {
     try {
       const creatorKey = req.headers['x-creator-key'] as string;
-      
+
       if (!creatorKey) {
         return res.status(401).json({ message: "Creator key required for submissions data" });
       }
-      
+
       const players = await storage.getAllPlayersForGame(req.params.id, creatorKey);
       res.json(players);
     } catch (error) {
-      console.error('Players fetch error:', error);
+      logger.error('Players fetch error:', error);
       if (error instanceof Error && error.message.includes("Unauthorized")) {
         res.status(403).json({ message: "Access denied. Only the game creator can view submissions." });
       } else {
@@ -428,27 +427,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
+
       const gameId = req.params.id;
       const questionData = req.body;
-      
+
       // Validate required fields
       if (!questionData.questionText || !questionData.options || questionData.correctAnswer === undefined) {
         return res.status(400).json({ message: "Missing required fields: questionText, options, correctAnswer" });
       }
-      
+
       if (!Array.isArray(questionData.options) || questionData.options.length !== 4) {
         return res.status(400).json({ message: "Options must be an array of exactly 4 strings" });
       }
-      
+
       if (questionData.correctAnswer < 0 || questionData.correctAnswer > 3) {
         return res.status(400).json({ message: "Correct answer must be between 0 and 3" });
       }
-      
+
       const question = await storage.addQuestionToGame(gameId, questionData, req.user.uid);
       res.json(question);
     } catch (error) {
-      console.error('Add question error:', error);
+      logger.error('Add question error:', error);
       if (error instanceof Error && error.message.includes("Unauthorized")) {
         res.status(403).json({ message: "Access denied. Only the game creator can add questions." });
       } else if (error instanceof Error && error.message.includes("not found")) {
@@ -465,26 +464,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
+
       const gameId = req.params.id;
       const { prizes } = req.body;
-      
+
       // Validate prizes data
       if (!Array.isArray(prizes)) {
         return res.status(400).json({ message: "Prizes must be an array" });
       }
-      
+
       // Validate each prize has required fields
       for (const prize of prizes) {
         if (!prize.placement || !prize.prize) {
           return res.status(400).json({ message: "Each prize must have placement and prize fields" });
         }
       }
-      
+
       const updatedGame = await storage.updateGamePrizes(gameId, prizes, req.user.uid);
       res.json(updatedGame);
     } catch (error) {
-      console.error('Update prizes error:', error);
+      logger.error('Update prizes error:', error);
       if (error instanceof Error && error.message.includes("Unauthorized")) {
         res.status(403).json({ message: "Access denied. Only the game creator can edit prizes." });
       } else if (error instanceof Error && error.message.includes("not found")) {

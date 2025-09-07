@@ -11,42 +11,30 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "hsl(var(--background-h) var(--background-s) var(--background-l))",
+        foreground: "hsl(var(--foreground-h) var(--foreground-s) var(--foreground-l))",
         card: {
-          DEFAULT: "var(--card)",
+          DEFAULT: "hsl(var(--card-h) var(--card-s) var(--card-l))",
           foreground: "var(--card-foreground)",
         },
-        popover: {
-          DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)",
-        },
         primary: {
-          DEFAULT: "var(--primary)",
+          DEFAULT: "hsl(var(--primary-h) var(--primary-s) var(--primary-l))",
           foreground: "var(--primary-foreground)",
         },
         secondary: {
-          DEFAULT: "var(--secondary)",
+          DEFAULT: "hsl(var(--secondary-h) var(--secondary-s) var(--secondary-l))",
           foreground: "var(--secondary-foreground)",
         },
         accent: {
-          DEFAULT: "var(--accent)",
+          DEFAULT: "hsl(var(--accent-h) var(--accent-s) var(--accent-l))",
           foreground: "var(--accent-foreground)",
         },
-        warning: {
-          DEFAULT: "var(--warning)",
-          foreground: "var(--warning-foreground)",
-        },
-        dark: {
-          DEFAULT: "var(--dark)",
-          foreground: "var(--dark-foreground)",
-        },
         muted: {
-          DEFAULT: "var(--muted)",
+          DEFAULT: "hsl(var(--muted-h) var(--muted-s) var(--muted-l))",
           foreground: "var(--muted-foreground)",
         },
         destructive: {
-          DEFAULT: "var(--destructive)",
+          DEFAULT: "hsl(var(--destructive-h) var(--destructive-s) var(--destructive-l))",
           foreground: "var(--destructive-foreground)",
         },
         border: "var(--border)",
