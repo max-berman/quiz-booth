@@ -20,20 +20,20 @@ import { useAuth } from '@/contexts/auth-context'
 export default function Home() {
 	const { isAuthenticated, user, loading } = useAuth()
 	return (
-		<div className='flex-1 bg-background flex flex-col min-h-0'>
+		<div className='flex-1 justify-center flex flex-col min-h-0'>
 			{/* Hero Section */}
 			<section className='relative py-24 px-4 sm:px-6 lg:px-8'>
 				<div className='max-w-7xl mx-auto'>
 					<div className='text-center relative z-10'>
 						<div className='mb-8 animate-slide-up'>
-							<h1 className='text-h1 text-foreground mb-6'>
+							<h1 className='text-h1 text-foreground mb-6 '>
 								Create{' '}
 								<span className='text-primary font-bold'>Trivia Games</span>
 								<br />
 								for your business
 							</h1>
 
-							<p className='text-xl text-muted-foreground max-w-3xl mx-auto mb-12 leading-relaxed'>
+							<p className='text-xl text-foreground max-w-3xl mx-auto mb-12 leading-relaxed'>
 								Engage your customers through play. Generate AI-powered custom
 								trivia questions for your trade show booth and capture leads
 								while visitors have fun competing for prizes.

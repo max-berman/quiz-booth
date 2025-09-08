@@ -34,6 +34,7 @@ import {
 	Save,
 	X,
 	Play,
+	Wrench,
 } from 'lucide-react'
 import { QRCodeModal } from '@/components/qr-code-modal'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
@@ -179,7 +180,7 @@ export default function Dashboard() {
 					<Card>
 						<CardContent className='p-8 text-center'>
 							<h2 className='text-2xl font-bold mb-4'>Sign In Required</h2>
-							<p className='text-muted-foreground mb-6'>
+							<p className='text-foreground mb-6'>
 								Please sign in to view and manage your trivia games.
 							</p>
 							<Button
@@ -213,9 +214,9 @@ export default function Dashboard() {
 
 					<Card>
 						<CardContent className='p-8 text-center'>
-							<Building className='h-16 w-16 text-muted-foreground mx-auto mb-4' />
+							<Building className='h-16 w-16 text-foreground mx-auto mb-4' />
 							<h2 className='text-2xl font-bold mb-4'>No Games Created</h2>
-							<p className='text-muted-foreground mb-6'>
+							<p className='text-foreground mb-6'>
 								You haven't created any trivia games yet. Get started by
 								creating your first game!
 							</p>
@@ -253,7 +254,7 @@ export default function Dashboard() {
 					<div className='flex items-center gap-4'>
 						<div>
 							<h1 className='text-h1 text-foreground'>Creator Dashboard</h1>
-							<p className='text-muted-foreground'>
+							<p className='text-foreground'>
 								Manage your {allGames.length} trivia game
 								{allGames.length !== 1 ? 's' : ''}
 							</p>
@@ -278,18 +279,21 @@ export default function Dashboard() {
 								className='hover:shadow-xl hover:scale-[1.02] transition-all duration-200 border-2'
 							>
 								<CardHeader className='pb-3'>
-									<div className='flex items-start justify-between'>
-										<CardTitle className='text-xl font-bold line-clamp-2 text-foreground'>
+									<div className='flex items-center justify-between'>
+										<CardTitle
+											title={game.companyName}
+											className='text-xl font-bold line-clamp-2 text-foreground'
+										>
 											{game.companyName}
 										</CardTitle>
-										<Badge variant='secondary' className='ml-2 font-semibold'>
+										<Badge className='ml-2 font-semibold'>
 											{game.industry}
 										</Badge>
 									</div>
 								</CardHeader>
 								<CardContent className='space-y-4'>
 									{/* Game Details */}
-									<div className='space-y-2 text-sm text-muted-foreground'>
+									<div className='space-y-2 text-sm text-foreground'>
 										<div className='flex items-center gap-2'>
 											<Calendar className='h-4 w-4' />
 											Created {new Date(game.createdAt).toLocaleDateString()}
@@ -304,7 +308,7 @@ export default function Dashboard() {
 												{game.categories.map((category, index) => (
 													<Badge
 														key={index}
-														variant='outline'
+														variant='secondary'
 														className='text-xs'
 													>
 														{category}
@@ -316,22 +320,10 @@ export default function Dashboard() {
 
 									{/* Action Buttons */}
 									<div className='space-y-3 pt-4'>
-										{/* Primary Action - Play Game */}
-										<Button
-											variant='default'
-											className='w-full '
-											size='sm'
-											onClick={() => setLocation(`/game/${game.id}`)}
-											data-testid={`button-play-game-${game.id}`}
-										>
-											<Play className='mr-2 h-4 w-4' />
-											Play Game
-										</Button>
-
 										{/* Management Actions */}
 										<div className='grid grid-cols-2 gap-2'>
 											<Button
-												variant='secondary'
+												variant='outline'
 												className='w-full'
 												size='sm'
 												onClick={() =>
@@ -344,51 +336,20 @@ export default function Dashboard() {
 											</Button>
 											<Button
 												variant='outline'
-												className='w-full'
+												className='w-full '
 												size='sm'
-												onClick={() => {
-													// Initialize prizes for this game
-													const existingPrizes = []
-													if (game.prizes && game.prizes.length > 0) {
-														existingPrizes.push(...game.prizes)
-													} else {
-														// Legacy format
-														if (game.firstPrize)
-															existingPrizes.push({
-																placement: '1st Place',
-																prize: game.firstPrize,
-															})
-														if (game.secondPrize)
-															existingPrizes.push({
-																placement: '2nd Place',
-																prize: game.secondPrize,
-															})
-														if (game.thirdPrize)
-															existingPrizes.push({
-																placement: '3rd Place',
-																prize: game.thirdPrize,
-															})
-													}
-													if (existingPrizes.length === 0) {
-														existingPrizes.push({
-															placement: '1st Place',
-															prize: '',
-														})
-													}
-													setPrizes(existingPrizes)
-													setEditingPrizes(game.id)
-												}}
-												data-testid={`button-edit-prizes-${game.id}`}
+												onClick={() => setLocation(`/game/${game.id}`)}
+												data-testid={`button-play-game-${game.id}`}
 											>
-												<Gift className='mr-1 h-4 w-4' />
-												Prizes
+												<Play className='mr-2 h-4 w-4' />
+												Play Game
 											</Button>
 										</div>
 
 										{/* Analytics Actions */}
 										<div className='grid grid-cols-2 gap-2'>
 											<Button
-												variant='secondary'
+												variant='outline'
 												className='w-full'
 												size='sm'
 												onClick={() => setLocation(`/leaderboard/${game.id}`)}
@@ -430,33 +391,49 @@ export default function Dashboard() {
 									</div>
 
 									{/* Prizes if configured */}
-									{((game.prizes && game.prizes.length > 0) ||
-										game.firstPrize ||
-										game.secondPrize ||
-										game.thirdPrize) && (
-										<div className='pt-2 border-t border-border'>
-											<p className='text-xs font-medium text-muted-foreground mb-1'>
+
+									<div className='flex border-t border-primary justify-between pt-4'>
+										{/* <p className='text-xs font-medium text-foreground mb-1'>
 												Prizes:
-											</p>
-											<div className='text-xs space-y-1'>
-												{game.prizes && game.prizes.length > 0 ? (
-													game.prizes.map((prize, index) => (
-														<div key={index}>
-															{prize.placement}: {prize.prize}
-														</div>
-													))
-												) : (
-													<>
-														{game.firstPrize && <div>🥇 {game.firstPrize}</div>}
-														{game.secondPrize && (
-															<div>🥈 {game.secondPrize}</div>
-														)}
-														{game.thirdPrize && <div>🥉 {game.thirdPrize}</div>}
-													</>
-												)}
-											</div>
-										</div>
-									)}
+											</p> */}
+										<ul className='text-xs flex flex-col flex-wrap  w-1/2'>
+											{game.prizes &&
+												game.prizes.length > 0 &&
+												game.prizes.map((prize, index) => (
+													<li key={index} className='mr-2'>
+														<strong>{prize.placement}</strong>: {prize.prize}
+													</li>
+												))}
+										</ul>
+										<Button
+											variant='outline'
+											className='w-1/2'
+											size='sm'
+											onClick={() => {
+												// Initialize prizes for this game
+												const existingPrizes = []
+												if (game.prizes && game.prizes.length > 0) {
+													existingPrizes.push(...game.prizes)
+												}
+												if (existingPrizes.length === 0) {
+													existingPrizes.push({
+														placement: '1st Place',
+														prize: '',
+													})
+												}
+												setPrizes(existingPrizes)
+												setEditingPrizes(game.id)
+											}}
+											data-testid={`button-edit-prizes-${game.id}`}
+										>
+											{game.prizes && game.prizes.length > 0 ? (
+												<Wrench className='mr-1 h-4 w-4' />
+											) : (
+												<Gift className='mr-1 h-4 w-4' />
+											)}
+											Prizes
+										</Button>
+									</div>
 								</CardContent>
 							</Card>
 						))}
@@ -464,9 +441,9 @@ export default function Dashboard() {
 				) : (
 					<Card>
 						<CardContent className='p-8 text-center'>
-							<Building className='h-16 w-16 text-muted-foreground mx-auto mb-4' />
+							<Building className='h-16 w-16 text-foreground mx-auto mb-4' />
 							<h2 className='text-2xl font-bold mb-4'>No Games Found</h2>
-							<p className='text-muted-foreground mb-6'>
+							<p className='text-foreground mb-6'>
 								There was an issue loading your games. Please try refreshing the
 								page.
 							</p>
