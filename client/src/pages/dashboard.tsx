@@ -39,7 +39,11 @@ export default function Dashboard() {
 	}
 
 	// Fetch games using Firebase authentication only
-	const { data: allGames = [], isLoading } = useQuery<Game[]>({
+	const {
+		data: allGames = [],
+		isLoading,
+		isError,
+	} = useQuery<Game[]>({
 		queryKey: ['/api/my-games', user?.uid],
 		queryFn: async () => {
 			if (!isAuthenticated) {
@@ -72,14 +76,20 @@ export default function Dashboard() {
 						response.status,
 						errorText
 					)
-					return []
+					throw new Error(
+						`Failed to fetch games: ${response.status} ${errorText}`
+					)
 				}
 			} catch (error) {
 				logger.error('Dashboard: Error fetching games:', error)
-				return []
+				throw error
 			}
 		},
 		enabled: isAuthenticated,
+		retry: 2,
+		retryDelay: 1000,
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		gcTime: 10 * 60 * 1000, // 10 minutes
 	})
 
 	if (!isAuthenticated) {
@@ -105,7 +115,7 @@ export default function Dashboard() {
 		)
 	}
 
-	if (allGames.length === 0 && !isLoading) {
+	if (allGames.length === 0 && !isLoading && !isError) {
 		return (
 			<div className='flex-1 py-8'>
 				<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -190,6 +200,19 @@ export default function Dashboard() {
 							/>
 						))}
 					</div>
+				) : isError ? (
+					<Card>
+						<CardContent className='p-8 text-center'>
+							<Building className='h-16 w-16 text-foreground mx-auto mb-4' />
+							<h2 className='text-2xl font-bold mb-4'>Error Loading Games</h2>
+							<p className='text-foreground mb-6'>
+								Failed to load your games. Please try refreshing the page.
+							</p>
+							<Button onClick={() => window.location.reload()}>
+								Refresh Page
+							</Button>
+						</CardContent>
+					</Card>
 				) : (
 					<Card>
 						<CardContent className='p-8 text-center'>
