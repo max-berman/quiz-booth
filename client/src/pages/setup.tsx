@@ -29,7 +29,6 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { LoadingSpinner } from '@/components/loading-spinner'
-import { ProfessionalFooter } from '@/components/professional-footer'
 import type { InsertGame } from '@shared/firebase-types'
 
 // Industry options for better organization
@@ -313,7 +312,7 @@ export default function Setup() {
 	}
 
 	return (
-		<div className='min-h-screen bg-background py-6'>
+		<div className='flex-1 bg-background py-6'>
 			<div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8'>
 				{/* Header */}
 				<div className='text-center mb-8'>
@@ -806,9 +805,6 @@ export default function Setup() {
 						</form>
 					</CardContent>
 				</Card>
-			</div>
-			<div className='mt-16'>
-				<ProfessionalFooter />
 			</div>
 		</div>
 	)

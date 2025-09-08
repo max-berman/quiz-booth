@@ -1,4 +1,4 @@
-import { useLocation } from 'wouter'
+import { useLocation, Link } from 'wouter'
 import { BarChart3, LogOut, User, Home, LogIn, ChevronDown } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { MenuLink } from './menu-link'
@@ -30,10 +30,22 @@ export function CreatorHeader() {
 	}
 
 	return (
-		<div className='bg-card px-4 py-2'>
+		<div className='bg-card border-b border-primary px-4 py-2'>
 			<div className='max-w-7xl mx-auto flex items-center justify-between'>
 				<div className='flex items-center gap-4'>
 					{/* Show Home button when not on home page */}
+					<Link
+						href='/'
+						data-testid='link-home'
+						className='flex  items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
+					>
+						<img
+							src='/src/assets/images/owl.svg'
+							alt='QuizBooth.games'
+							className='h-8 w-auto'
+						/>
+						<span className='hover:scale-[1.02] transition-all'>QuizBooth</span>
+					</Link>
 					{!isHomePage && (
 						<MenuLink href='/' data-testid='button-home'>
 							<Home className='mr-2 h-4 w-4' />

@@ -1,9 +1,10 @@
-import { Switch, Route } from 'wouter'
+import { Switch, Route, useLocation } from 'wouter'
 import { queryClient } from './lib/queryClient'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/toaster'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { CreatorHeader } from '@/components/creator-header'
+import { CreatorHeader } from '@/components/menu-header'
+import { Footer } from '@/components/footer'
 import { AuthProvider } from '@/contexts/auth-context'
 import Home from '@/pages/home'
 import Setup from '@/pages/setup'
@@ -38,6 +39,11 @@ function Router() {
 }
 
 function App() {
+	const [location] = useLocation()
+
+	// Don't show footer on game pages
+	const showFooter = !location.startsWith('/game')
+
 	return (
 		<QueryClientProvider client={queryClient}>
 			<TooltipProvider>
@@ -46,6 +52,7 @@ function App() {
 						{/* CreatorHeader is intentionally hidden on game pages to maintain immersive gameplay experience */}
 						<CreatorHeader />
 						<Router />
+						{showFooter && <Footer />}
 					</div>
 					<Toaster />
 				</AuthProvider>

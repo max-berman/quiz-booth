@@ -2,8 +2,17 @@ import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { apiLimiter } from "./middleware/rate-limit";
+import { databaseTimeout } from "./middleware/query-timeout";
 
 const app = express();
+
+// Apply rate limiting middleware
+app.use("/api", apiLimiter);
+
+// Apply database timeout middleware
+app.use("/api", databaseTimeout());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

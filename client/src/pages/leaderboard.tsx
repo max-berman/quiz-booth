@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Trophy, Home, Users } from 'lucide-react'
 import { Link } from 'wouter'
-import { ProfessionalFooter } from '@/components/professional-footer'
 import type { Player, Game } from '@shared/schema'
 
 export default function Leaderboard() {
@@ -45,7 +44,7 @@ export default function Leaderboard() {
 
 	if (isLoading) {
 		return (
-			<div className='min-h-screen bg-background flex items-center justify-center'>
+			<div className='flex-1 flex items-center justify-center'>
 				<div className='text-center'>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
 					<p>Loading leaderboard...</p>
@@ -55,7 +54,7 @@ export default function Leaderboard() {
 	}
 
 	return (
-		<div className='min-h-screen bg-background py-8'>
+		<div className='flex-1 py-8'>
 			<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
 				<Card className='shadow-xl overflow-hidden'>
 					<div className='bg-primary p-6 text-primary-foreground'>
@@ -187,9 +186,6 @@ export default function Leaderboard() {
 						</div>
 					</div>
 				</Card>
-			</div>
-			<div className='mt-16'>
-				<ProfessionalFooter />
 			</div>
 		</div>
 	)

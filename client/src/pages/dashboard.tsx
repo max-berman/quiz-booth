@@ -36,7 +36,6 @@ import {
 	Play,
 } from 'lucide-react'
 import { QRCodeModal } from '@/components/qr-code-modal'
-import { ProfessionalFooter } from '@/components/professional-footer'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
 import type { Game } from '@shared/firebase-types'
 
@@ -175,23 +174,10 @@ export default function Dashboard() {
 
 	if (!isAuthenticated) {
 		return (
-			<div className='min-h-screen bg-background py-8'>
+			<div className='flex-1 py-8'>
 				<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
-					<div className='flex items-center gap-4 mb-8'>
-						<Button
-							variant='ghost'
-							size='sm'
-							onClick={() => setLocation('/')}
-							data-testid='button-back-home'
-						>
-							<ArrowLeft className='h-4 w-4 mr-2' />
-							Back to Home
-						</Button>
-					</div>
-
 					<Card>
 						<CardContent className='p-8 text-center'>
-							<Building className='h-16 w-16 text-muted-foreground mx-auto mb-4' />
 							<h2 className='text-2xl font-bold mb-4'>Sign In Required</h2>
 							<p className='text-muted-foreground mb-6'>
 								Please sign in to view and manage your trivia games.
@@ -211,7 +197,7 @@ export default function Dashboard() {
 
 	if (allGames.length === 0 && !isLoading) {
 		return (
-			<div className='min-h-screen bg-background py-8'>
+			<div className='flex-1 py-8'>
 				<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
 					<div className='flex items-center gap-4 mb-8'>
 						<Button
@@ -250,7 +236,7 @@ export default function Dashboard() {
 
 	if (isLoading) {
 		return (
-			<div className='min-h-screen bg-background flex items-center justify-center'>
+			<div className='flex-1 flex items-center justify-center'>
 				<div className='text-center'>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
 					<p>Loading your games...</p>
@@ -260,7 +246,7 @@ export default function Dashboard() {
 	}
 
 	return (
-		<div className='min-h-screen bg-background py-8'>
+		<div className='flex-1 py-8'>
 			<div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
 				{/* Header */}
 				<div className='flex items-center justify-between mb-8'>
@@ -580,9 +566,6 @@ export default function Dashboard() {
 						</div>
 					</DialogContent>
 				</Dialog>
-			</div>
-			<div className='mt-16'>
-				<ProfessionalFooter />
 			</div>
 		</div>
 	)

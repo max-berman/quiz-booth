@@ -12,15 +12,15 @@ import {
 	Sparkles,
 	Play,
 	LogIn,
+	MonitorPlay,
 } from 'lucide-react'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
-import { ProfessionalFooter } from '@/components/professional-footer'
 import { useAuth } from '@/contexts/auth-context'
 
 export default function Home() {
 	const { isAuthenticated, user, loading } = useAuth()
 	return (
-		<div className='flex-1 bg-background'>
+		<div className='flex-1 bg-background flex flex-col min-h-0'>
 			{/* Hero Section */}
 			<section className='relative py-24 px-4 sm:px-6 lg:px-8'>
 				<div className='max-w-7xl mx-auto'>
@@ -47,11 +47,10 @@ export default function Home() {
 							<Link href='/setup'>
 								<Button
 									variant='default'
-									className='px-8 py-3  !text-white  w-full sm:w-auto'
+									className='px-8 py-3 w-full sm:w-auto'
 								>
-									<Sparkles className='mr-2 h-4 w-4' />
+									<MonitorPlay className='mr-2 h-8 w-4' />
 									Create Your Game
-									<ArrowRight className='ml-2 h-4 w-4' />
 								</Button>
 							</Link>
 
@@ -75,10 +74,6 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-
-			<div className='mt-16'>
-				<ProfessionalFooter />
-			</div>
 		</div>
 	)
 }

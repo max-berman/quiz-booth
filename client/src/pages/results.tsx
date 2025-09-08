@@ -10,7 +10,6 @@ import { Link } from 'wouter'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
-import { ProfessionalFooter } from '@/components/professional-footer'
 import type { Game, InsertPlayer } from '@shared/schema'
 
 export default function Results() {
@@ -90,7 +89,7 @@ export default function Results() {
 	}
 
 	return (
-		<div className='min-h-screen bg-gray-50 py-8'>
+		<div className='flex-1 py-8'>
 			<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
 				<Card className='shadow-xl'>
 					<CardContent className='p-8 text-center'>
@@ -219,7 +218,6 @@ export default function Results() {
 					</CardContent>
 				</Card>
 			</div>
-			<ProfessionalFooter />
 		</div>
 	)
 }
