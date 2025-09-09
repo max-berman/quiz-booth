@@ -49,7 +49,7 @@ export function SimpleDropdown({
 			{isOpen && (
 				<div
 					className={cn(
-						'absolute z-50 mt-1 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
+						'absolute z-50 mt-1  overflow-hidden rounded-md border bg-popover p-1 text-foreground shadow-md',
 						alignmentClasses[align]
 					)}
 				>

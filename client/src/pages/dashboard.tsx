@@ -44,7 +44,7 @@ export default function Dashboard() {
 		isLoading,
 		isError,
 	} = useQuery<Game[]>({
-		queryKey: ['/api/my-games', user?.uid],
+		queryKey: ['/api/user/games', user?.uid],
 		queryFn: async () => {
 			if (!isAuthenticated) {
 				logger.log('Dashboard: User not authenticated')
@@ -59,7 +59,7 @@ export default function Dashboard() {
 				const headers = await getAuthHeaders()
 				logger.log('Dashboard: Using headers:', headers)
 
-				const response = await fetch('/api/my-games', { headers })
+				const response = await fetch('/api/user/games', { headers })
 				logger.log('Dashboard: Response status:', response.status)
 
 				if (response.ok) {

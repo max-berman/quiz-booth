@@ -41,22 +41,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get games by creator key (legacy)
-  app.get("/api/creator/games", async (req, res) => {
-    try {
-      const creatorKey = req.headers['x-creator-key'] as string;
-
-      if (!creatorKey) {
-        return res.status(401).json({ message: "Creator key required" });
-      }
-
-      const games = await storage.getGamesByCreator(creatorKey);
-      res.json(games);
-    } catch (error) {
-      logger.error('Creator games fetch error:', error);
-      res.status(500).json({ message: "Failed to get creator games" });
-    }
-  });
 
   // Get games by authenticated user (Firebase auth)
   app.get("/api/user/games", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
@@ -73,29 +57,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Combined endpoint that supports both creator keys and Firebase auth
-  app.get("/api/my-games", optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
-    try {
-      const creatorKey = req.headers['x-creator-key'] as string;
-
-      // If authenticated with Firebase, get games by user
-      if (req.user) {
-        const games = await storage.getGamesByUser(req.user.uid);
-        return res.json(games);
-      }
-
-      // Fall back to creator key method
-      if (creatorKey) {
-        const games = await storage.getGamesByCreator(creatorKey);
-        return res.json(games);
-      }
-
-      return res.status(401).json({ message: "Authentication required" });
-    } catch (error) {
-      logger.error('Games fetch error:', error);
-      res.status(500).json({ message: "Failed to get games" });
-    }
-  });
 
   // Generate questions using DeepSeek API
   app.post("/api/games/:id/generate-questions", async (req, res) => {
@@ -257,40 +218,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update a question (requires creator key - legacy)
-  app.put("/api/questions/:id", async (req, res) => {
-    try {
-      const creatorKey = req.headers['x-creator-key'] as string;
-
-      if (!creatorKey) {
-        return res.status(401).json({ message: "Creator key required to update questions" });
-      }
-
-      const questionId = req.params.id;
-      const updates = req.body;
-
-      // Validate the updates
-      const allowedFields = ['questionText', 'options', 'correctAnswer', 'explanation'];
-      const filteredUpdates = Object.keys(updates)
-        .filter(key => allowedFields.includes(key))
-        .reduce((obj: any, key) => {
-          obj[key] = updates[key];
-          return obj;
-        }, {});
-
-      const updatedQuestion = await storage.updateQuestion(questionId, filteredUpdates, creatorKey);
-      res.json(updatedQuestion);
-    } catch (error) {
-      logger.error('Question update error:', error);
-      if (error instanceof Error && error.message.includes("Unauthorized")) {
-        res.status(403).json({ message: "Access denied. Only the game creator can edit questions." });
-      } else if (error instanceof Error && error.message.includes("not found")) {
-        res.status(404).json({ message: "Question not found" });
-      } else {
-        res.status(500).json({ message: "Failed to update question" });
-      }
-    }
-  });
 
   // Update a question (Firebase auth)
   app.put("/api/user/questions/:id", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
@@ -325,46 +252,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Combined question update endpoint
-  app.put("/api/my-questions/:id", optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
-    try {
-      const creatorKey = req.headers['x-creator-key'] as string;
-      const questionId = req.params.id;
-      const updates = req.body;
-
-      // Validate the updates
-      const allowedFields = ['questionText', 'options', 'correctAnswer', 'explanation'];
-      const filteredUpdates = Object.keys(updates)
-        .filter(key => allowedFields.includes(key))
-        .reduce((obj: any, key) => {
-          obj[key] = updates[key];
-          return obj;
-        }, {});
-
-      // If authenticated with Firebase, use user-based access
-      if (req.user) {
-        const updatedQuestion = await storage.updateQuestionByUser(questionId, filteredUpdates, req.user.uid);
-        return res.json(updatedQuestion);
-      }
-
-      // Fall back to creator key method
-      if (creatorKey) {
-        const updatedQuestion = await storage.updateQuestion(questionId, filteredUpdates, creatorKey);
-        return res.json(updatedQuestion);
-      }
-
-      return res.status(401).json({ message: "Authentication required" });
-    } catch (error) {
-      logger.error('Question update error:', error);
-      if (error instanceof Error && error.message.includes("Unauthorized")) {
-        res.status(403).json({ message: "Access denied. Only the game creator can edit questions." });
-      } else if (error instanceof Error && error.message.includes("not found")) {
-        res.status(404).json({ message: "Question not found" });
-      } else {
-        res.status(500).json({ message: "Failed to update question" });
-      }
-    }
-  });
 
   // Submit player score
   app.post("/api/games/:id/players", async (req, res) => {
@@ -400,26 +287,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all players for a game (raw submissions data) - requires creator key
-  app.get("/api/games/:id/players", async (req, res) => {
-    try {
-      const creatorKey = req.headers['x-creator-key'] as string;
-
-      if (!creatorKey) {
-        return res.status(401).json({ message: "Creator key required for submissions data" });
-      }
-
-      const players = await storage.getAllPlayersForGame(req.params.id, creatorKey);
-      res.json(players);
-    } catch (error) {
-      logger.error('Players fetch error:', error);
-      if (error instanceof Error && error.message.includes("Unauthorized")) {
-        res.status(403).json({ message: "Access denied. Only the game creator can view submissions." });
-      } else {
-        res.status(500).json({ message: "Failed to get players" });
-      }
-    }
-  });
 
   // Add single question to game (authenticated users only)
   app.post("/api/games/:id/add-question", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
