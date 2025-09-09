@@ -287,6 +287,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get players for a specific game (creator key authentication)
+  app.get("/api/games/:id/players", async (req, res) => {
+    try {
+      const gameId = req.params.id;
+      const creatorKey = req.headers['x-creator-key'] as string;
+
+      if (!creatorKey) {
+        return res.status(401).json({ message: "Creator key required" });
+      }
+
+      const players = await storage.getAllPlayersForGame(gameId, creatorKey);
+      res.json(players);
+    } catch (error) {
+      logger.error('Get players error:', error);
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Access denied. Only the game creator can view submissions." });
+      } else if (error instanceof Error && error.message.includes("not found")) {
+        res.status(404).json({ message: "Game not found" });
+      } else {
+        res.status(500).json({ message: "Failed to get players", error: error instanceof Error ? error.message : String(error) });
+      }
+    }
+  });
+
 
   // Add single question to game (authenticated users only)
   app.post("/api/games/:id/add-question", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {

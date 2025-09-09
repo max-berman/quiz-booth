@@ -47,9 +47,9 @@ export default function Home() {
 							<Link href='/setup'>
 								<Button
 									variant='default'
-									className='px-8 py-3 w-full sm:w-auto'
+									className='px-8 py-3 w-full text-lg sm:w-auto'
 								>
-									<MonitorPlay className='mr-2 h-8 w-4' />
+									<MonitorPlay className='mr-2 !h-6 !w-6' />
 									Create Your Game
 								</Button>
 							</Link>
@@ -57,9 +57,9 @@ export default function Home() {
 							<Link href='/leaderboard'>
 								<Button
 									variant='secondary'
-									className='px-8 py-3 w-full sm:w-auto'
+									className='px-8 py-3 text-lg w-full sm:w-auto'
 								>
-									<Trophy className='mr-2 h-4 w-4' />
+									<Trophy className='mr-2 !h-6 !w-6' />
 									View Leaderboard
 								</Button>
 							</Link>

@@ -8,6 +8,7 @@ import {
 	LogIn,
 	ChevronDown,
 	Menu,
+	CircleUserRound,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { MenuLink } from './menu-link'
@@ -90,7 +91,7 @@ export function CreatorHeader() {
 										className='flex items-center'
 										data-testid='user-menu'
 									>
-										<User className='mr-1 h-4 w-4' />
+										<CircleUserRound className=' h-4 w-4' />
 										{user?.email?.split('@')[0] || 'User'}
 										<ChevronDown
 											className={`h-4 w-4 transition-transform ${
@@ -124,7 +125,6 @@ export function CreatorHeader() {
 						<Button
 							variant='ghost'
 							size='icon'
-							className='ml-2 '
 							onClick={() => setIsSidebarOpen(true)}
 						>
 							<Menu className='!h-6 !w-6' />
@@ -139,14 +139,17 @@ export function CreatorHeader() {
 				isOpen={isSidebarOpen}
 				onClose={() => setIsSidebarOpen(false)}
 				side='right'
+				title={user?.email?.split('@')[0] || 'User'}
 			>
 				<div className='space-y-4'>
-					<h3 className='text-lg font-semibold'>Menu</h3>
-					<div className='space-y-2'>
+					<div className='space-y-4'>
 						<Button
 							variant='ghost'
 							className='w-full justify-start'
-							onClick={() => setLocation('/')}
+							onClick={() => {
+								setLocation('/')
+								setIsSidebarOpen(false)
+							}}
 						>
 							<Home className='mr-2 h-4 w-4' />
 							Home
@@ -155,7 +158,10 @@ export function CreatorHeader() {
 							<Button
 								variant='ghost'
 								className='w-full justify-start'
-								onClick={() => setLocation('/dashboard')}
+								onClick={() => {
+									setLocation('/dashboard')
+									setIsSidebarOpen(false)
+								}}
 							>
 								<BarChart3 className='mr-2 h-4 w-4' />
 								Dashboard
@@ -165,7 +171,10 @@ export function CreatorHeader() {
 							<Button
 								variant='ghost'
 								className='w-full justify-start'
-								onClick={handleSignOut}
+								onClick={() => {
+									handleSignOut()
+									setIsSidebarOpen(false)
+								}}
 							>
 								<LogOut className='mr-2 h-4 w-4' />
 								Sign Out
@@ -174,7 +183,10 @@ export function CreatorHeader() {
 							<Button
 								variant='ghost'
 								className='w-full justify-start'
-								onClick={() => setLocation('/auth/sign-in')}
+								onClick={() => {
+									setLocation('/auth/sign-in')
+									setIsSidebarOpen(false)
+								}}
 							>
 								<LogIn className='mr-2 h-4 w-4' />
 								Sign In
