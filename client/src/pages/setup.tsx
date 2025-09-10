@@ -119,8 +119,8 @@ export default function Setup() {
 	const [difficulty, setDifficulty] = useState('easy')
 	const [categories, setCategories] = useState<Categories>({
 		companyFacts: true,
-		industryKnowledge: true,
-		funFacts: false,
+		industryKnowledge: false,
+		funFacts: true,
 		generalKnowledge: false,
 		other: false,
 	})
@@ -130,14 +130,12 @@ export default function Setup() {
 
 	const [formData, setFormData] = useState<FormData>({
 		companyName: '',
-		industry: 'Technology',
+		industry: '',
 		productDescription: '',
-		questionCount: '10',
+		questionCount: '5',
 	})
 
-	const [prizes, setPrizes] = useState<Prize[]>([
-		{ placement: '1st Place', prize: '' },
-	])
+	const [prizes, setPrizes] = useState<Prize[]>([{ placement: '', prize: '' }])
 
 	// Memoized form state checks
 	const checkCompanyComplete = useCallback(() => {
@@ -319,15 +317,15 @@ export default function Setup() {
 					<h1 className='text-4xl md:text-5xl font-bold text-foreground mb-4'>
 						Create Your <span className='text-primary'>Trivia Game</span>
 					</h1>
-					<p className='text-lg text-muted-foreground max-w-2xl mx-auto'>
+					<p className='text-lg text-foreground max-w-2xl mx-auto'>
 						Generate engaging AI-powered trivia questions for your trade show
 						booth in just a few minutes
 					</p>
 				</div>
 
 				{/* Progress Steps */}
-				<div className='mb-8'>
-					<div className='flex items-center justify-center space-x-8 mb-6'>
+				{/* <div className='mb-8'>
+					<div className='flex items-center justify-center space-x-8 mb-6 '>
 						{steps.map((step, index) => (
 							<div key={step.id} className='flex items-center'>
 								<div
@@ -364,17 +362,15 @@ export default function Setup() {
 							</div>
 						))}
 					</div>
-				</div>
+				</div> */}
 
-				<Card className='shadow-2xl border-0 bg-white/80 backdrop-blur-sm'>
-					<CardContent className='p-8 md:p-12'>
+				<Card className='shadow-sm border-0 bg-popover'>
+					<CardContent className='p-4 md:p-6'>
 						<form onSubmit={handleSubmit} className='space-y-8'>
 							{/* Company Information Section */}
-							<div
-								className={`p-6 rounded-xl border-2 transition-all ${
-									focusedSection === 1
-										? 'border-primary bg-muted'
-										: 'border-border bg-muted'
+							<section
+								className={`p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
+									focusedSection === 1 ? 'shadow-md ' : ''
 								}`}
 								onFocus={() => setFocusedSection(1)}
 								onBlur={() => setFocusedSection(null)}
@@ -382,8 +378,8 @@ export default function Setup() {
 							>
 								<div className='mb-6'>
 									<h3 className='text-xl font-bold text-foreground flex items-center'>
-										<Building className='text-primary mr-3 h-6 w-6' />
-										Company Information
+										<Building className='text-foreground mr-3 h-6 w-6' />
+										Business Information
 										{checkCompanyComplete() && (
 											<CheckCircle className='ml-2 h-5 w-5 text-primary' />
 										)}
@@ -408,10 +404,10 @@ export default function Setup() {
 													companyName: e.target.value,
 												}))
 											}
-											className={`mt-2 h-12 text-base ${
+											className={`mt-2 h-12 ${
 												formData.companyName.trim()
 													? 'border-primary'
-													: 'border-gray-300'
+													: 'border-border'
 											}`}
 											required
 										/>
@@ -436,14 +432,15 @@ export default function Setup() {
 										>
 											<SelectTrigger
 												className={`mt-2 h-12 text-base ${
-													formData.industry
-														? 'border-primary'
-														: 'border-gray-300'
+													formData.industry ? 'border-primary' : 'border-border'
 												}`}
 											>
-												<SelectValue />
+												<SelectValue
+													className='text-base'
+													placeholder='Select your industry'
+												/>
 											</SelectTrigger>
-											<SelectContent>
+											<SelectContent className='text-base'>
 												{INDUSTRY_OPTIONS.map((industry) => (
 													<SelectItem key={industry} value={industry}>
 														{industry}
@@ -469,7 +466,7 @@ export default function Setup() {
 												className={`mt-2 h-12 text-base ${
 													customIndustry.trim()
 														? 'border-primary'
-														: 'border-gray-300'
+														: 'border-border'
 												}`}
 												required
 											/>
@@ -493,23 +490,21 @@ export default function Setup() {
 													productDescription: e.target.value,
 												}))
 											}
-											className={`mt-2 text-base ${
+											className={`mt-2  ${
 												formData.productDescription.trim()
 													? 'border-primary'
-													: 'border-gray-300'
+													: 'border-border'
 											}`}
 											rows={3}
 										/>
 									</div>
 								</div>
-							</div>
+							</section>
 
 							{/* Game Settings Section */}
-							<div
-								className={`p-6 rounded-xl border-2 transition-all ${
-									focusedSection === 2
-										? 'border-primary bg-muted'
-										: 'border-border bg-muted'
+							<section
+								className={`p-6 rounded-xl bg-popover  border-2 transition-all border-accent ${
+									focusedSection === 2 ? 'shadow-md ' : ''
 								}`}
 								onFocus={() => setFocusedSection(2)}
 								onBlur={() => setFocusedSection(null)}
@@ -517,7 +512,7 @@ export default function Setup() {
 							>
 								<div className='mb-6'>
 									<h3 className='text-xl font-bold text-foreground flex items-center'>
-										<Settings className='text-secondary mr-3 h-6 w-6' />
+										<Settings className='text-foreground mr-3 h-6 w-6' />
 										Game Settings
 										{checkSettingsComplete() && (
 											<CheckCircle className='ml-2 h-5 w-5 text-primary' />
@@ -546,7 +541,7 @@ export default function Setup() {
 												className={`mt-2 h-12 text-base ${
 													formData.questionCount
 														? 'border-primary'
-														: 'border-gray-300'
+														: 'border-border'
 												}`}
 											>
 												<SelectValue />
@@ -570,7 +565,7 @@ export default function Setup() {
 												<Button
 													key={level}
 													type='button'
-													variant={difficulty === level ? 'default' : 'outline'}
+													variant={difficulty === level ? 'outline' : 'link'}
 													className='h-8 flex flex-col hover:scale-100'
 													onClick={() => setDifficulty(level)}
 												>
@@ -590,8 +585,8 @@ export default function Setup() {
 													key={key}
 													className={`p-2 border rounded-lg transition-all ${
 														categories[key as keyof typeof categories]
-															? 'border-primary bg-primary/5'
-															: 'border-gray-200 hover:border-gray-300'
+															? 'border-primary bg-background'
+															: 'border-border hover:border-border'
 													}`}
 												>
 													<div className='flex items-start space-x-2'>
@@ -619,7 +614,7 @@ export default function Setup() {
 											))}
 										</div>
 										{categories.other && (
-											<div className='mt-4 bg-muted rounded-lg'>
+											<div className='mt-4 rounded-lg'>
 												<Label
 													htmlFor='customCategory'
 													className='text-base font-medium'
@@ -634,7 +629,7 @@ export default function Setup() {
 													className={`mt-2 ${
 														customCategory.trim()
 															? 'border-primary'
-															: 'border-gray-300'
+															: 'border-border'
 													}`}
 													rows={2}
 												/>
@@ -650,14 +645,12 @@ export default function Setup() {
 										)}
 									</div>
 								</div>
-							</div>
+							</section>
 
 							{/* Prize Settings Section */}
-							<div
-								className={`p-6 rounded-xl border-2 transition-all ${
-									focusedSection === 3
-										? 'border-primary bg-muted'
-										: 'border-border bg-muted'
+							<section
+								className={`p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
+									focusedSection === 3 ? 'shadow-md ' : ''
 								}`}
 								onFocus={() => setFocusedSection(3)}
 								onBlur={() => setFocusedSection(null)}
@@ -665,7 +658,7 @@ export default function Setup() {
 							>
 								<div className='flex items-center justify-between mb-6'>
 									<h3 className='text-xl font-bold text-foreground flex items-center'>
-										<Gift className='text-secondary mr-3 h-6 w-6' />
+										<Gift className='text-foreground mr-3 h-6 w-6' />
 										Prize Information (Optional)
 										<CheckCircle className='ml-2 h-5 w-5 ' />
 									</h3>
@@ -685,7 +678,7 @@ export default function Setup() {
 									{prizes.map((prize, index) => (
 										<div
 											key={index}
-											className='flex gap-3 items-end p-4 bg-card rounded-lg border'
+											className='flex gap-3 items-end p-4  rounded-lg border'
 										>
 											<div className='flex-1'>
 												<Label
@@ -704,7 +697,7 @@ export default function Setup() {
 													className={`mt-2 h-10 ${
 														prize.placement.trim()
 															? 'border-primary'
-															: 'border-gray-300'
+															: 'border-border'
 													}`}
 												/>
 											</div>
@@ -725,7 +718,7 @@ export default function Setup() {
 													className={`mt-2 h-10 ${
 														prize.prize.trim()
 															? 'border-primary'
-															: 'border-gray-300'
+															: 'border-border'
 													}`}
 												/>
 											</div>
@@ -744,17 +737,17 @@ export default function Setup() {
 									))}
 									<div className='flex items-start gap-2 p-4 bg-muted rounded-lg'>
 										<Info className='h-4 w-4 text-primary mt-0.5 flex-shrink-0' />
-										<p className='text-sm text-muted-foreground'>
+										<p className='text-sm text-primary'>
 											Add prizes to motivate participation. You can customize
 											placements (e.g., "4th Place", "Top 10", "Best Score") to
 											match your event needs.
 										</p>
 									</div>
 								</div>
-							</div>
+							</section>
 
 							{/* Submit Section */}
-							<div className='bg-muted p-8 rounded-xl border'>
+							<section className='bg-popover p-4  '>
 								<div className='text-center space-y-4'>
 									<div className='flex items-center justify-center gap-2 text-primary'>
 										<CheckCircle className='h-5 w-5' />
@@ -763,15 +756,15 @@ export default function Setup() {
 										</span>
 									</div>
 
-									<div className='text-sm text-muted-foreground max-w-md mx-auto'>
+									<div className='text-sm text-foreground max-w-md mx-auto'>
 										Our AI will create {formData.questionCount} {difficulty}{' '}
-										questions
 										{Object.values(categories).filter(Boolean).length > 0 && (
 											<>
 												{' '}
 												covering{' '}
-												{Object.values(categories).filter(Boolean).length}{' '}
-												categories
+												{Object.values(categories).filter(Boolean).length === 1
+													? 'category'
+													: 'categories'}
 											</>
 										)}
 									</div>
@@ -801,7 +794,7 @@ export default function Setup() {
 										</div>
 									)}
 								</div>
-							</div>
+							</section>
 						</form>
 					</CardContent>
 				</Card>

@@ -49,18 +49,23 @@ export function GameCard({ game, onEditPrizes }: GameCardProps) {
 
 	return (
 		<Card className='hover:shadow-xl hover:scale-[1.02] transition-all duration-200 border-2'>
-			<CardHeader className='pb-3'>
-				<div className='flex items-center justify-between'>
+			<CardHeader className='pb-3 px-4 pt-2'>
+				<div className='flex items-center flex-col '>
 					<CardTitle
 						title={game.companyName}
-						className='text-xl font-bold line-clamp-2 text-foreground'
+						className='text-xl font-bold line-clamp-2 text-foreground mb-1'
 					>
 						{game.companyName}
 					</CardTitle>
-					<Badge className='ml-2 font-semibold'>{game.industry}</Badge>
+					<Badge
+						title={game.industry}
+						className='font-semibold whitespace-nowrap block truncate text-ellipsis overflow-hidden '
+					>
+						{game.industry}
+					</Badge>
 				</div>
 			</CardHeader>
-			<CardContent className='space-y-4'>
+			<CardContent className='space-y-4 px-4'>
 				{/* Game Details */}
 				<div className='space-y-2 text-sm text-foreground'>
 					<div className='flex items-center gap-2'>
