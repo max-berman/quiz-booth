@@ -369,7 +369,7 @@ export default function Setup() {
 						<form onSubmit={handleSubmit} className='space-y-8'>
 							{/* Company Information Section */}
 							<section
-								className={`p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
+								className={`p-6 bg-background/30 rounded-xl border-2 transition-all border-accent ${
 									focusedSection === 1 ? 'shadow-md ' : ''
 								}`}
 								onFocus={() => setFocusedSection(1)}
@@ -503,7 +503,7 @@ export default function Setup() {
 
 							{/* Game Settings Section */}
 							<section
-								className={`p-6 rounded-xl bg-popover  border-2 transition-all border-accent ${
+								className={`p-6 bg-background/30 rounded-xl  border-2 transition-all border-accent ${
 									focusedSection === 2 ? 'shadow-md ' : ''
 								}`}
 								onFocus={() => setFocusedSection(2)}
@@ -586,7 +586,7 @@ export default function Setup() {
 													className={`p-2 border rounded-lg transition-all ${
 														categories[key as keyof typeof categories]
 															? 'border-primary bg-background'
-															: 'border-border hover:border-border'
+															: 'border-primary border-dashed hover:border-solid'
 													}`}
 												>
 													<div className='flex items-start space-x-2'>
@@ -649,7 +649,7 @@ export default function Setup() {
 
 							{/* Prize Settings Section */}
 							<section
-								className={`p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
+								className={`p-6 bg-background/30 rounded-xl border-2 transition-all border-accent ${
 									focusedSection === 3 ? 'shadow-md ' : ''
 								}`}
 								onFocus={() => setFocusedSection(3)}

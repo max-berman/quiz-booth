@@ -154,9 +154,9 @@ export function GameCard({ game, onEditPrizes }: GameCardProps) {
 				</div>
 
 				{/* Prizes if configured */}
-				<div className='flex border-dotted border-t border-primary justify-between pt-4'>
+				<div className='flex border-dotted border-t border-primary items-end pt-4'>
 					{/* Remove commented prize label */}
-					{game.prizes && (
+					{game.prizes ? (
 						<ul className='text-xs flex flex-col flex-wrap w-2/3 p-1  mr-2'>
 							{game.prizes.length > 0 &&
 								game.prizes.map((prize, index) => (
@@ -165,6 +165,8 @@ export function GameCard({ game, onEditPrizes }: GameCardProps) {
 									</li>
 								))}
 						</ul>
+					) : (
+						<div className='w-2/3' />
 					)}
 					<Button
 						variant='outline'
