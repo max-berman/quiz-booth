@@ -69,7 +69,7 @@ export function ShareEmbedModal({
 			<DialogTrigger asChild>
 				<Button variant='secondary' size='sm'>
 					<Share className='mr-1 h-4 w-4' />
-					{isBuilder ? 'Share Builder' : 'Share'}
+					{isBuilder ? 'Share Trivia Builder' : 'Share'}
 				</Button>
 			</DialogTrigger>
 			<DialogContent className='max-w-2xl !bg-white !text-black border-4 !border-black shadow-2xl z-50'>

@@ -260,7 +260,7 @@ export default function EditQuestions() {
 
 	if (loading) {
 		return (
-			<div className='min-h-screen bg-background flex items-center justify-center'>
+			<div className='flex-1 bg-background flex items-center justify-center'>
 				<div className='text-center'>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
 					<p>Loading...</p>
@@ -271,7 +271,7 @@ export default function EditQuestions() {
 
 	if (!user) {
 		return (
-			<div className='min-h-screen bg-background py-8'>
+			<div className='flex-1 bg-background py-8'>
 				<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
 					<Card>
 						<CardContent className='p-8 text-center'>
@@ -298,7 +298,7 @@ export default function EditQuestions() {
 
 	if (isLoading) {
 		return (
-			<div className='min-h-screen bg-background flex items-center justify-center'>
+			<div className='flex-1 bg-background flex items-center justify-center'>
 				<div className='text-center'>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
 					<p>Loading questions...</p>

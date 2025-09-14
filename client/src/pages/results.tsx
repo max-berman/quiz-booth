@@ -180,7 +180,7 @@ export default function Results() {
 							<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
 								<Button
 									variant='secondary'
-									onClick={() => setLocation('/setup')}
+									onClick={() => setLocation(`/game/${id}`)}
 									className='px-6 py-3 w-full'
 									data-testid='button-play-again'
 								>

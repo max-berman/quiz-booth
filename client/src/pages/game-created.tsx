@@ -115,7 +115,7 @@ export default function GameCreated() {
 
 	if (isLoading) {
 		return (
-			<div className='min-h-screen bg-background flex items-center justify-center'>
+			<div className='flex-1 bg-background flex items-center justify-center'>
 				<div className='text-center'>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
 					<p>Loading your game...</p>
@@ -126,7 +126,7 @@ export default function GameCreated() {
 
 	if (!game) {
 		return (
-			<div className='min-h-screen bg-background flex items-center justify-center'>
+			<div className='flex-1 bg-background flex items-center justify-center'>
 				<div className='text-center'>
 					<h2 className='text-2xl font-bold mb-4'>Game not found</h2>
 					<Button onClick={() => setLocation('/dashboard')}>
@@ -139,7 +139,7 @@ export default function GameCreated() {
 	}
 
 	return (
-		<div className='min-h-screen bg-background py-8'>
+		<div className='flex-1 bg-background py-8'>
 			<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
 				{/* Success Header */}
 				<div className='text-center mb-8'>

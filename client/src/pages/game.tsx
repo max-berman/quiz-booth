@@ -8,9 +8,10 @@ import {
 	CheckCircle,
 	XCircle,
 	Zap,
-	Clock,
+	Timer,
 	Home,
 	ArrowRight,
+	Lightbulb,
 } from 'lucide-react'
 import type { Game, Question } from '@shared/schema'
 
@@ -109,9 +110,17 @@ export default function GamePage() {
 
 	if (isLoading || !questions || !game) {
 		return (
-			<div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+			<div className='flex-1 bg-background flex items-center justify-center'>
 				<div className='text-center'>
+					<p className='flex items-center justify-center my-4'>
+						<img
+							src='/src/assets/images/owl.svg'
+							alt='QuizBooth.games logo'
+							className='h-16 w-auto'
+						/>
+					</p>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
+
 					<p>Loading game...</p>
 				</div>
 			</div>
@@ -119,16 +128,16 @@ export default function GamePage() {
 	}
 
 	return (
-		<div className='min-h-screen bg-background'>
+		<div className='flex-1 bg-background'>
 			{/* Top Navigation Bar */}
-			<div className='sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border'>
+			<div className='sticky top-0 z-50 bg-background/80 backdrop-blur-sm shadow-md'>
 				<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
 					<div className='flex items-center justify-between h-16'>
 						<Button
-							variant='ghost'
+							variant='secondary'
 							size='sm'
 							onClick={() => setLocation('/')}
-							className='flex items-center gap-2 text-muted-foreground hover:text-foreground'
+							className=''
 						>
 							<Home className='h-4 w-4' />
 							Home
@@ -165,17 +174,12 @@ export default function GamePage() {
 					</div>
 				</div>
 			</div>
-			<div className='max-w-4xl mx-auto px-4 sm:px-4 lg:px-8 py-4 space-y-4'>
-				{/* Game Progress */}
-				<div className='space-y-4'>
-					<Progress value={progressPercentage} className='h-3 bg-muted' />
-				</div>
-
+			<div className='max-w-4xl mx-auto px-4  lg:px-8 py-4 space-y-4'>
 				{/* Timer and Stats - Compact version */}
-				<div className='grid grid-cols-4 gap-3 mb-6'>
-					<div className='text-center p-3 bg-card/50 rounded-lg border'>
-						<Clock
-							className={`h-4 w-4 mx-auto mb-1 ${
+				<div className='flex justify-between items-center w-full'>
+					<div className='text-center p-2 px-4 bg-card/50 shadow-sm h-full w-[80px]'>
+						<Timer
+							className={`h-6 w-6 -rotate-[30deg] mx-auto mb-1 ${
 								timeLeft <= 10
 									? 'text-destructive animate-pulse'
 									: 'text-primary'
@@ -191,26 +195,44 @@ export default function GamePage() {
 						>
 							{timeLeft}s
 						</div>
-						<div className='text-xs text-muted-foreground'>Time</div>
 					</div>
-					<div className='text-center p-3 bg-card/50 rounded-lg border'>
-						<CheckCircle className='h-4 w-4 mx-auto mb-1 text-success' />
-						<div className='text-lg font-bold text-success'>
+					{/* 
+					<div className='grid grid-cols-4 gap-3 mb-6'>
+					<div className='text-center p-3 bg-popover rounded-lg shadow-sm'>
+						<CheckCircle className='h-4 w-4 mx-auto mb-1 text-primary' />
+						<div className='text-lg font-bold text-primary'>
 							{correctAnswers}
 						</div>
 						<div className='text-xs text-muted-foreground'>Correct</div>
 					</div>
-					<div className='text-center p-3 bg-card/50 rounded-lg border'>
+
+					<div className='text-center p-3 bg-popover rounded-lg shadow-sm'>
 						<XCircle className='h-4 w-4 mx-auto mb-1 text-destructive' />
 						<div className='text-lg font-bold text-destructive'>
 							{wrongAnswers}
 						</div>
 						<div className='text-xs text-muted-foreground'>Wrong</div>
 					</div>
-					<div className='text-center p-3 bg-card/50 rounded-lg border'>
-						<Zap className='h-4 w-4 mx-auto mb-1 text-secondary' />
-						<div className='text-lg font-bold text-secondary'>{streak}</div>
+
+					<div className='text-center p-3 bg-popover rounded-lg shadow-sm'>
+						<Zap className='h-4 w-4 mx-auto mb-1 text-foreground' />
+						<div className='text-lg font-bold text-foreground'>{streak}</div>
 						<div className='text-xs text-muted-foreground'>Streak</div>
+					</div> 
+					</div>
+					*/}
+					{/* Game Progress */}
+					<div className='space-y-4 w-full mx-4'>
+						<div className='text-lg font-medium text-foreground'>
+							Question {currentQuestionIndex + 1} of {questions.length}
+						</div>
+						{/* <div className='text-xs text-muted-foreground'>Score: {score}</div> */}
+						<Progress value={progressPercentage} className='h-4  bg-card' />
+					</div>
+					<div className='text-center p-2 bg-card/50 shadow-sm h-full'>
+						<div className='  text-primary'>
+							Score <strong className='text-lg'>{score}</strong>
+						</div>
 					</div>
 				</div>
 
@@ -227,74 +249,97 @@ export default function GamePage() {
 
 							{/* Answer Options - Better spacing and visual hierarchy */}
 							<div className='space-y-3'>
-								{currentQuestion?.options.map((option, index) => (
-									<button
-										key={index}
-										type='button'
-										className={`w-full p-4 md:p-5 rounded-xl border-2 text-left transition-all duration-200 ${
-											isAnswered
-												? selectedAnswer === index
-													? index === currentQuestion.correctAnswer
-														? 'bg-success/20 border-success text-success-foreground'
-														: 'bg-destructive/20 border-destructive text-destructive-foreground'
-													: index === currentQuestion.correctAnswer
-													? 'bg-success/20 border-success text-success-foreground'
-													: 'bg-muted/50 border-muted'
-												: 'bg-card border-border hover:border-primary hover:bg-primary/5 hover:scale-[1.02]'
-										}`}
-										onClick={() => handleAnswerSelect(index)}
-										disabled={isAnswered}
-										data-testid={`button-answer-${String.fromCharCode(
-											65 + index
-										)}`}
-									>
-										<div className='flex items-center justify-between'>
-											<div className='flex items-center gap-4'>
-												<span
-													className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-														isAnswered && selectedAnswer === index
-															? index === currentQuestion.correctAnswer
-																? 'bg-success text-success-foreground'
-																: 'bg-destructive text-destructive-foreground'
-															: isAnswered &&
-															  index === currentQuestion.correctAnswer
-															? 'bg-success text-success-foreground'
-															: 'bg-primary/20 text-primary'
-													}`}
-												>
-													{String.fromCharCode(65 + index)}
-												</span>
-												<span className='text-base md:text-lg font-medium'>
-													{option}
-												</span>
+								{currentQuestion?.options.map((option, index) => {
+									// Helper function to determine button styling based on answer state
+									const getButtonClasses = () => {
+										if (!isAnswered) {
+											// Question not answered yet - interactive state
+											return 'border-primary hover:border-primary bg-background border-dashed hover:scale-[1.02]'
+										}
+
+										if (selectedAnswer === index) {
+											// This is the selected answer
+											return index === currentQuestion.correctAnswer
+												? 'font-bold bg-primary/20 border-primary text-primary' // Correct answer selected
+												: 'bg-destructive/20 border-destructive text-destructive' // Wrong answer selected
+										}
+
+										if (index === currentQuestion.correctAnswer) {
+											// This is the correct answer (but not selected by user)
+											return 'font-bold bg-primary/20 border-primary text-primaryed'
+										}
+
+										// Default state - answered but not selected and not correct
+										return 'bg-background/80 border-primary border-dashed'
+									}
+
+									// Helper function to determine letter badge styling
+									const getLetterBadgeClasses = () => {
+										if (isAnswered && selectedAnswer === index) {
+											// This is the selected answer
+											return index === currentQuestion.correctAnswer
+												? 'bg-primary text-primary-foreground' // Correct answer selected
+												: 'bg-destructive text-destructive-foreground' // Wrong answer selected
+										}
+
+										if (isAnswered && index === currentQuestion.correctAnswer) {
+											// This is the correct answer (but not selected)
+											return 'bg-primary text-primary-foreground'
+										}
+
+										// Default state - not answered or not special case
+										return 'bg-primary/20 text-primary'
+									}
+
+									return (
+										<button
+											key={index}
+											type='button'
+											className={`w-full p-4 md:p-5 rounded-xl border-2 text-left transition-all duration-200 ${getButtonClasses()}`}
+											onClick={() => handleAnswerSelect(index)}
+											disabled={isAnswered}
+											data-testid={`button-answer-${String.fromCharCode(
+												65 + index
+											)}`}
+										>
+											<div className='flex items-center justify-between'>
+												<div className='flex items-center gap-4'>
+													<span
+														className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${getLetterBadgeClasses()}`}
+													>
+														{String.fromCharCode(65 + index)}
+													</span>
+													<span className='text-base md:text-lg font-medium'>
+														{option}
+													</span>
+												</div>
+												{isAnswered &&
+													selectedAnswer === index &&
+													(index === currentQuestion.correctAnswer ? (
+														<CheckCircle className='h-8 w-8 text-primary' />
+													) : (
+														<XCircle className='h-8 w-8 text-destructive' />
+													))}
+												{isAnswered &&
+													selectedAnswer !== index &&
+													index === currentQuestion.correctAnswer && (
+														<CheckCircle className='h-8 w-8 text-primary' />
+													)}
 											</div>
-											{isAnswered &&
-												selectedAnswer === index &&
-												(index === currentQuestion.correctAnswer ? (
-													<CheckCircle className='h-6 w-6 text-success' />
-												) : (
-													<XCircle className='h-6 w-6 text-destructive' />
-												))}
-											{isAnswered &&
-												selectedAnswer !== index &&
-												index === currentQuestion.correctAnswer && (
-													<CheckCircle className='h-6 w-6 text-success' />
-												)}
-										</div>
-									</button>
-								))}
+										</button>
+									)
+								})}
 							</div>
 
 							{/* Explanation - Enhanced styling */}
 							{showExplanation && currentQuestion?.explanation && (
-								<div className='mt-8 p-6 bg-muted rounded-2xl border border-border animate-slide-up'>
+								<div className='mt-8 p-6 bg-background rounded-2xl shadow-md animate-slide-up'>
 									<div className='flex items-center gap-3 mb-4'>
-										<div className='w-10 h-10 bg-foreground rounded-full flex items-center justify-center'>
-											<span className='text-white text-lg'>💡</span>
+										<div className='w-10 h-10 bg-primary rounded-full flex items-center justify-center'>
+											{/* <span className='text-white text-lg'>💡</span> */}
+											<Lightbulb className='h-6 w-6 text-primary-foreground' />
 										</div>
-										<h3 className='font-bold text-lg text-foreground'>
-											Explanation
-										</h3>
+										<h3 className='font-bold text-lg text-'>Explanation</h3>
 									</div>
 									<p className='text-foreground leading-relaxed text-base'>
 										{currentQuestion.explanation}
@@ -305,8 +350,8 @@ export default function GamePage() {
 
 						{/* Bottom Action - Show after answering */}
 						{isAnswered && (
-							<div className='text-center pt-4 border-t border-border'>
-								<p className='text-sm text-muted-foreground mb-3'>
+							<div className='text-center pt-4 border-t border-primary'>
+								<p className='text-sm text-foreground mb-3'>
 									{currentQuestionIndex < questions.length - 1
 										? 'Ready for the next question?'
 										: 'Great job! See your final results.'}
@@ -320,7 +365,7 @@ export default function GamePage() {
 								>
 									{currentQuestionIndex < questions.length - 1
 										? 'Continue →'
-										: 'View Results 🎉'}
+										: 'View Results'}
 								</Button>
 							</div>
 						)}

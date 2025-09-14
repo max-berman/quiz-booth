@@ -50,11 +50,11 @@ export function CreatorHeader() {
 						<Link
 							href='/'
 							data-testid='link-home'
-							className='flex  items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
+							className='flex items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
 						>
 							<img
 								src='/src/assets/images/owl.svg'
-								alt='QuizBooth.games'
+								alt='QuizBooth.games logo'
 								className='h-8 w-auto'
 							/>
 							<span className='hover:scale-[1.02] transition-all'>

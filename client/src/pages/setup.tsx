@@ -569,7 +569,13 @@ export default function Setup() {
 													className='h-8 flex flex-col hover:scale-100'
 													onClick={() => setDifficulty(level)}
 												>
-													<span className='font-medium'>{label}</span>
+													<span
+														className={` ${
+															difficulty === level ? 'font-bold' : 'font-medium'
+														}`}
+													>
+														{label}
+													</span>
 												</Button>
 											))}
 										</div>
