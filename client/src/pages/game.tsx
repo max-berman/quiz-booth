@@ -132,7 +132,7 @@ export default function GamePage() {
 			{/* Top Navigation Bar */}
 			<div className='sticky top-0 z-50 bg-background/80 backdrop-blur-sm shadow-md'>
 				<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
-					<div className='flex items-center justify-between h-16'>
+					<div className='flex items-center justify-between h-20'>
 						<Button
 							variant='secondary'
 							size='sm'
@@ -145,10 +145,11 @@ export default function GamePage() {
 
 						<div className='text-center'>
 							<div className='text-sm font-medium text-foreground'>
-								Question {currentQuestionIndex + 1} of {questions.length}
-							</div>
-							<div className='text-xs text-muted-foreground'>
-								Score: {score}
+								<img
+									src='/src/assets/images/naknick-logo.png'
+									alt='QuizBooth.games logo'
+									className='h-14 w-auto'
+								/>
 							</div>
 						</div>
 
@@ -174,29 +175,42 @@ export default function GamePage() {
 					</div>
 				</div>
 			</div>
-			<div className='max-w-4xl mx-auto px-4  lg:px-8 py-4 space-y-4'>
+			<div className='max-w-4xl mx-auto px-4  lg:px-8 py-4 space-y-4 text-primary'>
 				{/* Timer and Stats - Compact version */}
 				<div className='flex justify-between items-center w-full'>
-					<div className='text-center p-2 px-4 bg-card/50 shadow-sm h-full w-[80px]'>
+					<div className='text-center p-2  h-full min-w-[60px]'>
 						<Timer
 							className={`h-6 w-6 -rotate-[30deg] mx-auto mb-1 ${
-								timeLeft <= 10
-									? 'text-destructive animate-pulse'
-									: 'text-primary'
+								timeLeft <= 10 ? 'text-destructive animate-ping' : ''
 							}`}
 						/>
 						<div
 							className={`text-lg font-bold ${
-								timeLeft <= 10
-									? 'text-destructive animate-pulse'
-									: 'text-primary'
+								timeLeft <= 10 ? 'text-destructive' : ''
 							}`}
 							data-testid='text-timer'
 						>
 							{timeLeft}s
 						</div>
 					</div>
-					{/* 
+
+					{/* Game Progress */}
+					<div className='space-y-4 w-full mx-4'>
+						<div className='text-lg text-center font-medium'>
+							Question <strong>{currentQuestionIndex + 1}</strong> of{' '}
+							{questions.length}
+						</div>
+						{/* <div className='text-xs text-muted-foreground'>Score: {score}</div> */}
+						<Progress value={progressPercentage} className='h-4  bg-card' />
+					</div>
+					<div className='text-center p-2  h-full'>
+						<div className='text-primary'>
+							SCORE <strong className='text-lg'>{score}</strong>
+						</div>
+					</div>
+				</div>
+
+				{/* 
 					<div className='grid grid-cols-4 gap-3 mb-6'>
 					<div className='text-center p-3 bg-popover rounded-lg shadow-sm'>
 						<CheckCircle className='h-4 w-4 mx-auto mb-1 text-primary' />
@@ -221,20 +235,6 @@ export default function GamePage() {
 					</div> 
 					</div>
 					*/}
-					{/* Game Progress */}
-					<div className='space-y-4 w-full mx-4'>
-						<div className='text-lg font-medium text-foreground'>
-							Question {currentQuestionIndex + 1} of {questions.length}
-						</div>
-						{/* <div className='text-xs text-muted-foreground'>Score: {score}</div> */}
-						<Progress value={progressPercentage} className='h-4  bg-card' />
-					</div>
-					<div className='text-center p-2 bg-card/50 shadow-sm h-full'>
-						<div className='  text-primary'>
-							Score <strong className='text-lg'>{score}</strong>
-						</div>
-					</div>
-				</div>
 
 				{/* Question Card - Optimized for future customization */}
 				<Card className='game-card animate-slide-up border-2 shadow-lg'>
