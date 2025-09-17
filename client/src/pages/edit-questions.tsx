@@ -9,10 +9,19 @@ import { Textarea } from '@/components/ui/textarea'
 import { QuestionDisplay } from '@/components/question-display'
 import { QuestionEditForm } from '@/components/question-edit-form'
 import { useToast } from '@/hooks/use-toast'
-import { ArrowLeft, Save, Edit3, AlertCircle, Plus, X } from 'lucide-react'
+import {
+	ArrowLeft,
+	Save,
+	Edit3,
+	AlertCircle,
+	Plus,
+	X,
+	Trash2,
+} from 'lucide-react'
 import { apiRequest } from '@/lib/queryClient'
 import { useAuth } from '@/contexts/auth-context'
 import { getAuthHeaders } from '@/lib/auth-utils'
+import { generateSingleQuestion, type TriviaQuestion } from '@/lib/deepseek'
 import type { Question, Game } from '@shared/firebase-types'
 
 export default function EditQuestions() {
@@ -148,6 +157,81 @@ export default function EditQuestions() {
 			console.error('Add question error:', error)
 			toast({
 				title: 'Failed to add question',
+				description: error.message || 'Please try again.',
+				variant: 'destructive',
+			})
+		},
+	})
+
+	const deleteQuestionMutation = useMutation({
+		mutationFn: async (questionId: string) => {
+			if (!user) {
+				throw new Error('Authentication required to delete questions')
+			}
+
+			const headers = await getAuthHeaders()
+			const response = await fetch(`/api/user/questions/${questionId}`, {
+				method: 'DELETE',
+				headers,
+			})
+
+			if (!response.ok) {
+				const errorData = await response
+					.json()
+					.catch(() => ({ message: 'Failed to delete question' }))
+				throw new Error(errorData.message || 'Failed to delete question')
+			}
+
+			return response.json()
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ['/api/games', currentGameId, 'questions'],
+			})
+			toast({
+				title: 'Question deleted',
+				description: 'The question has been deleted successfully.',
+			})
+		},
+		onError: (error: any) => {
+			console.error('Delete question error:', error)
+			toast({
+				title: 'Failed to delete question',
+				description: error.message || 'Please try again.',
+				variant: 'destructive',
+			})
+		},
+	})
+
+	const generateQuestionMutation = useMutation({
+		mutationFn: async () => {
+			if (!user || !currentGameId) {
+				throw new Error('Authentication required to generate questions')
+			}
+
+			const generatedQuestion = await generateSingleQuestion(
+				currentGameId,
+				questions || []
+			)
+			return generatedQuestion
+		},
+		onSuccess: (generatedQuestion: TriviaQuestion) => {
+			// Populate the new question form with the generated question
+			setNewQuestion({
+				questionText: generatedQuestion.questionText,
+				options: generatedQuestion.options,
+				correctAnswer: generatedQuestion.correctAnswer,
+				explanation: generatedQuestion.explanation || '',
+			})
+			toast({
+				title: 'Question generated',
+				description: 'AI has generated a new question for you to review.',
+			})
+		},
+		onError: (error: any) => {
+			console.error('Generate question error:', error)
+			toast({
+				title: 'Failed to generate question',
 				description: error.message || 'Please try again.',
 				variant: 'destructive',
 			})
@@ -341,11 +425,12 @@ export default function EditQuestions() {
 								<CardTitle className='text-lg'>Add New Question</CardTitle>
 								<Button
 									variant='outline'
+									className='px-2'
 									size='sm'
 									onClick={handleCancelAdd}
 									data-testid='button-cancel-add'
 								>
-									<X className='h-4 w-4' />
+									<X className='h-6 w-6' />
 								</Button>
 							</div>
 						</CardHeader>
@@ -366,6 +451,24 @@ export default function EditQuestions() {
 									placeholder='Enter your trivia question...'
 									data-testid='input-new-question-text'
 								/>
+							</div>
+
+							<div className='flex justify-end'>
+								{' '}
+								<Button
+									onClick={() => generateQuestionMutation.mutate()}
+									size='sm'
+									disabled={
+										generateQuestionMutation.isPending ||
+										addQuestionMutation.isPending
+									}
+									variant='secondary'
+									data-testid='button-generate-question'
+								>
+									{generateQuestionMutation.isPending
+										? 'Generating...'
+										: 'Generate Question with AI'}
+								</Button>
 							</div>
 
 							<div>
@@ -446,8 +549,9 @@ export default function EditQuestions() {
 									data-testid='button-save-new-question'
 								>
 									<Save className='h-4 w-4 mr-2' />
-									{addQuestionMutation.isPending ? 'Adding...' : 'Add Question'}
+									{addQuestionMutation.isPending ? 'Adding...' : 'Save'}
 								</Button>
+
 								<Button
 									variant='outline'
 									onClick={handleCancelAdd}
@@ -471,15 +575,31 @@ export default function EditQuestions() {
 										Question {index + 1}
 									</CardTitle>
 									{editingQuestion !== question.id && (
-										<Button
-											variant='outline'
-											size='sm'
-											onClick={() => handleEdit(question.id)}
-											data-testid={`button-edit-${question.id}`}
-										>
-											<Edit3 className='h-4 w-4 mr-2' />
-											Edit
-										</Button>
+										<div className='flex gap-2'>
+											<Button
+												variant='outline'
+												size='sm'
+												onClick={() => handleEdit(question.id)}
+												data-testid={`button-edit-${question.id}`}
+											>
+												<Edit3 className='h-4 w-4 mr-2' />
+												Edit
+											</Button>
+											<Button
+												variant='destructive'
+												size='sm'
+												onClick={() =>
+													deleteQuestionMutation.mutate(question.id)
+												}
+												disabled={deleteQuestionMutation.isPending}
+												data-testid={`button-delete-${question.id}`}
+											>
+												<Trash2 className='h-4 w-4 mr-2' />
+												{deleteQuestionMutation.isPending
+													? 'Deleting...'
+													: 'Delete'}
+											</Button>
+										</div>
 									)}
 								</div>
 							</CardHeader>

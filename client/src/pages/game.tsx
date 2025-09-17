@@ -100,10 +100,11 @@ export default function GamePage() {
 				correctAnswers,
 				totalQuestions: questions?.length || 0,
 				timeSpent: finalTimeSpent,
+				streak,
 			}
 
 			setLocation(
-				`/results/${id}?score=${score}&correct=${correctAnswers}&total=${questions?.length}&time=${finalTimeSpent}`
+				`/results/${id}?score=${score}&correct=${correctAnswers}&total=${questions?.length}&time=${finalTimeSpent}&streak=${streak}`
 			)
 		}
 	}
@@ -114,7 +115,8 @@ export default function GamePage() {
 				<div className='text-center'>
 					<p className='flex items-center justify-center my-4'>
 						<img
-							src='/src/assets/images/owl.svg'
+							// src='/src/assets/images/owl.svg'
+							src='/src/assets/images/naknick-logo.png'
 							alt='QuizBooth.games logo'
 							className='h-16 w-auto'
 						/>
@@ -175,7 +177,7 @@ export default function GamePage() {
 					</div>
 				</div>
 			</div>
-			<div className='max-w-4xl mx-auto px-4  lg:px-8 py-4 space-y-4 text-primary'>
+			<div className='max-w-4xl mx-auto px-4 lg:px-8 py-4 space-y-4 text-primary'>
 				{/* Timer and Stats - Compact version */}
 				<div className='flex justify-between items-center w-full'>
 					<div className='text-center p-2  h-full min-w-[60px]'>
@@ -186,7 +188,7 @@ export default function GamePage() {
 						/>
 						<div
 							className={`text-lg font-bold ${
-								timeLeft <= 10 ? 'text-destructive' : ''
+								timeLeft <= 10 ? 'text-destructive text-xl' : ''
 							}`}
 							data-testid='text-timer'
 						>
@@ -203,9 +205,9 @@ export default function GamePage() {
 						{/* <div className='text-xs text-muted-foreground'>Score: {score}</div> */}
 						<Progress value={progressPercentage} className='h-4  bg-card' />
 					</div>
-					<div className='text-center p-2  h-full'>
-						<div className='text-primary'>
-							SCORE <strong className='text-lg'>{score}</strong>
+					<div className='text-center p-2 h-full'>
+						<div className='text-primary capitalize'>
+							Score <strong className='text-lg'>{score}</strong>
 						</div>
 					</div>
 				</div>
@@ -237,18 +239,18 @@ export default function GamePage() {
 					*/}
 
 				{/* Question Card - Optimized for future customization */}
-				<Card className='game-card animate-slide-up border-2 shadow-lg'>
-					<CardContent className='p-6 md:p-8'>
+				<Card className='game-card animate-slide-up shadow-md  border-border'>
+					<CardContent className='p-4 md:p-8'>
 						{/* Question Text - Optimized for readability */}
-						<div className='mb-8'>
+						<div className='mb-2'>
 							<div className='bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-6 mb-8'>
-								<h2 className='text-xl md:text-2xl font-bold text-foreground leading-relaxed text-center'>
+								<h2 className='text-xl md:text-2xl font-bold text-primary leading-relaxed text-center'>
 									{currentQuestion?.questionText}
 								</h2>
 							</div>
 
 							{/* Answer Options - Better spacing and visual hierarchy */}
-							<div className='space-y-3'>
+							<div className='space-y-4'>
 								{currentQuestion?.options.map((option, index) => {
 									// Helper function to determine button styling based on answer state
 									const getButtonClasses = () => {
@@ -333,7 +335,7 @@ export default function GamePage() {
 
 							{/* Explanation - Enhanced styling */}
 							{showExplanation && currentQuestion?.explanation && (
-								<div className='mt-8 p-6 bg-background rounded-2xl shadow-md animate-slide-up'>
+								<div className='mt-6 p-6 bg-background/70 rounded-sm shadow-md animate-slide-up'>
 									<div className='flex items-center gap-3 mb-4'>
 										<div className='w-10 h-10 bg-primary rounded-full flex items-center justify-center'>
 											{/* <span className='text-white text-lg'>💡</span> */}
@@ -350,7 +352,7 @@ export default function GamePage() {
 
 						{/* Bottom Action - Show after answering */}
 						{isAnswered && (
-							<div className='text-center pt-4 border-t border-primary'>
+							<div className='text-center pt-4 '>
 								<p className='text-sm text-foreground mb-3'>
 									{currentQuestionIndex < questions.length - 1
 										? 'Ready for the next question?'
@@ -360,7 +362,7 @@ export default function GamePage() {
 									type='button'
 									onClick={handleNextQuestion}
 									size='lg'
-									className='px-8 py-3 text-base font-semibold  !text-white '
+									className='px-8 py-4 text-xl font-semibold uppercase'
 									data-testid='button-continue'
 								>
 									{currentQuestionIndex < questions.length - 1
@@ -375,3 +377,27 @@ export default function GamePage() {
 		</div>
 	)
 }
+// TODO: Add this to FAQ section
+/* 
+__How Your Score is Calculated__
+
+Your final score is based on three factors:
+
+1. __Correct Answers__: You earn 100 points for each question you answer correctly.
+
+2. __Speed Bonus__: Answer quickly to earn bonus points! You get 2 points for every second you save out of the 30-second time limit. Here are some examples:
+
+   - Answer in 10 seconds: (30-10)*2 = 40 bonus points
+   - Answer in 20 seconds: (30-20)*2 = 20 bonus points
+   - Answer in 25 seconds: (30-25)*2 = 10 bonus points
+   - Answer instantly (0 seconds): 60 bonus points (maximum)
+   - Answer at 30 seconds: 0 bonus points
+
+3. __Streak Bonus__: Maintain consecutive correct answers to build your streak. Each correct answer in a row earns you 10 bonus points per streak level.
+
+__Example__: If you answer 3 questions correctly in a row and answer each in 10 seconds, you could earn 170 points per question (100 + 40 + 30)!
+
+The faster you answer and the longer your streak, the higher your score will be. Good luck!
+
+
+*/

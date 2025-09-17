@@ -26,6 +26,7 @@ export default function Results() {
 	const correctAnswers = parseInt(urlParams.get('correct') || '0')
 	const totalQuestions = parseInt(urlParams.get('total') || '0')
 	const timeSpent = parseInt(urlParams.get('time') || '0')
+	const streak = parseInt(urlParams.get('streak') || '0')
 
 	const { data: game } = useQuery<Game>({
 		queryKey: ['/api/games', id],
@@ -103,7 +104,7 @@ export default function Results() {
 							<p className='text-gray-600'>Here are your results</p>
 						</div>
 
-						<div className='grid md:grid-cols-3 gap-6 mb-8'>
+						<div className='grid md:grid-cols-4 gap-6 mb-8'>
 							<div className='bg-gradient-to-br from-accent/10 to-accent/20 p-6 rounded-xl'>
 								<div className='text-3xl font-bold text-accent mb-2'>
 									{score}
@@ -122,6 +123,14 @@ export default function Results() {
 							</div>
 							<div className='bg-gradient-to-br from-secondary/10 to-secondary/20 p-6 rounded-xl'>
 								<div className='text-3xl font-bold text-secondary mb-2'>
+									{streak}
+								</div>
+								<div className='text-sm font-medium text-gray-700'>
+									Final Streak
+								</div>
+							</div>
+							<div className='bg-gradient-to-br from-purple-500/10 to-purple-600/20 p-6 rounded-xl'>
+								<div className='text-3xl font-bold text-purple-600 mb-2'>
 									{formatTime(timeSpent)}
 								</div>
 								<div className='text-sm font-medium text-gray-700'>

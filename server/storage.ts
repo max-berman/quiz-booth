@@ -1,4 +1,4 @@
-import { type Game, type InsertGame, type Question, type InsertQuestion, type Player, type InsertPlayer } from "@shared/firebase-types";
+import { type Game, type InsertGame, type Question, type InsertQuestion, type Player, type InsertPlayer, type PrizePlacement } from "@shared/firebase-types";
 import { randomUUID } from "crypto";
 import { db, collections } from "./firebase";
 import { Timestamp } from 'firebase-admin/firestore';
@@ -12,15 +12,16 @@ export interface IStorage {
   getGamesByCreator(creatorKey: string): Promise<Game[]>;
   getGamesByUser(userId: string): Promise<Game[]>;
   updateGamePrizes(gameId: string, prizes: PrizePlacement[], userId: string): Promise<Game>;
-  
+
   // Question methods
   createQuestions(questions: InsertQuestion[]): Promise<Question[]>;
   addQuestionToGame(gameId: string, questionData: Omit<InsertQuestion, 'gameId'>, userId: string): Promise<Question>;
   getQuestionsByGameId(gameId: string): Promise<Question[]>;
   updateQuestion(id: string, updates: Partial<Question>, creatorKey: string): Promise<Question>;
   updateQuestionByUser(id: string, updates: Partial<Question>, userId: string): Promise<Question>;
+  deleteQuestionByUser(id: string, userId: string): Promise<void>;
   getQuestion(id: string): Promise<Question | undefined>;
-  
+
   // Player methods
   createPlayer(player: InsertPlayer): Promise<Player>;
   getPlayersByGameId(gameId: string): Promise<Player[]>;
@@ -51,12 +52,12 @@ export class FirebaseStorage implements IStorage {
         creatorKey,
         createdAt: Timestamp.fromDate(now),
       };
-      
+
       // Only add userId if it exists (avoid undefined fields in Firestore)
       if (userId) {
         gameData.userId = userId;
       }
-      
+
       const game: Game = {
         id: gameData.id,
         companyName: gameData.companyName,
@@ -73,7 +74,7 @@ export class FirebaseStorage implements IStorage {
         userId: gameData.userId,
         createdAt: now, // For the returned object, use JS Date
       };
-      
+
       console.log('Creating game in Firebase:', JSON.stringify(gameData, null, 2));
       console.log('Game data keys:', Object.keys(gameData));
       console.log('Game data types:', Object.keys(gameData).map(key => `${key}: ${typeof gameData[key as keyof typeof gameData]}`));
@@ -105,7 +106,7 @@ export class FirebaseStorage implements IStorage {
       .collection(collections.games)
       .where('creatorKey', '==', creatorKey)
       .get();
-    
+
     const games = gamesSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -113,7 +114,7 @@ export class FirebaseStorage implements IStorage {
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
       } as Game;
     });
-    
+
     // Sort by creation date (newest first)
     return games.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
@@ -123,7 +124,7 @@ export class FirebaseStorage implements IStorage {
       .collection(collections.games)
       .where('userId', '==', userId)
       .get();
-    
+
     const games = gamesSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -131,7 +132,7 @@ export class FirebaseStorage implements IStorage {
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
       } as Game;
     });
-    
+
     // Sort by creation date (newest first)
     return games.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
@@ -141,7 +142,7 @@ export class FirebaseStorage implements IStorage {
     if (!gameDoc.exists) return undefined;
     const data = gameDoc.data();
     if (!data) return undefined;
-    
+
     // Convert Firestore Timestamp to JavaScript Date
     return {
       ...data,
@@ -152,7 +153,7 @@ export class FirebaseStorage implements IStorage {
   async createQuestions(insertQuestions: InsertQuestion[]): Promise<Question[]> {
     const batch = db.batch();
     const questions: Question[] = [];
-    
+
     for (const insertQuestion of insertQuestions) {
       const id = randomUUID();
       const question: Question = {
@@ -160,12 +161,12 @@ export class FirebaseStorage implements IStorage {
         ...insertQuestion,
         explanation: insertQuestion.explanation || null,
       };
-      
+
       const questionRef = db.collection(collections.questions).doc(id);
       batch.set(questionRef, question);
       questions.push(question);
     }
-    
+
     await batch.commit();
     return questions;
   }
@@ -175,9 +176,9 @@ export class FirebaseStorage implements IStorage {
       .collection(collections.questions)
       .where('gameId', '==', gameId)
       .get();
-    
+
     const questions = questionsSnapshot.docs.map(doc => doc.data() as Question);
-    
+
     // Sort by order in memory to avoid needing a composite index
     return questions.sort((a, b) => (a.order || 0) - (b.order || 0));
   }
@@ -194,13 +195,13 @@ export class FirebaseStorage implements IStorage {
     if (!question) {
       throw new Error("Question not found");
     }
-    
+
     // Verify game access using creator key
     const hasAccess = await this.verifyGameAccess(question.gameId, creatorKey);
     if (!hasAccess) {
       throw new Error("Unauthorized access to edit this question");
     }
-    
+
     // Update the question
     const updatedQuestion: Question = {
       ...question,
@@ -208,7 +209,7 @@ export class FirebaseStorage implements IStorage {
       id, // Ensure ID cannot be changed
       gameId: question.gameId, // Ensure gameId cannot be changed
     };
-    
+
     await db.collection(collections.questions).doc(id).update(updates);
     return updatedQuestion;
   }
@@ -222,9 +223,9 @@ export class FirebaseStorage implements IStorage {
       company: insertPlayer.company || null,
       completedAt: Timestamp.fromDate(now),
     };
-    
+
     await db.collection(collections.players).doc(id).set(playerData);
-    
+
     return {
       ...playerData,
       completedAt: now, // Return JS Date for the response
@@ -236,7 +237,7 @@ export class FirebaseStorage implements IStorage {
       .collection(collections.players)
       .where('gameId', '==', gameId)
       .get();
-    
+
     return playersSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -251,7 +252,7 @@ export class FirebaseStorage implements IStorage {
       .collection(collections.players)
       .where('gameId', '==', gameId)
       .get();
-    
+
     const players = playersSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -259,7 +260,7 @@ export class FirebaseStorage implements IStorage {
         completedAt: data.completedAt?.toDate ? data.completedAt.toDate() : new Date(data.completedAt),
       } as Player;
     });
-    
+
     // Sort by score (desc) and then timeSpent (asc) in memory
     return players.sort((a, b) => {
       if (b.score !== a.score) {
@@ -273,7 +274,7 @@ export class FirebaseStorage implements IStorage {
     const playersSnapshot = await db
       .collection(collections.players)
       .get();
-    
+
     const players = playersSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -281,7 +282,7 @@ export class FirebaseStorage implements IStorage {
         completedAt: data.completedAt?.toDate ? data.completedAt.toDate() : new Date(data.completedAt),
       } as Player;
     });
-    
+
     // Sort by score (desc) and then timeSpent (asc) in memory
     return players.sort((a, b) => {
       if (b.score !== a.score) {
@@ -297,19 +298,19 @@ export class FirebaseStorage implements IStorage {
     if (!question) {
       throw new Error("Question not found");
     }
-    
+
     const hasAccess = await this.verifyGameAccessByUser(question.gameId, userId);
     if (!hasAccess) {
       throw new Error("Unauthorized access to question");
     }
-    
+
     const updatedQuestion = {
       ...question,
       ...updates,
       id, // Ensure ID cannot be changed
       gameId: question.gameId, // Ensure gameId cannot be changed
     };
-    
+
     await db.collection(collections.questions).doc(id).update(updates);
     return updatedQuestion;
   }
@@ -319,12 +320,12 @@ export class FirebaseStorage implements IStorage {
     if (!creatorKey || !(await this.verifyGameAccess(gameId, creatorKey))) {
       throw new Error("Unauthorized access to game submissions");
     }
-    
+
     const playersSnapshot = await db
       .collection(collections.players)
       .where('gameId', '==', gameId)
       .get();
-    
+
     const players = playersSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -332,7 +333,7 @@ export class FirebaseStorage implements IStorage {
         completedAt: data.completedAt?.toDate ? data.completedAt.toDate() : new Date(data.completedAt),
       } as Player;
     });
-    
+
     // Sort by completedAt (desc) in memory
     return players.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
   }
@@ -343,12 +344,12 @@ export class FirebaseStorage implements IStorage {
     if (!hasAccess) {
       throw new Error("Unauthorized access to game submissions");
     }
-    
+
     const playersSnapshot = await db
       .collection(collections.players)
       .where('gameId', '==', gameId)
       .get();
-    
+
     const players = playersSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -356,7 +357,7 @@ export class FirebaseStorage implements IStorage {
         completedAt: data.completedAt?.toDate ? data.completedAt.toDate() : new Date(data.completedAt),
       } as Player;
     });
-    
+
     // Sort by completedAt (desc) in memory
     return players.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
   }
@@ -367,11 +368,11 @@ export class FirebaseStorage implements IStorage {
     if (!hasAccess) {
       throw new Error('Unauthorized: Only the game creator can add questions');
     }
-    
+
     // Get existing questions to determine order
     const existingQuestions = await this.getQuestionsByGameId(gameId);
     const maxOrder = Math.max(0, ...existingQuestions.map(q => q.order || 0));
-    
+
     const id = randomUUID();
     const question: Question = {
       id,
@@ -382,9 +383,25 @@ export class FirebaseStorage implements IStorage {
       explanation: questionData.explanation || null,
       order: maxOrder + 1,
     };
-    
+
     await db.collection(collections.questions).doc(id).set(question);
     return question;
+  }
+
+  async deleteQuestionByUser(id: string, userId: string): Promise<void> {
+    // First verify the user owns the game that this question belongs to
+    const question = await this.getQuestion(id);
+    if (!question) {
+      throw new Error("Question not found");
+    }
+
+    const hasAccess = await this.verifyGameAccessByUser(question.gameId, userId);
+    if (!hasAccess) {
+      throw new Error("Unauthorized access to delete question");
+    }
+
+    // Delete the question from Firestore
+    await db.collection(collections.questions).doc(id).delete();
   }
 
   async updateGamePrizes(gameId: string, prizes: PrizePlacement[], userId: string): Promise<Game> {
@@ -393,18 +410,18 @@ export class FirebaseStorage implements IStorage {
     if (!hasAccess) {
       throw new Error('Unauthorized: Only the game creator can update prizes');
     }
-    
+
     // Get the current game
     const game = await this.getGame(gameId);
     if (!game) {
       throw new Error('Game not found');
     }
-    
+
     // Update prizes in Firestore
     await db.collection(collections.games).doc(gameId).update({
       prizes: prizes
     });
-    
+
     // Return updated game
     return {
       ...game,
