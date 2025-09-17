@@ -21,6 +21,7 @@ export interface Game {
   creatorKey: string;
   userId?: string; // Firebase UID - optional for backward compatibility
   createdAt: Date;
+  modifiedAt?: Date; // Track when game was last modified
 }
 
 export interface Question {

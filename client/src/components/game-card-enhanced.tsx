@@ -21,8 +21,9 @@ import {
 import { QRCodeModal } from '@/components/qr-code-modal'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
 import type { Game } from '@shared/firebase-types'
+import { useQuery } from '@tanstack/react-query'
 
-interface GameCardProps {
+interface GameCardEnhancedProps {
 	game: Game
 	onEditPrizes: (
 		gameId: string,
@@ -30,8 +31,23 @@ interface GameCardProps {
 	) => void
 }
 
-export function GameCard({ game, onEditPrizes }: GameCardProps) {
+export function GameCardEnhanced({
+	game,
+	onEditPrizes,
+}: GameCardEnhancedProps) {
 	const [, setLocation] = useLocation()
+
+	// Fetch actual question count for this game
+	const { data: actualQuestionCount } = useQuery<number>({
+		queryKey: ['/api/games', game.id, 'questions-count'],
+		queryFn: async () => {
+			const response = await fetch(`/api/games/${game.id}/questions`)
+			const questions = await response.json()
+			return questions.length
+		},
+		enabled: !!game.id,
+		staleTime: 5 * 60 * 1000, // 5 minutes
+	})
 
 	const handleEditPrizes = () => {
 		const existingPrizes = []
@@ -82,7 +98,10 @@ export function GameCard({ game, onEditPrizes }: GameCardProps) {
 						)}
 					<div className='flex items-center gap-2'>
 						<Building className='h-4 w-4' />
-						{game.questionCount} questions • {game.difficulty} difficulty
+						{actualQuestionCount !== undefined
+							? actualQuestionCount
+							: game.questionCount}{' '}
+						questions • {game.difficulty} difficulty
 					</div>
 					{game.categories.length > 0 && (
 						<div className='flex flex-wrap gap-1 mt-2'>

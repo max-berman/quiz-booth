@@ -51,6 +51,7 @@ export class FirebaseStorage implements IStorage {
         prizes: insertGame.prizes || null,
         creatorKey,
         createdAt: Timestamp.fromDate(now),
+        modifiedAt: Timestamp.fromDate(now), // Set modifiedAt to creation time initially
       };
 
       // Only add userId if it exists (avoid undefined fields in Firestore)
@@ -73,6 +74,7 @@ export class FirebaseStorage implements IStorage {
         creatorKey: gameData.creatorKey,
         userId: gameData.userId,
         createdAt: now, // For the returned object, use JS Date
+        modifiedAt: now, // Set modifiedAt to creation time initially
       };
 
       console.log('Creating game in Firebase:', JSON.stringify(gameData, null, 2));
@@ -112,6 +114,7 @@ export class FirebaseStorage implements IStorage {
       return {
         ...data,
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+        modifiedAt: data.modifiedAt?.toDate ? data.modifiedAt.toDate() : new Date(data.modifiedAt || data.createdAt),
       } as Game;
     });
 
@@ -130,6 +133,7 @@ export class FirebaseStorage implements IStorage {
       return {
         ...data,
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+        modifiedAt: data.modifiedAt?.toDate ? data.modifiedAt.toDate() : new Date(data.modifiedAt || data.createdAt),
       } as Game;
     });
 
@@ -147,6 +151,7 @@ export class FirebaseStorage implements IStorage {
     return {
       ...data,
       createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+      modifiedAt: data.modifiedAt?.toDate ? data.modifiedAt.toDate() : new Date(data.modifiedAt || data.createdAt),
     } as Game;
   }
 
@@ -311,6 +316,12 @@ export class FirebaseStorage implements IStorage {
       gameId: question.gameId, // Ensure gameId cannot be changed
     };
 
+    // Update game's modifiedAt timestamp
+    const now = new Date();
+    await db.collection(collections.games).doc(question.gameId).update({
+      modifiedAt: Timestamp.fromDate(now)
+    });
+
     await db.collection(collections.questions).doc(id).update(updates);
     return updatedQuestion;
   }
@@ -384,6 +395,12 @@ export class FirebaseStorage implements IStorage {
       order: maxOrder + 1,
     };
 
+    // Update game's modifiedAt timestamp
+    const now = new Date();
+    await db.collection(collections.games).doc(gameId).update({
+      modifiedAt: Timestamp.fromDate(now)
+    });
+
     await db.collection(collections.questions).doc(id).set(question);
     return question;
   }
@@ -399,6 +416,12 @@ export class FirebaseStorage implements IStorage {
     if (!hasAccess) {
       throw new Error("Unauthorized access to delete question");
     }
+
+    // Update game's modifiedAt timestamp
+    const now = new Date();
+    await db.collection(collections.games).doc(question.gameId).update({
+      modifiedAt: Timestamp.fromDate(now)
+    });
 
     // Delete the question from Firestore
     await db.collection(collections.questions).doc(id).delete();
