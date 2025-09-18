@@ -13,12 +13,12 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Download, Users, Trophy, Clock, Mail } from 'lucide-react'
-import type { Player } from '@shared/schema'
+import type { Player, Game } from '@shared/schema'
 
 export default function Submissions() {
 	const { id } = useParams()
 
-	const { data: game } = useQuery({
+	const { data: game } = useQuery<Game>({
 		queryKey: ['/api/games', id],
 		enabled: !!id,
 	})
@@ -27,7 +27,7 @@ export default function Submissions() {
 		data: players = [],
 		isLoading,
 		error,
-	} = useQuery({
+	} = useQuery<Player[]>({
 		queryKey: ['/api/games', id, 'players'],
 		enabled: !!id,
 		queryFn: async () => {
@@ -78,18 +78,18 @@ export default function Submissions() {
 			'Time Spent (s)',
 			'Completion Time',
 		]
-		const csvData = players.map((player: Player) => [
+		const csvData = players.map((player) => [
 			player.name,
 			player.company || '', // Email is stored in company field
 			player.score,
 			player.correctAnswers,
 			player.totalQuestions,
 			player.timeSpent,
-			player.createdAt ? formatDate(player.createdAt) : '',
+			player.completedAt ? formatDate(player.completedAt.toString()) : '',
 		])
 
 		const csvContent = [headers, ...csvData]
-			.map((row) => row.map((field) => `"${field}"`).join(','))
+			.map((row) => row.map((field: any) => `"${field}"`).join(','))
 			.join('\n')
 
 		const blob = new Blob([csvContent], { type: 'text/csv' })
@@ -106,19 +106,16 @@ export default function Submissions() {
 		avgScore:
 			players.length > 0
 				? Math.round(
-						players.reduce((sum: number, p: Player) => sum + p.score, 0) /
-							players.length
+						players.reduce((sum, p) => sum + p.score, 0) / players.length
 				  )
 				: 0,
 		avgTime:
 			players.length > 0
 				? Math.round(
-						players.reduce((sum: number, p: Player) => sum + p.timeSpent, 0) /
-							players.length
+						players.reduce((sum, p) => sum + p.timeSpent, 0) / players.length
 				  )
 				: 0,
-		topScore:
-			players.length > 0 ? Math.max(...players.map((p: Player) => p.score)) : 0,
+		topScore: players.length > 0 ? Math.max(...players.map((p) => p.score)) : 0,
 	}
 
 	if (isLoading) {
@@ -297,8 +294,8 @@ export default function Submissions() {
 													</TableCell>
 													<TableCell>{formatTime(player.timeSpent)}</TableCell>
 													<TableCell>
-														{player.createdAt
-															? formatDate(player.createdAt)
+														{player.completedAt
+															? formatDate(player.completedAt.toString())
 															: 'Unknown'}
 													</TableCell>
 													<TableCell>

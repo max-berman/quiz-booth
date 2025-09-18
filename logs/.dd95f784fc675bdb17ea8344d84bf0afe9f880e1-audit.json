@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/maxim/Dev/quiz-booth/logs/.dd95f784fc675bdb17ea8344d84bf0afe9f880e1-audit.json",
+    "files": [
+        {
+            "date": 1758225668348,
+            "name": "/home/maxim/Dev/quiz-booth/logs/mcp-puppeteer-2025-09-18.log",
+            "hash": "4fc56d25c956c874bf03468744eb3bbe36c74f79744089886ba743fd95af8b15"
+        }
+    ],
+    "hashType": "sha256"
+}

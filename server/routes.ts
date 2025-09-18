@@ -297,6 +297,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedQuestions = questionsToInsert.map((q: any) => insertQuestionSchema.parse(q));
 
       const questions = await storage.createQuestions(validatedQuestions);
+
+      // Invalidate cache for this game's questions since we added multiple questions
+      questionsCache.delete(cacheKeys.questions(game.id));
+
       res.json(questions);
     } catch (error) {
       logger.error('Question generation error:', error);
@@ -511,6 +515,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }, {});
 
       const updatedQuestion = await storage.updateQuestionByUser(questionId, filteredUpdates, req.user.uid);
+
+      // Invalidate cache for this game's questions
+      const question = await storage.getQuestion(questionId);
+      if (question) {
+        questionsCache.delete(cacheKeys.questions(question.gameId));
+      }
+
       res.json(updatedQuestion);
     } catch (error) {
       logger.error('Question update error:', error);
@@ -532,7 +543,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const questionId = req.params.id;
+
+      // First get the question to determine which game it belongs to for cache invalidation
+      const question = await storage.getQuestion(questionId);
+      if (!question) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+
       await storage.deleteQuestionByUser(questionId, req.user.uid);
+
+      // Invalidate cache for this game's questions
+      questionsCache.delete(cacheKeys.questions(question.gameId));
+
       res.json({ message: "Question deleted successfully" });
     } catch (error) {
       logger.error('Question delete error:', error);
@@ -636,6 +658,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const question = await storage.addQuestionToGame(gameId, questionData, req.user.uid);
+
+      // Invalidate cache for this game's questions
+      questionsCache.delete(cacheKeys.questions(gameId));
+
       res.json(question);
     } catch (error) {
       logger.error('Add question error:', error);
@@ -672,6 +698,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const updatedGame = await storage.updateGamePrizes(gameId, prizes, req.user.uid);
+
+      // Invalidate cache for this game since prizes were updated
+      gameCache.delete(cacheKeys.game(gameId));
+
       res.json(updatedGame);
     } catch (error) {
       logger.error('Update prizes error:', error);

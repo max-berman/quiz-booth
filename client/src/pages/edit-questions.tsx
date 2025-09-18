@@ -137,9 +137,52 @@ export default function EditQuestions() {
 
 			return response.json()
 		},
-		onSuccess: () => {
+		onMutate: async (newQuestionData) => {
+			// Cancel any outgoing refetches to avoid overwriting our optimistic update
+			await queryClient.cancelQueries({
+				queryKey: ['/api/games', currentGameId, 'questions'],
+			})
+
+			// Snapshot the previous value
+			const previousQuestions = queryClient.getQueryData<Question[]>([
+				'/api/games',
+				currentGameId,
+				'questions',
+			])
+
+			// Generate a temporary ID for the optimistic update
+			const tempId = `temp-${Date.now()}`
+
+			// Optimistically add the question to the UI
+			if (previousQuestions) {
+				const optimisticQuestion: Question = {
+					id: tempId,
+					gameId: currentGameId!,
+					questionText: newQuestionData.questionText,
+					options: newQuestionData.options,
+					correctAnswer: newQuestionData.correctAnswer,
+					explanation: newQuestionData.explanation || null,
+					order: (previousQuestions.length || 0) + 1,
+				}
+
+				queryClient.setQueryData<Question[]>(
+					['/api/games', currentGameId, 'questions'],
+					[...previousQuestions, optimisticQuestion]
+				)
+			}
+
+			return { previousQuestions, tempId }
+		},
+		onSuccess: (data, variables, context) => {
+			// Invalidate all relevant queries to ensure UI stays in sync with actual data
 			queryClient.invalidateQueries({
 				queryKey: ['/api/games', currentGameId, 'questions'],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['/api/games', currentGameId, 'questions-count'],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['/api/user/games', user?.uid],
 			})
 			toast({
 				title: 'Question added',
@@ -153,8 +196,17 @@ export default function EditQuestions() {
 				explanation: '',
 			})
 		},
-		onError: (error: any) => {
+		onError: (error: any, variables, context: any) => {
 			console.error('Add question error:', error)
+
+			// Roll back the optimistic update on error
+			if (context?.previousQuestions) {
+				queryClient.setQueryData<Question[]>(
+					['/api/games', currentGameId, 'questions'],
+					context.previousQuestions
+				)
+			}
+
 			toast({
 				title: 'Failed to add question',
 				description: error.message || 'Please try again.',
@@ -184,17 +236,56 @@ export default function EditQuestions() {
 
 			return response.json()
 		},
+		onMutate: async (questionId: string) => {
+			// Cancel any outgoing refetches to avoid overwriting our optimistic update
+			await queryClient.cancelQueries({
+				queryKey: ['/api/games', currentGameId, 'questions'],
+			})
+
+			// Snapshot the previous value
+			const previousQuestions = queryClient.getQueryData<Question[]>([
+				'/api/games',
+				currentGameId,
+				'questions',
+			])
+
+			// Optimistically remove the question from the UI
+			if (previousQuestions) {
+				queryClient.setQueryData<Question[]>(
+					['/api/games', currentGameId, 'questions'],
+					previousQuestions.filter((q) => q.id !== questionId)
+				)
+			}
+
+			return { previousQuestions }
+		},
 		onSuccess: () => {
+			// Invalidate all relevant queries to ensure UI stays in sync
 			queryClient.invalidateQueries({
 				queryKey: ['/api/games', currentGameId, 'questions'],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['/api/games', currentGameId, 'questions-count'],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['/api/user/games', user?.uid],
 			})
 			toast({
 				title: 'Question deleted',
 				description: 'The question has been deleted successfully.',
 			})
 		},
-		onError: (error: any) => {
+		onError: (error: any, questionId: string, context: any) => {
 			console.error('Delete question error:', error)
+
+			// Roll back the optimistic update on error
+			if (context?.previousQuestions) {
+				queryClient.setQueryData<Question[]>(
+					['/api/games', currentGameId, 'questions'],
+					context.previousQuestions
+				)
+			}
+
 			toast({
 				title: 'Failed to delete question',
 				description: error.message || 'Please try again.',
