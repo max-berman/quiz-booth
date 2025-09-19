@@ -306,7 +306,11 @@ export default function Setup() {
 	}
 
 	if (isGenerating) {
-		return <LoadingSpinner message='Generating Your Trivia Questions' />
+		return (
+			<div className='flex-1 bg-background py-6 flex items-center'>
+				<LoadingSpinner message='Generating Your Trivia Questions' />
+			</div>
+		)
 	}
 
 	return (
