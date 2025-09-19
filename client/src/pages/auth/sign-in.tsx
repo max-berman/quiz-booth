@@ -77,8 +77,8 @@ export default function SignIn() {
 
 	if (emailSent) {
 		return (
-			<div className='flex-1 bg-gray-50 py-8'>
-				<div className='max-w-md mx-auto px-4'>
+			<div className='flex-1  bg-background py-8 items-center flex'>
+				<div className='max-w-md mx-auto px-4  text-primary'>
 					<Card>
 						<CardHeader>
 							<CardTitle className='text-center'>Check your email</CardTitle>
@@ -88,10 +88,10 @@ export default function SignIn() {
 								<div className='w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4'>
 									<Mail className='h-8 w-8 text-primary' />
 								</div>
-								<p className='text-gray-600 mb-4'>
+								<p className=' mb-4'>
 									We've sent a sign-in link to <strong>{email}</strong>
 								</p>
-								<p className='text-sm text-gray-500 mb-6'>
+								<p className='text-sm mb-6'>
 									Click the link in your email to sign in. The link will expire
 									in 1 hour.
 								</p>
@@ -106,16 +106,6 @@ export default function SignIn() {
 								>
 									Use different email
 								</Button>
-
-								<Button
-									onClick={() => setLocation('/')}
-									variant='ghost'
-									className='w-full'
-									data-testid='button-back-home'
-								>
-									<ArrowLeft className='mr-2 h-4 w-4' />
-									Back to Home
-								</Button>
 							</div>
 						</CardContent>
 					</Card>
@@ -125,12 +115,12 @@ export default function SignIn() {
 	}
 
 	return (
-		<div className='flex-1 bg-gray-50 py-8'>
-			<div className='max-w-md mx-auto px-4'>
+		<div className='flex-1 bg-background py-8 items-center flex'>
+			<div className='max-w-md mx-auto px-4 '>
 				<Card>
 					<CardHeader>
-						<CardTitle className='text-center'>Sign In</CardTitle>
-						<p className='text-center text-gray-600 text-sm'>
+						<CardTitle className='text-center text-primary'>Sign In</CardTitle>
+						<p className='text-center text-sm'>
 							Choose your preferred sign-in method
 						</p>
 					</CardHeader>
@@ -171,17 +161,17 @@ export default function SignIn() {
 
 						<div className='relative'>
 							<div className='absolute inset-0 flex items-center'>
-								<Separator className='w-full' />
+								<Separator className='w-full ' />
 							</div>
 							<div className='relative flex justify-center text-xs uppercase'>
-								<span className='bg-gray-50 px-2 text-gray-500'>Or</span>
+								<span className='bg-background px-2 text-primary'>Or</span>
 							</div>
 						</div>
 
 						{/* Email Sign-in (Alternative) */}
-						<form onSubmit={handleSubmit} className='space-y-4'>
+						<form onSubmit={handleSubmit} className='space-y-4 text-primary'>
 							<div>
-								<Label htmlFor='email'>Email Address</Label>
+								{/* <Label htmlFor='email'>Email Address</Label> */}
 								<Input
 									id='email'
 									type='email'
@@ -191,6 +181,7 @@ export default function SignIn() {
 									required
 									data-testid='input-email'
 								/>
+								{/* <p>We'll send over a quick sign-in link via email.</p> */}
 							</div>
 
 							<Button
@@ -213,15 +204,6 @@ export default function SignIn() {
 								)}
 							</Button>
 						</form>
-
-						<div className='mt-6 text-center'>
-							<Link href='/'>
-								<Button variant='ghost' data-testid='button-back-home'>
-									<ArrowLeft className='mr-2 h-4 w-4' />
-									Back to Home
-								</Button>
-							</Link>
-						</div>
 					</CardContent>
 				</Card>
 			</div>
