@@ -41,8 +41,10 @@ function Router() {
 function App() {
 	const [location] = useLocation()
 
-	// Don't show footer on game pages
-	const showFooter = !location.startsWith('/game')
+	// Don't show footer on actual game play pages, but show on game creation/management pages
+	const isGamePlayPage =
+		location.startsWith('/game/') && !location.startsWith('/game-created')
+	const showFooter = !isGamePlayPage
 
 	return (
 		<QueryClientProvider client={queryClient}>

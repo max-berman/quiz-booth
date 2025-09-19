@@ -25,6 +25,7 @@ interface PrizeEditModalProps {
 	onOpenChange: (open: boolean) => void
 	gameId: string | null
 	initialPrizes?: Prize[]
+	onPrizesUpdated?: () => void
 }
 
 export function PrizeEditModal({
@@ -32,6 +33,7 @@ export function PrizeEditModal({
 	onOpenChange,
 	gameId,
 	initialPrizes = [{ placement: '1st Place', prize: '' }],
+	onPrizesUpdated,
 }: PrizeEditModalProps) {
 	const { user } = useAuth()
 	const { toast } = useToast()
@@ -72,6 +74,7 @@ export function PrizeEditModal({
 				title: 'Prizes updated',
 				description: 'Prize information has been saved successfully.',
 			})
+			onPrizesUpdated?.()
 			onOpenChange(false)
 		},
 		onError: (error: Error) => {

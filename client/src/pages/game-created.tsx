@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'wouter'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import {
 	CheckCircle,
 	Play,
@@ -26,15 +27,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { PrizeEditModal } from '@/components/prize-edit-modal'
 import type { Game } from '@shared/firebase-types'
 
 export default function GameCreated() {
 	const { id } = useParams<{ id: string }>()
 	const [, setLocation] = useLocation()
 	const { toast } = useToast()
+	const queryClient = useQueryClient()
 	const [showQR, setShowQR] = useState(false)
 	const [showShare, setShowShare] = useState(false)
 	const [qrCodeDataURL, setQrCodeDataURL] = useState<string>('')
+	const [editingPrizes, setEditingPrizes] = useState<string | null>(null)
+	const [initialPrizes, setInitialPrizes] = useState([
+		{ placement: '1st Place', prize: '' },
+		{ placement: '2nd Place', prize: '' },
+		{ placement: '3rd Place', prize: '' },
+	])
 
 	const { data: game, isLoading } = useQuery<Game>({
 		queryKey: [`/api/games/${id}`],
@@ -113,6 +122,21 @@ export default function GameCreated() {
 		}
 	}
 
+	const handleEditPrizes = () => {
+		const existingPrizes = []
+		if (game?.prizes && game.prizes.length > 0) {
+			existingPrizes.push(...game.prizes)
+		}
+		if (existingPrizes.length === 0) {
+			existingPrizes.push({
+				placement: '1st Place',
+				prize: '',
+			})
+		}
+		setInitialPrizes(existingPrizes)
+		setEditingPrizes(id || null)
+	}
+
 	if (isLoading) {
 		return (
 			<div className='flex-1 bg-background flex items-center justify-center'>
@@ -139,173 +163,166 @@ export default function GameCreated() {
 	}
 
 	return (
-		<div className='flex-1 bg-background py-8'>
+		<div className='flex-1 bg-background py-8 items-center flex'>
 			<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
 				{/* Success Header */}
 				<div className='text-center mb-8'>
-					<div className='inline-flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-4'>
-						<CheckCircle className='h-8 w-8 ' />
+					<div className='inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4'>
+						<CheckCircle className='h-8 w-8 text-primary-foreground' />
 					</div>
-					<h1 className='text-3xl font-bold text-foreground mb-2'>
+					<h1 className='text-3xl font-bold text-primary mb-2'>
 						Game Created Successfully!
 					</h1>
-					<p className='text-muted-foreground'>
+					<p className='text-foreground'>
 						Your trivia game is ready to engage visitors at your trade show.
 					</p>
 				</div>
 
-				{/* Game Details Card */}
-				<Card className='mb-8'>
-					<CardHeader>
-						<div className='flex items-center justify-between'>
-							<CardTitle className='text-xl'>{game.companyName}</CardTitle>
-							<Badge variant='secondary'>{game.industry}</Badge>
+				{/* Game Details Card - Enhanced styling to match game-card-enhanced */}
+				<Card className='mb-8 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 border-2'>
+					<CardHeader className='pb-3 px-4 pt-2'>
+						<div className='flex justify-between flex-row'>
+							<CardTitle
+								title={game.companyName}
+								className='font-bold line-clamp-2 text-primary mb-1'
+							>
+								{game.companyName}
+							</CardTitle>
+							<Badge title={game.industry} className='font-semibold h-6'>
+								{game.industry}
+							</Badge>
 						</div>
 					</CardHeader>
-					<CardContent className='space-y-4'>
-						<div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-							<div className='text-center'>
-								<div className='text-2xl font-bold text-primary'>
+					<CardContent className='space-y-4 px-4'>
+						{/* Game Details */}
+						<div className='space-y-2 text-sm text-foreground'>
+							<div className='flex items-center gap-2'>
+								<div className='font-bold text-primary'>
 									{game.questionCount}
 								</div>
-								<div className='text-sm text-muted-foreground'>Questions</div>
+								<span>Questions</span>
 							</div>
-							<div className='text-center'>
-								<div className='text-2xl font-bold text-primary capitalize'>
+							<div className='flex items-center gap-2'>
+								<div className='font-bold text-primary capitalize'>
 									{game.difficulty}
 								</div>
-								<div className='text-sm text-muted-foreground'>Difficulty</div>
+								<span>Difficulty</span>
 							</div>
-							<div className='text-center'>
-								<div className='text-2xl font-bold text-primary'>
-									{game.categories.join(', ').length > 20
-										? game.categories.length + ' types'
-										: game.categories.join(', ')}
+							{game.firstPrize && (
+								<div className='flex items-center gap-2'>
+									<div className='font-bold text-primary'>
+										${game.firstPrize}
+									</div>
+									<span>First Prize</span>
 								</div>
-								<div className='text-sm text-muted-foreground'>
-									Question Types
-								</div>
-							</div>
-							<div className='text-center'>
-								<div className='text-2xl font-bold text-primary'>
-									${game.firstPrize || '0'}
-								</div>
-								<div className='text-sm text-muted-foreground'>First Prize</div>
-							</div>
+							)}
 						</div>
 
 						{game.categories.length > 0 && (
-							<div>
-								<h4 className='font-medium mb-2'>Question Categories:</h4>
-								<div className='flex flex-wrap gap-2'>
-									{game.categories.map((category, index) => (
-										<Badge key={index} variant='outline'>
-											{category}
-										</Badge>
-									))}
-								</div>
+							<div className='flex flex-wrap gap-1'>
+								{game.categories.map((category, index) => (
+									<Badge key={index} variant='secondary' className='text-xs'>
+										{category}
+									</Badge>
+								))}
 							</div>
 						)}
 
 						{game.productDescription && (
-							<div>
-								<h4 className='font-medium mb-2'>Product Description:</h4>
+							<div className='pt-2'>
 								<p className='text-muted-foreground text-sm'>
 									{game.productDescription}
 								</p>
 							</div>
 						)}
-					</CardContent>
-				</Card>
 
-				{/* Action Buttons */}
-				<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8'>
-					<Button
-						onClick={() => setLocation(`/game/${id}`)}
-						variant='secondary'
-						className='h-24 flex flex-col gap-2'
-						data-testid='button-play-game'
-					>
-						<Play className='h-6 w-6' />
-						<span>Play Game</span>
-					</Button>
-
-					<Button
-						variant='outline'
-						onClick={() => setLocation(`/edit-questions/${id}`)}
-						className='h-24 flex flex-col gap-2'
-						data-testid='button-edit-questions'
-					>
-						<Edit3 className='h-6 w-6' />
-						<span>Edit Questions</span>
-					</Button>
-
-					<Button
-						variant='outline'
-						onClick={() => setShowQR(true)}
-						className='h-24 flex flex-col gap-2'
-						data-testid='button-qr-code'
-					>
-						<QrCode className='h-6 w-6' />
-						<span>QR Code</span>
-					</Button>
-
-					<Button
-						variant='outline'
-						onClick={() => setShowShare(true)}
-						className='h-24 flex flex-col gap-2'
-						data-testid='button-share-embed'
-					>
-						<Share2 className='h-6 w-6' />
-						<span>Share & Embed</span>
-					</Button>
-
-					<Button
-						variant='outline'
-						onClick={() => setLocation('/dashboard')}
-						className='h-24 flex flex-col gap-2'
-						data-testid='button-dashboard'
-					>
-						<BarChart3 className='h-6 w-6' />
-						<span>Dashboard</span>
-					</Button>
-				</div>
-
-				{/* Quick Share Section */}
-				<Card>
-					<CardHeader>
-						<CardTitle className='text-lg'>Quick Share</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<div className='flex items-center gap-2'>
-							<div className='flex-1 border p-2 bg-muted rounded-lg font-mono text-sm overflow-hidden'>
-								{gameUrl}
+						{game.prizes && game.prizes.length > 0 && (
+							<div className='flex border-dotted border-t border-primary items-end pt-4'>
+								<ul className='text-xs flex flex-col flex-wrap w-2/3 p-1 mr-2'>
+									{game.prizes.map((prize, index) => (
+										<li key={index} className='mr-2'>
+											<strong>{prize.placement}</strong>: {prize.prize}
+										</li>
+									))}
+								</ul>
 							</div>
-							<Button
-								variant='outline'
-								size='sm'
-								onClick={copyGameUrl}
-								data-testid='button-copy-url'
-							>
-								<Copy className='h-4 w-4' />
-							</Button>
+						)}
+
+						<Separator />
+
+						{/* Action Buttons - Enhanced styling to match game-card-enhanced */}
+						<div className='space-y-2 mb-4'>
+							<div className='grid grid-cols-3 gap-2'>
+								<Button
+									variant='outline'
+									className='w-full'
+									size='sm'
+									onClick={() => setLocation(`/game/${id}`)}
+									data-testid='button-play-game'
+								>
+									<Play className='mr-2 h-4 w-4' />
+									Play Game
+								</Button>
+								<Button
+									variant='outline'
+									className='w-full'
+									size='sm'
+									onClick={() => setLocation(`/edit-questions/${id}`)}
+									data-testid='button-edit-questions'
+								>
+									<Edit3 className='mr-1 h-4 w-4' />
+									Edit Questions
+								</Button>
+
+								<Button
+									variant='outline'
+									className='w-full'
+									size='sm'
+									onClick={() => setLocation('/dashboard')}
+									data-testid='button-dashboard'
+								>
+									<BarChart3 className='mr-1 h-4 w-4' />
+									Dashboard
+								</Button>
+							</div>
+
+							<div className='grid grid-cols-3 gap-2'>
+								<Button
+									variant='outline'
+									className='w-full'
+									size='sm'
+									onClick={() => setShowShare(true)}
+									data-testid='button-share-embed'
+								>
+									<Share2 className='mr-1 h-4 w-4' />
+									Share & Embed
+								</Button>
+
+								<Button
+									variant='outline'
+									className='w-full'
+									size='sm'
+									onClick={() => setShowQR(true)}
+									data-testid='button-qr-code'
+								>
+									<QrCode className='mr-1 h-4 w-4' />
+									QR Code
+								</Button>
+
+								<Button
+									variant='outline'
+									className='w-full'
+									size='sm'
+									onClick={handleEditPrizes}
+									data-testid='button-edit-prizes'
+								>
+									<Edit3 className='mr-1 h-4 w-4' />
+									Edit Prizes
+								</Button>
+							</div>
 						</div>
-						<p className='text-sm text-muted-foreground mt-2'>
-							Share this URL with your trade show visitors or display the QR
-							code at your booth.
-						</p>
 					</CardContent>
 				</Card>
-
-				{/* Navigation */}
-				<div className='mt-8 text-center'>
-					<Button
-						onClick={() => setLocation('/setup')}
-						data-testid='button-create-another'
-					>
-						Create Another Game
-					</Button>
-				</div>
 
 				{/* QR Code Modal */}
 				<Dialog open={showQR} onOpenChange={setShowQR}>
@@ -446,6 +463,18 @@ export default function GameCreated() {
 						</Tabs>
 					</DialogContent>
 				</Dialog>
+
+				{/* Prize Edit Modal */}
+				<PrizeEditModal
+					open={!!editingPrizes}
+					onOpenChange={() => setEditingPrizes(null)}
+					gameId={editingPrizes}
+					initialPrizes={initialPrizes}
+					onPrizesUpdated={() => {
+						// Refresh the game data to show updated prizes immediately
+						queryClient.invalidateQueries({ queryKey: [`/api/games/${id}`] })
+					}}
+				/>
 			</div>
 		</div>
 	)
