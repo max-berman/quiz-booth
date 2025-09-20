@@ -373,6 +373,20 @@ export default function GamePage() {
 						)}
 					</CardContent>
 				</Card>
+				<div className='flex items-center justify-center'>
+					<a
+						href='https://www.naknick.com'
+						target='_blank'
+						rel='noopener noreferrer'
+					>
+						<img
+							// src='/src/assets/images/owl.svg'
+							src='/src/assets/images/logo.png'
+							alt='QuizBooth.games logo'
+							className='h-32 w-auto'
+						/>
+					</a>
+				</div>
 			</div>
 		</div>
 	)

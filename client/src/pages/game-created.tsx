@@ -14,6 +14,7 @@ import {
 	QrCode,
 	Edit3,
 	Home,
+	Plus,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import QRCode from 'qrcode'
@@ -180,7 +181,7 @@ export default function GameCreated() {
 
 				{/* Game Details Card - Enhanced styling to match game-card-enhanced */}
 				<Card className='mb-8 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 border-2'>
-					<CardHeader className='pb-3 px-4 pt-2'>
+					<CardHeader className='p-4'>
 						<div className='flex justify-between flex-row'>
 							<CardTitle
 								title={game.companyName}
@@ -197,25 +198,17 @@ export default function GameCreated() {
 						{/* Game Details */}
 						<div className='space-y-2 text-sm text-foreground'>
 							<div className='flex items-center gap-2'>
+								<span>Questions:</span>
 								<div className='font-bold text-primary'>
 									{game.questionCount}
 								</div>
-								<span>Questions</span>
 							</div>
 							<div className='flex items-center gap-2'>
+								<span>Difficulty:</span>
 								<div className='font-bold text-primary capitalize'>
 									{game.difficulty}
 								</div>
-								<span>Difficulty</span>
 							</div>
-							{game.firstPrize && (
-								<div className='flex items-center gap-2'>
-									<div className='font-bold text-primary'>
-										${game.firstPrize}
-									</div>
-									<span>First Prize</span>
-								</div>
-							)}
 						</div>
 
 						{game.categories.length > 0 && (
@@ -237,8 +230,9 @@ export default function GameCreated() {
 						)}
 
 						{game.prizes && game.prizes.length > 0 && (
-							<div className='flex border-dotted border-t border-primary items-end pt-4'>
-								<ul className='text-xs flex flex-col flex-wrap w-2/3 p-1 mr-2'>
+							<div className='flex border-primary  rounded-sm bg-primary/10 px-2'>
+								Prizes:
+								<ul className='text-xs flex flex-col flex-wrap w-2/3 p-1 mx-2'>
 									{game.prizes.map((prize, index) => (
 										<li key={index} className='mr-2'>
 											<strong>{prize.placement}</strong>: {prize.prize}
@@ -247,8 +241,6 @@ export default function GameCreated() {
 								</ul>
 							</div>
 						)}
-
-						<Separator />
 
 						{/* Action Buttons - Enhanced styling to match game-card-enhanced */}
 						<div className='space-y-2 mb-4'>
@@ -267,13 +259,33 @@ export default function GameCreated() {
 									variant='outline'
 									className='w-full'
 									size='sm'
+									onClick={handleEditPrizes}
+									data-testid='button-edit-prizes'
+								>
+									{game.prizes && game.prizes.length < 0 ? (
+										<>
+											<Edit3 className='mr-1 h-4 w-4' /> Edit Prizes
+										</>
+									) : (
+										<>
+											<Plus className='mr-1 h-4 w-4' /> Add
+										</>
+									)}{' '}
+									Prizes
+								</Button>
+								<Button
+									variant='outline'
+									className='w-full'
+									size='sm'
 									onClick={() => setLocation(`/edit-questions/${id}`)}
 									data-testid='button-edit-questions'
 								>
 									<Edit3 className='mr-1 h-4 w-4' />
 									Edit Questions
 								</Button>
+							</div>
 
+							<div className='grid grid-cols-3 gap-2'>
 								<Button
 									variant='outline'
 									className='w-full'
@@ -284,9 +296,6 @@ export default function GameCreated() {
 									<BarChart3 className='mr-1 h-4 w-4' />
 									Dashboard
 								</Button>
-							</div>
-
-							<div className='grid grid-cols-3 gap-2'>
 								<Button
 									variant='outline'
 									className='w-full'
@@ -307,17 +316,6 @@ export default function GameCreated() {
 								>
 									<QrCode className='mr-1 h-4 w-4' />
 									QR Code
-								</Button>
-
-								<Button
-									variant='outline'
-									className='w-full'
-									size='sm'
-									onClick={handleEditPrizes}
-									data-testid='button-edit-prizes'
-								>
-									<Edit3 className='mr-1 h-4 w-4' />
-									Edit Prizes
 								</Button>
 							</div>
 						</div>
