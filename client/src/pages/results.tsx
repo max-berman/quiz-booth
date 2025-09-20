@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
-import { Trophy, RotateCcw, Eye, Edit3 } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import { Trophy, RotateCcw, Eye, Edit3, Check } from 'lucide-react'
 import { Link } from 'wouter'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
@@ -90,50 +91,50 @@ export default function Results() {
 	}
 
 	return (
-		<div className='flex-1 py-8'>
+		<div className='flex-1 py-8 flex items-center'>
 			<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
-				<Card className='shadow-xl'>
+				<Card className='shadow-xl border-border'>
 					<CardContent className='p-8 text-center'>
 						<div className='mb-8'>
-							<div className='w-20 bg-slate-100 h-20 text-4xl rounded-full flex items-center justify-center mx-auto mb-4'>
-								🏆
+							<div className='w-20  bg-background h-20 text-4xl rounded-full flex items-center justify-center mx-auto mb-4'>
+								<Trophy className='h-12 w-12 text-primary' />
 							</div>
-							<h3 className='text-3xl font-bold text-dark mb-2'>
+							<h3 className='text-3xl font-bold text-dark mb-2 text-primary'>
 								Game Complete!
 							</h3>
-							<p className='text-gray-600'>Here are your results</p>
+							<p className='text-primary'>Here are your results</p>
 						</div>
 
 						<div className='grid md:grid-cols-4 gap-6 mb-8'>
-							<div className='bg-gradient-to-br from-accent/10 to-accent/20 p-6 rounded-xl'>
-								<div className='text-3xl font-bold text-accent mb-2'>
+							<div className='p-6 rounded-xl bg-primary/30'>
+								<div className='text-3xl font-bold text-primary mb-2'>
 									{score}
 								</div>
-								<div className='text-sm font-medium text-gray-700'>
+								<div className='text-sm font-medium text-card-foreground'>
 									Final Score
 								</div>
 							</div>
-							<div className='bg-gradient-to-br from-primary/10 to-primary/20 p-6 rounded-xl'>
+							<div className='p-6 rounded-xl bg-primary/25'>
 								<div className='text-3xl font-bold text-primary mb-2'>
 									{correctAnswers}/{totalQuestions}
 								</div>
-								<div className='text-sm font-medium text-gray-700'>
+								<div className='text-sm font-medium text-card-foreground'>
 									Correct Answers
 								</div>
 							</div>
-							<div className='bg-gradient-to-br from-secondary/10 to-secondary/20 p-6 rounded-xl'>
-								<div className='text-3xl font-bold text-secondary mb-2'>
+							<div className='p-6 rounded-xl bg-primary/20'>
+								<div className='text-3xl font-bold text-primary mb-2'>
 									{streak}
 								</div>
-								<div className='text-sm font-medium text-gray-700'>
+								<div className='text-sm font-medium text-card-foreground'>
 									Final Streak
 								</div>
 							</div>
-							<div className='bg-gradient-to-br from-purple-500/10 to-purple-600/20 p-6 rounded-xl'>
-								<div className='text-3xl font-bold text-purple-600 mb-2'>
+							<div className='p-6 rounded-xl bg-primary/15'>
+								<div className='text-3xl font-bold text-primary mb-2'>
 									{formatTime(timeSpent)}
 								</div>
-								<div className='text-sm font-medium text-gray-700'>
+								<div className='text-sm font-medium text-card-foreground'>
 									Time Taken
 								</div>
 							</div>
@@ -141,26 +142,26 @@ export default function Results() {
 
 						{/* Player Registration */}
 						{!isScoreSaved && (
-							<div className='bg-gray-50 p-6 rounded-xl mb-6'>
-								<h4 className='text-lg font-semibold text-dark mb-4'>
+							<div className='bg-accent/10 p-4 rounded-xl mb-6'>
+								<h3 className='text-lg font-semibold text-primary mb-4'>
 									Save Your Score to Leaderboard
-								</h4>
-								<div className='grid sm:grid-cols-2 gap-4 max-w-md mx-auto mb-4'>
+								</h3>
+								<div className='grid sm:grid-cols-2 gap-4 mb-4'>
 									<div>
-										<Label htmlFor='playerName'>Name *</Label>
 										<Input
 											id='playerName'
 											placeholder='Enter your name'
+											//className='border-primary'
 											value={playerName}
 											onChange={(e) => setPlayerName(e.target.value)}
 										/>
 									</div>
 									<div>
-										<Label htmlFor='playerEmail'>Email (Optional)</Label>
 										<Input
 											id='playerEmail'
 											type='email'
 											placeholder='your.email@company.com'
+											//className='border-primary'
 											value={playerEmail}
 											onChange={(e) => setPlayerEmail(e.target.value)}
 										/>
@@ -178,8 +179,9 @@ export default function Results() {
 
 						{isScoreSaved && (
 							<div className='bg-accent/10 p-4 rounded-xl mb-6'>
-								<p className='text-accent font-semibold'>
-									✅ Score saved successfully!
+								<p className='text-primary font-semibold flex justify-center'>
+									<Check className='h-6 w-6 text-primary' /> Score saved
+									successfully!
 								</p>
 							</div>
 						)}
