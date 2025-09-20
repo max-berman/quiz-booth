@@ -17,18 +17,24 @@ export const databaseTimeout = (timeoutMs: number = 5000) => {
       return next();
     }
 
+    let responseSent = false;
+
     // Store original send method
     const originalSend = res.send;
 
     // Override send to handle timeouts
     res.send = function (body: any) {
-      clearTimeout(req._timeoutId);
-      originalSend.call(this, body);
+      if (!responseSent) {
+        responseSent = true;
+        clearTimeout(req._timeoutId);
+        originalSend.call(this, body);
+      }
     };
 
     // Set timeout for the request
     req._timeoutId = setTimeout(() => {
-      if (!res.headersSent) {
+      if (!responseSent && !res.headersSent) {
+        responseSent = true;
         res.status(504).json({
           message: 'Request timeout',
           error: 'Database operation took too long to complete'
