@@ -408,7 +408,7 @@ export default function Setup() {
 													companyName: e.target.value,
 												}))
 											}
-											className={`mt-2 h-12 ${
+											className={`mt-2 h-12  ${
 												formData.companyName.trim()
 													? 'border-primary'
 													: 'border-border'

@@ -18,11 +18,19 @@ import {
 	X,
 	Trash2,
 } from 'lucide-react'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { apiRequest } from '@/lib/queryClient'
 import { useAuth } from '@/contexts/auth-context'
 import { getAuthHeaders } from '@/lib/auth-utils'
 import { generateSingleQuestion, type TriviaQuestion } from '@/lib/deepseek'
 import type { Question, Game } from '@shared/firebase-types'
+
+const TOTAL_QUESTIONS = 15
 
 export default function EditQuestions() {
 	const [location, setLocation] = useLocation()
@@ -498,14 +506,35 @@ export default function EditQuestions() {
 
 				{/* Add Question Button */}
 				<div className='mb-6'>
-					<Button
-						onClick={() => setIsAddingQuestion(true)}
-						disabled={isAddingQuestion || editingQuestion !== null}
-						data-testid='button-add-question'
-					>
-						<Plus className='h-4 w-4 mr-2' />
-						Add New Question
-					</Button>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<div className='inline-block'>
+									<Button
+										onClick={() => setIsAddingQuestion(true)}
+										disabled={
+											isAddingQuestion ||
+											editingQuestion !== null ||
+											(questions && questions.length >= TOTAL_QUESTIONS)
+										}
+										data-testid='button-add-question'
+									>
+										<Plus className='h-4 w-4 mr-2' />
+										Add New Question
+									</Button>
+								</div>
+							</TooltipTrigger>
+							<TooltipContent
+								className='bg-destructive text-destructive-foreground'
+								side='right'
+								hidden={!(questions && questions.length >= TOTAL_QUESTIONS)}
+							>
+								<p className=' '>
+									You can only create {TOTAL_QUESTIONS} questions per game
+								</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				</div>
 
 				{/* Add New Question Form */}

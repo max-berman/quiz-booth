@@ -2,6 +2,7 @@ import { useParams } from 'wouter'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { Trophy, Home, Users } from 'lucide-react'
 import { Link } from 'wouter'
 import type { Player, Game } from '@shared/schema'
@@ -26,13 +27,13 @@ export default function Leaderboard() {
 	const getRankIcon = (rank: number) => {
 		switch (rank) {
 			case 1:
-				return 'bg-primary text-primary-foreground rounded-full'
+				return 'border-primary/70 border-2 bg-primary/70 text-primary-foreground text-2xl rounded-full'
 			case 2:
-				return 'bg-secondary text-secondary-foreground rounded-full'
+				return 'border-primary/60 border-2 bg-primary/60 text-primary-foreground text-xl rounded-full'
 			case 3:
-				return 'bg-muted-foreground text-background rounded-full'
+				return 'border-primary/50 border-2 bg-primary/50 text-primary-foreground text-lg rounded-full'
 			default:
-				return 'bg-muted text-muted-foreground rounded-full'
+				return 'border-primary/50 border-2 bg-muted text-primary text-lg rounded-full'
 		}
 	}
 
@@ -55,9 +56,9 @@ export default function Leaderboard() {
 
 	return (
 		<div className='flex-1 py-8'>
-			<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
+			<div className='max-w-4xl mx-auto px-2 sm:px-4 lg:px-8'>
 				<Card className='shadow-xl overflow-hidden'>
-					<div className='bg-primary p-6 text-primary-foreground'>
+					<div className='bg-primary p-4 text-primary-foreground'>
 						<div className='flex items-center justify-between'>
 							<div>
 								<h3 className='text-2xl font-bold mb-2 flex items-center'>
@@ -115,20 +116,22 @@ export default function Leaderboard() {
 							</div>
 						)}
 
-					<CardContent className='p-6'>
+					<CardContent className='p-0'>
 						{leaderboard && leaderboard.length > 0 ? (
-							<div className='space-y-2'>
+							<div className='space-y-0'>
 								{leaderboard.map((player, index) => (
 									<div
 										key={player.id}
-										className='flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted transition-colors duration-150'
+										className={`flex items-center justify-between p-4 transition-colors duration-150 ${
+											index % 2 === 0 ? 'bg-accent' : ''
+										}`}
 									>
 										<div className='flex items-center space-x-4'>
 											<div className='flex-shrink-0'>
 												<div
 													className={`w-10 h-10 ${getRankIcon(
 														index + 1
-													)} flex bg-slate-700 items-center justify-center text-white font-bold`}
+													)} flex items-center justify-center font-bold`}
 												>
 													{index + 1}
 												</div>
@@ -167,8 +170,10 @@ export default function Leaderboard() {
 						)}
 					</CardContent>
 
-					<div className='bg-muted p-4 text-center'>
-						<div className='flex justify-center gap-4'>
+					<Separator />
+
+					<div className=' p-4 text-center'>
+						<div className='flex sm:flex-row flex-col gap-4 justify-center'>
 							<Link href='/'>
 								<Button className='px-6 py-3'>
 									<Home className='mr-2 h-4 w-4' />

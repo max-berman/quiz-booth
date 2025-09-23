@@ -53,7 +53,7 @@ export function CreatorHeader() {
 							className='flex items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
 						>
 							<img
-								src='/src/assets/images/owl.svg'
+								src='/src/assets/images/logo_.svg'
 								alt='QuizBooth.games logo'
 								className='h-8 w-auto'
 							/>

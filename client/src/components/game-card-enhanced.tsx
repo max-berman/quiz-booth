@@ -49,6 +49,18 @@ export function GameCardEnhanced({
 		staleTime: 5 * 60 * 1000, // 5 minutes
 	})
 
+	// Fetch play count for this game
+	const { data: playCount } = useQuery<number>({
+		queryKey: ['/api/games', game.id, 'play-count'],
+		queryFn: async () => {
+			const response = await fetch(`/api/games/${game.id}/play-count`)
+			const data = await response.json()
+			return data.count
+		},
+		enabled: !!game.id,
+		staleTime: 2 * 60 * 1000, // 2 minutes
+	})
+
 	const handleEditPrizes = () => {
 		const existingPrizes = []
 		if (game.prizes && game.prizes.length > 0) {
@@ -103,6 +115,12 @@ export function GameCardEnhanced({
 							: game.questionCount}{' '}
 						questions • {game.difficulty} difficulty
 					</div>
+					{playCount !== undefined && (
+						<div className='flex items-center gap-2'>
+							<BarChart3 className='h-4 w-4' />
+							{playCount} {playCount === 1 ? 'play' : 'plays'}
+						</div>
+					)}
 					{game.categories.length > 0 && (
 						<div className='flex flex-wrap gap-1 mt-2'>
 							{game.categories.map((category, index) => (
