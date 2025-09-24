@@ -8,6 +8,7 @@ export interface PrizePlacement {
 
 export interface Game {
   id: string;
+  gameTitle: string | null; // AI-generated or user-edited game title
   companyName: string;
   industry: string;
   productDescription: string | null;
@@ -53,6 +54,7 @@ export const prizePlacementSchema = z.object({
 });
 
 export const insertGameSchema = z.object({
+  gameTitle: z.string().optional().nullable(),
   companyName: z.string(),
   industry: z.string(),
   productDescription: z.string().optional().nullable(),

@@ -6,6 +6,57 @@ import { z } from "zod";
 import { verifyFirebaseToken, optionalFirebaseAuth, type AuthenticatedRequest } from "./firebase-auth";
 import { logger } from "./lib/logger";
 import { gameCache, questionsCache, leaderboardCache, userGamesCache, cacheKeys, withCache } from "./lib/cache";
+import { usageTracker } from "./lib/usage-tracker";
+import { registerUsageRoutes } from "./routes/usage";
+
+// Helper function to detect if a string contains a website URL
+function isWebsiteURL(text: string): boolean {
+  if (!text.includes('.')) {
+    return false;
+  }
+
+  // Check if it starts with http/https protocol
+  if (text.startsWith('http://') || text.startsWith('https://')) {
+    return true;
+  }
+
+  // Common TLDs that are likely to be websites
+  const commonTLDs = [
+    '.com', '.org', '.net', '.io', '.co', '.dev', '.app', '.tech', '.ai', '.me',
+    '.info', '.biz', '.us', '.uk', '.ca', '.au', '.de', '.fr', '.jp', '.cn',
+    '.edu', '.gov', '.mil', '.xyz', '.online', '.site', '.store', '.blog',
+    '.club', '.design', '.space', '.world', '.digital', '.cloud', '.tools'
+  ];
+
+  // More precise check: look for TLDs that appear to be part of a domain name
+  // This avoids false positives like "test.example" or "acme.corp"
+  return commonTLDs.some(tld => {
+    const index = text.indexOf(tld);
+    if (index === -1) return false;
+
+    // Check if the TLD appears to be at the end of a domain-like structure
+    // or preceded by a dot (for subdomains)
+    const afterTLD = text.substring(index + tld.length);
+    const beforeTLD = text.substring(0, index);
+
+    // Valid if:
+    // 1. TLD is at the end of the string, OR
+    // 2. TLD is followed by a path separator (/), OR  
+    // 3. TLD is part of a longer domain (like .co.uk)
+    const isValidPosition =
+      afterTLD.length === 0 ||
+      afterTLD.startsWith('/') ||
+      afterTLD.startsWith('?') ||
+      afterTLD.startsWith('#') ||
+      afterTLD.startsWith('.');
+
+    // Check that there's some text before the TLD (domain name)
+    // Allow simple domain names like "google.com" where beforeTLD is just "google"
+    const hasDomainName = beforeTLD.length > 0;
+
+    return isValidPosition && hasDomainName;
+  });
+}
 
 // Helper function to shuffle array and track the new position of an element
 function shuffleArrayAndTrackIndex<T>(array: T[], trackedIndex: number): { shuffled: T[], newIndex: number } {
@@ -93,6 +144,8 @@ function levenshteinDistance(s: string, t: string): number {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Register usage tracking routes
+  registerUsageRoutes(app);
   // Create a new game (with optional Firebase auth)
   app.post("/api/games", optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
     try {
@@ -101,6 +154,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const gameData = insertGameSchema.parse(req.body);
       logger.log('Parsed game data:', gameData);
+
+      // Track usage for authenticated users
+      if (req.user?.uid) {
+        // Check beta limits (soft check during beta - always allows but warns)
+        const limitCheck = await usageTracker.checkBetaLimit(req.user.uid, 'game_created');
+
+        if (limitCheck.message) {
+          logger.log(`Beta limit warning for user ${req.user.uid}: ${limitCheck.message}`);
+          // During beta, we log warnings but don't block creation
+        }
+
+        // Record usage event
+        await usageTracker.recordEvent(req.user.uid, 'game_created', {
+          questionCount: gameData.questionCount,
+          difficulty: gameData.difficulty,
+          categories: gameData.categories
+        });
+      }
 
       // Pass userId if authenticated, otherwise use legacy creator key approach
       const game = await storage.createGame(gameData, req.user?.uid);
@@ -159,14 +230,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Game not found" });
       }
 
+      // Track AI question generation usage for authenticated users
+      if (game.userId) {
+        await usageTracker.recordEvent(game.userId, 'ai_question_generated', {
+          questionCount: game.questionCount,
+          gameId: game.id
+        });
+      }
+
       // Call DeepSeek API to generate questions
       const deepseekApiKey = process.env.DEEPSEEK_API_KEY || process.env.VITE_DEEPSEEK_API_KEY;
       if (!deepseekApiKey) {
         return res.status(500).json({ message: "DeepSeek API key not configured" });
       }
 
+      // Generate game title first if not already set
+      let gameTitle = game.gameTitle;
+      if (!gameTitle) {
+        const titlePrompt = `Generate a short, creative game title (max 3-5 words) for a trivia game with these characteristics:
+- Company: ${game.companyName}
+- Industry: ${game.industry}
+- Description: ${game.productDescription || 'Not provided'}
+- Categories: ${game.categories.join(', ')}
+
+Requirements:
+- Must be short and memorable (3-5 words max)
+- Include subtle humor or wordplay
+- Reflect the company/industry context
+- Examples: "Acme Corp Tech Challenge", "Widget Wonders Quiz", "Industry Insider Trivia"
+
+Return ONLY the title as plain text, no JSON or additional formatting.`;
+
+        const titleResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${deepseekApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [
+              {
+                role: 'user',
+                content: titlePrompt
+              }
+            ],
+            max_tokens: 50,
+            temperature: 0.8,
+          }),
+        });
+
+        if (titleResponse.ok) {
+          const titleData = await titleResponse.json();
+          const generatedTitle = titleData.choices[0].message.content.trim();
+          // Clean up the title (remove quotes, extra spaces, etc.)
+          gameTitle = generatedTitle.replace(/^["']|["']$/g, '').trim();
+          logger.log('Generated game title:', gameTitle);
+
+          // Update the game with the generated title
+          await storage.updateGameTitle(game.id, gameTitle!, game.userId || 'system-generated');
+
+          // Invalidate cache for this game since title was updated
+          gameCache.delete(cacheKeys.game(game.id));
+        } else {
+          logger.warn('Failed to generate game title, proceeding without it');
+        }
+      }
+
       // Determine if company name contains a website URL
-      const isWebsite = game.companyName.includes('.') && (game.companyName.startsWith('http') || game.companyName.includes('.com') || game.companyName.includes('.org') || game.companyName.includes('.net'));
+      const isWebsite = isWebsiteURL(game.companyName);
       const companyInfo = isWebsite ? `Company website: ${game.companyName}` : `Company name: ${game.companyName}`;
       const websiteInstruction = isWebsite ? 'IMPORTANT: If a website is provided, use your knowledge about that company from the web to create more accurate and specific questions about their business, products, services, and history.' : '';
 
@@ -319,6 +451,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Game not found" });
       }
 
+      // Track AI question generation usage for authenticated users
+      if (game.userId) {
+        await usageTracker.recordEvent(game.userId, 'ai_question_generated', {
+          gameId: game.id,
+          singleQuestion: true
+        });
+      }
+
       // Use existing questions from request body to avoid database query
       const existingQuestions = req.body.existingQuestions || [];
       logger.log(`Received ${existingQuestions.length} existing questions for duplicate checking`);
@@ -330,7 +470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Determine if company name contains a website URL
-      const isWebsite = game.companyName.includes('.') && (game.companyName.startsWith('http') || game.companyName.includes('.com') || game.companyName.includes('.org') || game.companyName.includes('.net'));
+      const isWebsite = isWebsiteURL(game.companyName);
       const companyInfo = isWebsite ? `Company website: ${game.companyName}` : `Company name: ${game.companyName}`;
       const websiteInstruction = isWebsite ? 'IMPORTANT: If a website is provided, use your knowledge about that company from the web to create more accurate and specific questions about their business, products, services, and history.' : '';
 
@@ -633,6 +773,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get play count for a specific game (public endpoint)
+  app.get("/api/games/:id/play-count", async (req, res) => {
+    try {
+      const gameId = req.params.id;
+      const playCount = await storage.getPlayerCountByGameId(gameId);
+      res.json({ count: playCount });
+    } catch (error) {
+      logger.error('Get play count error:', error);
+      res.status(500).json({ message: "Failed to get play count", error: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
 
   // Add single question to game (authenticated users only)
   app.post("/api/games/:id/add-question", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
@@ -711,6 +863,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(404).json({ message: "Game not found" });
       } else {
         res.status(500).json({ message: "Failed to update prizes" });
+      }
+    }
+  });
+
+  // Update game title (authenticated users only)
+  app.put("/api/user/games/:id/title", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const gameId = req.params.id;
+      const { gameTitle } = req.body;
+
+      // Validate title
+      if (!gameTitle || typeof gameTitle !== 'string') {
+        return res.status(400).json({ message: "Game title is required and must be a string" });
+      }
+
+      if (gameTitle.length > 100) {
+        return res.status(400).json({ message: "Game title must be 100 characters or less" });
+      }
+
+      const updatedGame = await storage.updateGameTitle(gameId, gameTitle, req.user.uid);
+
+      // Invalidate cache for this game since title was updated
+      gameCache.delete(cacheKeys.game(gameId));
+
+      res.json(updatedGame);
+    } catch (error) {
+      logger.error('Update game title error:', error);
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Access denied. Only the game creator can edit the title." });
+      } else if (error instanceof Error && error.message.includes("not found")) {
+        res.status(404).json({ message: "Game not found" });
+      } else {
+        res.status(500).json({ message: "Failed to update game title" });
+      }
+    }
+  });
+
+  // Update game (general update endpoint for authenticated users)
+  app.put("/api/user/games/:id", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const gameId = req.params.id;
+      const updates = req.body;
+
+      // Validate updates
+      if (!updates || typeof updates !== 'object') {
+        return res.status(400).json({ message: "Invalid update data" });
+      }
+
+      // Only allow specific fields to be updated
+      const allowedFields = ['gameTitle', 'productDescription'];
+      const filteredUpdates = Object.keys(updates)
+        .filter(key => allowedFields.includes(key))
+        .reduce((obj: any, key) => {
+          obj[key] = updates[key];
+          return obj;
+        }, {});
+
+      if (Object.keys(filteredUpdates).length === 0) {
+        return res.status(400).json({ message: "No valid fields to update" });
+      }
+
+      // Validate gameTitle if provided
+      if (filteredUpdates.gameTitle && filteredUpdates.gameTitle.length > 100) {
+        return res.status(400).json({ message: "Game title must be 100 characters or less" });
+      }
+
+      const updatedGame = await storage.updateGame(gameId, filteredUpdates, req.user.uid);
+
+      // Invalidate cache for this game since it was updated
+      gameCache.delete(cacheKeys.game(gameId));
+
+      res.json(updatedGame);
+    } catch (error) {
+      logger.error('Update game error:', error);
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Access denied. Only the game creator can edit the game." });
+      } else if (error instanceof Error && error.message.includes("not found")) {
+        res.status(404).json({ message: "Game not found" });
+      } else {
+        res.status(500).json({ message: "Failed to update game" });
       }
     }
   });

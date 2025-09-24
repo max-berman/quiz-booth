@@ -12,6 +12,8 @@ export interface IStorage {
   getGamesByCreator(creatorKey: string): Promise<Game[]>;
   getGamesByUser(userId: string): Promise<Game[]>;
   updateGamePrizes(gameId: string, prizes: PrizePlacement[], userId: string): Promise<Game>;
+  updateGameTitle(gameId: string, gameTitle: string, userId: string): Promise<Game>;
+  updateGame(gameId: string, updates: Partial<Game>, userId: string): Promise<Game>;
 
   // Question methods
   createQuestions(questions: InsertQuestion[]): Promise<Question[]>;
@@ -29,6 +31,7 @@ export interface IStorage {
   getAllLeaderboard(): Promise<Player[]>;
   getAllPlayersForGame(gameId: string, creatorKey?: string): Promise<Player[]>;
   getAllPlayersForGameByUser(gameId: string, userId: string): Promise<Player[]>;
+  getPlayerCountByGameId(gameId: string): Promise<number>;
 }
 
 export class FirebaseStorage implements IStorage {
@@ -39,6 +42,7 @@ export class FirebaseStorage implements IStorage {
       const now = new Date();
       const gameData: any = {
         id,
+        gameTitle: insertGame.gameTitle || null, // Include gameTitle if provided
         companyName: insertGame.companyName,
         industry: insertGame.industry,
         productDescription: insertGame.productDescription || null,
@@ -61,6 +65,7 @@ export class FirebaseStorage implements IStorage {
 
       const game: Game = {
         id: gameData.id,
+        gameTitle: gameData.gameTitle,
         companyName: gameData.companyName,
         industry: gameData.industry,
         productDescription: gameData.productDescription,
@@ -449,6 +454,78 @@ export class FirebaseStorage implements IStorage {
     return {
       ...game,
       prizes: prizes
+    };
+  }
+
+  async getPlayerCountByGameId(gameId: string): Promise<number> {
+    const playersSnapshot = await db
+      .collection(collections.players)
+      .where('gameId', '==', gameId)
+      .get();
+
+    return playersSnapshot.size;
+  }
+
+  async updateGameTitle(gameId: string, gameTitle: string, userId: string): Promise<Game> {
+    // Verify user owns the game
+    const hasAccess = await this.verifyGameAccessByUser(gameId, userId);
+    if (!hasAccess) {
+      throw new Error('Unauthorized: Only the game creator can update the title');
+    }
+
+    // Get the current game
+    const game = await this.getGame(gameId);
+    if (!game) {
+      throw new Error('Game not found');
+    }
+
+    // Update game title in Firestore
+    const now = new Date();
+    await db.collection(collections.games).doc(gameId).update({
+      gameTitle: gameTitle,
+      modifiedAt: Timestamp.fromDate(now)
+    });
+
+    // Return updated game
+    return {
+      ...game,
+      gameTitle: gameTitle,
+      modifiedAt: now
+    };
+  }
+
+  async updateGame(gameId: string, updates: Partial<Game>, userId: string): Promise<Game> {
+    // Verify user owns the game
+    const hasAccess = await this.verifyGameAccessByUser(gameId, userId);
+    if (!hasAccess) {
+      throw new Error('Unauthorized: Only the game creator can update the game');
+    }
+
+    // Get the current game
+    const game = await this.getGame(gameId);
+    if (!game) {
+      throw new Error('Game not found');
+    }
+
+    // Filter out fields that shouldn't be updated
+    const allowedUpdates = { ...updates };
+    delete (allowedUpdates as any).id;
+    delete (allowedUpdates as any).creatorKey;
+    delete (allowedUpdates as any).userId;
+    delete (allowedUpdates as any).createdAt;
+
+    // Update game in Firestore
+    const now = new Date();
+    await db.collection(collections.games).doc(gameId).update({
+      ...allowedUpdates,
+      modifiedAt: Timestamp.fromDate(now)
+    });
+
+    // Return updated game
+    return {
+      ...game,
+      ...allowedUpdates,
+      modifiedAt: now
     };
   }
 }

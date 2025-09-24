@@ -187,7 +187,7 @@ export default function GameCreated() {
 								title={game.companyName}
 								className='font-bold line-clamp-2 text-primary mb-1'
 							>
-								{game.companyName}
+								{game.gameTitle || game.companyName}
 							</CardTitle>
 							<Badge title={game.industry} className='font-semibold h-6'>
 								{game.industry}

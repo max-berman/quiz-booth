@@ -5,6 +5,7 @@ import { z } from "zod";
 
 export const games = pgTable("games", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  gameTitle: text("game_title"), // AI-generated or user-edited game title
   companyName: text("company_name").notNull(),
   industry: text("industry").notNull(),
   productDescription: text("product_description"),

@@ -83,7 +83,7 @@ export function GameCardEnhanced({
 						title={game.companyName}
 						className='text-xl font-bold line-clamp-2 text-foreground mb-1'
 					>
-						{game.companyName}
+						{game.gameTitle || game.companyName}
 					</CardTitle>
 					<Badge
 						title={game.industry}
