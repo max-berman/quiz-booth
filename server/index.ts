@@ -1,11 +1,24 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { apiLimiter } from "./middleware/rate-limit";
 import { databaseTimeout } from "./middleware/query-timeout";
 
 const app = express();
+
+// Configure CORS for Render deployment
+app.use(cors({
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    'https://quiz-booth-frontend.onrender.com',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Creator-Key']
+}));
 
 // Apply rate limiting middleware
 app.use("/api", apiLimiter);
