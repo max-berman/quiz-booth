@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useLocation } from 'wouter'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/auth-context'
-import { getAuthHeaders } from '@/lib/auth-utils'
+import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -39,6 +39,7 @@ const INDUSTRY_OPTIONS = [
 	'Automotive',
 	'Beauty and Cosmetics',
 	'Construction',
+	'E-commerce',
 	'Education',
 	'Energy',
 	'Entertainment',
@@ -115,6 +116,7 @@ export default function Setup() {
 	const [, setLocation] = useLocation()
 	const { toast } = useToast()
 	const { isAuthenticated } = useAuth()
+	const queryClient = useQueryClient()
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [difficulty, setDifficulty] = useState('easy')
 	const [categories, setCategories] = useState<Categories>({
@@ -169,33 +171,39 @@ export default function Setup() {
 		]
 	}, [checkCompanyComplete, checkSettingsComplete])
 
+	// Initialize Firebase Functions
+	const {
+		createGame: createGameFunction,
+		generateQuestions: generateQuestionsFunction,
+	} = useFirebaseFunctions()
+
 	// Game creation mutation
 	const createGameMutation = useMutation({
 		mutationFn: async (gameData: InsertGame) => {
-			const headers = await getAuthHeaders()
-			const response = await fetch('/api/games', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					...headers,
-				},
-				body: JSON.stringify(gameData),
-			})
-
-			if (!response.ok) {
-				throw new Error('Failed to create game')
+			// Use the correct data format expected by Firebase Functions
+			const firebaseGameData = {
+				title: gameData.gameTitle || null,
+				description: gameData.industry,
+				companyName: gameData.companyName,
+				productDescription: gameData.productDescription || null,
+				questionCount: gameData.questionCount,
+				difficulty: gameData.difficulty,
+				categories: gameData.categories,
+				prizes: gameData.prizes || null,
 			}
 
-			return response.json()
+			const result = await createGameFunction(firebaseGameData)
+			return result.data as { id: string }
 		},
-		onSuccess: async (game) => {
+		onSuccess: async (game: { id: string }) => {
 			setIsGenerating(true)
 			try {
-				const headers = await getAuthHeaders()
-				await fetch(`/api/games/${game.id}/generate-questions`, {
-					method: 'POST',
-					headers,
-				})
+				// Generate questions using Firebase Function
+				await generateQuestionsFunction({ gameId: game.id })
+
+				// Invalidate dashboard queries to refresh the games list
+				queryClient.invalidateQueries({ queryKey: ['getGamesByUser'] })
+
 				setLocation(`/game-created/${game.id}`)
 			} catch (error) {
 				console.error('Question generation failed:', error)
@@ -208,6 +216,7 @@ export default function Setup() {
 			}
 		},
 		onError: (error) => {
+			console.error('Game creation error:', error)
 			toast({
 				title: 'Error',
 				description: 'Failed to create game. Please try again.',

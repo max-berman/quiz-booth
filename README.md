@@ -9,18 +9,18 @@ A comprehensive trivia application that generates AI-powered custom trivia games
 - **AI-Powered Question Generation** - Uses DeepSeek AI to create custom trivia questions based on company information
 - **Multi-Step Game Creation** - Intuitive wizard for setting up games with company details, game settings, and prize configuration
 - **Real-time Leaderboards** - Live score tracking and player rankings with intelligent caching
-- **Cross-Device Authentication** - Firebase Auth with Google Sign-in and legacy creator key support
+- **Cross-Device Authentication** - Firebase Auth with Google Sign-in
 - **QR Code Sharing** - Dynamic QR codes for easy game distribution at events
 - **Comprehensive Analytics** - Player submissions tracking, play counts, and lead capture
 
 ### Advanced Features
 
 - **Website-Based Company Detection** - Automatically detects when company names are website URLs for more accurate question generation
-- **Flexible Prize System** - Customizable prize tiers (1st place, top 10, etc.) with detailed prize descriptions
+- **Flexible Prize System** - Customizable prize tiers with any placement names (1st place, top 10, etc.) with detailed prize descriptions
 - **Question Management** - AI-generated question batches, single question generation with uniqueness checks, and manual editing
 - **Category-Based Question Generation** - Support for multiple question categories: Company Facts, Industry Knowledge, Fun Facts, General Knowledge
 - **Responsive Design** - Optimized for all devices and screen sizes
-- **Intelligent Caching** - Performance-optimized caching for games, questions, and leaderboards
+- **Serverless Architecture** - Firebase Functions for scalable, cost-effective backend
 
 ### Technical Features
 
@@ -28,8 +28,7 @@ A comprehensive trivia application that generates AI-powered custom trivia games
 - **Modern UI Components** - Built with Radix UI and Tailwind CSS
 - **Real-time Data** - Firebase Firestore integration with real-time updates
 - **Error Handling** - Comprehensive error handling with user-friendly messages
-- **Rate Limiting** - Protection against API abuse
-- **Performance Optimization** - Intelligent caching and optimized bundle loading
+- **Performance Optimization** - Optimized Firebase Functions with memory and timeout settings
 
 ## 📁 Project Structure
 
@@ -43,10 +42,13 @@ quiz-booth/
 │   │   ├── hooks/          # Custom React hooks
 │   │   ├── lib/            # Utility libraries and configurations
 │   │   └── assets/         # Static assets and images
-├── server/                 # Express.js backend API
-│   ├── middleware/         # Custom middleware (rate limiting, validation)
-│   ├── lib/                # Server utilities (caching, logging)
-│   └── routes.ts           # API route definitions
+├── firebase-functions/     # Firebase Functions backend
+│   ├── src/                # TypeScript source files
+│   │   ├── games/          # Game management functions
+│   │   ├── questions/      # Question generation functions
+│   │   ├── usage/          # Usage tracking functions
+│   │   └── auth/           # Authentication functions
+│   └── lib/                # Compiled JavaScript files
 ├── shared/                 # Shared TypeScript types and schemas
 ├── attached_assets/        # Documentation and asset files
 └── dist/                   # Build output (generated)
@@ -148,33 +150,32 @@ npm run build        # Build for production
 npm run start        # Start production server
 ```
 
-## 🔌 API Endpoints
+## 🔌 Firebase Functions API
 
 ### Game Management
 
-- `POST /api/games` - Create new trivia game (optional auth)
-- `GET /api/games/:id` - Get specific game details
-- `GET /api/user/games` - Get games for authenticated user
-- `PUT /api/user/games/:id` - Update game details
-- `PUT /api/user/games/:id/title` - Update game title
-- `PUT /api/games/:id/prizes` - Update game prizes
+- `createGame` - Create new trivia game (requires auth)
+- `getGame` - Get specific game details
+- `getGamesByUser` - Get games for authenticated user
+- `updateGame` - Update game details
+- `updateGameTitle` - Update game title
+- `updateGamePrizes` - Update game prizes with flexible format
 
 ### Question Management
 
-- `POST /api/games/:id/generate-questions` - Generate AI questions for game
-- `POST /api/games/:id/generate-single-question` - Generate single question
-- `GET /api/games/:id/questions` - Get all questions for a game
-- `POST /api/games/:id/add-question` - Add single question to game
-- `PUT /api/user/questions/:id` - Update question
-- `DELETE /api/user/questions/:id` - Delete question
+- `generateQuestions` - Generate AI questions for game
+- `generateSingleQuestion` - Generate single question
+- `getQuestions` - Get all questions for a game
+- `addQuestion` - Add single question to game
+- `updateQuestion` - Update question
+- `deleteQuestion` - Delete question
 
 ### Player & Analytics
 
-- `POST /api/games/:id/players` - Submit player score/completion
-- `GET /api/games/:id/players` - Get all player submissions (creator only)
-- `GET /api/games/:id/leaderboard` - Get game-specific leaderboard
-- `GET /api/leaderboard` - Get global leaderboard across all games
-- `GET /api/games/:id/play-count` - Get play count for a game
+- `savePlayerScore` - Submit player score/completion
+- `getGameLeaderboard` - Get game-specific leaderboard
+- `trackUsage` - Track usage events
+- `getUsage` - Get usage statistics
 
 ## 🔐 Authentication System
 

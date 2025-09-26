@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "quiz-booth-production",
+    "staging": "trivia-games-7a81b"
+  },
+  "targets": {},
+  "etags": {}
+}

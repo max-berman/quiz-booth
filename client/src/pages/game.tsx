@@ -13,7 +13,8 @@ import {
 	ArrowRight,
 	Lightbulb,
 } from 'lucide-react'
-import type { Game, Question } from '@shared/schema'
+import type { Game, Question } from '@shared/firebase-types'
+import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 
 export default function GamePage() {
 	const { id } = useParams()
@@ -30,13 +31,30 @@ export default function GamePage() {
 	const [isAnswered, setIsAnswered] = useState(false)
 	const [showExplanation, setShowExplanation] = useState(false)
 
-	const { data: game } = useQuery<Game>({
-		queryKey: ['/api/games', id],
+	// Initialize Firebase Functions
+	const { getGame, getQuestions } = useFirebaseFunctions()
+
+	const { data: game, isLoading: gameLoading } = useQuery<Game>({
+		queryKey: [`game-${id}`],
+		queryFn: async () => {
+			const result = await getGame({ gameId: id })
+			return result.data as Game
+		},
+		enabled: !!id,
 	})
 
-	const { data: questions, isLoading } = useQuery<Question[]>({
-		queryKey: ['/api/games', id, 'questions'],
-	})
+	const { data: questions, isLoading: questionsLoading } = useQuery<Question[]>(
+		{
+			queryKey: [`questions-${id}`],
+			queryFn: async () => {
+				const result = await getQuestions({ gameId: id })
+				return result.data as Question[]
+			},
+			enabled: !!id,
+		}
+	)
+
+	const isLoading = gameLoading || questionsLoading
 
 	const currentQuestion = questions?.[currentQuestionIndex]
 	const progressPercentage = questions

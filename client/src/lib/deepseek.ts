@@ -1,4 +1,5 @@
-import { apiRequest } from "./queryClient";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { auth } from "./firebase";
 
 export interface TriviaQuestion {
   questionText: string;
@@ -8,13 +9,18 @@ export interface TriviaQuestion {
 }
 
 export async function generateQuestions(gameId: string): Promise<TriviaQuestion[]> {
-  const response = await apiRequest("POST", `/api/games/${gameId}/generate-questions`);
-  return response.json();
+  const functions = getFunctions();
+  const generateQuestionsFunction = httpsCallable(functions, 'generateQuestions');
+  const result = await generateQuestionsFunction({ gameId });
+  return result.data as TriviaQuestion[];
 }
 
 export async function generateSingleQuestion(gameId: string, existingQuestions: any[] = []): Promise<TriviaQuestion> {
-  const response = await apiRequest("POST", `/api/games/${gameId}/generate-single-question`, {
+  const functions = getFunctions();
+  const generateSingleQuestionFunction = httpsCallable(functions, 'generateSingleQuestion');
+  const result = await generateSingleQuestionFunction({
+    gameId,
     existingQuestions
   });
-  return response.json();
+  return result.data as TriviaQuestion;
 }
