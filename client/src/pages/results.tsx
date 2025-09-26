@@ -8,10 +8,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Trophy, RotateCcw, Eye, Edit3, Check } from 'lucide-react'
 import { Link } from 'wouter'
-import { apiRequest, queryClient } from '@/lib/queryClient'
+import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
-import type { Game, InsertPlayer } from '@shared/schema'
+import type { Game } from '@shared/firebase-types'
+import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 
 export default function Results() {
 	const { id } = useParams()
@@ -29,24 +30,26 @@ export default function Results() {
 	const timeSpent = parseInt(urlParams.get('time') || '0')
 	const streak = parseInt(urlParams.get('streak') || '0')
 
+	// Initialize Firebase Functions
+	const { getGame, savePlayerScore } = useFirebaseFunctions()
+
 	const { data: game } = useQuery<Game>({
-		queryKey: ['/api/games', id],
+		queryKey: [`game-${id}`],
+		queryFn: async () => {
+			const result = await getGame({ gameId: id })
+			return result.data as Game
+		},
+		enabled: !!id,
 	})
 
 	const saveScoreMutation = useMutation({
-		mutationFn: async (playerData: InsertPlayer) => {
-			const response = await apiRequest(
-				'POST',
-				`/api/games/${id}/players`,
-				playerData
-			)
-			return response.json()
+		mutationFn: async (playerData: any) => {
+			// Use the actual Firebase Function to save the score
+			const result = await savePlayerScore(playerData)
+			return result.data
 		},
 		onSuccess: () => {
 			setIsScoreSaved(true)
-			queryClient.invalidateQueries({
-				queryKey: ['/api/games', id, 'leaderboard'],
-			})
 			toast({
 				title: 'Success!',
 				description: 'Your score has been saved to the leaderboard.',
@@ -71,10 +74,10 @@ export default function Results() {
 			return
 		}
 
-		const playerData: InsertPlayer = {
-			name: playerName.trim(),
-			company: playerEmail.trim() || undefined, // Using company field to store email for now
+		const playerData = {
 			gameId: id!,
+			playerName: playerName.trim(),
+			company: playerEmail.trim() || undefined, // Using company field to store email for now
 			score,
 			correctAnswers,
 			totalQuestions,

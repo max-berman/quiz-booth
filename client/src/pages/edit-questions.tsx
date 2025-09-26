@@ -24,11 +24,10 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { apiRequest } from '@/lib/queryClient'
 import { useAuth } from '@/contexts/auth-context'
-import { getAuthHeaders } from '@/lib/auth-utils'
 import { generateSingleQuestion, type TriviaQuestion } from '@/lib/deepseek'
 import type { Question, Game } from '@shared/firebase-types'
+import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 
 const TOTAL_QUESTIONS = 15
 
@@ -53,13 +52,25 @@ export default function EditQuestions() {
 		explanation: '',
 	})
 
+	// Initialize Firebase Functions
+	const { getGame, getQuestions, updateQuestion, addQuestion, deleteQuestion } =
+		useFirebaseFunctions()
+
 	const { data: game } = useQuery<Game>({
-		queryKey: ['/api/games', currentGameId],
+		queryKey: [`game-${currentGameId}`],
+		queryFn: async () => {
+			const result = await getGame({ gameId: currentGameId })
+			return result.data as Game
+		},
 		enabled: !!currentGameId,
 	})
 
 	const { data: questions, isLoading } = useQuery<Question[]>({
-		queryKey: ['/api/games', currentGameId, 'questions'],
+		queryKey: [`questions-${currentGameId}`],
+		queryFn: async () => {
+			const result = await getQuestions({ gameId: currentGameId })
+			return result.data as Question[]
+		},
 		enabled: !!currentGameId,
 	})
 
@@ -75,28 +86,12 @@ export default function EditQuestions() {
 				throw new Error('Authentication required to edit questions')
 			}
 
-			const headers = await getAuthHeaders()
-			const response = await fetch(`/api/user/questions/${questionId}`, {
-				method: 'PUT',
-				headers: {
-					...headers,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(updates),
-			})
-
-			if (!response.ok) {
-				const errorData = await response
-					.json()
-					.catch(() => ({ message: 'Failed to update question' }))
-				throw new Error(errorData.message || 'Failed to update question')
-			}
-
-			return response.json()
+			const result = await updateQuestion({ questionId, updates })
+			return result.data
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({
-				queryKey: ['/api/games', currentGameId, 'questions'],
+				queryKey: [`questions-${currentGameId}`],
 			})
 			toast({
 				title: 'Question updated',
@@ -126,36 +121,26 @@ export default function EditQuestions() {
 				throw new Error('Authentication required to add questions')
 			}
 
-			const headers = await getAuthHeaders()
-			const response = await fetch(`/api/games/${currentGameId}/add-question`, {
-				method: 'POST',
-				headers: {
-					...headers,
-					'Content-Type': 'application/json',
+			const result = await addQuestion({
+				gameId: currentGameId,
+				questionData: {
+					questionText: questionData.questionText,
+					options: questionData.options,
+					correctAnswer: questionData.correctAnswer,
+					explanation: questionData.explanation,
 				},
-				body: JSON.stringify(questionData),
 			})
-
-			if (!response.ok) {
-				const errorData = await response
-					.json()
-					.catch(() => ({ message: 'Failed to add question' }))
-				throw new Error(errorData.message || 'Failed to add question')
-			}
-
-			return response.json()
+			return result.data
 		},
 		onMutate: async (newQuestionData) => {
 			// Cancel any outgoing refetches to avoid overwriting our optimistic update
 			await queryClient.cancelQueries({
-				queryKey: ['/api/games', currentGameId, 'questions'],
+				queryKey: [`questions-${currentGameId}`],
 			})
 
 			// Snapshot the previous value
 			const previousQuestions = queryClient.getQueryData<Question[]>([
-				'/api/games',
-				currentGameId,
-				'questions',
+				`questions-${currentGameId}`,
 			])
 
 			// Generate a temporary ID for the optimistic update
@@ -174,7 +159,7 @@ export default function EditQuestions() {
 				}
 
 				queryClient.setQueryData<Question[]>(
-					['/api/games', currentGameId, 'questions'],
+					[`questions-${currentGameId}`],
 					[...previousQuestions, optimisticQuestion]
 				)
 			}
@@ -184,13 +169,10 @@ export default function EditQuestions() {
 		onSuccess: (data, variables, context) => {
 			// Invalidate all relevant queries to ensure UI stays in sync with actual data
 			queryClient.invalidateQueries({
-				queryKey: ['/api/games', currentGameId, 'questions'],
+				queryKey: [`questions-${currentGameId}`],
 			})
 			queryClient.invalidateQueries({
-				queryKey: ['/api/games', currentGameId, 'questions-count'],
-			})
-			queryClient.invalidateQueries({
-				queryKey: ['/api/user/games', user?.uid],
+				queryKey: [`game-${currentGameId}`],
 			})
 			toast({
 				title: 'Question added',
@@ -210,7 +192,7 @@ export default function EditQuestions() {
 			// Roll back the optimistic update on error
 			if (context?.previousQuestions) {
 				queryClient.setQueryData<Question[]>(
-					['/api/games', currentGameId, 'questions'],
+					[`questions-${currentGameId}`],
 					context.previousQuestions
 				)
 			}
@@ -229,38 +211,24 @@ export default function EditQuestions() {
 				throw new Error('Authentication required to delete questions')
 			}
 
-			const headers = await getAuthHeaders()
-			const response = await fetch(`/api/user/questions/${questionId}`, {
-				method: 'DELETE',
-				headers,
-			})
-
-			if (!response.ok) {
-				const errorData = await response
-					.json()
-					.catch(() => ({ message: 'Failed to delete question' }))
-				throw new Error(errorData.message || 'Failed to delete question')
-			}
-
-			return response.json()
+			const result = await deleteQuestion({ questionId })
+			return result.data
 		},
 		onMutate: async (questionId: string) => {
 			// Cancel any outgoing refetches to avoid overwriting our optimistic update
 			await queryClient.cancelQueries({
-				queryKey: ['/api/games', currentGameId, 'questions'],
+				queryKey: [`questions-${currentGameId}`],
 			})
 
 			// Snapshot the previous value
 			const previousQuestions = queryClient.getQueryData<Question[]>([
-				'/api/games',
-				currentGameId,
-				'questions',
+				`questions-${currentGameId}`,
 			])
 
 			// Optimistically remove the question from the UI
 			if (previousQuestions) {
 				queryClient.setQueryData<Question[]>(
-					['/api/games', currentGameId, 'questions'],
+					[`questions-${currentGameId}`],
 					previousQuestions.filter((q) => q.id !== questionId)
 				)
 			}
@@ -270,13 +238,10 @@ export default function EditQuestions() {
 		onSuccess: () => {
 			// Invalidate all relevant queries to ensure UI stays in sync
 			queryClient.invalidateQueries({
-				queryKey: ['/api/games', currentGameId, 'questions'],
+				queryKey: [`questions-${currentGameId}`],
 			})
 			queryClient.invalidateQueries({
-				queryKey: ['/api/games', currentGameId, 'questions-count'],
-			})
-			queryClient.invalidateQueries({
-				queryKey: ['/api/user/games', user?.uid],
+				queryKey: [`game-${currentGameId}`],
 			})
 			toast({
 				title: 'Question deleted',
@@ -289,7 +254,7 @@ export default function EditQuestions() {
 			// Roll back the optimistic update on error
 			if (context?.previousQuestions) {
 				queryClient.setQueryData<Question[]>(
-					['/api/games', currentGameId, 'questions'],
+					[`questions-${currentGameId}`],
 					context.previousQuestions
 				)
 			}

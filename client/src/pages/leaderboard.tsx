@@ -5,7 +5,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Trophy, Home, Users } from 'lucide-react'
 import { Link } from 'wouter'
-import type { Player, Game } from '@shared/schema'
+import type { Player, Game } from '@shared/firebase-types'
+import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 
 export default function Leaderboard() {
 	const { id } = useParams()
@@ -13,15 +14,33 @@ export default function Leaderboard() {
 	// If ID is provided, show game-specific leaderboard, otherwise show global
 	const isGameSpecific = Boolean(id)
 
+	// Initialize Firebase Functions
+	const { getGame, getGameLeaderboard } = useFirebaseFunctions()
+
 	const { data: game } = useQuery<Game>({
-		queryKey: ['/api/games', id],
-		enabled: isGameSpecific,
+		queryKey: [`game-${id}`],
+		queryFn: async () => {
+			const result = await getGame({ gameId: id })
+			return result.data as Game
+		},
+		enabled: isGameSpecific && !!id,
 	})
 
+	// Fetch actual leaderboard data from Firebase Functions
 	const { data: leaderboard, isLoading } = useQuery<Player[]>({
-		queryKey: isGameSpecific
-			? ['/api/games', id, 'leaderboard']
-			: ['/api/leaderboard'],
+		queryKey: isGameSpecific ? [`leaderboard-${id}`] : ['global-leaderboard'],
+		queryFn: async () => {
+			if (isGameSpecific && id) {
+				// Get game-specific leaderboard
+				const result = await getGameLeaderboard({ gameId: id })
+				return result.data as Player[]
+			} else {
+				// TODO: Implement global leaderboard functionality
+				// For now, return empty array for global leaderboard
+				return []
+			}
+		},
+		enabled: isGameSpecific ? !!id : true,
 	})
 
 	const getRankIcon = (rank: number) => {

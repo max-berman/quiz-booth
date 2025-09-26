@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/hooks/use-toast'
-import { getAuthHeaders } from '@/lib/auth-utils'
 import { logger } from '@/lib/logger'
 import {
 	Button,
@@ -14,6 +13,7 @@ import {
 	Label,
 } from '@/lib/ui-imports'
 import { Plus, Save, X } from 'lucide-react'
+import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 
 interface Prize {
 	placement: string
@@ -39,6 +39,7 @@ export function PrizeEditModal({
 	const { toast } = useToast()
 	const queryClient = useQueryClient()
 	const [prizes, setPrizes] = useState<Prize[]>(initialPrizes)
+	const { updateGamePrizes } = useFirebaseFunctions()
 
 	// Reset prizes when initialPrizes changes (when opening modal for different game)
 	useEffect(() => {
@@ -49,27 +50,26 @@ export function PrizeEditModal({
 		mutationFn: async (updatedPrizes: Prize[]) => {
 			if (!gameId) throw new Error('Game ID is required')
 
-			const headers = await getAuthHeaders()
-			const response = await fetch(`/api/games/${gameId}/prizes`, {
-				method: 'PUT',
-				headers: {
-					...headers,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ prizes: updatedPrizes }),
-			})
+			// Convert the prize array to the flexible object format expected by the Firebase Function
+			const prizesObject = updatedPrizes.reduce((acc, prize) => {
+				if (prize.placement.trim() && prize.prize.trim()) {
+					// Use the placement as the key (normalized)
+					const key = prize.placement.toLowerCase().replace(/\s+/g, '_')
+					acc[key] = prize.prize
+				}
+				return acc
+			}, {} as Record<string, string>)
 
-			if (!response.ok) {
-				const errorData = await response
-					.json()
-					.catch(() => ({ message: 'Failed to update prizes' }))
-				throw new Error(errorData.message || 'Failed to update prizes')
-			}
-
-			return response.json()
+			const result = await updateGamePrizes({ gameId, prizes: prizesObject })
+			return result.data
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['/api/my-games', user?.uid] })
+			// Invalidate all relevant queries to refresh the data
+			queryClient.invalidateQueries({ queryKey: ['getGamesByUser'] })
+			queryClient.invalidateQueries({ queryKey: ['getGamesByUser', user?.uid] })
+			if (gameId) {
+				queryClient.invalidateQueries({ queryKey: [`game-${gameId}`] })
+			}
 			toast({
 				title: 'Prizes updated',
 				description: 'Prize information has been saved successfully.',

@@ -1,0 +1,403 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
+const functions = __importStar(require("firebase-functions"));
+const admin = __importStar(require("firebase-admin"));
+const crypto_1 = require("crypto");
+const firestore_1 = require("firebase-admin/firestore");
+const db = admin.firestore();
+// Helper function to track usage
+async function trackUsage(userId, eventType, metadata) {
+    try {
+        await db.collection('usageEvents').add({
+            userId,
+            eventType,
+            metadata: metadata || {},
+            timestamp: firestore_1.Timestamp.now(),
+            costUnits: 0,
+        });
+        // Update counters
+        const counterRef = db.collection('usageCounters').doc(userId);
+        await counterRef.set({
+            [getCounterField(eventType)]: firestore_1.FieldValue.increment(1),
+            lastResetDate: firestore_1.Timestamp.now(),
+            updatedAt: firestore_1.Timestamp.now(),
+        }, { merge: true });
+    }
+    catch (error) {
+        console.error('Usage tracking error:', error);
+    }
+}
+function getCounterField(eventType) {
+    const fieldMap = {
+        game_created: 'currentPeriodGamesCreated',
+        question_generated: 'currentPeriodQuestionsGenerated',
+        ai_question_generated: 'currentPeriodAiQuestions',
+        player_submission: 'currentPeriodPlayerSubmissions',
+        analytics_viewed: 'currentPeriodAnalyticsViews',
+        export_used: 'currentPeriodExports',
+        custom_theme_applied: 'currentPeriodCustomThemes',
+    };
+    return fieldMap[eventType] || 'currentPeriodGamesCreated';
+}
+// Create a new game
+exports.createGame = functions.runWith({
+    memory: '256MB',
+    timeoutSeconds: 60
+}).https.onCall(async (data, context) => {
+    // Authentication check
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+    }
+    const userId = context.auth.uid;
+    const { title, description, questionCount, difficulty, categories, companyName, productDescription, prizes } = data;
+    try {
+        // Usage tracking
+        await trackUsage(userId, 'game_created', {
+            questionCount,
+            difficulty,
+            categories,
+        });
+        // Create game in Firestore
+        const gameId = (0, crypto_1.randomUUID)();
+        const creatorKey = (0, crypto_1.randomUUID)();
+        const now = new Date();
+        // Convert prizes array to object format for storage
+        let prizesObject = null;
+        if (prizes && Array.isArray(prizes) && prizes.length > 0) {
+            prizesObject = {};
+            prizes.forEach(prize => {
+                if (prize.placement.trim() && prize.prize.trim()) {
+                    // Use the placement as the key (normalized)
+                    const key = prize.placement.toLowerCase().replace(/\s+/g, '_');
+                    prizesObject[key] = prize.prize;
+                }
+            });
+        }
+        const gameData = {
+            id: gameId,
+            gameTitle: title || null,
+            companyName,
+            industry: description || '',
+            productDescription: productDescription || null,
+            questionCount,
+            difficulty,
+            categories,
+            prizes: prizesObject,
+            creatorKey,
+            userId,
+            createdAt: firestore_1.Timestamp.fromDate(now),
+            modifiedAt: firestore_1.Timestamp.fromDate(now),
+            status: 'draft',
+            isPublic: false,
+        };
+        await db.collection('games').doc(gameId).set(gameData);
+        return {
+            id: gameId,
+            gameTitle: title,
+            companyName,
+            industry: description,
+            productDescription,
+            questionCount,
+            difficulty,
+            categories,
+            creatorKey,
+            userId,
+            createdAt: now.toISOString(),
+            modifiedAt: now.toISOString(),
+        };
+    }
+    catch (error) {
+        console.error('Create game error:', error);
+        throw new functions.https.HttpsError('internal', 'Failed to create game');
+    }
+});
+// Get game by ID
+exports.getGame = functions.https.onCall(async (data, context) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    const { gameId } = data;
+    try {
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+        const gameData = gameDoc.data();
+        // Convert prizes object to array format for frontend
+        const prizesArray = (gameData === null || gameData === void 0 ? void 0 : gameData.prizes) ? Object.entries(gameData.prizes).map(([key, value]) => ({
+            placement: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            prize: value
+        })).filter(p => p.prize) : [];
+        // Check if user has access
+        if (context.auth && (gameData === null || gameData === void 0 ? void 0 : gameData.userId) === context.auth.uid) {
+            // User owns the game, return full data
+            return Object.assign(Object.assign({}, gameData), { prizes: prizesArray, createdAt: (_c = (_b = (_a = gameData === null || gameData === void 0 ? void 0 : gameData.createdAt) === null || _a === void 0 ? void 0 : _a.toDate) === null || _b === void 0 ? void 0 : _b.call(_a)) === null || _c === void 0 ? void 0 : _c.toISOString(), modifiedAt: (_f = (_e = (_d = gameData === null || gameData === void 0 ? void 0 : gameData.modifiedAt) === null || _d === void 0 ? void 0 : _d.toDate) === null || _e === void 0 ? void 0 : _e.call(_d)) === null || _f === void 0 ? void 0 : _f.toISOString() });
+        }
+        else if (gameData === null || gameData === void 0 ? void 0 : gameData.isPublic) {
+            // Public game, return limited data
+            return {
+                id: gameData.id,
+                gameTitle: gameData.gameTitle,
+                companyName: gameData.companyName,
+                industry: gameData.industry,
+                prizes: prizesArray,
+                isPublic: true,
+                createdAt: (_j = (_h = (_g = gameData === null || gameData === void 0 ? void 0 : gameData.createdAt) === null || _g === void 0 ? void 0 : _g.toDate) === null || _h === void 0 ? void 0 : _h.call(_g)) === null || _j === void 0 ? void 0 : _j.toISOString(),
+            };
+        }
+        else {
+            throw new functions.https.HttpsError('permission-denied', 'Access denied');
+        }
+    }
+    catch (error) {
+        console.error('Get game error:', error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError('internal', 'Failed to get game');
+    }
+});
+// Get games by authenticated user
+exports.getGamesByUser = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+    }
+    const userId = context.auth.uid;
+    try {
+        const gamesSnapshot = await db
+            .collection('games')
+            .where('userId', '==', userId)
+            .get();
+        const games = gamesSnapshot.docs.map(doc => {
+            var _a, _b, _c, _d, _e, _f;
+            const data = doc.data();
+            // Convert prizes object to array format for frontend
+            const prizesArray = (data === null || data === void 0 ? void 0 : data.prizes) ? Object.entries(data.prizes).map(([key, value]) => ({
+                placement: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                prize: value
+            })).filter(p => p.prize) : [];
+            return Object.assign(Object.assign({}, data), { prizes: prizesArray, createdAt: (_c = (_b = (_a = data.createdAt) === null || _a === void 0 ? void 0 : _a.toDate) === null || _b === void 0 ? void 0 : _b.call(_a)) === null || _c === void 0 ? void 0 : _c.toISOString(), modifiedAt: (_f = (_e = (_d = data.modifiedAt) === null || _d === void 0 ? void 0 : _d.toDate) === null || _e === void 0 ? void 0 : _e.call(_d)) === null || _f === void 0 ? void 0 : _f.toISOString() });
+        });
+        // Sort by creation date (newest first)
+        return games.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    catch (error) {
+        console.error('Get user games error:', error);
+        throw new functions.https.HttpsError('internal', 'Failed to get user games');
+    }
+});
+// Update game
+exports.updateGame = functions.https.onCall(async (data, context) => {
+    var _a, _b, _c, _d, _e, _f;
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+    }
+    const userId = context.auth.uid;
+    const { gameId, updates } = data;
+    try {
+        // Verify user owns the game
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+        const gameData = gameDoc.data();
+        if ((gameData === null || gameData === void 0 ? void 0 : gameData.userId) !== userId) {
+            throw new functions.https.HttpsError('permission-denied', 'Access denied');
+        }
+        // Filter out fields that shouldn't be updated
+        const allowedUpdates = Object.assign({}, updates);
+        delete allowedUpdates.id;
+        delete allowedUpdates.creatorKey;
+        delete allowedUpdates.userId;
+        delete allowedUpdates.createdAt;
+        // Update game
+        const now = new Date();
+        await db.collection('games').doc(gameId).update(Object.assign(Object.assign({}, allowedUpdates), { modifiedAt: firestore_1.Timestamp.fromDate(now) }));
+        // Get updated game
+        const updatedGameDoc = await db.collection('games').doc(gameId).get();
+        const updatedGame = updatedGameDoc.data();
+        return Object.assign(Object.assign({}, updatedGame), { createdAt: (_c = (_b = (_a = updatedGame === null || updatedGame === void 0 ? void 0 : updatedGame.createdAt) === null || _a === void 0 ? void 0 : _a.toDate) === null || _b === void 0 ? void 0 : _b.call(_a)) === null || _c === void 0 ? void 0 : _c.toISOString(), modifiedAt: (_f = (_e = (_d = updatedGame === null || updatedGame === void 0 ? void 0 : updatedGame.modifiedAt) === null || _d === void 0 ? void 0 : _d.toDate) === null || _e === void 0 ? void 0 : _e.call(_d)) === null || _f === void 0 ? void 0 : _f.toISOString() });
+    }
+    catch (error) {
+        console.error('Update game error:', error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError('internal', 'Failed to update game');
+    }
+});
+// Update game title
+exports.updateGameTitle = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+    }
+    const userId = context.auth.uid;
+    const { gameId, gameTitle } = data;
+    try {
+        // Verify user owns the game
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+        const gameData = gameDoc.data();
+        if ((gameData === null || gameData === void 0 ? void 0 : gameData.userId) !== userId) {
+            throw new functions.https.HttpsError('permission-denied', 'Access denied');
+        }
+        // Update game title
+        const now = new Date();
+        await db.collection('games').doc(gameId).update({
+            gameTitle,
+            modifiedAt: firestore_1.Timestamp.fromDate(now),
+        });
+        return { success: true, gameTitle };
+    }
+    catch (error) {
+        console.error('Update game title error:', error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError('internal', 'Failed to update game title');
+    }
+});
+// Update game prizes
+exports.updateGamePrizes = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+    }
+    const userId = context.auth.uid;
+    const { gameId, prizes } = data;
+    try {
+        // Verify user owns the game
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+        const gameData = gameDoc.data();
+        if ((gameData === null || gameData === void 0 ? void 0 : gameData.userId) !== userId) {
+            throw new functions.https.HttpsError('permission-denied', 'Access denied');
+        }
+        // Update prizes
+        const now = new Date();
+        await db.collection('games').doc(gameId).update({
+            prizes,
+            modifiedAt: firestore_1.Timestamp.fromDate(now),
+        });
+        return { success: true, prizes };
+    }
+    catch (error) {
+        console.error('Update game prizes error:', error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError('internal', 'Failed to update game prizes');
+    }
+});
+// Save player score to leaderboard
+exports.savePlayerScore = functions.https.onCall(async (data, context) => {
+    const { gameId, playerName, company, score, correctAnswers, totalQuestions, timeSpent } = data;
+    try {
+        // Verify game exists
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+        const gameData = gameDoc.data();
+        // Check if game is public or user has access
+        if (!(gameData === null || gameData === void 0 ? void 0 : gameData.isPublic) && (!context.auth || (gameData === null || gameData === void 0 ? void 0 : gameData.userId) !== context.auth.uid)) {
+            throw new functions.https.HttpsError('permission-denied', 'Access denied');
+        }
+        // Usage tracking (if authenticated)
+        if (context.auth) {
+            await trackUsage(context.auth.uid, 'player_submission', {
+                gameId,
+                score,
+                correctAnswers,
+                totalQuestions,
+                timeSpent,
+            });
+        }
+        // Create player record
+        const playerId = (0, crypto_1.randomUUID)();
+        const now = new Date();
+        const playerData = {
+            id: playerId,
+            gameId,
+            name: playerName,
+            company: company || null,
+            score,
+            correctAnswers,
+            totalQuestions,
+            timeSpent,
+            completedAt: firestore_1.Timestamp.fromDate(now),
+        };
+        await db.collection('players').doc(playerId).set(playerData);
+        return { success: true, playerId };
+    }
+    catch (error) {
+        console.error('Save player score error:', error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError('internal', 'Failed to save player score');
+    }
+});
+// Get leaderboard for a game
+exports.getGameLeaderboard = functions.https.onCall(async (data, context) => {
+    const { gameId } = data;
+    try {
+        // Verify game exists
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+        const gameData = gameDoc.data();
+        // Check if game is public or user has access
+        if (!(gameData === null || gameData === void 0 ? void 0 : gameData.isPublic) && (!context.auth || (gameData === null || gameData === void 0 ? void 0 : gameData.userId) !== context.auth.uid)) {
+            throw new functions.https.HttpsError('permission-denied', 'Access denied');
+        }
+        // Get players for this game, ordered by score (descending) and time (ascending)
+        const playersSnapshot = await db
+            .collection('players')
+            .where('gameId', '==', gameId)
+            .orderBy('score', 'desc')
+            .orderBy('timeSpent', 'asc')
+            .limit(100) // Limit to top 100 players
+            .get();
+        const players = playersSnapshot.docs.map(doc => {
+            var _a, _b, _c;
+            const data = doc.data();
+            return Object.assign(Object.assign({}, data), { completedAt: (_c = (_b = (_a = data.completedAt) === null || _a === void 0 ? void 0 : _a.toDate) === null || _b === void 0 ? void 0 : _b.call(_a)) === null || _c === void 0 ? void 0 : _c.toISOString() });
+        });
+        return players;
+    }
+    catch (error) {
+        console.error('Get game leaderboard error:', error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError('internal', 'Failed to get leaderboard');
+    }
+});
+//# sourceMappingURL=games.js.map

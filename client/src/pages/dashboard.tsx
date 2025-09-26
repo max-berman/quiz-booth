@@ -3,7 +3,7 @@ import { useLocation } from 'wouter'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/lib/logger'
-import { getAuthHeaders } from '@/lib/auth-utils'
+import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
 	Button,
@@ -38,13 +38,16 @@ export default function Dashboard() {
 		setEditingPrizes(gameId)
 	}
 
-	// Fetch games using Firebase authentication only
+	// Initialize Firebase Functions
+	const { getGamesByUser } = useFirebaseFunctions()
+
+	// Fetch games using Firebase Functions
 	const {
 		data: allGames = [],
 		isLoading,
 		isError,
 	} = useQuery<Game[]>({
-		queryKey: ['/api/user/games', user?.uid],
+		queryKey: ['getGamesByUser', user?.uid],
 		queryFn: async () => {
 			if (!isAuthenticated) {
 				logger.log('Dashboard: User not authenticated')
@@ -56,30 +59,15 @@ export default function Dashboard() {
 					'Dashboard: Fetching games for authenticated user:',
 					user?.uid
 				)
-				const headers = await getAuthHeaders()
-				logger.log('Dashboard: Using headers:', headers)
 
-				const response = await fetch('/api/user/games', { headers })
-				logger.log('Dashboard: Response status:', response.status)
+				const result = await getGamesByUser({})
+				const games = result.data as Game[]
+				logger.log('Dashboard: Received games:', games)
 
-				if (response.ok) {
-					const games = await response.json()
-					logger.log('Dashboard: Received games:', games)
-					return games.sort(
-						(a: Game, b: Game) =>
-							new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-					)
-				} else {
-					const errorText = await response.text()
-					logger.error(
-						'Dashboard: Failed to fetch games:',
-						response.status,
-						errorText
-					)
-					throw new Error(
-						`Failed to fetch games: ${response.status} ${errorText}`
-					)
-				}
+				return games.sort(
+					(a: Game, b: Game) =>
+						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+				)
 			} catch (error) {
 				logger.error('Dashboard: Error fetching games:', error)
 				throw error

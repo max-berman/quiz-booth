@@ -30,6 +30,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { PrizeEditModal } from '@/components/prize-edit-modal'
 import type { Game } from '@shared/firebase-types'
+import { getFunctions, httpsCallable } from 'firebase/functions'
+import { auth } from '@/lib/firebase'
 
 export default function GameCreated() {
 	const { id } = useParams<{ id: string }>()
@@ -47,13 +49,12 @@ export default function GameCreated() {
 	])
 
 	const { data: game, isLoading } = useQuery<Game>({
-		queryKey: [`/api/games/${id}`],
+		queryKey: [`game-${id}`],
 		queryFn: async () => {
-			const response = await fetch(`/api/games/${id}`)
-			if (!response.ok) {
-				throw new Error('Failed to fetch game')
-			}
-			return response.json()
+			const functions = getFunctions()
+			const getGame = httpsCallable(functions, 'getGame')
+			const result = await getGame({ gameId: id })
+			return result.data as Game
 		},
 		enabled: !!id,
 	})
@@ -262,7 +263,7 @@ export default function GameCreated() {
 									onClick={handleEditPrizes}
 									data-testid='button-edit-prizes'
 								>
-									{game.prizes && game.prizes.length < 0 ? (
+									{game.prizes && game.prizes.length > 0 ? (
 										<>
 											<Edit3 className='mr-1 h-4 w-4' /> Edit Prizes
 										</>
@@ -470,7 +471,7 @@ export default function GameCreated() {
 					initialPrizes={initialPrizes}
 					onPrizesUpdated={() => {
 						// Refresh the game data to show updated prizes immediately
-						queryClient.invalidateQueries({ queryKey: [`/api/games/${id}`] })
+						queryClient.invalidateQueries({ queryKey: [`game-${id}`] })
 					}}
 				/>
 			</div>
