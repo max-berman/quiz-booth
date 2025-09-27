@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
+exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const crypto_1 = require("crypto");
@@ -304,7 +304,12 @@ exports.updateGamePrizes = functions.https.onCall(async (data, context) => {
             prizes,
             modifiedAt: firestore_1.Timestamp.fromDate(now),
         });
-        return { success: true, prizes };
+        // Convert prizes object to array format for frontend response
+        const prizesArray = prizes ? Object.entries(prizes).map(([key, value]) => ({
+            placement: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            prize: value
+        })).filter(p => p.prize) : [];
+        return { success: true, prizes: prizesArray };
     }
     catch (error) {
         console.error('Update game prizes error:', error);
@@ -398,6 +403,49 @@ exports.getGameLeaderboard = functions.https.onCall(async (data, context) => {
             throw error;
         }
         throw new functions.https.HttpsError('internal', 'Failed to get leaderboard');
+    }
+});
+// Get all players (submissions) for a game - for creator access
+exports.getGamePlayers = functions.https.onCall(async (data, context) => {
+    const { gameId } = data;
+    try {
+        // Verify game exists
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+        const gameData = gameDoc.data();
+        // Check if user is authenticated and owns the game
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+        if ((gameData === null || gameData === void 0 ? void 0 : gameData.userId) !== context.auth.uid) {
+            throw new functions.https.HttpsError('permission-denied', 'Access denied - only game creator can view submissions');
+        }
+        // Get all players for this game (temporarily without ordering to test)
+        const playersSnapshot = await db
+            .collection('players')
+            .where('gameId', '==', gameId)
+            .get();
+        const players = playersSnapshot.docs.map(doc => {
+            var _a, _b, _c;
+            const data = doc.data();
+            return Object.assign(Object.assign({}, data), { completedAt: (_c = (_b = (_a = data.completedAt) === null || _a === void 0 ? void 0 : _a.toDate) === null || _b === void 0 ? void 0 : _b.call(_a)) === null || _c === void 0 ? void 0 : _c.toISOString() });
+        });
+        // Sort manually by completedAt (newest first)
+        players.sort((a, b) => {
+            const dateA = a.completedAt ? new Date(a.completedAt).getTime() : 0;
+            const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0;
+            return dateB - dateA;
+        });
+        return players;
+    }
+    catch (error) {
+        console.error('Get game players error:', error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError('internal', 'Failed to get players data');
     }
 });
 //# sourceMappingURL=games.js.map

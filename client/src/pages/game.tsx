@@ -132,16 +132,22 @@ export default function GamePage() {
 			<div className='flex-1 bg-background flex items-center justify-center'>
 				<div className='text-center'>
 					<p className='flex items-center justify-center my-4'>
-						<img
-							// src='/src/assets/images/owl.svg'
-							src='/src/assets/images/naknick-logo.png'
-							alt='QuizBooth.games logo'
-							className='h-16 w-auto'
-						/>
+						<a
+							href='https://www.naknick.com'
+							target='_blank'
+							rel='noopener noreferrer'
+						>
+							<img
+								// src='/assets/owl.svg'
+								src='/assets/logo.png'
+								alt='NaknNick games logo'
+								className='h-32 w-auto '
+							/>
+						</a>
 					</p>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
 
-					<p>Loading game...</p>
+					<p className='animate-bounce'>Loading game...</p>
 				</div>
 			</div>
 		)
@@ -166,7 +172,7 @@ export default function GamePage() {
 						<div className='text-center'>
 							<div className='text-sm font-medium text-foreground'>
 								<img
-									src='/src/assets/images/naknick-logo.png'
+									src='/assets/naknick-logo.png'
 									alt='QuizBooth.games logo'
 									className='h-14 w-auto'
 								/>
@@ -398,9 +404,9 @@ export default function GamePage() {
 						rel='noopener noreferrer'
 					>
 						<img
-							// src='/src/assets/images/owl.svg'
-							src='/src/assets/images/logo.png'
-							alt='QuizBooth.games logo'
+							// src='/assets/owl.svg'
+							src='/assets/logo.png'
+							alt='NaknNick games logo'
 							className='h-32 w-auto'
 						/>
 					</a>

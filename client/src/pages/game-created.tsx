@@ -126,7 +126,7 @@ export default function GameCreated() {
 
 	const handleEditPrizes = () => {
 		const existingPrizes = []
-		if (game?.prizes && game.prizes.length > 0) {
+		if (game?.prizes && Array.isArray(game.prizes) && game.prizes.length > 0) {
 			existingPrizes.push(...game.prizes)
 		}
 		if (existingPrizes.length === 0) {
@@ -230,18 +230,20 @@ export default function GameCreated() {
 							</div>
 						)}
 
-						{game.prizes && game.prizes.length > 0 && (
-							<div className='flex border-primary  rounded-sm bg-primary/10 px-2'>
-								Prizes:
-								<ul className='text-xs flex flex-col flex-wrap w-2/3 p-1 mx-2'>
-									{game.prizes.map((prize, index) => (
-										<li key={index} className='mr-2'>
-											<strong>{prize.placement}</strong>: {prize.prize}
-										</li>
-									))}
-								</ul>
-							</div>
-						)}
+						{game.prizes &&
+							Array.isArray(game.prizes) &&
+							game.prizes.length > 0 && (
+								<div className='flex border-primary rounded-sm bg-primary/10 px-2'>
+									Prizes:
+									<ul className='text-xs flex flex-col flex-wrap w-2/3 p-1 mx-2'>
+										{game.prizes.map((prize, index) => (
+											<li key={index} className='mr-2'>
+												<strong>{prize.placement}</strong>: {prize.prize}
+											</li>
+										))}
+									</ul>
+								</div>
+							)}
 
 						{/* Action Buttons - Enhanced styling to match game-card-enhanced */}
 						<div className='space-y-2 mb-4'>
@@ -263,7 +265,9 @@ export default function GameCreated() {
 									onClick={handleEditPrizes}
 									data-testid='button-edit-prizes'
 								>
-									{game.prizes && game.prizes.length > 0 ? (
+									{game.prizes &&
+									Array.isArray(game.prizes) &&
+									game.prizes.length > 0 ? (
 										<>
 											<Edit3 className='mr-1 h-4 w-4' /> Edit Prizes
 										</>

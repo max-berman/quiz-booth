@@ -35,7 +35,7 @@ export function GameCard({ game, onEditPrizes }: GameCardProps) {
 
 	const handleEditPrizes = () => {
 		const existingPrizes = []
-		if (game.prizes && game.prizes.length > 0) {
+		if (game.prizes && Array.isArray(game.prizes) && game.prizes.length > 0) {
 			existingPrizes.push(...game.prizes)
 		}
 		if (existingPrizes.length === 0) {
@@ -164,7 +164,7 @@ export function GameCard({ game, onEditPrizes }: GameCardProps) {
 				{/* Prizes if configured */}
 				<div className='flex border-dotted border-t border-primary items-end pt-4'>
 					{/* Remove commented prize label */}
-					{game.prizes ? (
+					{game.prizes && Array.isArray(game.prizes) ? (
 						<ul className='text-xs flex flex-col flex-wrap w-2/3 p-1  mr-2'>
 							{game.prizes.length > 0 &&
 								game.prizes.map((prize, index) => (
@@ -184,7 +184,9 @@ export function GameCard({ game, onEditPrizes }: GameCardProps) {
 						data-testid={`button-edit-prizes-${game.id}`}
 						aria-label={`Edit prizes for ${game.companyName}`}
 					>
-						{game.prizes && game.prizes.length > 0 ? (
+						{game.prizes &&
+						Array.isArray(game.prizes) &&
+						game.prizes.length > 0 ? (
 							<Edit3 className='mr-1 h-4 w-4' aria-hidden='true' />
 						) : (
 							<Plus className='mr-1 h-4 w-4' aria-hidden='true' />

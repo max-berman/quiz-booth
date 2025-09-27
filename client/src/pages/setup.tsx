@@ -324,7 +324,7 @@ export default function Setup() {
 
 	return (
 		<div className='flex-1 bg-background py-6'>
-			<div className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8'>
+			<div className='max-w-5xl mx-auto px-2 lg:px-6'>
 				{/* Header */}
 				<div className='text-center mb-8'>
 					<h1 className='text-4xl md:text-5xl font-bold text-foreground mb-4'>
@@ -377,12 +377,12 @@ export default function Setup() {
 					</div>
 				</div> */}
 
-				<Card className='shadow-sm border-0 bg-popover'>
-					<CardContent className='p-4 md:p-6'>
+				<Card className='border-none bg-none bg-transparent py-2'>
+					<CardContent className='p-2'>
 						<form onSubmit={handleSubmit} className='space-y-8'>
 							{/* Company Information Section */}
 							<section
-								className={`p-6 bg-background/30 rounded-xl border-2 transition-all border-accent ${
+								className={`p-4 lg:p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
 									focusedSection === 1 ? 'shadow-md ' : ''
 								}`}
 								onFocus={() => setFocusedSection(1)}
@@ -390,7 +390,7 @@ export default function Setup() {
 								tabIndex={0}
 							>
 								<div className='mb-6'>
-									<h3 className='text-xl font-bold text-foreground flex items-center'>
+									<h3 className='text-base md:text-xl font-bold text-foreground flex items-center'>
 										<Building className='text-foreground mr-3 h-6 w-6' />
 										Business Information
 										{checkCompanyComplete() && (
@@ -516,7 +516,7 @@ export default function Setup() {
 
 							{/* Game Settings Section */}
 							<section
-								className={`p-6 bg-background/30 rounded-xl  border-2 transition-all border-accent ${
+								className={`p-4 lg:p-6 bg-popover rounded-xl  border-2 transition-all border-accent ${
 									focusedSection === 2 ? 'shadow-md ' : ''
 								}`}
 								onFocus={() => setFocusedSection(2)}
@@ -524,7 +524,7 @@ export default function Setup() {
 								tabIndex={0}
 							>
 								<div className='mb-6'>
-									<h3 className='text-xl font-bold text-foreground flex items-center'>
+									<h3 className='text-base md:text-xl  font-bold text-foreground flex items-center'>
 										<Settings className='text-foreground mr-3 h-6 w-6' />
 										Game Settings
 										{checkSettingsComplete() && (
@@ -533,7 +533,7 @@ export default function Setup() {
 									</h3>
 								</div>
 
-								<div className='grid md:grid-cols-2 gap-6'>
+								<div className='grid md:grid-cols-2 gap-4'>
 									<div>
 										<Label
 											htmlFor='questionCount'
@@ -598,7 +598,7 @@ export default function Setup() {
 										<Label className='text-base font-medium'>
 											Question Categories *
 										</Label>
-										<div className='grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3'>
+										<div className='grid grid-cols-1 sm:grid-cols-2 gap-4  mt-3'>
 											{CATEGORY_OPTIONS.map(({ key, label, desc }) => (
 												<div
 													key={key}
@@ -668,25 +668,25 @@ export default function Setup() {
 
 							{/* Prize Settings Section */}
 							<section
-								className={`p-6 bg-background/30 rounded-xl border-2 transition-all border-accent ${
+								className={`p-4 lg:p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
 									focusedSection === 3 ? 'shadow-md ' : ''
 								}`}
 								onFocus={() => setFocusedSection(3)}
 								onBlur={() => setFocusedSection(null)}
 								tabIndex={0}
 							>
-								<div className='flex items-center justify-between mb-6'>
-									<h3 className='text-xl font-bold text-foreground flex items-center'>
-										<Gift className='text-foreground mr-3 h-6 w-6' />
+								<div className='flex flex-col md:flex-row justify-between mb-6'>
+									<h3 className='text-base mb-2 md:mb-0 md:text-xl font-bold text-foreground flex items-center'>
+										<Gift className='text-foreground mr-2 h-6 w-6' />
 										Prize Information (Optional)
-										<CheckCircle className='ml-2 h-5 w-5 ' />
+										{/* <CheckCircle className='ml-2 h-5 w-5 text-primary' /> */}
 									</h3>
 									<Button
 										type='button'
 										variant='outline'
 										size='sm'
 										onClick={addPrize}
-										className='flex items-center gap-1'
+										className='flex items-center gap-1 w-1/3 md:w-auto  self-end'
 									>
 										<Plus className='h-2 w-2' />
 										Add Prize
@@ -704,7 +704,7 @@ export default function Setup() {
 													htmlFor={`placement-${index}`}
 													className='text-base font-medium'
 												>
-													Placement
+													Plsent
 												</Label>
 												<Input
 													id={`placement-${index}`}
@@ -766,52 +766,54 @@ export default function Setup() {
 							</section>
 
 							{/* Submit Section */}
-							<section className='bg-popover p-4  '>
-								<div className='text-center space-y-4'>
-									<div className='flex items-center justify-center gap-2 text-primary'>
-										<CheckCircle className='h-5 w-5' />
-										<span className='font-medium'>
-											Ready to generate your trivia game!
-										</span>
-									</div>
+							<section className='p-0'>
+								<div className='text-center space-y-2'>
+									{!isAuthenticated && (
+										<div className='flex items-center justify-center gap-2 text-destructive  p-2 rounded-lg'>
+											<AlertCircle className='h-5 w-5' />
+											<span className='font-medium'>
+												Sign In Required to Generate Trivia
+											</span>
+										</div>
+									)}
 
-									<div className='text-sm text-foreground max-w-md mx-auto'>
-										Our AI will create {formData.questionCount} {difficulty}{' '}
-										{Object.values(categories).filter(Boolean).length > 0 && (
-											<>
-												{' '}
-												covering{' '}
-												{Object.values(categories).filter(Boolean).length === 1
-													? 'category'
-													: 'categories'}
-											</>
+									{isAuthenticated &&
+										(!checkCompanyComplete() || !checkSettingsComplete()) && (
+											<div className='flex items-center justify-center gap-2 text-destructive'>
+												<AlertCircle className='h-4 w-4' />
+												<span className='text-sm'>
+													Please complete required sections above
+												</span>
+											</div>
 										)}
-									</div>
+
+									{isAuthenticated && (
+										<div className='flex items-center justify-center gap-2 text-primary'>
+											<CheckCircle className='h-5 w-5' />
+											<span className='font-medium'>
+												Our AI will generate your trivia!
+											</span>
+										</div>
+									)}
 
 									<Button
 										type='submit'
 										size='lg'
-										className='px-12 py-4 font-bold text-lg rounded-xl'
+										className='px-4 py-4 font-bold text-base lg:text-lg rounded-xl'
 										disabled={
 											createGameMutation.isPending ||
+											!isAuthenticated ||
 											!checkCompanyComplete() ||
 											!checkSettingsComplete()
 										}
 									>
 										<Wand2 className='mr-3 h-5 w-5' />
-										{createGameMutation.isPending
+										{!isAuthenticated
+											? 'Sign In to Generate Trivia'
+											: createGameMutation.isPending
 											? 'Creating...'
 											: 'Generate Trivia Game'}
 									</Button>
-
-									{(!checkCompanyComplete() || !checkSettingsComplete()) && (
-										<div className='flex items-center justify-center gap-2 text-destructive'>
-											<AlertCircle className='h-4 w-4' />
-											<span className='text-sm'>
-												Please complete required sections above
-											</span>
-										</div>
-									)}
 								</div>
 							</section>
 						</form>

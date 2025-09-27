@@ -14,13 +14,21 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Download, Users, Trophy, Clock, Mail } from 'lucide-react'
 import type { Player, Game } from '@shared/schema'
+import { getFunctions, httpsCallable } from 'firebase/functions'
+import { auth } from '@/lib/firebase'
 
 export default function Submissions() {
 	const { id } = useParams()
 
 	const { data: game } = useQuery<Game>({
-		queryKey: ['/api/games', id],
+		queryKey: [`game-${id}`],
 		enabled: !!id,
+		queryFn: async () => {
+			const functions = getFunctions()
+			const getGame = httpsCallable(functions, 'getGame')
+			const result = await getGame({ gameId: id })
+			return result.data as Game
+		},
 	})
 
 	const {
@@ -28,33 +36,13 @@ export default function Submissions() {
 		isLoading,
 		error,
 	} = useQuery<Player[]>({
-		queryKey: ['/api/games', id, 'players'],
-		enabled: !!id,
+		queryKey: [`game-${id}-players`],
+		enabled: !!id && !!auth.currentUser,
 		queryFn: async () => {
-			const creatorKey = localStorage.getItem(`game-${id}-creator-key`)
-
-			if (!creatorKey) {
-				throw new Error(
-					'No access key found. Only the game creator can view submissions.'
-				)
-			}
-
-			const response = await fetch(`/api/games/${id}/players`, {
-				headers: {
-					'X-Creator-Key': creatorKey,
-				},
-			})
-
-			if (!response.ok) {
-				const errorData = await response
-					.json()
-					.catch(() => ({ message: 'Unknown error' }))
-				throw new Error(
-					errorData.message || `Failed to fetch data: ${response.status}`
-				)
-			}
-
-			return response.json()
+			const functions = getFunctions()
+			const getGamePlayers = httpsCallable(functions, 'getGamePlayers')
+			const result = await getGamePlayers({ gameId: id })
+			return result.data as Player[]
 		},
 	})
 
