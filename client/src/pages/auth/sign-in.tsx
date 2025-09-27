@@ -168,6 +168,12 @@ export default function SignIn() {
 							</div>
 						</div>
 
+						<div>
+							<p className='text-sm mt-2 text-center'>
+								Sign in using a magic link
+							</p>
+						</div>
+
 						{/* Email Sign-in (Alternative) */}
 						<form onSubmit={handleSubmit} className='space-y-4 text-primary'>
 							<div>
@@ -181,9 +187,6 @@ export default function SignIn() {
 									required
 									data-testid='input-email'
 								/>
-								<p className='text-sm mt-2'>
-									We'll send over a quick sign-in link via email.
-								</p>
 							</div>
 
 							<Button

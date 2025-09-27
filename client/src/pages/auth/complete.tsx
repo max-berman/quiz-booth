@@ -142,7 +142,7 @@ export default function CompleteSignIn() {
 	}
 
 	return (
-		<div className='flex-1 bg-gray-50 py-8'>
+		<div className='flex-1 bg-background py-8 items-center flex'>
 			<div className='max-w-md mx-auto px-4'>
 				<Card>
 					<CardHeader>
@@ -162,7 +162,6 @@ export default function CompleteSignIn() {
 						) : (
 							<form onSubmit={handleSubmit} className='space-y-4'>
 								<div>
-									<Label htmlFor='email'>Email Address</Label>
 									<Input
 										id='email'
 										type='email'

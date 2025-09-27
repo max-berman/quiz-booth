@@ -326,11 +326,11 @@ export default function Setup() {
 		<div className='flex-1 bg-background py-6'>
 			<div className='max-w-5xl mx-auto px-2 lg:px-6'>
 				{/* Header */}
-				<div className='text-center mb-8'>
-					<h1 className='text-4xl md:text-5xl font-bold text-foreground mb-4'>
+				<div className='text-center my-4 lg:my-8'>
+					<h1 className='text-2xl lg:text-4xl md:text-5xl font-bold text-foreground mb-4'>
 						Create Your <span className='text-primary'>Trivia Game</span>
 					</h1>
-					<p className='text-lg text-foreground max-w-2xl mx-auto'>
+					<p className='text-base lg:text-lg text-foreground max-w-2xl mx-auto'>
 						Generate engaging AI-powered trivia questions for your trade show
 						booth in just a few minutes
 					</p>
@@ -378,6 +378,14 @@ export default function Setup() {
 				</div> */}
 
 				<Card className='border-none bg-none bg-transparent py-2'>
+					{!isAuthenticated && (
+						<div className='flex items-center justify-center gap-2 text-destructive  p-2 rounded-lg'>
+							<AlertCircle className='h-5 w-5' />
+							<span className='font-medium'>
+								Sign In Required to Generate Trivia
+							</span>
+						</div>
+					)}
 					<CardContent className='p-2'>
 						<form onSubmit={handleSubmit} className='space-y-8'>
 							{/* Company Information Section */}
@@ -704,7 +712,7 @@ export default function Setup() {
 													htmlFor={`placement-${index}`}
 													className='text-base font-medium'
 												>
-													Plsent
+													Place
 												</Label>
 												<Input
 													id={`placement-${index}`}
@@ -768,15 +776,6 @@ export default function Setup() {
 							{/* Submit Section */}
 							<section className='p-0'>
 								<div className='text-center space-y-2'>
-									{!isAuthenticated && (
-										<div className='flex items-center justify-center gap-2 text-destructive  p-2 rounded-lg'>
-											<AlertCircle className='h-5 w-5' />
-											<span className='font-medium'>
-												Sign In Required to Generate Trivia
-											</span>
-										</div>
-									)}
-
 									{isAuthenticated &&
 										(!checkCompanyComplete() || !checkSettingsComplete()) && (
 											<div className='flex items-center justify-center gap-2 text-destructive'>
@@ -787,14 +786,14 @@ export default function Setup() {
 											</div>
 										)}
 
-									{isAuthenticated && (
+									{/* {isAuthenticated && (
 										<div className='flex items-center justify-center gap-2 text-primary'>
 											<CheckCircle className='h-5 w-5' />
 											<span className='font-medium'>
 												Our AI will generate your trivia!
 											</span>
 										</div>
-									)}
+									)} */}
 
 									<Button
 										type='submit'
