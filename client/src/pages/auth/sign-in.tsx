@@ -146,7 +146,7 @@ export default function SignIn() {
 							)}
 						</Button>
 
-						<div className='text-xs text-center text-gray-500'>
+						{/* <div className='text-xs text-center text-gray-500'>
 							<p>
 								Current domain:{' '}
 								<code className='text-xs bg-gray-100 px-1 rounded'>
@@ -157,7 +157,7 @@ export default function SignIn() {
 								If authentication fails, add this domain to Firebase Console →
 								Authentication → Settings → Authorized domains
 							</p>
-						</div>
+						</div> */}
 
 						<div className='relative'>
 							<div className='absolute inset-0 flex items-center'>
@@ -181,7 +181,9 @@ export default function SignIn() {
 									required
 									data-testid='input-email'
 								/>
-								{/* <p>We'll send over a quick sign-in link via email.</p> */}
+								<p className='text-sm mt-2'>
+									We'll send over a quick sign-in link via email.
+								</p>
 							</div>
 
 							<Button

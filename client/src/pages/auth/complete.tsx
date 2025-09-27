@@ -69,17 +69,17 @@ export default function CompleteSignIn() {
 
 	if (completed) {
 		return (
-			<div className='flex-1 bg-gray-50 py-8'>
+			<div className='flex-1 bg-background py-8 items-center flex'>
 				<div className='max-w-md mx-auto px-4'>
 					<Card>
 						<CardHeader>
-							<CardTitle className='text-center text-green-600'>
+							<CardTitle className='text-center text-primary'>
 								Sign-in Successful!
 							</CardTitle>
 						</CardHeader>
 						<CardContent className='text-center space-y-4'>
-							<div className='w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto'>
-								<CheckCircle className='h-8 w-8 text-green-600' />
+							<div className='w-16 h-16 bg-background border-2 border-primary rounded-full flex items-center justify-center mx-auto'>
+								<CheckCircle className='h-8 w-8 text-primary' />
 							</div>
 							<p className='text-gray-600'>
 								Welcome! You'll be redirected to your dashboard in a moment.
@@ -101,17 +101,17 @@ export default function CompleteSignIn() {
 
 	if (error) {
 		return (
-			<div className='flex-1 bg-gray-50 py-8'>
+			<div className='flex-1 bg-background py-8 items-center flex'>
 				<div className='max-w-md mx-auto px-4'>
 					<Card>
 						<CardHeader>
-							<CardTitle className='text-center text-red-600'>
+							<CardTitle className='text-center text-destructive'>
 								Sign-in Error
 							</CardTitle>
 						</CardHeader>
 						<CardContent className='text-center space-y-4'>
-							<div className='w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto'>
-								<AlertCircle className='h-8 w-8 text-red-600' />
+							<div className='w-16 h-16 bg-background rounded-full flex items-center justify-center mx-auto border-2 border-destructive'>
+								<AlertCircle className='h-8 w-8 text-destructive' />
 							</div>
 							<p className='text-gray-600'>{error}</p>
 							<div className='space-y-2'>
@@ -120,7 +120,6 @@ export default function CompleteSignIn() {
 										setError(null)
 										setEmail('')
 									}}
-									variant='outline'
 									className='w-full'
 									data-testid='button-try-again'
 								>
