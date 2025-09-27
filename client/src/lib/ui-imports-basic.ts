@@ -1,0 +1,20 @@
+// Basic UI component imports - most commonly used components
+export { Button } from "@/components/ui/button";
+export { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+export { Input } from "@/components/ui/input";
+export { Label } from "@/components/ui/label";
+export { Badge } from "@/components/ui/badge";
+export { Progress } from "@/components/ui/progress";
+export { Separator } from "@/components/ui/separator";
+export { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+export { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+export { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+export { Textarea } from "@/components/ui/textarea";
+export { Checkbox } from "@/components/ui/checkbox";
+export { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+export { Switch } from "@/components/ui/switch";
+export { Slider } from "@/components/ui/slider";
+export { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+export { Skeleton } from "@/components/ui/skeleton";

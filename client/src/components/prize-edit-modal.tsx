@@ -11,7 +11,7 @@ import {
 	DialogTitle,
 	Input,
 	Label,
-} from '@/lib/ui-imports'
+} from '@/lib/ui-imports-basic'
 import { Plus, Save, X } from 'lucide-react'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 

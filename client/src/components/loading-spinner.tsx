@@ -4,7 +4,7 @@ export function LoadingSpinner({
 	message?: string
 }) {
 	return (
-		<div className='max-w-2xl mx-auto text-center'>
+		<div className='flex-1 flex flex-col items-center justify-center bg-background'>
 			<div className='bg-card rounded-2xl shadow-xl p-12'>
 				<div className='animate-spin w-16 h-16 border-4 border-primary border-t-transparent rounded-full mx-auto mb-6'></div>
 				<h3 className='text-2xl font-bold text-primary mb-4'>{message}</h3>

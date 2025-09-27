@@ -12,7 +12,7 @@ import {
 	CardHeader,
 	CardTitle,
 	Badge,
-} from '@/lib/ui-imports'
+} from '@/lib/ui-imports-basic'
 import { Plus, ArrowLeft, Building } from 'lucide-react'
 import { PrizeEditModal } from '@/components/prize-edit-modal'
 import { GameCardEnhanced } from '@/components/game-card-enhanced'
@@ -144,7 +144,7 @@ export default function Dashboard() {
 
 	if (isLoading) {
 		return (
-			<div className='flex-1 flex items-center justify-center'>
+			<div className='flex-1 flex flex-col items-center justify-center bg-background'>
 				<div className='text-center'>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
 					<p>Loading your games...</p>

@@ -6,7 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 	Badge,
-} from '@/lib/ui-imports'
+} from '@/lib/ui-imports-basic'
 import {
 	Edit3,
 	BarChart3,
