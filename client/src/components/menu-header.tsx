@@ -57,9 +57,10 @@ export function CreatorHeader() {
 								alt='QuizBooth.games logo'
 								className='h-8 w-auto'
 							/>
-							<span className='hover:scale-[1.02] transition-all'>
+							<span className='hover:scale-[1.02] transition-all font-medium'>
 								QuizBooth
 							</span>
+							<span className='text-xs self-end font-medium'>beta</span>
 						</Link>
 					</div>
 

@@ -51,6 +51,7 @@
     },
     "ui": {
       "enabled": true
-    }
+    },
+    "dataDir": "./emulator-data"
   }
 }

@@ -201,18 +201,28 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
     
     IMPORTANT - Question Category Instructions:
     ${categoryInstructions}
+
+    CRITICAL - ENHANCEMENT REQUIREMENTS:
+    - Approximately 15% of questions should include one relevant emoji in the question text
+    - Use emojis sparingly and only when they enhance engagement or clarity
+    - The emoji should complement the question topic without being distracting
+    - Never use emojis in answer options or explanations
+    - Appropriate emoji contexts: science/tech 🧪, nature 🌿, history 🏛️, geography 🌍, pop culture 🎬, etc.
+    - Ensure questions are engaging, educational, and factually accurate
+    - Vary the position of correct answers randomly
     
     Return ONLY a JSON object with a "questions" array containing the questions in this exact format:
     {
       "questions": [
         {
-          "questionText": "Question here?",
+          "questionText": "Question here?🌟",
           "options": ["Option A", "Option B", "Option C", "Option D"],
           "correctAnswer": 0,
           "explanation": "Brief explanation of the answer"
         }
       ]
     }
+
     
     Make sure:
     - Follow the category instructions precisely
@@ -220,6 +230,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
     - correctAnswer is the index (0-3) of the correct option
     - Include a brief explanation for each answer
     - Vary the position of correct answers
+    - Approximately 15% of questions include a relevant emoji in questionText
     - Return valid JSON only, no additional text`;
 
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -360,23 +371,28 @@ export const generateSingleQuestion = functions.https.onCall(async (data, contex
     ${categoryInstructions}
     
     CRITICAL - UNIQUENESS REQUIREMENT:
-    This question must be completely unique and not duplicate any existing questions for this game.
+    - Ensure the question is clear and unambiguous
+    - This question must be completely unique and not duplicate any existing questions for this game.
+    - Question should be interesting, educational, and factually accurate
+    - **Approximately 15% of questions should include one relevant emoji in the question text**
     
     Return ONLY a JSON object with a single question in this exact format:
     {
-      "questionText": "Question here?",
+      "questionText": "Clear and concise question? 🎯",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctAnswer": 0,
-      "explanation": "Brief explanation of the answer"
+      "explanation": "Brief educational explanation citing verifiable facts"
     }
+
     
     Make sure:
     - Follow the category instructions precisely
     - The question has exactly 4 options
     - correctAnswer is the index (0-3) of the correct option
     - Include a brief explanation for the answer
-    - Ensure the question is completely unique
-    - Return valid JSON only, no additional text`;
+    - Ensure the question is completely unique and appropriate for the specified difficulty level
+    - Use emojis sparingly and only when they enhance understanding or engagement
+    - Return valid JSON only, no additional text or formatting`;
 
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',

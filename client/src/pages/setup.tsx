@@ -712,7 +712,7 @@ export default function Setup() {
 													htmlFor={`placement-${index}`}
 													className='text-base font-medium'
 												>
-													Place
+													Placement
 												</Label>
 												<Input
 													id={`placement-${index}`}

@@ -17,7 +17,7 @@
     "deploy:functions": "firebase deploy --only functions",
     "deploy:firestore": "firebase deploy --only firestore",
     "deploy:all": "npm run build:client && npm run build:functions && firebase deploy",
-    "emulators": "firebase emulators:start"
+    "emulate": "firebase emulators:start --import=./emulator-data --export-on-exit"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
