@@ -55,11 +55,11 @@ export default function Home() {
 	return (
 		<div className='flex-1 justify-center flex flex-col '>
 			{/* Hero Section */}
-			<section className='relative pt-4 lg:pt-0 px-4 sm:px-6 lg:px-8'>
+			<section className='relative pt-4 md:pt-0 px-4 md:px-8'>
 				<div className='max-w-5xl mx-auto'>
 					<div className='text-center relative z-10'>
 						<div className='mb-8 animate-slide-up'>
-							<h1 className='text-h1 text-foreground mb-6 '>
+							<h1 className='text-h1 text-foreground my-6 '>
 								Create{' '}
 								<span className='text-primary font-bold'>Trivia Games</span>
 								<br />
@@ -74,7 +74,7 @@ export default function Home() {
 						</div>
 
 						<div
-							className='flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up'
+							className='flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up'
 							style={{ animationDelay: '0.2s' }}
 						>
 							<Link href='/setup'>
@@ -123,24 +123,24 @@ export default function Home() {
 			</section> */}
 
 			{/* Value Proposition Section */}
-			<section className='relative pt-4 lg:pt-0 px-4 sm:px-6 lg:px-8'>
+			<section className='relative pt-4 lg:pt-0 px-4 sm:px-6 lg:px-8 my-4'>
 				<div className='max-w-5xl mx-auto'>
-					<div className='text-center mb-16'>
-						<h2 className='text-3xl font-bold text-foreground mb-4'>
+					<div className='text-center mb-4 md:mb-16'>
+						<h2 className='text-2xl md:text-3xl font-bold text-foreground my-4 md:my-8'>
 							Why Choose QuizBooth?
 						</h2>
 					</div>
 
-					<div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+					<ul className='grid grid-cols-1 md:grid-cols-3 gap-4'>
 						{features.map((feature, index) => (
-							<div
+							<li
 								key={feature.title}
 								className='text-center animate-slide-up'
 								style={{ animationDelay: `${0.1 * index}s` }}
 							>
 								<div className='flex justify-center mb-4'>
-									<div className='p-3 bg-primary/10 rounded-full border-2 border-primary'>
-										<feature.icon className='h-8 w-8 text-primary ' />
+									<div className='p-2 md:p-3 bg-primary/10 rounded-full border-2 border-primary'>
+										<feature.icon className='h-4 w-4 md:h-8 md:w-8 text-primary ' />
 									</div>
 								</div>
 								<h3 className='text-xl font-semibold text-foreground mb-3'>
@@ -149,9 +149,9 @@ export default function Home() {
 								<p className='text-primary leading-relaxed'>
 									{feature.description}
 								</p>
-							</div>
+							</li>
 						))}
-					</div>
+					</ul>
 				</div>
 			</section>
 		</div>

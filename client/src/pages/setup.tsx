@@ -316,15 +316,18 @@ export default function Setup() {
 
 	if (isGenerating) {
 		return (
-			<div className='flex-1 bg-background py-6 flex items-center'>
-				<LoadingSpinner message='Generating Your Trivia Questions' />
+			<div className='flex-1 flex bg-background py-6 items-center'>
+				<LoadingSpinner
+					message='Generating Your Trivia Questions'
+					showTriviaContent={true}
+				/>
 			</div>
 		)
 	}
 
 	return (
 		<div className='flex-1 bg-background py-6'>
-			<div className='max-w-5xl mx-auto px-2 lg:px-6'>
+			<div className='max-w-4xl mx-auto px-2 lg:px-6'>
 				{/* Header */}
 				<div className='text-center my-4 lg:my-8'>
 					<h1 className='text-2xl lg:text-4xl md:text-5xl font-bold text-foreground mb-4'>
