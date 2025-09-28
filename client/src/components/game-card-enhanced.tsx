@@ -172,8 +172,27 @@ export function GameCardEnhanced({
 					)}
 				</div>
 
+				{/* Prizes if configured */}
+
+				{/* Remove commented prize label */}
+				{game.prizes && Array.isArray(game.prizes) && (
+					<div className='flex '>
+						{game.prizes.length > 0 && (
+							<div className='text-xs font-semibold mr-2'>Prizes:</div>
+						)}
+						<ul className='text-xs flex flex-col flex-wrap  mr-2'>
+							{game.prizes.length > 0 &&
+								game.prizes.map((prize, index) => (
+									<li key={index} className='mr-2'>
+										<strong>{prize.placement}</strong>: {prize.prize}
+									</li>
+								))}
+						</ul>
+					</div>
+				)}
+
 				{/* Action Buttons */}
-				<div className='space-y-2 pt-2'>
+				<div className='space-y-1 pt-2'>
 					{/* Management Actions */}
 
 					<div className='grid grid-cols-2 gap-2'>
@@ -196,6 +215,22 @@ export function GameCardEnhanced({
 							</span> */}
 							</div>
 						</div>
+						<Button
+							variant='outline'
+							size='sm'
+							onClick={handleEditPrizes}
+							data-testid={`button-edit-prizes-${game.id}`}
+							aria-label={`Edit prizes for ${game.companyName}`}
+						>
+							{game.prizes &&
+							Array.isArray(game.prizes) &&
+							game.prizes.length > 0 ? (
+								<Edit3 className='mr-1 h-4 w-4' aria-hidden='true' />
+							) : (
+								<Plus className='mr-1 h-4 w-4' aria-hidden='true' />
+							)}
+							Prizes
+						</Button>
 					</div>
 					<div className='grid grid-cols-2 gap-2'>
 						<Button
@@ -258,40 +293,6 @@ export function GameCardEnhanced({
 						<QRCodeModal gameId={game.id} gameTitle={game.companyName} />
 						<ShareEmbedModal gameId={game.id} gameTitle={game.companyName} />
 					</div>
-				</div>
-
-				{/* Prizes if configured */}
-				<div className='flex border-dotted border-t border-primary items-end pt-4'>
-					{/* Remove commented prize label */}
-					{game.prizes && Array.isArray(game.prizes) ? (
-						<ul className='text-xs flex flex-col flex-wrap w-2/3 p-1  mr-2'>
-							{game.prizes.length > 0 &&
-								game.prizes.map((prize, index) => (
-									<li key={index} className='mr-2'>
-										<strong>{prize.placement}</strong>: {prize.prize}
-									</li>
-								))}
-						</ul>
-					) : (
-						<div className='w-2/3' />
-					)}
-					<Button
-						variant='outline'
-						className='w-1/3 '
-						size='sm'
-						onClick={handleEditPrizes}
-						data-testid={`button-edit-prizes-${game.id}`}
-						aria-label={`Edit prizes for ${game.companyName}`}
-					>
-						{game.prizes &&
-						Array.isArray(game.prizes) &&
-						game.prizes.length > 0 ? (
-							<Edit3 className='mr-1 h-4 w-4' aria-hidden='true' />
-						) : (
-							<Plus className='mr-1 h-4 w-4' aria-hidden='true' />
-						)}
-						Prizes
-					</Button>
 				</div>
 			</CardContent>
 		</Card>

@@ -1,0 +1,68 @@
+# QuizBooth - AI-Powered Trivia Game Platform
+
+## Overview
+QuizBooth is a platform that helps businesses create engaging trivia games for events and trade shows. It uses AI to generate custom questions and includes lead capture features to turn players into potential customers.
+
+## Core Features
+- AI-Powered Question Generation
+- Lead Capture Integration
+- QR Code Sharing
+- Real-time Analytics
+- Custom Branding
+- Business Event Optimization
+
+## Key Pages
+- **Home**: https://quizbooth.games/ - Main landing page with value proposition
+- **Setup**: https://quizbooth.games/setup - Game creation wizard
+- **Dashboard**: https://quizbooth.games/dashboard - User dashboard for managing games
+- **Game Play**: https://quizbooth.games/game/{id} - Individual trivia games
+- **Results**: https://quizbooth.games/results/{id} - Game results and leaderboards
+- **Authentication**: https://quizbooth.games/auth/sign-in - User authentication
+
+## Target Audience
+- Businesses attending trade shows
+- Event organizers
+- Marketing teams
+- Companies looking for interactive customer engagement
+
+## Business Value
+- Increase booth traffic at events
+- Capture qualified leads through gameplay
+- Engage customers with interactive content
+- Generate brand awareness through gamification
+
+## Technical Stack
+- Frontend: React with TypeScript
+- Backend: Firebase Functions
+- Database: Firestore
+- Hosting: Firebase Hosting
+- AI Integration: Custom question generation
+
+## Content Structure
+1. **Home Page**: Value proposition, features, call-to-action
+2. **Setup Process**: Company info, game settings, prize configuration
+3. **Game Experience**: Interactive trivia gameplay
+4. **Results & Analytics**: Performance tracking and lead management
+
+## Key Keywords
+- trivia games for business
+- trade show engagement
+- lead capture games
+- AI question generation
+- interactive marketing
+- event gamification
+
+## Recent Updates
+- Domain migrated to quizbooth.games
+- Comprehensive SEO optimization
+- Enhanced structured data
+- Performance improvements
+
+## Contact Information
+For business inquiries, visit the main website or use the contact form on the homepage.
+
+## Sitemap Reference
+For complete URL structure, see: https://quizbooth.games/sitemap.xml
+
+## Robots.txt
+For crawling guidelines, see: https://quizbooth.games/robots.txt

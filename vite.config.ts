@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
@@ -10,6 +11,82 @@ export default defineConfig({
   envDir: path.resolve(import.meta.dirname), // Look for .env files in project root
   plugins: [
     react(),
+    ...(process.env.NODE_ENV === 'production' ? [
+      VitePWA({
+        registerType: 'autoUpdate',
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf}'],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'gstatic-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            }
+          ]
+        },
+        manifest: {
+          name: 'QuizBooth - Create Engaging Trivia Games',
+          short_name: 'QuizBooth',
+          description: 'Create AI-powered custom trivia games for trade shows and events',
+          theme_color: '#3b82f6',
+          background_color: '#ffffff',
+          display: 'standalone',
+          orientation: 'portrait',
+          scope: '/',
+          start_url: '/',
+          icons: [
+            {
+              src: '/assets/quiz-booth-icon.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: '/assets/quiz-booth-icon.png',
+              sizes: '512x512',
+              type: 'image/png'
+            },
+            {
+              src: '/assets/quiz-booth-icon.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
+            }
+          ],
+          categories: ['business', 'education', 'entertainment'],
+          screenshots: [
+            {
+              src: '/assets/quizbooth.png',
+              sizes: '1280x720',
+              type: 'image/png',
+              form_factor: 'wide'
+            }
+          ]
+        }
+      })
+    ] : []),
     runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
       process.env.REPL_ID !== undefined

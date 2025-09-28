@@ -57,6 +57,16 @@ This document outlines the SEO improvements implemented for the QuizBooth applic
 - **HelmetProvider**: Wrapped around the main App component
 - **Page-specific meta tags**: Implemented for Home page with ability to extend to other pages
 
+### 7. LLM Crawling Optimization ✅
+
+- **llms.txt**: Created comprehensive file for efficient LLM crawling
+  - Platform overview and core features
+  - Key pages with descriptions
+  - Target audience and business value
+  - Technical stack information
+  - Content structure and keywords
+  - Recent updates and references
+
 ## Current SEO Status
 
 ### ✅ Completed

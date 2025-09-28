@@ -9,6 +9,7 @@ import { CreatorHeader } from '@/components/menu-header'
 import { Footer } from '@/components/footer'
 import { AuthProvider } from '@/contexts/auth-context'
 import { LoadingSpinner } from '@/components/loading-spinner'
+import { PWARegistration } from '@/components/pwa-registration'
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import('@/pages/home'))
@@ -65,6 +66,7 @@ function App() {
 							{showFooter && <Footer />}
 						</div>
 						<Toaster />
+						<PWARegistration />
 					</AuthProvider>
 				</TooltipProvider>
 			</QueryClientProvider>

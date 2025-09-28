@@ -35,11 +35,23 @@
   <link rel="apple-touch-icon" href="/assets/quiz-booth-icon.png"> <!-- iOS -->
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 
+  <!-- PWA Manifest (loaded dynamically in production) -->
+
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#3b82f6" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="QuizBooth" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="QuizBooth" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="msapplication-TileColor" content="#3b82f6" />
+  <meta name="msapplication-config" content="/browserconfig.xml" />
+
   <!-- Canonical URL -->
   <link rel="canonical" href="https://quizbooth.games" />
 
   <!-- Preload Critical Resources -->
-  <link rel="preload" href="/assets/quizbooth.png" as="image" />
   <link rel="preload" href="/assets/fonts/Onest-Regular.ttf" as="font" type="font/ttf" crossorigin />
   <link rel="preload" href="/assets/fonts/Onest-Bold.ttf" as="font" type="font/ttf" crossorigin />
   <link rel="preload" href="/assets/fonts/Onest-Medium.ttf" as="font" type="font/ttf" crossorigin />
@@ -127,6 +139,15 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
+  <script>
+    // Dynamically load PWA manifest only in production
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = '/manifest.webmanifest';
+      document.head.appendChild(link);
+    }
+  </script>
 </body>
 
 </html>
