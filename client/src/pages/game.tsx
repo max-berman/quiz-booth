@@ -34,7 +34,11 @@ export default function GamePage() {
 	// Initialize Firebase Functions
 	const { getGame, getQuestions } = useFirebaseFunctions()
 
-	const { data: game, isLoading: gameLoading } = useQuery<Game>({
+	const {
+		data: game,
+		isLoading: gameLoading,
+		error: gameError,
+	} = useQuery<Game>({
 		queryKey: [`game-${id}`],
 		queryFn: async () => {
 			const result = await getGame({ gameId: id })
@@ -43,16 +47,18 @@ export default function GamePage() {
 		enabled: !!id,
 	})
 
-	const { data: questions, isLoading: questionsLoading } = useQuery<Question[]>(
-		{
-			queryKey: [`questions-${id}`],
-			queryFn: async () => {
-				const result = await getQuestions({ gameId: id })
-				return result.data as Question[]
-			},
-			enabled: !!id,
-		}
-	)
+	const {
+		data: questions,
+		isLoading: questionsLoading,
+		error: questionsError,
+	} = useQuery<Question[]>({
+		queryKey: [`questions-${id}`],
+		queryFn: async () => {
+			const result = await getQuestions({ gameId: id })
+			return result.data as Question[]
+		},
+		enabled: !!id,
+	})
 
 	const isLoading = gameLoading || questionsLoading
 
@@ -63,6 +69,11 @@ export default function GamePage() {
 
 	// Timer effect
 	useEffect(() => {
+		// Don't run timer if there are errors (game is private)
+		if (gameError || questionsError) {
+			return
+		}
+
 		if (timeLeft > 0 && !isAnswered) {
 			const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
 			return () => clearTimeout(timer)
@@ -70,7 +81,7 @@ export default function GamePage() {
 			// Time's up, auto-advance
 			handleNextQuestion()
 		}
-	}, [timeLeft, isAnswered])
+	}, [timeLeft, isAnswered, gameError, questionsError])
 
 	// Reset timer for new question
 	useEffect(() => {
@@ -127,6 +138,50 @@ export default function GamePage() {
 		}
 	}
 
+	// Check for permission denied errors (game is private)
+	if (gameError || questionsError) {
+		const error = gameError || questionsError
+		const isPermissionDenied =
+			(error as any)?.code === 'permission-denied' ||
+			(error as any)?.message?.includes('Access denied') ||
+			(error as any)?.message?.includes('permission-denied')
+
+		if (isPermissionDenied) {
+			return (
+				<div className='flex-1 bg-background flex items-center justify-center'>
+					<div className='text-center max-w-md mx-auto p-6'>
+						<p className='flex items-center justify-center my-4'>
+							<a
+								href='https://www.naknick.com'
+								target='_blank'
+								rel='noopener noreferrer'
+							>
+								<img
+									src='/assets/logo.png'
+									alt='NaknNick games logo'
+									className='h-32 w-auto'
+								/>
+							</a>
+						</p>
+						<div className='bg-destructive/10 border border-destructive/20 rounded-lg p-6 mb-6'>
+							<XCircle className='h-16 w-16 text-destructive mx-auto mb-4' />
+							<h2 className='text-xl font-bold text-destructive mb-2'>
+								Game Not Available
+							</h2>
+							<p className='text-foreground mb-4'>
+								This game is currently set to private and cannot be accessed by
+								the public.
+							</p>
+						</div>
+						<Button onClick={() => setLocation('/')} className='mt-4'>
+							Return to Home
+						</Button>
+					</div>
+				</div>
+			)
+		}
+	}
+
 	if (isLoading || !questions || !game) {
 		return (
 			<div className='flex-1 bg-background flex items-center justify-center'>
@@ -169,12 +224,20 @@ export default function GamePage() {
 						</Button> */}
 
 						<li className='w-1/4 flex justify-start'>
-							<a href='/' target='_blank' rel='noopener noreferrer'>
+							<a
+								href='/'
+								target='_blank'
+								rel='noopener noreferrer'
+								className='flex items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
+							>
 								<img
 									src='/assets/logo_.svg'
 									alt='QuizBooth.games logo'
 									className='h-8 w-auto'
 								/>
+								<span className='hidden lg:block hover:scale-[1.02] transition-all font-medium'>
+									QuizBooth
+								</span>
 							</a>
 						</li>
 

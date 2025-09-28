@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useLocation } from 'wouter'
 import {
 	Button,
@@ -20,6 +21,7 @@ import {
 } from 'lucide-react'
 import { QRCodeModal } from '@/components/qr-code-modal'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
+import { Checkbox } from '@/components/ui/checkbox'
 import type { Game } from '@shared/firebase-types'
 import { useQuery } from '@tanstack/react-query'
 
@@ -36,6 +38,7 @@ export function GameCardEnhanced({
 	onEditPrizes,
 }: GameCardEnhancedProps) {
 	const [, setLocation] = useLocation()
+	const [isPublic, setIsPublic] = useState(game.isPublic === true)
 
 	// Fetch actual question count for this game
 	const { data: actualQuestionCount } = useQuery<number>({
@@ -73,6 +76,43 @@ export function GameCardEnhanced({
 			})
 		}
 		onEditPrizes(game.id, existingPrizes)
+	}
+
+	const handlePublicToggle = async (newValue: boolean | 'indeterminate') => {
+		const isPublicValue = newValue === true
+		console.log(
+			'Checkbox changed:',
+			isPublicValue,
+			'Game ID:',
+			game.id,
+			'Current isPublic:',
+			isPublic
+		)
+
+		// Update UI immediately for better UX
+		setIsPublic(isPublicValue)
+
+		try {
+			const { getFunctions, httpsCallable } = await import('firebase/functions')
+			const functions = getFunctions()
+			const updateGamePublicStatus = httpsCallable(
+				functions,
+				'updateGamePublicStatus'
+			)
+
+			console.log('Calling updateGamePublicStatus...')
+			const result = await updateGamePublicStatus({
+				gameId: game.id,
+				isPublic: isPublicValue,
+			})
+			console.log('Update result:', result)
+
+			// Success - state is already updated
+		} catch (error) {
+			console.error('Failed to update game public status:', error)
+			// Revert the UI state on error
+			setIsPublic(!isPublicValue)
+		}
 	}
 
 	return (
@@ -135,6 +175,28 @@ export function GameCardEnhanced({
 				{/* Action Buttons */}
 				<div className='space-y-2 pt-2'>
 					{/* Management Actions */}
+
+					<div className='grid grid-cols-2 gap-2'>
+						{/* Public/Private Toggle */}
+						<div className='flex items-center border-primary border  p-2 rounded-lg bg-background'>
+							<div className='flex items-center justify-between gap-2'>
+								<Checkbox
+									id={`public-toggle-${game.id}`}
+									checked={isPublic}
+									onCheckedChange={handlePublicToggle}
+								/>
+								<label
+									htmlFor={`public-toggle-${game.id}`}
+									className='text-sm font-medium cursor-pointer flex-1'
+								>
+									Public Game
+								</label>
+								{/* <span className='text-xs text-muted-foreground'>
+								{isPublic ? 'Public' : 'Private'}
+							</span> */}
+							</div>
+						</div>
+					</div>
 					<div className='grid grid-cols-2 gap-2'>
 						<Button
 							variant='outline'

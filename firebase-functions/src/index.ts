@@ -5,7 +5,7 @@ import * as admin from 'firebase-admin';
 admin.initializeApp();
 
 // Import function modules
-import { createGame, getGame, getGamesByUser, updateGame, updateGameTitle, updateGamePrizes, savePlayerScore, getGameLeaderboard, getGamePlayers } from './games/games';
+import { createGame, getGame, getGamesByUser, updateGame, updateGameTitle, updateGamePublicStatus, updateGamePrizes, savePlayerScore, getGameLeaderboard, getGamePlayers } from './games/games';
 import { generateQuestions, generateSingleQuestion, getQuestions, updateQuestion, deleteQuestion, addQuestion } from './questions/questions';
 import { trackUsage, getUsage, resetUsage } from './usage/usage';
 import { userSetup } from './auth/userSetup';
@@ -17,6 +17,7 @@ export {
   getGamesByUser,
   updateGame,
   updateGameTitle,
+  updateGamePublicStatus,
   updateGamePrizes,
   savePlayerScore,
   getGameLeaderboard,

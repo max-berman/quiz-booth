@@ -23,6 +23,7 @@ export interface Game {
   userId?: string; // Firebase UID - optional for backward compatibility
   createdAt: Date;
   modifiedAt?: Date; // Track when game was last modified
+  isPublic?: boolean; // Whether the game is publicly accessible
 }
 
 export interface Question {

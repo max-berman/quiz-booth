@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useLocation } from 'wouter'
+import { Helmet } from 'react-helmet-async'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/auth-context'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
@@ -326,21 +327,41 @@ export default function Setup() {
 	}
 
 	return (
-		<div className='flex-1 bg-background py-6'>
-			<div className='max-w-4xl mx-auto px-2 lg:px-6'>
-				{/* Header */}
-				<div className='text-center my-4 lg:my-8'>
-					<h1 className='text-2xl lg:text-4xl md:text-5xl font-bold text-foreground mb-4'>
-						Create Your <span className='text-primary'>Trivia Game</span>
-					</h1>
-					<p className='text-base lg:text-lg text-foreground max-w-2xl mx-auto'>
-						Generate engaging AI-powered trivia questions for your trade show
-						booth in just a few minutes
-					</p>
-				</div>
+		<>
+			<Helmet>
+				<title>Create Trivia Game - QuizBooth</title>
+				<meta
+					name='description'
+					content="Create custom AI-powered trivia games for your business events. Generate engaging questions in minutes with QuizBooth's setup wizard."
+				/>
+				<meta property='og:title' content='Create Trivia Game - QuizBooth' />
+				<meta
+					property='og:description'
+					content="Create custom AI-powered trivia games for your business events. Generate engaging questions in minutes with QuizBooth's setup wizard."
+				/>
+				<meta property='og:url' content='https://quizbooth.games/setup' />
+				<meta name='twitter:title' content='Create Trivia Game - QuizBooth' />
+				<meta
+					name='twitter:description'
+					content="Create custom AI-powered trivia games for your business events. Generate engaging questions in minutes with QuizBooth's setup wizard."
+				/>
+				<link rel='canonical' href='https://quizbooth.games/setup' />
+			</Helmet>
+			<div className='flex-1 bg-background py-6'>
+				<div className='max-w-4xl mx-auto px-2 lg:px-6'>
+					{/* Header */}
+					<div className='text-center my-4 lg:my-8'>
+						<h1 className='text-2xl lg:text-4xl md:text-5xl font-bold text-foreground mb-4'>
+							Create Your <span className='text-primary'>Trivia Game</span>
+						</h1>
+						<p className='text-base lg:text-lg text-foreground max-w-2xl mx-auto'>
+							Generate engaging AI-powered trivia questions for your trade show
+							booth in just a few minutes
+						</p>
+					</div>
 
-				{/* Progress Steps */}
-				{/* <div className='mb-8'>
+					{/* Progress Steps */}
+					{/* <div className='mb-8'>
 					<div className='flex items-center justify-center space-x-8 mb-6 '>
 						{steps.map((step, index) => (
 							<div key={step.id} className='flex items-center'>
@@ -380,416 +401,423 @@ export default function Setup() {
 					</div>
 				</div> */}
 
-				<Card className='border-none bg-none bg-transparent py-2'>
-					{!isAuthenticated && (
-						<div className='flex items-center justify-center gap-2 text-destructive  p-2 rounded-lg'>
-							<AlertCircle className='h-5 w-5' />
-							<span className='font-medium'>
-								Sign In Required to Generate Trivia
-							</span>
-						</div>
-					)}
-					<CardContent className='p-2'>
-						<form onSubmit={handleSubmit} className='space-y-8'>
-							{/* Company Information Section */}
-							<section
-								className={`p-4 lg:p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
-									focusedSection === 1 ? 'shadow-md ' : ''
-								}`}
-								onFocus={() => setFocusedSection(1)}
-								onBlur={() => setFocusedSection(null)}
-								tabIndex={0}
-							>
-								<div className='mb-6'>
-									<h3 className='text-base md:text-xl font-bold text-foreground flex items-center'>
-										<Building className='text-foreground mr-3 h-6 w-6' />
-										Business Information
-										{checkCompanyComplete() && (
-											<CheckCircle className='ml-2 h-5 w-5 text-primary' />
-										)}
-									</h3>
-								</div>
-
-								<div className='grid md:grid-cols-2 gap-6'>
-									<div>
-										<Label
-											htmlFor='companyName'
-											className='text-base font-medium'
-										>
-											Company Name or Website *
-										</Label>
-										<Input
-											id='companyName'
-											placeholder='Enter company name or website URL'
-											value={formData.companyName}
-											onChange={(e) =>
-												setFormData((prev) => ({
-													...prev,
-													companyName: e.target.value,
-												}))
-											}
-											className={`mt-2 h-12  ${
-												formData.companyName.trim()
-													? 'border-primary'
-													: 'border-border'
-											}`}
-											required
-										/>
-										<div className='flex items-start gap-2 mt-2'>
-											<Info className='h-4 w-4 text-primary mt-0.5 flex-shrink-0' />
-											<p className='text-sm text-muted-foreground'>
-												Provide a website URL for more relevant AI-generated
-												questions, or enter your company name.
-											</p>
-										</div>
+					<Card className='border-none bg-none bg-transparent py-2'>
+						{!isAuthenticated && (
+							<div className='flex items-center justify-center gap-2 text-destructive  p-2 rounded-lg'>
+								<AlertCircle className='h-5 w-5' />
+								<span className='font-medium'>
+									Sign In Required to Generate Trivia
+								</span>
+							</div>
+						)}
+						<CardContent className='p-2'>
+							<form onSubmit={handleSubmit} className='space-y-8'>
+								{/* Company Information Section */}
+								<section
+									className={`p-4 lg:p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
+										focusedSection === 1 ? 'shadow-md ' : ''
+									}`}
+									onFocus={() => setFocusedSection(1)}
+									onBlur={() => setFocusedSection(null)}
+									tabIndex={0}
+								>
+									<div className='mb-6'>
+										<h3 className='text-base md:text-xl font-bold text-foreground flex items-center'>
+											<Building className='text-foreground mr-3 h-6 w-6' />
+											Business Information
+											{checkCompanyComplete() && (
+												<CheckCircle className='ml-2 h-5 w-5 text-primary' />
+											)}
+										</h3>
 									</div>
 
-									<div>
-										<Label htmlFor='industry' className='text-base font-medium'>
-											Industry *
-										</Label>
-										<Select
-											value={formData.industry}
-											onValueChange={(value) =>
-												setFormData((prev) => ({ ...prev, industry: value }))
-											}
-										>
-											<SelectTrigger
-												className={`mt-2 h-12 text-base ${
-													formData.industry ? 'border-primary' : 'border-border'
-												}`}
-											>
-												<SelectValue
-													className='text-base'
-													placeholder='Select your industry'
-												/>
-											</SelectTrigger>
-											<SelectContent className='text-base'>
-												{INDUSTRY_OPTIONS.map((industry) => (
-													<SelectItem key={industry} value={industry}>
-														{industry}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-									</div>
-
-									{formData.industry === 'Other' && (
+									<div className='grid md:grid-cols-2 gap-6'>
 										<div>
 											<Label
-												htmlFor='customIndustry'
+												htmlFor='companyName'
 												className='text-base font-medium'
 											>
-												Custom Industry *
+												Company Name or Website *
 											</Label>
 											<Input
-												id='customIndustry'
-												placeholder='Enter your industry'
-												value={customIndustry}
-												onChange={(e) => setCustomIndustry(e.target.value)}
-												className={`mt-2 h-12 text-base ${
-													customIndustry.trim()
+												id='companyName'
+												placeholder='Enter company name or website URL'
+												value={formData.companyName}
+												onChange={(e) =>
+													setFormData((prev) => ({
+														...prev,
+														companyName: e.target.value,
+													}))
+												}
+												className={`mt-2 h-12  ${
+													formData.companyName.trim()
 														? 'border-primary'
 														: 'border-border'
 												}`}
 												required
 											/>
+											<div className='flex items-start gap-2 mt-2'>
+												<Info className='h-4 w-4 text-primary mt-0.5 flex-shrink-0' />
+												<p className='text-sm text-muted-foreground'>
+													Provide a website URL for more relevant AI-generated
+													questions, or enter your company name.
+												</p>
+											</div>
 										</div>
-									)}
 
-									<div className='md:col-span-2'>
-										<Label
-											htmlFor='productDescription'
-											className='text-base font-medium'
-										>
-											Product/Service Focus (Optional)
-										</Label>
-										<Textarea
-											id='productDescription'
-											placeholder='Describe your main products or services to get more targeted questions...'
-											value={formData.productDescription}
-											onChange={(e) =>
-												setFormData((prev) => ({
-													...prev,
-													productDescription: e.target.value,
-												}))
-											}
-											className={`mt-2  ${
-												formData.productDescription.trim()
-													? 'border-primary'
-													: 'border-border'
-											}`}
-											rows={3}
-										/>
-									</div>
-								</div>
-							</section>
+										<div>
+											<Label
+												htmlFor='industry'
+												className='text-base font-medium'
+											>
+												Industry *
+											</Label>
+											<Select
+												value={formData.industry}
+												onValueChange={(value) =>
+													setFormData((prev) => ({ ...prev, industry: value }))
+												}
+											>
+												<SelectTrigger
+													className={`mt-2 h-12 text-base ${
+														formData.industry
+															? 'border-primary'
+															: 'border-border'
+													}`}
+												>
+													<SelectValue
+														className='text-base'
+														placeholder='Select your industry'
+													/>
+												</SelectTrigger>
+												<SelectContent className='text-base'>
+													{INDUSTRY_OPTIONS.map((industry) => (
+														<SelectItem key={industry} value={industry}>
+															{industry}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										</div>
 
-							{/* Game Settings Section */}
-							<section
-								className={`p-4 lg:p-6 bg-popover rounded-xl  border-2 transition-all border-accent ${
-									focusedSection === 2 ? 'shadow-md ' : ''
-								}`}
-								onFocus={() => setFocusedSection(2)}
-								onBlur={() => setFocusedSection(null)}
-								tabIndex={0}
-							>
-								<div className='mb-6'>
-									<h3 className='text-base md:text-xl  font-bold text-foreground flex items-center'>
-										<Settings className='text-foreground mr-3 h-6 w-6' />
-										Game Settings
-										{checkSettingsComplete() && (
-											<CheckCircle className='ml-2 h-5 w-5 text-primary' />
+										{formData.industry === 'Other' && (
+											<div>
+												<Label
+													htmlFor='customIndustry'
+													className='text-base font-medium'
+												>
+													Custom Industry *
+												</Label>
+												<Input
+													id='customIndustry'
+													placeholder='Enter your industry'
+													value={customIndustry}
+													onChange={(e) => setCustomIndustry(e.target.value)}
+													className={`mt-2 h-12 text-base ${
+														customIndustry.trim()
+															? 'border-primary'
+															: 'border-border'
+													}`}
+													required
+												/>
+											</div>
 										)}
-									</h3>
-								</div>
 
-								<div className='grid md:grid-cols-2 gap-4'>
-									<div>
-										<Label
-											htmlFor='questionCount'
-											className='text-base font-medium'
-										>
-											Number of Questions
-										</Label>
-										<Select
-											value={formData.questionCount}
-											onValueChange={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													questionCount: value,
-												}))
-											}
-										>
-											<SelectTrigger
-												className={`mt-2 h-12 text-base ${
-													formData.questionCount
+										<div className='md:col-span-2'>
+											<Label
+												htmlFor='productDescription'
+												className='text-base font-medium'
+											>
+												Product/Service Focus (Optional)
+											</Label>
+											<Textarea
+												id='productDescription'
+												placeholder='Describe your main products or services to get more targeted questions...'
+												value={formData.productDescription}
+												onChange={(e) =>
+													setFormData((prev) => ({
+														...prev,
+														productDescription: e.target.value,
+													}))
+												}
+												className={`mt-2  ${
+													formData.productDescription.trim()
 														? 'border-primary'
 														: 'border-border'
 												}`}
-											>
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												{QUESTION_COUNT_OPTIONS.map((option) => (
-													<SelectItem key={option.value} value={option.value}>
-														{option.label}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
+												rows={3}
+											/>
+										</div>
+									</div>
+								</section>
+
+								{/* Game Settings Section */}
+								<section
+									className={`p-4 lg:p-6 bg-popover rounded-xl  border-2 transition-all border-accent ${
+										focusedSection === 2 ? 'shadow-md ' : ''
+									}`}
+									onFocus={() => setFocusedSection(2)}
+									onBlur={() => setFocusedSection(null)}
+									tabIndex={0}
+								>
+									<div className='mb-6'>
+										<h3 className='text-base md:text-xl  font-bold text-foreground flex items-center'>
+											<Settings className='text-foreground mr-3 h-6 w-6' />
+											Game Settings
+											{checkSettingsComplete() && (
+												<CheckCircle className='ml-2 h-5 w-5 text-primary' />
+											)}
+										</h3>
 									</div>
 
-									<div>
-										<Label className='text-base font-medium'>
-											Difficulty Level
-										</Label>
-										<div className='grid grid-cols-3 gap-3 mt-3'>
-											{DIFFICULTY_OPTIONS.map(({ level, label }) => (
-												<Button
-													key={level}
-													type='button'
-													variant={difficulty === level ? 'outline' : 'link'}
-													className='h-8 flex flex-col hover:scale-100'
-													onClick={() => setDifficulty(level)}
+									<div className='grid md:grid-cols-2 gap-4'>
+										<div>
+											<Label
+												htmlFor='questionCount'
+												className='text-base font-medium'
+											>
+												Number of Questions
+											</Label>
+											<Select
+												value={formData.questionCount}
+												onValueChange={(value) =>
+													setFormData((prev) => ({
+														...prev,
+														questionCount: value,
+													}))
+												}
+											>
+												<SelectTrigger
+													className={`mt-2 h-12 text-base ${
+														formData.questionCount
+															? 'border-primary'
+															: 'border-border'
+													}`}
 												>
-													<span
-														className={` ${
-															difficulty === level ? 'font-bold' : 'font-medium'
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													{QUESTION_COUNT_OPTIONS.map((option) => (
+														<SelectItem key={option.value} value={option.value}>
+															{option.label}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										</div>
+
+										<div>
+											<Label className='text-base font-medium'>
+												Difficulty Level
+											</Label>
+											<div className='grid grid-cols-3 gap-3 mt-3'>
+												{DIFFICULTY_OPTIONS.map(({ level, label }) => (
+													<Button
+														key={level}
+														type='button'
+														variant={difficulty === level ? 'outline' : 'link'}
+														className='h-8 flex flex-col hover:scale-100'
+														onClick={() => setDifficulty(level)}
+													>
+														<span
+															className={` ${
+																difficulty === level
+																	? 'font-bold'
+																	: 'font-medium'
+															}`}
+														>
+															{label}
+														</span>
+													</Button>
+												))}
+											</div>
+										</div>
+
+										<div className='md:col-span-2'>
+											<Label className='text-base font-medium'>
+												Question Categories *
+											</Label>
+											<div className='grid grid-cols-1 sm:grid-cols-2 gap-4  mt-3'>
+												{CATEGORY_OPTIONS.map(({ key, label, desc }) => (
+													<div
+														key={key}
+														className={`p-2 border rounded-lg transition-all ${
+															categories[key as keyof typeof categories]
+																? 'border-primary bg-background'
+																: 'border-primary border-dashed hover:border-solid'
 														}`}
 													>
-														{label}
-													</span>
-												</Button>
-											))}
-										</div>
-									</div>
-
-									<div className='md:col-span-2'>
-										<Label className='text-base font-medium'>
-											Question Categories *
-										</Label>
-										<div className='grid grid-cols-1 sm:grid-cols-2 gap-4  mt-3'>
-											{CATEGORY_OPTIONS.map(({ key, label, desc }) => (
-												<div
-													key={key}
-													className={`p-2 border rounded-lg transition-all ${
-														categories[key as keyof typeof categories]
-															? 'border-primary bg-background'
-															: 'border-primary border-dashed hover:border-solid'
-													}`}
-												>
-													<div className='flex items-start space-x-2'>
-														<Checkbox
-															id={key}
-															className='mt-1'
-															checked={
-																categories[key as keyof typeof categories]
-															}
-															onCheckedChange={() =>
-																toggleCategory(key as keyof Categories)
-															}
-														/>
-														<label
-															htmlFor={key}
-															className='cursor-pointer flex-1'
-														>
-															<span className='font-bold'>{label}</span>
-															<p className='text-sm text-muted-foreground'>
-																{desc}
-															</p>
-														</label>
+														<div className='flex items-start space-x-2'>
+															<Checkbox
+																id={key}
+																className='mt-1'
+																checked={
+																	categories[key as keyof typeof categories]
+																}
+																onCheckedChange={() =>
+																	toggleCategory(key as keyof Categories)
+																}
+															/>
+															<label
+																htmlFor={key}
+																className='cursor-pointer flex-1'
+															>
+																<span className='font-bold'>{label}</span>
+																<p className='text-sm text-muted-foreground'>
+																	{desc}
+																</p>
+															</label>
+														</div>
 													</div>
+												))}
+											</div>
+											{categories.other && (
+												<div className='mt-4 rounded-lg'>
+													<Label
+														htmlFor='customCategory'
+														className='text-base font-medium'
+													>
+														Describe your custom questions
+													</Label>
+													<Textarea
+														id='customCategory'
+														placeholder='e.g., questions about sustainable packaging, our company history, or specific product features'
+														value={customCategory}
+														onChange={(e) => setCustomCategory(e.target.value)}
+														className={`mt-2 ${
+															customCategory.trim()
+																? 'border-primary'
+																: 'border-border'
+														}`}
+														rows={2}
+													/>
 												</div>
-											))}
-										</div>
-										{categories.other && (
-											<div className='mt-4 rounded-lg'>
-												<Label
-													htmlFor='customCategory'
-													className='text-base font-medium'
-												>
-													Describe your custom questions
-												</Label>
-												<Textarea
-													id='customCategory'
-													placeholder='e.g., questions about sustainable packaging, our company history, or specific product features'
-													value={customCategory}
-													onChange={(e) => setCustomCategory(e.target.value)}
-													className={`mt-2 ${
-														customCategory.trim()
-															? 'border-primary'
-															: 'border-border'
-													}`}
-													rows={2}
-												/>
-											</div>
-										)}
-										{!Object.values(categories).some(Boolean) && (
-											<div className='flex items-center gap-2 mt-2 text-destructive'>
-												<AlertCircle className='h-4 w-4' />
-												<span className='text-sm'>
-													Please select at least one category
-												</span>
-											</div>
-										)}
-									</div>
-								</div>
-							</section>
-
-							{/* Prize Settings Section */}
-							<section
-								className={`p-4 lg:p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
-									focusedSection === 3 ? 'shadow-md ' : ''
-								}`}
-								onFocus={() => setFocusedSection(3)}
-								onBlur={() => setFocusedSection(null)}
-								tabIndex={0}
-							>
-								<div className='flex flex-col md:flex-row justify-between mb-6'>
-									<h3 className='text-base mb-2 md:mb-0 md:text-xl font-bold text-foreground flex items-center'>
-										<Gift className='text-foreground mr-2 h-6 w-6' />
-										Prize Information (Optional)
-										{/* <CheckCircle className='ml-2 h-5 w-5 text-primary' /> */}
-									</h3>
-									<Button
-										type='button'
-										variant='outline'
-										size='sm'
-										onClick={addPrize}
-										className='flex items-center gap-1 w-1/3 md:w-auto  self-end'
-									>
-										<Plus className='h-2 w-2' />
-										Add Prize
-									</Button>
-								</div>
-
-								<div className='space-y-4'>
-									{prizes.map((prize, index) => (
-										<div
-											key={index}
-											className='flex gap-3 items-end p-4  rounded-lg border'
-										>
-											<div className='flex-1'>
-												<Label
-													htmlFor={`placement-${index}`}
-													className='text-base font-medium'
-												>
-													Placement
-												</Label>
-												<Input
-													id={`placement-${index}`}
-													placeholder='e.g., 1st Place, Top 10, etc.'
-													value={prize.placement}
-													onChange={(e) =>
-														updatePrize(index, 'placement', e.target.value)
-													}
-													className={`mt-2 h-10 ${
-														prize.placement.trim()
-															? 'border-primary'
-															: 'border-border'
-													}`}
-												/>
-											</div>
-											<div className='flex-1'>
-												<Label
-													htmlFor={`prize-${index}`}
-													className='text-base font-medium'
-												>
-													Prize
-												</Label>
-												<Input
-													id={`prize-${index}`}
-													placeholder='e.g., $100 Gift Card'
-													value={prize.prize}
-													onChange={(e) =>
-														updatePrize(index, 'prize', e.target.value)
-													}
-													className={`mt-2 h-10 ${
-														prize.prize.trim()
-															? 'border-primary'
-															: 'border-border'
-													}`}
-												/>
-											</div>
-											{prizes.length > 1 && (
-												<Button
-													type='button'
-													variant='outline'
-													size='sm'
-													onClick={() => removePrize(index)}
-													className='h-10 w-10 p-0'
-												>
-													<X className='h-2 w-2' />
-												</Button>
+											)}
+											{!Object.values(categories).some(Boolean) && (
+												<div className='flex items-center gap-2 mt-2 text-destructive'>
+													<AlertCircle className='h-4 w-4' />
+													<span className='text-sm'>
+														Please select at least one category
+													</span>
+												</div>
 											)}
 										</div>
-									))}
-									<div className='flex items-start gap-2 p-4 bg-muted rounded-lg'>
-										<Info className='h-4 w-4 text-primary mt-0.5 flex-shrink-0' />
-										<p className='text-sm text-primary'>
-											Add prizes to motivate participation. You can customize
-											placements (e.g., "4th Place", "Top 10", "Best Score") to
-											match your event needs.
-										</p>
 									</div>
-								</div>
-							</section>
+								</section>
 
-							{/* Submit Section */}
-							<section className='p-0'>
-								<div className='text-center space-y-2'>
-									{isAuthenticated &&
-										(!checkCompanyComplete() || !checkSettingsComplete()) && (
-											<div className='flex items-center justify-center gap-2 text-destructive'>
-												<AlertCircle className='h-4 w-4' />
-												<span className='text-sm'>
-													Please complete required sections above
-												</span>
+								{/* Prize Settings Section */}
+								<section
+									className={`p-4 lg:p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
+										focusedSection === 3 ? 'shadow-md ' : ''
+									}`}
+									onFocus={() => setFocusedSection(3)}
+									onBlur={() => setFocusedSection(null)}
+									tabIndex={0}
+								>
+									<div className='flex flex-col md:flex-row justify-between mb-6'>
+										<h3 className='text-base mb-2 md:mb-0 md:text-xl font-bold text-foreground flex items-center'>
+											<Gift className='text-foreground mr-2 h-6 w-6' />
+											Prize Information (Optional)
+											{/* <CheckCircle className='ml-2 h-5 w-5 text-primary' /> */}
+										</h3>
+										<Button
+											type='button'
+											variant='outline'
+											size='sm'
+											onClick={addPrize}
+											className='flex items-center gap-1 w-1/3 md:w-auto  self-end'
+										>
+											<Plus className='h-2 w-2' />
+											Add Prize
+										</Button>
+									</div>
+
+									<div className='space-y-4'>
+										{prizes.map((prize, index) => (
+											<div
+												key={index}
+												className='flex gap-3 items-end p-4  rounded-lg border'
+											>
+												<div className='flex-1'>
+													<Label
+														htmlFor={`placement-${index}`}
+														className='text-base font-medium'
+													>
+														Placement
+													</Label>
+													<Input
+														id={`placement-${index}`}
+														placeholder='e.g., 1st Place, Top 10, etc.'
+														value={prize.placement}
+														onChange={(e) =>
+															updatePrize(index, 'placement', e.target.value)
+														}
+														className={`mt-2 h-10 ${
+															prize.placement.trim()
+																? 'border-primary'
+																: 'border-border'
+														}`}
+													/>
+												</div>
+												<div className='flex-1'>
+													<Label
+														htmlFor={`prize-${index}`}
+														className='text-base font-medium'
+													>
+														Prize
+													</Label>
+													<Input
+														id={`prize-${index}`}
+														placeholder='e.g., $100 Gift Card'
+														value={prize.prize}
+														onChange={(e) =>
+															updatePrize(index, 'prize', e.target.value)
+														}
+														className={`mt-2 h-10 ${
+															prize.prize.trim()
+																? 'border-primary'
+																: 'border-border'
+														}`}
+													/>
+												</div>
+												{prizes.length > 1 && (
+													<Button
+														type='button'
+														variant='outline'
+														size='sm'
+														onClick={() => removePrize(index)}
+														className='h-10 w-10 p-0'
+													>
+														<X className='h-2 w-2' />
+													</Button>
+												)}
 											</div>
-										)}
+										))}
+										<div className='flex items-start gap-2 p-4 bg-muted rounded-lg'>
+											<Info className='h-4 w-4 text-primary mt-0.5 flex-shrink-0' />
+											<p className='text-sm text-primary'>
+												Add prizes to motivate participation. You can customize
+												placements (e.g., "4th Place", "Top 10", "Best Score")
+												to match your event needs.
+											</p>
+										</div>
+									</div>
+								</section>
 
-									{/* {isAuthenticated && (
+								{/* Submit Section */}
+								<section className='p-0'>
+									<div className='text-center space-y-2'>
+										{isAuthenticated &&
+											(!checkCompanyComplete() || !checkSettingsComplete()) && (
+												<div className='flex items-center justify-center gap-2 text-destructive'>
+													<AlertCircle className='h-4 w-4' />
+													<span className='text-sm'>
+														Please complete required sections above
+													</span>
+												</div>
+											)}
+
+										{/* {isAuthenticated && (
 										<div className='flex items-center justify-center gap-2 text-primary'>
 											<CheckCircle className='h-5 w-5' />
 											<span className='font-medium'>
@@ -798,30 +826,31 @@ export default function Setup() {
 										</div>
 									)} */}
 
-									<Button
-										type='submit'
-										size='lg'
-										className='px-4 py-4 font-bold text-base lg:text-lg rounded-xl'
-										disabled={
-											createGameMutation.isPending ||
-											!isAuthenticated ||
-											!checkCompanyComplete() ||
-											!checkSettingsComplete()
-										}
-									>
-										<Wand2 className='mr-3 h-5 w-5' />
-										{!isAuthenticated
-											? 'Sign In to Generate Trivia'
-											: createGameMutation.isPending
-											? 'Creating...'
-											: 'Generate Trivia Game'}
-									</Button>
-								</div>
-							</section>
-						</form>
-					</CardContent>
-				</Card>
+										<Button
+											type='submit'
+											size='lg'
+											className='px-4 py-4 font-bold text-base lg:text-lg rounded-xl'
+											disabled={
+												createGameMutation.isPending ||
+												!isAuthenticated ||
+												!checkCompanyComplete() ||
+												!checkSettingsComplete()
+											}
+										>
+											<Wand2 className='mr-3 h-5 w-5' />
+											{!isAuthenticated
+												? 'Sign In to Generate Trivia'
+												: createGameMutation.isPending
+												? 'Creating...'
+												: 'Generate Trivia Game'}
+										</Button>
+									</div>
+								</section>
+							</form>
+						</CardContent>
+					</Card>
+				</div>
 			</div>
-		</div>
+		</>
 	)
 }

@@ -469,6 +469,19 @@ export const getQuestions = functions.https.onCall(async (data, context) => {
   const { gameId } = data;
 
   try {
+    // Verify game exists and user has access
+    const gameDoc = await db.collection('games').doc(gameId).get();
+    if (!gameDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Game not found');
+    }
+
+    const gameData = gameDoc.data();
+
+    // Check if game is public or user has access
+    if (!gameData?.isPublic && (!context.auth || gameData?.userId !== context.auth.uid)) {
+      throw new functions.https.HttpsError('permission-denied', 'Access denied');
+    }
+
     const questionsSnapshot = await db
       .collection('questions')
       .where('gameId', '==', gameId)
@@ -480,6 +493,9 @@ export const getQuestions = functions.https.onCall(async (data, context) => {
     return questions.sort((a, b) => (a.order || 0) - (b.order || 0));
   } catch (error) {
     console.error('Get questions error:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
     throw new functions.https.HttpsError('internal', 'Failed to get questions');
   }
 });

@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userSetup = exports.resetUsage = exports.getUsage = exports.trackUsage = exports.addQuestion = exports.deleteQuestion = exports.updateQuestion = exports.getQuestions = exports.generateSingleQuestion = exports.generateQuestions = exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
+exports.userSetup = exports.resetUsage = exports.getUsage = exports.trackUsage = exports.addQuestion = exports.deleteQuestion = exports.updateQuestion = exports.getQuestions = exports.generateSingleQuestion = exports.generateQuestions = exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
 // import * as functions from 'firebase-functions';
 const admin = __importStar(require("firebase-admin"));
 // Initialize Firebase Admin
@@ -35,6 +35,7 @@ Object.defineProperty(exports, "getGame", { enumerable: true, get: function () {
 Object.defineProperty(exports, "getGamesByUser", { enumerable: true, get: function () { return games_1.getGamesByUser; } });
 Object.defineProperty(exports, "updateGame", { enumerable: true, get: function () { return games_1.updateGame; } });
 Object.defineProperty(exports, "updateGameTitle", { enumerable: true, get: function () { return games_1.updateGameTitle; } });
+Object.defineProperty(exports, "updateGamePublicStatus", { enumerable: true, get: function () { return games_1.updateGamePublicStatus; } });
 Object.defineProperty(exports, "updateGamePrizes", { enumerable: true, get: function () { return games_1.updateGamePrizes; } });
 Object.defineProperty(exports, "savePlayerScore", { enumerable: true, get: function () { return games_1.savePlayerScore; } });
 Object.defineProperty(exports, "getGameLeaderboard", { enumerable: true, get: function () { return games_1.getGameLeaderboard; } });

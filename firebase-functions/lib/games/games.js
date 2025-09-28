@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
+exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const crypto_1 = require("crypto");
@@ -112,7 +112,7 @@ exports.createGame = functions.runWith({
             createdAt: firestore_1.Timestamp.fromDate(now),
             modifiedAt: firestore_1.Timestamp.fromDate(now),
             status: 'draft',
-            isPublic: false,
+            isPublic: true,
         };
         await db.collection('games').doc(gameId).set(gameData);
         return {
@@ -137,7 +137,7 @@ exports.createGame = functions.runWith({
 });
 // Get game by ID
 exports.getGame = functions.https.onCall(async (data, context) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     const { gameId } = data;
     try {
         const gameDoc = await db.collection('games').doc(gameId).get();
@@ -168,7 +168,17 @@ exports.getGame = functions.https.onCall(async (data, context) => {
             };
         }
         else {
-            throw new functions.https.HttpsError('permission-denied', 'Access denied');
+            // Shared game (not public but accessible via direct link)
+            // Return limited data for shared games
+            return {
+                id: gameData === null || gameData === void 0 ? void 0 : gameData.id,
+                gameTitle: gameData === null || gameData === void 0 ? void 0 : gameData.gameTitle,
+                companyName: gameData === null || gameData === void 0 ? void 0 : gameData.companyName,
+                industry: gameData === null || gameData === void 0 ? void 0 : gameData.industry,
+                prizes: prizesArray,
+                isPublic: false,
+                createdAt: (_m = (_l = (_k = gameData === null || gameData === void 0 ? void 0 : gameData.createdAt) === null || _k === void 0 ? void 0 : _k.toDate) === null || _l === void 0 ? void 0 : _l.call(_k)) === null || _m === void 0 ? void 0 : _m.toISOString(),
+            };
         }
     }
     catch (error) {
@@ -279,6 +289,39 @@ exports.updateGameTitle = functions.https.onCall(async (data, context) => {
             throw error;
         }
         throw new functions.https.HttpsError('internal', 'Failed to update game title');
+    }
+});
+// Update game public status
+exports.updateGamePublicStatus = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+    }
+    const userId = context.auth.uid;
+    const { gameId, isPublic } = data;
+    try {
+        // Verify user owns the game
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+        const gameData = gameDoc.data();
+        if ((gameData === null || gameData === void 0 ? void 0 : gameData.userId) !== userId) {
+            throw new functions.https.HttpsError('permission-denied', 'Access denied');
+        }
+        // Update game public status
+        const now = new Date();
+        await db.collection('games').doc(gameId).update({
+            isPublic,
+            modifiedAt: firestore_1.Timestamp.fromDate(now),
+        });
+        return { success: true, isPublic };
+    }
+    catch (error) {
+        console.error('Update game public status error:', error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError('internal', 'Failed to update game public status');
     }
 });
 // Update game prizes

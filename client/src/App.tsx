@@ -1,5 +1,6 @@
 import { Switch, Route, useLocation } from 'wouter'
 import { Suspense, lazy } from 'react'
+import { Helmet, HelmetProvider } from 'react-helmet-async'
 import { queryClient } from './lib/queryClient'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/toaster'
@@ -53,19 +54,21 @@ function App() {
 	const showFooter = !isGamePlayPage
 
 	return (
-		<QueryClientProvider client={queryClient}>
-			<TooltipProvider>
-				<AuthProvider>
-					<div className='h-screen bg-background flex flex-col'>
-						{/* CreatorHeader is intentionally hidden on game pages to maintain immersive gameplay experience */}
-						<CreatorHeader />
-						<Router />
-						{showFooter && <Footer />}
-					</div>
-					<Toaster />
-				</AuthProvider>
-			</TooltipProvider>
-		</QueryClientProvider>
+		<HelmetProvider>
+			<QueryClientProvider client={queryClient}>
+				<TooltipProvider>
+					<AuthProvider>
+						<div className='h-screen bg-background flex flex-col'>
+							{/* CreatorHeader is intentionally hidden on game pages to maintain immersive gameplay experience */}
+							<CreatorHeader />
+							<Router />
+							{showFooter && <Footer />}
+						</div>
+						<Toaster />
+					</AuthProvider>
+				</TooltipProvider>
+			</QueryClientProvider>
+		</HelmetProvider>
 	)
 }
 

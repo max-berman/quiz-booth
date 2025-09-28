@@ -101,7 +101,7 @@ export const createGame = functions.runWith({
       createdAt: Timestamp.fromDate(now),
       modifiedAt: Timestamp.fromDate(now),
       status: 'draft',
-      isPublic: false,
+      isPublic: true,
     };
 
     await db.collection('games').doc(gameId).set(gameData);
@@ -166,7 +166,17 @@ export const getGame = functions.https.onCall(async (data, context) => {
         createdAt: gameData?.createdAt?.toDate?.()?.toISOString(),
       };
     } else {
-      throw new functions.https.HttpsError('permission-denied', 'Access denied');
+      // Shared game (not public but accessible via direct link)
+      // Return limited data for shared games
+      return {
+        id: gameData?.id,
+        gameTitle: gameData?.gameTitle,
+        companyName: gameData?.companyName,
+        industry: gameData?.industry,
+        prizes: prizesArray,
+        isPublic: false,
+        createdAt: gameData?.createdAt?.toDate?.()?.toISOString(),
+      };
     }
   } catch (error) {
     console.error('Get game error:', error);
@@ -313,6 +323,47 @@ export const updateGameTitle = functions.https.onCall(async (data, context) => {
       throw error;
     }
     throw new functions.https.HttpsError('internal', 'Failed to update game title');
+  }
+});
+
+// Update game public status
+export const updateGamePublicStatus = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'User must be authenticated'
+    );
+  }
+
+  const userId = context.auth.uid;
+  const { gameId, isPublic } = data;
+
+  try {
+    // Verify user owns the game
+    const gameDoc = await db.collection('games').doc(gameId).get();
+    if (!gameDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Game not found');
+    }
+
+    const gameData = gameDoc.data();
+    if (gameData?.userId !== userId) {
+      throw new functions.https.HttpsError('permission-denied', 'Access denied');
+    }
+
+    // Update game public status
+    const now = new Date();
+    await db.collection('games').doc(gameId).update({
+      isPublic,
+      modifiedAt: Timestamp.fromDate(now),
+    });
+
+    return { success: true, isPublic };
+  } catch (error) {
+    console.error('Update game public status error:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError('internal', 'Failed to update game public status');
   }
 });
 

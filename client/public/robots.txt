@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://quizbooth.games/sitemap.xml
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+
+# Allow all other paths
+Allow: /assets/
+Allow: /game/
+Allow: /results/
+Allow: /leaderboard/
+Allow: /submissions/
+Allow: /edit-questions/
+Allow: /game-created/
+Allow: /auth/
