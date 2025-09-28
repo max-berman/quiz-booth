@@ -138,7 +138,6 @@ export default function GamePage() {
 							rel='noopener noreferrer'
 						>
 							<img
-								// src='/assets/owl.svg'
 								src='/assets/logo.png'
 								alt='NaknNick games logo'
 								className='h-32 w-auto '
@@ -157,9 +156,9 @@ export default function GamePage() {
 		<div className='flex-1 bg-background'>
 			{/* Top Navigation Bar */}
 			<div className='sticky top-0 z-50 bg-background/80 backdrop-blur-sm shadow-md'>
-				<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
-					<div className='flex items-center justify-between h-20'>
-						<Button
+				<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8'>
+					<ul className='flex items-center justify-between h-20'>
+						{/* <Button
 							variant='secondary'
 							size='sm'
 							onClick={() => setLocation('/')}
@@ -167,41 +166,49 @@ export default function GamePage() {
 						>
 							<Home className='h-4 w-4' />
 							Home
-						</Button>
+						</Button> */}
 
-						<div className='text-center'>
-							<div className='text-sm font-medium text-foreground'>
+						<li className='w-1/4 flex justify-start'>
+							<a href='/' target='_blank' rel='noopener noreferrer'>
+								<img
+									src='/assets/logo_.svg'
+									alt='QuizBooth.games logo'
+									className='h-8 w-auto'
+								/>
+							</a>
+						</li>
+
+						<li className='w-2/4 flex justify-center'>
+							<a href='/' target='_blank' rel='noopener noreferrer'>
 								<img
 									src='/assets/naknick-logo.png'
 									alt='QuizBooth.games logo'
-									className='h-14 w-auto'
+									className='max-h-16 w-auto'
 								/>
-							</div>
-						</div>
+							</a>
+						</li>
 
-						{isAnswered && (
-							<Button
-								size='sm'
-								onClick={handleNextQuestion}
-								className='flex items-center gap-2 !text-white'
-							>
-								{currentQuestionIndex < questions.length - 1 ? (
-									<>
-										Next <ArrowRight className='h-4 w-4' />
-									</>
-								) : (
-									'Finish'
-								)}
-							</Button>
-						)}
-
-						{!isAnswered && (
-							<div className='w-[84px]' /> /* Placeholder to center the middle content */
-						)}
-					</div>
+						<li className='w-1/4 flex justify-end'>
+							{isAnswered && (
+								<Button
+									size='sm'
+									onClick={handleNextQuestion}
+									className='flex items-center gap-2 !text-white'
+								>
+									{currentQuestionIndex < questions.length - 1 ? (
+										<>
+											Next <ArrowRight className='h-4 w-4' />
+										</>
+									) : (
+										'Finish'
+									)}
+								</Button>
+							)}
+						</li>
+					</ul>
 				</div>
 			</div>
-			<div className='max-w-4xl mx-auto px-4 lg:px-8 py-4 space-y-4 text-primary'>
+			<div className='max-w-4xl mx-auto px-0 lg:px-6 py-4 space-y-4 text-primary'>
 				{/* Timer and Stats - Compact version */}
 				<div className='flex justify-between items-center w-full'>
 					<div className='text-center p-2  h-full min-w-[60px]'>
@@ -263,18 +270,18 @@ export default function GamePage() {
 					*/}
 
 				{/* Question Card - Optimized for future customization */}
-				<Card className='game-card animate-slide-up shadow-md  border-border'>
-					<CardContent className='p-4 md:p-8'>
+				<Card className='game-card animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'>
+					<CardContent className='p-0 pb-4 md:p-6'>
 						{/* Question Text - Optimized for readability */}
 						<div className='mb-2'>
-							<div className='bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-6 mb-8'>
-								<h2 className='text-xl md:text-2xl font-bold text-primary leading-relaxed text-center'>
+							<div className='bg-gradient-to-r from-primary/10 to-secondary/10 rounded-none md:rounded-2xl p-4 mb-4'>
+								<h2 className='text-lg md:text-2xl font-bold text-primary leading-relaxed text-center'>
 									{currentQuestion?.questionText}
 								</h2>
 							</div>
 
 							{/* Answer Options - Better spacing and visual hierarchy */}
-							<div className='space-y-4'>
+							<div className='space-y-4 px-4 md:px-0'>
 								{currentQuestion?.options.map((option, index) => {
 									// Helper function to determine button styling based on answer state
 									const getButtonClasses = () => {
@@ -359,7 +366,7 @@ export default function GamePage() {
 
 							{/* Explanation - Enhanced styling */}
 							{showExplanation && currentQuestion?.explanation && (
-								<div className='mt-6 p-6 bg-background/70 rounded-sm shadow-md animate-slide-up'>
+								<div className='mt-6 mx-4 md:mx-0 p-6 bg-background/70 rounded-2xl shadow-md animate-slide-up'>
 									<div className='flex items-center gap-3 mb-4'>
 										<div className='w-10 h-10 bg-primary rounded-full flex items-center justify-center'>
 											{/* <span className='text-white text-lg'>💡</span> */}
@@ -397,7 +404,7 @@ export default function GamePage() {
 						)}
 					</CardContent>
 				</Card>
-				<div className='flex items-center justify-center'>
+				<div className='flex items-center justify-center mb-2'>
 					<a
 						href='https://www.naknick.com'
 						target='_blank'

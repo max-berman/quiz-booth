@@ -94,59 +94,59 @@ export default function Results() {
 	}
 
 	return (
-		<div className='flex-1 py-8 flex items-center'>
-			<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
-				<Card className='shadow-xl border-border'>
-					<CardContent className='p-8 text-center'>
-						<div className='mb-8'>
-							<div className='w-20  bg-background h-20 text-4xl rounded-full flex items-center justify-center mx-auto mb-4'>
-								<Trophy className='h-12 w-12 text-primary' />
+		<div className='flex-1 py-4 flex items-center'>
+			<div className='w-full md:max-w-4xl mx-auto px-2 md:px-6'>
+				<Card className='shadow-smmd:shadow-xl border-border'>
+					<CardContent className='p-4 md:p-8 text-center'>
+						<div className='mb-4'>
+							<div className=' w-16 h-16 md:w-20 md:h-20 border-primary border-2 bg-background  text-4xl rounded-full flex items-center justify-center mx-auto mb-4'>
+								<Trophy className='h-8 w-8 md:h-12 md:w-12 text-primary ' />
 							</div>
-							<h3 className='text-3xl font-bold text-dark mb-2 text-primary'>
+							<h3 className='text-2xl md:text-3xl font-bold text-dark mb-2 text-primary'>
 								Game Complete!
 							</h3>
 							<p className='text-primary'>Here are your results</p>
 						</div>
 
-						<div className='grid md:grid-cols-4 gap-6 mb-8'>
-							<div className='p-6 rounded-xl bg-primary/30'>
-								<div className='text-3xl font-bold text-primary mb-2'>
+						<ul className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-2'>
+							<li className='p-2 md:p-6 rounded-xl bg-primary/30'>
+								<div className='text-xl md:text-3xl font-bold text-primary mb-2'>
 									{score}
 								</div>
 								<div className='text-sm font-medium text-card-foreground'>
 									Final Score
 								</div>
-							</div>
-							<div className='p-6 rounded-xl bg-primary/25'>
-								<div className='text-3xl font-bold text-primary mb-2'>
+							</li>
+							<li className='p-2 md:p-6 rounded-xl bg-primary/25'>
+								<div className='text-xl md:text-3xl font-bold text-primary mb-2'>
 									{correctAnswers}/{totalQuestions}
 								</div>
 								<div className='text-sm font-medium text-card-foreground'>
 									Correct Answers
 								</div>
-							</div>
-							<div className='p-6 rounded-xl bg-primary/20'>
-								<div className='text-3xl font-bold text-primary mb-2'>
+							</li>
+							<li className='p-2 md:p-6 rounded-xl bg-primary/20'>
+								<div className='text-xl md:text-3xl font-bold text-primary mb-2'>
 									{streak}
 								</div>
 								<div className='text-sm font-medium text-card-foreground'>
 									Final Streak
 								</div>
-							</div>
-							<div className='p-6 rounded-xl bg-primary/15'>
-								<div className='text-3xl font-bold text-primary mb-2'>
+							</li>
+							<li className='p-2 md:p-6 rounded-xl bg-primary/15'>
+								<div className='text-xl md:text-3xl font-bold text-primary mb-2'>
 									{formatTime(timeSpent)}
 								</div>
 								<div className='text-sm font-medium text-card-foreground'>
 									Time Taken
 								</div>
-							</div>
-						</div>
+							</li>
+						</ul>
 
 						{/* Player Registration */}
 						{!isScoreSaved && (
 							<div className='bg-accent/10 p-4 rounded-xl mb-6'>
-								<h3 className='text-lg font-semibold text-primary mb-4'>
+								<h3 className='text-base md:text-lg font-semibold text-primary mb-4'>
 									Save Your Score to Leaderboard
 								</h3>
 								<div className='grid sm:grid-cols-2 gap-4 mb-4'>
@@ -173,7 +173,7 @@ export default function Results() {
 								<Button
 									onClick={handleSaveScore}
 									disabled={saveScoreMutation.isPending}
-									className='px-6 py-3'
+									className='px-6 py-3 text-lg'
 								>
 									Save Score
 								</Button>
