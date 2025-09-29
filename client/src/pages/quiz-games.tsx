@@ -207,14 +207,14 @@ export default function Quizzes() {
 									<h3 className='font-semibold text-foreground mb-4'>
 										Industry
 									</h3>
-									<div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
+									<div className='grid px-2 grid-cols-2 md:grid-cols-3 gap-2'>
 										{industries.map((industry) => (
 											<button
 												key={industry}
 												onClick={() => handleIndustryChange(industry)}
-												className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+												className={`px-1 py-1 rounded-lg text-xs border transition-colors ${
 													selectedIndustry === industry
-														? 'bg-primary text-primary-foreground border-primary'
+														? 'border-border hover:bg-accent border-primary font-semibold'
 														: 'bg-background border-border hover:bg-accent'
 												}`}
 											>
@@ -234,10 +234,10 @@ export default function Quizzes() {
 											<button
 												key={category}
 												onClick={() => handleCategoryToggle(category)}
-												className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+												className={`px-1 py-1 rounded-lg text-sm border transition-colors bg-background ${
 													selectedCategories.includes(category)
-														? 'bg-secondary text-secondary-foreground border-secondary'
-														: 'bg-background border-border hover:bg-accent'
+														? 'border-border hover:bg-accent border-primary font-semibold'
+														: 'text-secondary-foreground'
 												}`}
 											>
 												{category}
