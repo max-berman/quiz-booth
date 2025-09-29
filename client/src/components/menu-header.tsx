@@ -9,6 +9,7 @@ import {
 	ChevronDown,
 	Menu,
 	CircleUserRound,
+	Gamepad2,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { MenuLink } from './menu-link'
@@ -72,6 +73,12 @@ export function CreatorHeader() {
 								Home
 							</MenuLink>
 						)} */}
+
+						{/* Quiz Games - visible to all users */}
+						<MenuLink href='/quiz-games' data-testid='button-quiz-games'>
+							<Gamepad2 className='mr-2 h-4 w-4' />
+							Quiz Games
+						</MenuLink>
 
 						{/* Dashboard for authenticated users */}
 						{isAuthenticated && (
@@ -154,6 +161,17 @@ export function CreatorHeader() {
 						>
 							<Home className='mr-2 h-4 w-4' />
 							Home
+						</Button>
+						<Button
+							variant='ghost'
+							className='w-full justify-start'
+							onClick={() => {
+								setLocation('/quiz-games')
+								setIsSidebarOpen(false)
+							}}
+						>
+							<Gamepad2 className='mr-2 h-4 w-4' />
+							Quiz Games
 						</Button>
 						{isAuthenticated && (
 							<Button

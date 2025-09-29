@@ -148,7 +148,7 @@ export default function GamePage() {
 
 		if (isPermissionDenied) {
 			return (
-				<div className='flex-1 bg-background flex items-center justify-center'>
+				<div className='bg-background flex items-center justify-center'>
 					<div className='text-center max-w-md mx-auto p-6'>
 						<p className='flex items-center justify-center my-4'>
 							<a
@@ -333,10 +333,10 @@ export default function GamePage() {
 					*/}
 
 				{/* Question Card - Optimized for future customization */}
-				<Card className='game-card animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'>
+				<Card className='game-card !my-8 animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'>
 					<CardContent className='p-0 pb-4 md:p-6'>
 						{/* Question Text - Optimized for readability */}
-						<div className='mb-2'>
+						<div className=''>
 							<div className='bg-gradient-to-r from-primary/10 to-secondary/10 rounded-none md:rounded-2xl p-4 mb-4'>
 								<h2 className='text-lg md:text-2xl font-bold text-primary leading-relaxed text-center'>
 									{currentQuestion?.questionText}

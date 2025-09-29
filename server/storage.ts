@@ -11,6 +11,8 @@ export interface IStorage {
   verifyGameAccessByUser(gameId: string, userId: string): Promise<boolean>;
   getGamesByCreator(creatorKey: string): Promise<Game[]>;
   getGamesByUser(userId: string): Promise<Game[]>;
+  getPublicGames(limit?: number, offset?: number): Promise<Game[]>;
+  getPublicGamesCount(): Promise<number>;
   updateGamePrizes(gameId: string, prizes: PrizePlacement[], userId: string): Promise<Game>;
   updateGameTitle(gameId: string, gameTitle: string, userId: string): Promise<Game>;
   updateGame(gameId: string, updates: Partial<Game>, userId: string): Promise<Game>;
@@ -492,6 +494,36 @@ export class FirebaseStorage implements IStorage {
       gameTitle: gameTitle,
       modifiedAt: now
     };
+  }
+
+  async getPublicGames(limit: number = 12, offset: number = 0): Promise<Game[]> {
+    const gamesSnapshot = await db
+      .collection(collections.games)
+      .where('isPublic', '==', true)
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+      .offset(offset)
+      .get();
+
+    const games = gamesSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+        modifiedAt: data.modifiedAt?.toDate ? data.modifiedAt.toDate() : new Date(data.modifiedAt || data.createdAt),
+      } as Game;
+    });
+
+    return games;
+  }
+
+  async getPublicGamesCount(): Promise<number> {
+    const gamesSnapshot = await db
+      .collection(collections.games)
+      .where('isPublic', '==', true)
+      .get();
+
+    return gamesSnapshot.size;
   }
 
   async updateGame(gameId: string, updates: Partial<Game>, userId: string): Promise<Game> {

@@ -20,9 +20,25 @@ import {
 } from 'lucide-react'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
 import { useAuth } from '@/contexts/auth-context'
+import { PublicGameCard } from '@/components/public-game-card'
+import { useQuery } from '@tanstack/react-query'
+import type { Game } from '@shared/firebase-types'
+import { getFunctions, httpsCallable } from 'firebase/functions'
 
 export default function Home() {
 	const { isAuthenticated, user, loading } = useAuth()
+
+	// Fetch recent public games
+	const { data: recentGames, isLoading: gamesLoading } = useQuery<Game[]>({
+		queryKey: ['public-games'],
+		queryFn: async () => {
+			const functions = getFunctions()
+			const getPublicGames = httpsCallable(functions, 'getPublicGames')
+			const result = await getPublicGames({ limit: 3 })
+			return result.data as Game[]
+		},
+		staleTime: 5 * 60 * 1000, // 5 minutes
+	})
 
 	// Static stats data - will be replaced with real data later
 	const stats = [
@@ -82,13 +98,13 @@ export default function Home() {
 				/>
 				<link rel='canonical' href='https://quizbooth.games' />
 			</Helmet>
-			<div className='flex-1 justify-center flex flex-col '>
+			<div className='flex-1 flex flex-col'>
 				{/* Hero Section */}
-				<section className='relative pt-4 md:pt-0 px-4 md:px-8'>
+				<section className='relative mt-4 md:pt-0 px-4 md:px-8'>
 					<div className='max-w-5xl mx-auto'>
 						<div className='text-center relative z-10'>
 							<div className='mb-8 animate-slide-up'>
-								<h1 className='text-h1 text-foreground my-6 '>
+								<h1 className='text-h1 text-foreground my-8 '>
 									Create{' '}
 									<span className='text-primary font-bold'>Trivia Games</span>
 									<br />
@@ -181,6 +197,84 @@ export default function Home() {
 								</li>
 							))}
 						</ul>
+					</div>
+				</section>
+
+				{/* Recent Games Section */}
+				<section className='relative pt-4 lg:pt-0 px-4 sm:px-6 lg:px-8 my-12'>
+					<div className='max-w-7xl mx-auto'>
+						<div className='text-center mb-8'>
+							<h2 className='text-2xl md:text-3xl font-bold text-foreground mb-4'>
+								Recently Added Games
+							</h2>
+							<p className='text-lg text-muted-foreground max-w-2xl mx-auto'>
+								Check out the latest trivia games created by our community.
+								Play, learn, and have fun!
+							</p>
+						</div>
+
+						{/* Games Grid */}
+						{gamesLoading ? (
+							<div className='grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto'>
+								{[1, 2, 3].map((i) => (
+									<Card key={i} className='animate-pulse'>
+										<CardContent className='p-6'>
+											<div className='space-y-3'>
+												<div className='h-4 bg-muted rounded w-3/4 mx-auto'></div>
+												<div className='h-3 bg-muted rounded w-1/2 mx-auto'></div>
+												<div className='space-y-2'>
+													<div className='h-3 bg-muted rounded'></div>
+													<div className='h-3 bg-muted rounded'></div>
+													<div className='h-3 bg-muted rounded w-2/3'></div>
+												</div>
+												<div className='h-10 bg-muted rounded mt-4'></div>
+											</div>
+										</CardContent>
+									</Card>
+								))}
+							</div>
+						) : recentGames && recentGames.length > 0 ? (
+							<>
+								<div className='grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto'>
+									{recentGames.map((game, index) => (
+										<div
+											key={game.id}
+											className='animate-slide-up'
+											style={{ animationDelay: `${0.1 * index}s` }}
+										>
+											<PublicGameCard game={game} />
+										</div>
+									))}
+								</div>
+
+								{/* More Quizzes Link */}
+								<div className='text-center mt-8'>
+									<Link href='/quiz-games'>
+										<Button variant='outline' className='px-6 py-2'>
+											View All Quiz Games
+											<ArrowRight className='ml-2 h-4 w-4' />
+										</Button>
+									</Link>
+								</div>
+							</>
+						) : (
+							<div className='text-center py-12'>
+								<Card className='max-w-md mx-auto'>
+									<CardContent className='p-6'>
+										<Gamepad2 className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
+										<h3 className='text-lg font-semibold text-foreground mb-2'>
+											No Public Games Yet
+										</h3>
+										<p className='text-muted-foreground mb-4'>
+											Be the first to create a public trivia game!
+										</p>
+										<Link href='/setup'>
+											<Button variant='default'>Create Your Game</Button>
+										</Link>
+									</CardContent>
+								</Card>
+							</div>
+						)}
 					</div>
 				</section>
 			</div>

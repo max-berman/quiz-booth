@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
+exports.getPublicGamesCount = exports.getPublicGames = exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const crypto_1 = require("crypto");
@@ -489,6 +489,68 @@ exports.getGamePlayers = functions.https.onCall(async (data, context) => {
             throw error;
         }
         throw new functions.https.HttpsError('internal', 'Failed to get players data');
+    }
+});
+// Get public games (no authentication required)
+exports.getPublicGames = functions.https.onCall(async (data, context) => {
+    const { limit = 12, offset = 0 } = data;
+    try {
+        // Get public games, ordered by creation date (newest first)
+        let gamesQuery = db
+            .collection('games')
+            .where('isPublic', '==', true)
+            .orderBy('createdAt', 'desc');
+        // Apply limit and offset
+        if (limit) {
+            gamesQuery = gamesQuery.limit(limit);
+        }
+        if (offset) {
+            // Note: Firestore doesn't support offset directly, so we'd need to use cursor-based pagination
+            // For now, we'll skip offset and just use limit
+        }
+        const gamesSnapshot = await gamesQuery.get();
+        const games = gamesSnapshot.docs.map(doc => {
+            var _a, _b, _c, _d, _e, _f;
+            const data = doc.data();
+            // Convert prizes object to array format for frontend
+            const prizesArray = (data === null || data === void 0 ? void 0 : data.prizes) ? Object.entries(data.prizes).map(([key, value]) => ({
+                placement: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                prize: value
+            })).filter(p => p.prize) : [];
+            return {
+                id: data.id,
+                gameTitle: data.gameTitle,
+                companyName: data.companyName,
+                industry: data.industry,
+                productDescription: data.productDescription,
+                questionCount: data.questionCount,
+                difficulty: data.difficulty,
+                categories: data.categories,
+                prizes: prizesArray,
+                isPublic: data.isPublic,
+                createdAt: (_c = (_b = (_a = data.createdAt) === null || _a === void 0 ? void 0 : _a.toDate) === null || _b === void 0 ? void 0 : _b.call(_a)) === null || _c === void 0 ? void 0 : _c.toISOString(),
+                modifiedAt: (_f = (_e = (_d = data.modifiedAt) === null || _d === void 0 ? void 0 : _d.toDate) === null || _e === void 0 ? void 0 : _e.call(_d)) === null || _f === void 0 ? void 0 : _f.toISOString(),
+            };
+        });
+        return games;
+    }
+    catch (error) {
+        console.error('Get public games error:', error);
+        throw new functions.https.HttpsError('internal', 'Failed to get public games');
+    }
+});
+// Get public games count (no authentication required)
+exports.getPublicGamesCount = functions.https.onCall(async (data, context) => {
+    try {
+        const gamesSnapshot = await db
+            .collection('games')
+            .where('isPublic', '==', true)
+            .get();
+        return { count: gamesSnapshot.size };
+    }
+    catch (error) {
+        console.error('Get public games count error:', error);
+        throw new functions.https.HttpsError('internal', 'Failed to get public games count');
     }
 });
 //# sourceMappingURL=games.js.map

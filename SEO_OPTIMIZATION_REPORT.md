@@ -35,13 +35,20 @@ This document outlines the SEO improvements implemented for the QuizBooth applic
 
   - Homepage (priority: 1.0, changefreq: weekly)
   - Setup page (priority: 0.8, changefreq: monthly)
+  - Quiz Games page (priority: 0.9, changefreq: daily)
   - Dashboard (priority: 0.7, changefreq: daily)
   - Authentication pages (priority: 0.5, changefreq: monthly)
 
 - **robots.txt**: Configured to guide search engine crawlers
+
   - Allow all public routes
   - Disallow API and admin routes
   - Reference to sitemap location
+
+- **Automated Sitemap Generation**: Created script that generates sitemap automatically during build process
+  - Runs as part of `npm run deploy:all`
+  - Can be run manually with `npm run sitemap`
+  - Includes all main application routes with appropriate priorities
 
 ### 5. Structured Data (JSON-LD) ✅
 

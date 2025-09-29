@@ -785,6 +785,31 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
     }
   });
 
+  // Get public games (public endpoint)
+  app.get("/api/games/public", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 12;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const games = await storage.getPublicGames(limit, offset);
+      res.json(games);
+    } catch (error) {
+      logger.error('Get public games error:', error);
+      res.status(500).json({ message: "Failed to get public games", error: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  // Get public games count (public endpoint)
+  app.get("/api/games/public/count", async (req, res) => {
+    try {
+      const count = await storage.getPublicGamesCount();
+      res.json({ count });
+    } catch (error) {
+      logger.error('Get public games count error:', error);
+      res.status(500).json({ message: "Failed to get public games count", error: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
 
   // Add single question to game (authenticated users only)
   app.post("/api/games/:id/add-question", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {

@@ -197,23 +197,22 @@ export function GameCardEnhanced({
 
 					<div className='grid grid-cols-2 gap-2'>
 						{/* Public/Private Toggle */}
-						<div className='flex items-center border-primary border  p-2 rounded-lg bg-background'>
-							<div className='flex items-center justify-between gap-2'>
-								<Checkbox
-									id={`public-toggle-${game.id}`}
-									checked={isPublic}
-									onCheckedChange={handlePublicToggle}
-								/>
-								<label
-									htmlFor={`public-toggle-${game.id}`}
-									className='text-sm font-medium cursor-pointer flex-1'
-								>
-									Public Game
-								</label>
-								{/* <span className='text-xs text-muted-foreground'>
+						<div className='flex items-center justify-center border-primary border px-4 rounded-lg bg-background'>
+							<Checkbox
+								id={`public-toggle-${game.id}`}
+								checked={isPublic}
+								className='mr-2'
+								onCheckedChange={handlePublicToggle}
+							/>
+							<label
+								htmlFor={`public-toggle-${game.id}`}
+								className='text-sm font-medium cursor-pointer flex-1'
+							>
+								Public
+							</label>
+							{/* <span className='text-xs text-muted-foreground'>
 								{isPublic ? 'Public' : 'Private'}
 							</span> */}
-							</div>
 						</div>
 						<Button
 							variant='outline'

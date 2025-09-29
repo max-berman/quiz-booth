@@ -13,10 +13,11 @@
     "db:push": "drizzle-kit push",
     "build:client": "vite build",
     "build:functions": "cd firebase-functions && npm run build",
+    "sitemap": "node scripts/generate-sitemap.js",
     "deploy:hosting": "firebase deploy --only hosting",
     "deploy:functions": "firebase deploy --only functions",
     "deploy:firestore": "firebase deploy --only firestore",
-    "deploy:all": "npm run build:client && npm run build:functions && firebase deploy",
+    "deploy:all": "npm run build:client && npm run build:functions && npm run sitemap && firebase deploy",
     "emulate": "firebase emulators:start --import=./emulator-data --export-on-exit"
   },
   "dependencies": {

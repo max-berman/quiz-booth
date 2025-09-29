@@ -568,3 +568,72 @@ export const getGamePlayers = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('internal', 'Failed to get players data');
   }
 });
+
+// Get public games (no authentication required)
+export const getPublicGames = functions.https.onCall(async (data, context) => {
+  const { limit = 12, offset = 0 } = data;
+
+  try {
+    // Get public games, ordered by creation date (newest first)
+    let gamesQuery = db
+      .collection('games')
+      .where('isPublic', '==', true)
+      .orderBy('createdAt', 'desc');
+
+    // Apply limit and offset
+    if (limit) {
+      gamesQuery = gamesQuery.limit(limit);
+    }
+    if (offset) {
+      // Note: Firestore doesn't support offset directly, so we'd need to use cursor-based pagination
+      // For now, we'll skip offset and just use limit
+    }
+
+    const gamesSnapshot = await gamesQuery.get();
+
+    const games = gamesSnapshot.docs.map(doc => {
+      const data = doc.data();
+
+      // Convert prizes object to array format for frontend
+      const prizesArray = data?.prizes ? Object.entries(data.prizes).map(([key, value]) => ({
+        placement: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        prize: value
+      })).filter(p => p.prize) : [];
+
+      return {
+        id: data.id,
+        gameTitle: data.gameTitle,
+        companyName: data.companyName,
+        industry: data.industry,
+        productDescription: data.productDescription,
+        questionCount: data.questionCount,
+        difficulty: data.difficulty,
+        categories: data.categories,
+        prizes: prizesArray,
+        isPublic: data.isPublic,
+        createdAt: data.createdAt?.toDate?.()?.toISOString(),
+        modifiedAt: data.modifiedAt?.toDate?.()?.toISOString(),
+      };
+    });
+
+    return games;
+  } catch (error) {
+    console.error('Get public games error:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to get public games');
+  }
+});
+
+// Get public games count (no authentication required)
+export const getPublicGamesCount = functions.https.onCall(async (data, context) => {
+  try {
+    const gamesSnapshot = await db
+      .collection('games')
+      .where('isPublic', '==', true)
+      .get();
+
+    return { count: gamesSnapshot.size };
+  } catch (error) {
+    console.error('Get public games count error:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to get public games count');
+  }
+});
