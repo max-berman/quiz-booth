@@ -571,14 +571,27 @@ export const getGamePlayers = functions.https.onCall(async (data, context) => {
 
 // Get public games (no authentication required)
 export const getPublicGames = functions.https.onCall(async (data, context) => {
-  const { limit = 12, offset = 0 } = data;
+  const { limit = 12, offset = 0, industry, categories } = data;
 
   try {
     // Get public games, ordered by creation date (newest first)
     let gamesQuery = db
       .collection('games')
-      .where('isPublic', '==', true)
-      .orderBy('createdAt', 'desc');
+      .where('isPublic', '==', true);
+
+    // Apply filters if provided
+    if (industry && industry !== 'all') {
+      gamesQuery = gamesQuery.where('industry', '==', industry);
+    }
+
+    // Apply category filter if provided
+    if (categories && categories.length > 0) {
+      // For categories, we need to check if the game's categories array contains any of the selected categories
+      // Firestore doesn't support array-contains-any with multiple conditions, so we'll filter client-side
+      // For now, we'll get all games and filter client-side for categories
+    }
+
+    gamesQuery = gamesQuery.orderBy('createdAt', 'desc');
 
     // Apply limit and offset
     if (limit) {
@@ -591,7 +604,7 @@ export const getPublicGames = functions.https.onCall(async (data, context) => {
 
     const gamesSnapshot = await gamesQuery.get();
 
-    const games = gamesSnapshot.docs.map(doc => {
+    let games = gamesSnapshot.docs.map(doc => {
       const data = doc.data();
 
       // Convert prizes object to array format for frontend
@@ -615,6 +628,15 @@ export const getPublicGames = functions.https.onCall(async (data, context) => {
         modifiedAt: data.modifiedAt?.toDate?.()?.toISOString(),
       };
     });
+
+    // Apply category filter client-side if needed
+    if (categories && categories.length > 0) {
+      games = games.filter(game =>
+        game.categories && game.categories.some((category: string) =>
+          categories.includes(category)
+        )
+      );
+    }
 
     return games;
   } catch (error) {

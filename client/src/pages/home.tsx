@@ -207,7 +207,7 @@ export default function Home() {
 							<h2 className='text-2xl md:text-3xl font-bold text-foreground mb-4'>
 								Recently Added Games
 							</h2>
-							<p className='text-lg text-muted-foreground max-w-2xl mx-auto'>
+							<p className='text-lg text-foreground max-w-2xl mx-auto'>
 								Check out the latest trivia games created by our community.
 								Play, learn, and have fun!
 							</p>

@@ -1,24 +1,38 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Button } from '@/components/ui/button'
 import { PublicGameCard } from '@/components/public-game-card'
 import { useQuery } from '@tanstack/react-query'
 import type { Game } from '@shared/firebase-types'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2, Filter, X } from 'lucide-react'
 import { Link } from 'wouter'
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import { INDUSTRY_OPTIONS } from '@shared/constants'
 
 export default function Quizzes() {
 	const [page, setPage] = useState(0)
+	const [selectedIndustry, setSelectedIndustry] = useState<string>('all')
+	const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+	const [showFilters, setShowFilters] = useState(false)
 	const limit = 12 // 12 cards per page (3x4 grid)
 
-	// Fetch public games with pagination
+	// Reset page when filters change
+	useEffect(() => {
+		setPage(0)
+	}, [selectedIndustry, selectedCategories])
+
+	// Fetch public games with pagination and filtering
 	const { data: games, isLoading: gamesLoading } = useQuery<Game[]>({
-		queryKey: ['public-games', page],
+		queryKey: ['public-games', page, selectedIndustry, selectedCategories],
 		queryFn: async () => {
 			const functions = getFunctions()
 			const getPublicGames = httpsCallable(functions, 'getPublicGames')
-			const result = await getPublicGames({ limit, offset: page * limit })
+			const result = await getPublicGames({
+				limit,
+				offset: page * limit,
+				industry: selectedIndustry,
+				categories: selectedCategories,
+			})
 			return result.data as Game[]
 		},
 		staleTime: 5 * 60 * 1000, // 5 minutes
@@ -44,6 +58,39 @@ export default function Quizzes() {
 	const handleLoadMore = () => {
 		setPage((prev) => prev + 1)
 	}
+
+	const handleIndustryChange = (industry: string) => {
+		setSelectedIndustry(industry)
+	}
+
+	const handleCategoryToggle = (category: string) => {
+		setSelectedCategories((prev) =>
+			prev.includes(category)
+				? prev.filter((c) => c !== category)
+				: [...prev, category]
+		)
+	}
+
+	const clearFilters = () => {
+		setSelectedIndustry('all')
+		setSelectedCategories([])
+	}
+
+	// Industry options from shared constants with "all" option
+	const industries = ['all', ...INDUSTRY_OPTIONS]
+
+	// Extract unique categories from existing games
+	const categories = useMemo(() => {
+		if (!games) return []
+
+		const allCategories = games.flatMap((game) => game.categories || [])
+		const uniqueCategories = Array.from(new Set(allCategories)).sort()
+
+		return uniqueCategories
+	}, [games])
+
+	const hasActiveFilters =
+		selectedIndustry !== 'all' || selectedCategories.length > 0
 
 	return (
 		<>
@@ -76,22 +123,131 @@ export default function Quizzes() {
 			<div className='container mx-auto px-4 py-8'>
 				{/* Header */}
 				<div className='mb-8'>
-					<Link href='/'>
-						<Button variant='ghost' className='mb-4'>
-							<ArrowLeft className='mr-2 h-4 w-4' />
-							Back to Home
-						</Button>
-					</Link>
 					<div className='text-center'>
 						<h1 className='text-3xl md:text-4xl font-bold text-foreground mb-4'>
 							All Quiz Games
 						</h1>
-						<p className='text-lg text-muted-foreground max-w-2xl mx-auto'>
+						<p className='text-lg text-foreground max-w-2xl mx-auto'>
 							Discover and play trivia games created by our community. From tech
 							challenges to general knowledge quizzes, there's something for
 							everyone.
 						</p>
 					</div>
+				</div>
+
+				{/* Filters Section */}
+				<div className='mb-8'>
+					<div className='flex flex-col md:flex-row gap-4 items-start md:items-center justify-between'>
+						<div className='flex items-center gap-4'>
+							<Button
+								variant='outline'
+								onClick={() => setShowFilters(!showFilters)}
+								className='flex items-center gap-2'
+							>
+								<Filter className='h-4 w-4' />
+								Filters
+								{hasActiveFilters && (
+									<span className='bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs'>
+										{selectedCategories.length +
+											(selectedIndustry !== 'all' ? 1 : 0)}
+									</span>
+								)}
+							</Button>
+
+							{hasActiveFilters && (
+								<Button
+									variant='ghost'
+									onClick={clearFilters}
+									className='flex items-center gap-2 text-muted-foreground hover:text-foreground'
+								>
+									<X className='h-4 w-4' />
+									Clear Filters
+								</Button>
+							)}
+						</div>
+
+						{/* Active Filters Display */}
+						{hasActiveFilters && (
+							<div className='flex flex-wrap gap-2'>
+								{selectedIndustry !== 'all' && (
+									<span className='bg-primary/20 text-primary px-3 py-1 rounded-full text-sm flex items-center gap-1'>
+										Industry: {selectedIndustry}
+										<button
+											onClick={() => setSelectedIndustry('all')}
+											className='hover:text-primary-foreground'
+										>
+											<X className='h-3 w-3' />
+										</button>
+									</span>
+								)}
+								{selectedCategories.map((category) => (
+									<span
+										key={category}
+										className='bg-secondary/20 text-secondary-foreground px-3 py-1 rounded-full text-sm flex items-center gap-1'
+									>
+										{category}
+										<button
+											onClick={() => handleCategoryToggle(category)}
+											className='hover:text-secondary-foreground'
+										>
+											<X className='h-3 w-3' />
+										</button>
+									</span>
+								))}
+							</div>
+						)}
+					</div>
+
+					{/* Filter Options */}
+					{showFilters && (
+						<div className='mt-6 p-6 bg-card border rounded-lg'>
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+								{/* Industry Filter */}
+								<div>
+									<h3 className='font-semibold text-foreground mb-4'>
+										Industry
+									</h3>
+									<div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
+										{industries.map((industry) => (
+											<button
+												key={industry}
+												onClick={() => handleIndustryChange(industry)}
+												className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+													selectedIndustry === industry
+														? 'bg-primary text-primary-foreground border-primary'
+														: 'bg-background border-border hover:bg-accent'
+												}`}
+											>
+												{industry === 'all' ? 'All Industries' : industry}
+											</button>
+										))}
+									</div>
+								</div>
+
+								{/* Categories Filter */}
+								<div>
+									<h3 className='font-semibold text-foreground mb-4'>
+										Question Categories
+									</h3>
+									<div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
+										{categories.map((category) => (
+											<button
+												key={category}
+												onClick={() => handleCategoryToggle(category)}
+												className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+													selectedCategories.includes(category)
+														? 'bg-secondary text-secondary-foreground border-secondary'
+														: 'bg-background border-border hover:bg-accent'
+												}`}
+											>
+												{category}
+											</button>
+										))}
+									</div>
+								</div>
+							</div>
+						</div>
+					)}
 				</div>
 
 				{/* Games Grid */}

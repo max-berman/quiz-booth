@@ -31,36 +31,7 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { LoadingSpinner } from '@/components/loading-spinner'
 import type { InsertGame } from '@shared/firebase-types'
-
-// Industry options for better organization
-const INDUSTRY_OPTIONS = [
-	'Advertising and Marketing',
-	'Agriculture',
-	'Art and Design',
-	'Automotive',
-	'Beauty and Cosmetics',
-	'Construction',
-	'E-commerce',
-	'Education',
-	'Energy',
-	'Entertainment',
-	'Environmental Services',
-	'Fashion',
-	'Finance and Banking',
-	'Food and Beverage',
-	'Gaming',
-	'Healthcare',
-	'Logistics and Transport',
-	'Manufacturing',
-	'Media and Communications',
-	'Real Estate',
-	'Retail',
-	'Sports and Fitness',
-	'Technology',
-	'Tourism and Hospitality',
-	'Wellness and Lifestyle',
-	'Other',
-]
+import { INDUSTRY_OPTIONS } from '@shared/constants'
 
 // Difficulty options
 const DIFFICULTY_OPTIONS = [
@@ -401,7 +372,7 @@ export default function Setup() {
 					</div>
 				</div> */}
 
-					<Card className='border-none bg-none bg-transparent py-2'>
+					<Card className='border-none bg-background shadow-none py-2'>
 						{!isAuthenticated && (
 							<div className='flex items-center justify-center gap-2 text-destructive  p-2 rounded-lg'>
 								<AlertCircle className='h-5 w-5' />

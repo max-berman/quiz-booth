@@ -493,13 +493,23 @@ exports.getGamePlayers = functions.https.onCall(async (data, context) => {
 });
 // Get public games (no authentication required)
 exports.getPublicGames = functions.https.onCall(async (data, context) => {
-    const { limit = 12, offset = 0 } = data;
+    const { limit = 12, offset = 0, industry, categories } = data;
     try {
         // Get public games, ordered by creation date (newest first)
         let gamesQuery = db
             .collection('games')
-            .where('isPublic', '==', true)
-            .orderBy('createdAt', 'desc');
+            .where('isPublic', '==', true);
+        // Apply filters if provided
+        if (industry && industry !== 'all') {
+            gamesQuery = gamesQuery.where('industry', '==', industry);
+        }
+        // Apply category filter if provided
+        if (categories && categories.length > 0) {
+            // For categories, we need to check if the game's categories array contains any of the selected categories
+            // Firestore doesn't support array-contains-any with multiple conditions, so we'll filter client-side
+            // For now, we'll get all games and filter client-side for categories
+        }
+        gamesQuery = gamesQuery.orderBy('createdAt', 'desc');
         // Apply limit and offset
         if (limit) {
             gamesQuery = gamesQuery.limit(limit);
@@ -509,7 +519,7 @@ exports.getPublicGames = functions.https.onCall(async (data, context) => {
             // For now, we'll skip offset and just use limit
         }
         const gamesSnapshot = await gamesQuery.get();
-        const games = gamesSnapshot.docs.map(doc => {
+        let games = gamesSnapshot.docs.map(doc => {
             var _a, _b, _c, _d, _e, _f;
             const data = doc.data();
             // Convert prizes object to array format for frontend
@@ -532,6 +542,10 @@ exports.getPublicGames = functions.https.onCall(async (data, context) => {
                 modifiedAt: (_f = (_e = (_d = data.modifiedAt) === null || _d === void 0 ? void 0 : _d.toDate) === null || _e === void 0 ? void 0 : _e.call(_d)) === null || _f === void 0 ? void 0 : _f.toISOString(),
             };
         });
+        // Apply category filter client-side if needed
+        if (categories && categories.length > 0) {
+            games = games.filter(game => game.categories && game.categories.some((category) => categories.includes(category)));
+        }
         return games;
     }
     catch (error) {
