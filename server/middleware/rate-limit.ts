@@ -29,6 +29,17 @@ export const gameCreationLimiter = rateLimit({
   message: 'Too many game creations, please try again later.',
 });
 
+// AI generation rate limiting (more restrictive due to cost)
+export const aiGenerationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Limit each user to 10 AI generations per hour
+  keyGenerator: (req: any) => {
+    // Use user ID for authenticated requests, IP for anonymous
+    return req.user?.uid || ipKeyGenerator(req);
+  },
+  message: 'Too many AI generation requests, please try again later.',
+});
+
 // Enhanced rate limiting with monitoring
 export const monitoredRateLimit = (options: Options) => {
   const limiter = rateLimit(options);

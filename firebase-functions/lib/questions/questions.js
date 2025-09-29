@@ -28,6 +28,7 @@ const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const crypto_1 = require("crypto");
 const firestore_1 = require("firebase-admin/firestore");
+const rate_limit_1 = require("../lib/rate-limit");
 const db = admin.firestore();
 // Helper function to track usage
 async function trackUsage(userId, eventType, metadata) {
@@ -112,6 +113,8 @@ exports.generateQuestions = functions.https.onCall(async (data, context) => {
     var _a, _b;
     const { gameId } = data;
     try {
+        // Rate limiting check for AI generation
+        await (0, rate_limit_1.withRateLimit)(rate_limit_1.rateLimitConfigs.aiGeneration)(data, context);
         // Get game data
         const gameDoc = await db.collection('games').doc(gameId).get();
         if (!gameDoc.exists) {
@@ -304,6 +307,8 @@ exports.generateSingleQuestion = functions.https.onCall(async (data, context) =>
     var _a;
     const { gameId } = data;
     try {
+        // Rate limiting check for AI generation
+        await (0, rate_limit_1.withRateLimit)(rate_limit_1.rateLimitConfigs.aiGeneration)(data, context);
         // Get game data
         const gameDoc = await db.collection('games').doc(gameId).get();
         if (!gameDoc.exists) {

@@ -28,6 +28,7 @@ const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const crypto_1 = require("crypto");
 const firestore_1 = require("firebase-admin/firestore");
+const rate_limit_1 = require("../lib/rate-limit");
 const db = admin.firestore();
 // Helper function to track usage
 async function trackUsage(userId, eventType, metadata) {
@@ -75,6 +76,8 @@ exports.createGame = functions.runWith({
     const userId = context.auth.uid;
     const { title, description, questionCount, difficulty, categories, companyName, productDescription, prizes } = data;
     try {
+        // Rate limiting check
+        await (0, rate_limit_1.withRateLimit)(rate_limit_1.rateLimitConfigs.gameCreation)(data, context);
         // Usage tracking
         await trackUsage(userId, 'game_created', {
             questionCount,

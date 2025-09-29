@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { randomUUID } from 'crypto';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
+import { rateLimitConfigs, withRateLimit } from '../lib/rate-limit';
 
 const db = admin.firestore();
 
@@ -61,6 +62,9 @@ export const createGame = functions.runWith({
   const { title, description, questionCount, difficulty, categories, companyName, productDescription, prizes } = data;
 
   try {
+    // Rate limiting check
+    await withRateLimit(rateLimitConfigs.gameCreation)(data, context);
+
     // Usage tracking
     await trackUsage(userId, 'game_created', {
       questionCount,

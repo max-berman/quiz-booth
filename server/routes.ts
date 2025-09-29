@@ -8,6 +8,7 @@ import { logger } from "./lib/logger";
 import { gameCache, questionsCache, leaderboardCache, userGamesCache, cacheKeys, withCache } from "./lib/cache";
 import { usageTracker } from "./lib/usage-tracker";
 import { registerUsageRoutes } from "./routes/usage";
+import { apiLimiter, authLimiter, gameCreationLimiter, aiGenerationLimiter } from "./middleware/rate-limit";
 
 // Helper function to detect if a string contains a website URL
 function isWebsiteURL(text: string): boolean {
@@ -147,7 +148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register usage tracking routes
   registerUsageRoutes(app);
   // Create a new game (with optional Firebase auth)
-  app.post("/api/games", optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/games", gameCreationLimiter, optionalFirebaseAuth, async (req: AuthenticatedRequest, res) => {
     try {
       logger.api.request('POST', '/api/games', req.body);
       logger.log('User authenticated?', !!req.user);
@@ -186,7 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get game by ID (with caching)
-  app.get("/api/games/:id", async (req, res) => {
+  app.get("/api/games/:id", apiLimiter, async (req, res) => {
     try {
       const gameId = req.params.id;
       const game = await withCache(
@@ -207,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Get games by authenticated user (Firebase auth)
-  app.get("/api/user/games", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/user/games", authLimiter, verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
@@ -223,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Generate questions using DeepSeek API
-  app.post("/api/games/:id/generate-questions", async (req, res) => {
+  app.post("/api/games/:id/generate-questions", aiGenerationLimiter, async (req, res) => {
     try {
       const game = await storage.getGame(req.params.id);
       if (!game) {
@@ -444,7 +445,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Generate a single question using DeepSeek API (returns question data without saving to database)
-  app.post("/api/games/:id/generate-single-question", async (req, res) => {
+  app.post("/api/games/:id/generate-single-question", aiGenerationLimiter, async (req, res) => {
     try {
       const game = await storage.getGame(req.params.id);
       if (!game) {
@@ -619,7 +620,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Get questions for a game (with caching)
-  app.get("/api/games/:id/questions", async (req, res) => {
+  app.get("/api/games/:id/questions", apiLimiter, async (req, res) => {
     try {
       const gameId = req.params.id;
       const questions = await withCache(
@@ -636,7 +637,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
 
 
   // Update a question (Firebase auth)
-  app.put("/api/user/questions/:id", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+  app.put("/api/user/questions/:id", authLimiter, verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
@@ -676,7 +677,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Delete a question (Firebase auth)
-  app.delete("/api/user/questions/:id", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+  app.delete("/api/user/questions/:id", authLimiter, verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
@@ -724,7 +725,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Get leaderboard for a specific game (with caching)
-  app.get("/api/games/:id/leaderboard", async (req, res) => {
+  app.get("/api/games/:id/leaderboard", apiLimiter, async (req, res) => {
     try {
       const gameId = req.params.id;
       const leaderboard = await withCache(
@@ -740,7 +741,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Get global leaderboard
-  app.get("/api/leaderboard", async (req, res) => {
+  app.get("/api/leaderboard", apiLimiter, async (req, res) => {
     try {
       const leaderboard = await storage.getAllLeaderboard();
       res.json(leaderboard);
@@ -774,7 +775,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Get play count for a specific game (public endpoint)
-  app.get("/api/games/:id/play-count", async (req, res) => {
+  app.get("/api/games/:id/play-count", apiLimiter, async (req, res) => {
     try {
       const gameId = req.params.id;
       const playCount = await storage.getPlayerCountByGameId(gameId);
@@ -786,7 +787,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Get public games (public endpoint)
-  app.get("/api/games/public", async (req, res) => {
+  app.get("/api/games/public", apiLimiter, async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 12;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -800,7 +801,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Get public games count (public endpoint)
-  app.get("/api/games/public/count", async (req, res) => {
+  app.get("/api/games/public/count", apiLimiter, async (req, res) => {
     try {
       const count = await storage.getPublicGamesCount();
       res.json({ count });
@@ -812,7 +813,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
 
 
   // Add single question to game (authenticated users only)
-  app.post("/api/games/:id/add-question", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/games/:id/add-question", authLimiter, verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
@@ -853,7 +854,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Update game prizes (authenticated users only)
-  app.put("/api/games/:id/prizes", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+  app.put("/api/games/:id/prizes", authLimiter, verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
@@ -893,7 +894,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Update game title (authenticated users only)
-  app.put("/api/user/games/:id/title", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+  app.put("/api/user/games/:id/title", authLimiter, verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
@@ -930,7 +931,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
   });
 
   // Update game (general update endpoint for authenticated users)
-  app.put("/api/user/games/:id", verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
+  app.put("/api/user/games/:id", authLimiter, verifyFirebaseToken, async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });

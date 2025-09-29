@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { randomUUID } from 'crypto';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
+import { rateLimitConfigs, withRateLimit } from '../lib/rate-limit';
 
 const db = admin.firestore();
 
@@ -104,6 +105,9 @@ export const generateQuestions = functions.https.onCall(async (data, context) =>
   const { gameId } = data;
 
   try {
+    // Rate limiting check for AI generation
+    await withRateLimit(rateLimitConfigs.aiGeneration)(data, context);
+
     // Get game data
     const gameDoc = await db.collection('games').doc(gameId).get();
     if (!gameDoc.exists) {
@@ -315,6 +319,9 @@ export const generateSingleQuestion = functions.https.onCall(async (data, contex
   const { gameId } = data;
 
   try {
+    // Rate limiting check for AI generation
+    await withRateLimit(rateLimitConfigs.aiGeneration)(data, context);
+
     // Get game data
     const gameDoc = await db.collection('games').doc(gameId).get();
     if (!gameDoc.exists) {
