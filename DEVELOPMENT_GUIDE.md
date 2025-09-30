@@ -134,6 +134,62 @@ npm run build
 - Check that `VITE_USE_FIREBASE_EMULATOR` is set correctly
 - Verify the emulators are running on the expected ports
 
+## Server-Side Rendering (SSR) Development
+
+The application includes Firebase Functions-based SSR for SEO optimization on main pages.
+
+### SSR Architecture
+
+- **Framework**: Firebase Functions with Express.js
+- **Pages**: Home, About, Quiz Games, FAQ
+- **Features**: Dynamic meta tags, Firestore data fetching, security headers
+- **Performance**: 1-hour caching, graceful fallback to client-side rendering
+
+### Testing SSR Locally
+
+1. **Start SSR with Emulators**:
+
+   ```bash
+   npm run emulate
+   ```
+
+2. **Test SSR Routes**:
+
+   - Home: `http://localhost:5001/demo-quiz-booth/us-central1/ssr/`
+   - About: `http://localhost:5001/demo-quiz-booth/us-central1/ssr/about`
+   - Quiz Games: `http://localhost:5001/demo-quiz-booth/us-central1/ssr/quiz-games`
+   - FAQ: `http://localhost:5001/demo-quiz-booth/us-central1/ssr/faq`
+
+3. **Verify SSR Features**:
+   - Server-generated HTML with proper meta tags
+   - Dynamic content from Firestore
+   - Security headers (X-Frame-Options, XSS Protection)
+   - 1-hour caching for performance
+
+### SSR Development Workflow
+
+1. **Modify SSR Pages**:
+
+   - Update page components in `client/src/pages/`
+   - SSR automatically picks up changes in production
+   - For local testing, rebuild and redeploy functions
+
+2. **Add New SSR Routes**:
+
+   - Add route in `firebase-functions/src/ssr/index.ts`
+   - Create corresponding page component
+   - Update meta tags and SEO content
+
+3. **SSR Testing Commands**:
+
+   ```bash
+   # Test SSR locally
+   npm run test:ssr
+
+   # Build and deploy SSR functions
+   npm run deploy:ssr
+   ```
+
 ## Testing
 
 To verify the application is working:
@@ -143,5 +199,6 @@ To verify the application is working:
 3. Open http://localhost:5173
 4. Test authentication, game creation, and question generation
 5. Check the emulator UI at http://localhost:4000 for logs and data
+6. Test SSR routes via Firebase Functions endpoints
 
 This development setup provides a complete local Firebase environment that mirrors the production setup while maintaining fast development iteration.

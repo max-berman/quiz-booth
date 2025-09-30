@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userSetup = exports.resetUsage = exports.getUsage = exports.trackUsage = exports.addQuestion = exports.deleteQuestion = exports.updateQuestion = exports.getQuestions = exports.generateSingleQuestion = exports.generateQuestions = exports.getPublicGamesCount = exports.getPublicGames = exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
+exports.ssrHandler = exports.userSetup = exports.resetUsage = exports.getUsage = exports.trackUsage = exports.addQuestion = exports.deleteQuestion = exports.updateQuestion = exports.getQuestions = exports.generateSingleQuestion = exports.generateQuestions = exports.deleteGame = exports.getPublicGamesCount = exports.getPublicGames = exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
 // import * as functions from 'firebase-functions';
 const admin = __importStar(require("firebase-admin"));
 const dotenv = __importStar(require("dotenv"));
@@ -45,6 +45,7 @@ Object.defineProperty(exports, "getGameLeaderboard", { enumerable: true, get: fu
 Object.defineProperty(exports, "getGamePlayers", { enumerable: true, get: function () { return games_1.getGamePlayers; } });
 Object.defineProperty(exports, "getPublicGames", { enumerable: true, get: function () { return games_1.getPublicGames; } });
 Object.defineProperty(exports, "getPublicGamesCount", { enumerable: true, get: function () { return games_1.getPublicGamesCount; } });
+Object.defineProperty(exports, "deleteGame", { enumerable: true, get: function () { return games_1.deleteGame; } });
 const questions_1 = require("./questions/questions");
 Object.defineProperty(exports, "generateQuestions", { enumerable: true, get: function () { return questions_1.generateQuestions; } });
 Object.defineProperty(exports, "generateSingleQuestion", { enumerable: true, get: function () { return questions_1.generateSingleQuestion; } });
@@ -58,4 +59,7 @@ Object.defineProperty(exports, "getUsage", { enumerable: true, get: function () 
 Object.defineProperty(exports, "resetUsage", { enumerable: true, get: function () { return usage_1.resetUsage; } });
 const userSetup_1 = require("./auth/userSetup");
 Object.defineProperty(exports, "userSetup", { enumerable: true, get: function () { return userSetup_1.userSetup; } });
+// Import SSR handler
+const ssr_1 = require("./ssr");
+Object.defineProperty(exports, "ssrHandler", { enumerable: true, get: function () { return ssr_1.ssrHandler; } });
 //# sourceMappingURL=index.js.map

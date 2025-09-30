@@ -7,6 +7,8 @@ import { Trophy, Home, Users } from 'lucide-react'
 import { Link } from 'wouter'
 import type { Player, Game } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
+import { formatTime } from '@/lib/time-utils'
+import { formatDate } from '@/lib/date-utils'
 
 export default function Leaderboard() {
 	const { id } = useParams()
@@ -54,12 +56,6 @@ export default function Leaderboard() {
 			default:
 				return 'border-primary/50 border-2 bg-muted text-primary text-lg rounded-full'
 		}
-	}
-
-	const formatTime = (seconds: number) => {
-		const minutes = Math.floor(seconds / 60)
-		const remainingSeconds = seconds % 60
-		return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
 	}
 
 	if (isLoading) {
@@ -161,7 +157,7 @@ export default function Leaderboard() {
 												</div>
 												<div className='text-xs text-muted-foreground'>
 													{formatTime(player.timeSpent)} •{' '}
-													{new Date(player.completedAt).toLocaleDateString()}
+													{formatDate(player.completedAt)}
 												</div>
 											</div>
 										</div>

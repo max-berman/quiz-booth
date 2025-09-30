@@ -37,6 +37,13 @@ This file provides comprehensive guidance to WARP (warp.dev) when working with c
 - **Multiple Tiers**: Support for 1st place, top 10, custom placements
 - **Backward Compatibility**: Maintains legacy `firstPrize`, `secondPrize`, `thirdPrize` fields
 
+#### 6. **Server-Side Rendering (SSR) Implementation**
+
+- **Firebase Functions SSR**: Server-side rendering for SEO optimization
+- **SSR Pages**: Home, About, Quiz Games, FAQ pages with server-rendered HTML
+- **Features**: Dynamic meta tags, Firestore data fetching, security headers
+- **Performance**: 1-hour caching, graceful fallback to client-side rendering
+
 ## 🏗️ Architecture Overview
 
 This is a **Trade Show Trivia Application** that generates AI-powered custom trivia games for trade show booths. The application uses a modern full-stack architecture with TypeScript throughout.

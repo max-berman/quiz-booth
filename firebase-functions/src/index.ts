@@ -9,10 +9,13 @@ dotenv.config();
 admin.initializeApp();
 
 // Import function modules
-import { createGame, getGame, getGamesByUser, updateGame, updateGameTitle, updateGamePublicStatus, updateGamePrizes, savePlayerScore, getGameLeaderboard, getGamePlayers, getPublicGames, getPublicGamesCount } from './games/games';
+import { createGame, getGame, getGamesByUser, updateGame, updateGameTitle, updateGamePublicStatus, updateGamePrizes, savePlayerScore, getGameLeaderboard, getGamePlayers, getPublicGames, getPublicGamesCount, deleteGame } from './games/games';
 import { generateQuestions, generateSingleQuestion, getQuestions, updateQuestion, deleteQuestion, addQuestion } from './questions/questions';
 import { trackUsage, getUsage, resetUsage } from './usage/usage';
 import { userSetup } from './auth/userSetup';
+
+// Import SSR handler
+import { ssrHandler } from './ssr';
 
 // Export all functions
 export {
@@ -28,6 +31,7 @@ export {
   getGamePlayers,
   getPublicGames,
   getPublicGamesCount,
+  deleteGame,
   generateQuestions,
   generateSingleQuestion,
   getQuestions,
@@ -37,5 +41,6 @@ export {
   trackUsage,
   getUsage,
   resetUsage,
-  userSetup
+  userSetup,
+  ssrHandler
 };

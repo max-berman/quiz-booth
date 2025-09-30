@@ -12,7 +12,10 @@ QuizBooth is a platform that helps businesses create engaging trivia games for e
 - Business Event Optimization
 
 ## Key Pages
-- **Home**: https://quizbooth.games/ - Main landing page with value proposition
+- **Home**: https://quizbooth.games/ - Main landing page with value proposition (SSR Enabled)
+- **About**: https://quizbooth.games/about - Company mission and information (SSR Enabled)
+- **Quiz Games**: https://quizbooth.games/quiz-games - Public games listing (SSR Enabled)
+- **FAQ**: https://quizbooth.games/faq - Frequently asked questions (SSR Enabled)
 - **Setup**: https://quizbooth.games/setup - Game creation wizard
 - **Dashboard**: https://quizbooth.games/dashboard - User dashboard for managing games
 - **Game Play**: https://quizbooth.games/game/{id} - Individual trivia games

@@ -29,6 +29,7 @@ A comprehensive trivia application that generates AI-powered custom trivia games
 - **Real-time Data** - Firebase Firestore integration with real-time updates
 - **Error Handling** - Comprehensive error handling with user-friendly messages
 - **Performance Optimization** - Optimized Firebase Functions with memory and timeout settings
+- **Server-Side Rendering (SSR)** - Firebase Functions SSR for SEO optimization on main pages
 
 ## 📁 Project Structure
 

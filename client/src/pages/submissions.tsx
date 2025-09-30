@@ -16,6 +16,8 @@ import { ArrowLeft, Download, Users, Trophy, Clock, Mail } from 'lucide-react'
 import type { Player, Game } from '@shared/schema'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { auth } from '@/lib/firebase'
+import { formatTime } from '@/lib/time-utils'
+import { formatDateTime } from '@/lib/date-utils'
 
 export default function Submissions() {
 	const { id } = useParams()
@@ -46,16 +48,6 @@ export default function Submissions() {
 		},
 	})
 
-	const formatTime = (seconds: number) => {
-		const minutes = Math.floor(seconds / 60)
-		const remainingSeconds = seconds % 60
-		return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-	}
-
-	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleString()
-	}
-
 	const downloadCSV = () => {
 		const headers = [
 			'Name',
@@ -73,7 +65,7 @@ export default function Submissions() {
 			player.correctAnswers,
 			player.totalQuestions,
 			player.timeSpent,
-			player.completedAt ? formatDate(player.completedAt.toString()) : '',
+			player.completedAt ? formatDateTime(player.completedAt.toString()) : '',
 		])
 
 		const csvContent = [headers, ...csvData]
@@ -283,7 +275,7 @@ export default function Submissions() {
 													<TableCell>{formatTime(player.timeSpent)}</TableCell>
 													<TableCell>
 														{player.completedAt
-															? formatDate(player.completedAt.toString())
+															? formatDateTime(player.completedAt.toString())
 															: 'Unknown'}
 													</TableCell>
 													<TableCell>

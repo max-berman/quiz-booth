@@ -17,6 +17,8 @@ const staticRoutes = [
 	'/quiz-games',
 	'/dashboard',
 	'/auth/sign-in',
+	'/about',
+	'/faq',
 ]
 
 // Dynamic routes that might need to be generated from data

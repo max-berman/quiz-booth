@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
 import type { Game } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
+import { formatTime } from '@/lib/time-utils'
 
 export default function Results() {
 	const { id } = useParams()
@@ -85,12 +86,6 @@ export default function Results() {
 		}
 
 		saveScoreMutation.mutate(playerData)
-	}
-
-	const formatTime = (seconds: number) => {
-		const minutes = Math.floor(seconds / 60)
-		const remainingSeconds = seconds % 60
-		return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
 	}
 
 	return (

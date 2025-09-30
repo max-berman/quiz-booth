@@ -55,6 +55,35 @@ To verify that the DeepSeek API is working correctly:
 3. Create a new trivia game with test data
 4. The app should successfully generate questions using the DeepSeek API
 
+## Server-Side Rendering (SSR) Testing
+
+To test the SSR functionality:
+
+1. **Test SSR Routes**:
+
+   ```bash
+   npm run test:ssr
+   ```
+
+2. **Test with Firebase Emulators**:
+
+   ```bash
+   npm run emulate
+   ```
+
+3. **Verify SSR Pages**:
+
+   - Home page (`/`) - Should render server-side with SEO meta tags
+   - About page (`/about`) - Should render server-side with mission content
+   - Quiz Games page (`/quiz-games`) - Should render server-side with public games
+   - FAQ page (`/faq`) - Should render server-side with structured content
+
+4. **Check SSR Features**:
+   - Server-generated HTML with proper meta tags
+   - Dynamic content from Firestore
+   - Security headers (X-Frame-Options, XSS Protection)
+   - 1-hour caching for performance
+
 ## Troubleshooting
 
 ### Common Issues

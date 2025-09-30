@@ -1,6 +1,7 @@
 {
-  "name": "rest-express",
-  "version": "1.0.0",
+  "name": "QuizBooth",
+  "version": "2.0.0",
+  "description": "AI-powered trivia games for trade shows and events - Engage customers, capture leads, and drive business growth through interactive gameplay",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -13,7 +14,8 @@
     "deploy:functions": "firebase deploy --only functions",
     "deploy:firestore": "firebase deploy --only firestore",
     "deploy:all": "npm run build:client && npm run build:functions && npm run sitemap && firebase deploy",
-    "emulate": "npm run build:functions && firebase emulators:start --import=./emulator-data --export-on-exit"
+    "emulate": "npm run build:functions && firebase emulators:start --import=./emulator-data --export-on-exit",
+    "test:ssr": "curl http://127.0.0.1:5000/ && curl http://127.0.0.1:5000/about && curl http://127.0.0.1:5000/quiz-games && curl http://127.0.0.1:5000/faq"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",

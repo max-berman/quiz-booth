@@ -663,3 +663,67 @@ export const getPublicGamesCount = functions.https.onCall(async (data, context) 
     throw new functions.https.HttpsError('internal', 'Failed to get public games count');
   }
 });
+
+// Delete game and all related data
+export const deleteGame = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'User must be authenticated'
+    );
+  }
+
+  const userId = context.auth.uid;
+  const { gameId } = data;
+
+  try {
+    // Verify user owns the game
+    const gameDoc = await db.collection('games').doc(gameId).get();
+    if (!gameDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Game not found');
+    }
+
+    const gameData = gameDoc.data();
+    if (gameData?.userId !== userId) {
+      throw new functions.https.HttpsError('permission-denied', 'Access denied');
+    }
+
+    // Start a batch write for atomic operations
+    const batch = db.batch();
+
+    // Delete the game document
+    batch.delete(db.collection('games').doc(gameId));
+
+    // Delete all questions for this game
+    const questionsSnapshot = await db
+      .collection('questions')
+      .where('gameId', '==', gameId)
+      .get();
+
+    questionsSnapshot.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    // Delete all player submissions for this game
+    const playersSnapshot = await db
+      .collection('players')
+      .where('gameId', '==', gameId)
+      .get();
+
+    playersSnapshot.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    // Commit the batch deletion
+    await batch.commit();
+
+    console.log(`Game ${gameId} and all related data deleted successfully`);
+    return { success: true, message: 'Game and all related data deleted successfully' };
+  } catch (error) {
+    console.error('Delete game error:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError('internal', 'Failed to delete game');
+  }
+});

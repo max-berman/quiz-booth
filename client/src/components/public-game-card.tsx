@@ -8,53 +8,13 @@ import {
 } from '@/lib/ui-imports-basic'
 import { Building, Calendar, Gift, Play, Target } from 'lucide-react'
 import type { Game } from '@shared/firebase-types'
+import { isWebsite, formatWebsite } from '@/lib/website-utils'
 
 interface PublicGameCardProps {
 	game: Game
 }
 
 export function PublicGameCard({ game }: PublicGameCardProps) {
-	// Helper function to check if company name is a website
-	const isWebsite = (text: string): boolean => {
-		if (!text.includes('.')) return false
-		if (text.startsWith('http://') || text.startsWith('https://')) return true
-
-		const commonTLDs = [
-			'.com',
-			'.org',
-			'.net',
-			'.io',
-			'.co',
-			'.dev',
-			'.app',
-			'.tech',
-			'.ai',
-		]
-		return commonTLDs.some((tld) => {
-			const index = text.indexOf(tld)
-			if (index === -1) return false
-			const afterTLD = text.substring(index + tld.length)
-			return (
-				afterTLD.length === 0 ||
-				afterTLD.startsWith('/') ||
-				afterTLD.startsWith('?') ||
-				afterTLD.startsWith('#')
-			)
-		})
-	}
-
-	// Format website for display
-	const formatWebsite = (website: string): string => {
-		try {
-			const url = new URL(
-				website.startsWith('http') ? website : `https://${website}`
-			)
-			return url.hostname
-		} catch {
-			return website
-		}
-	}
-
 	return (
 		<Card className='hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-2 h-full flex flex-col'>
 			{/* <CardHeader className='pb-3 px-4 pt-4'> */}
@@ -108,7 +68,7 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 					)}
 
 					{/* Prize Info */}
-					{game.prizes && game.prizes.length > 0 && (
+					{/* {game.prizes && game.prizes.length > 0 && (
 						<div className='flex items-start gap-2'>
 							<Gift className='h-4 w-4 text-primary mt-0.5 flex-shrink-0' />
 							<div className='text-sm'>
@@ -122,6 +82,22 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 										+{game.prizes.length - 2} more prizes
 									</div>
 								)}
+							</div>
+						</div>
+					)} */}
+
+					{/* Prizes if configured */}
+					{game.prizes && Array.isArray(game.prizes) && (
+						<div className='flex gap-2 items-start'>
+							{game.prizes.length > 0 && <Gift className='h-4 w-4 mt-0.5' />}
+							<div className='flex flex-wrap gap-1 mr-2 text-primary'>
+								{game.prizes.length > 0 &&
+									game.prizes.map((prize, index) => (
+										<span key={index}>
+											<strong>{prize.placement}</strong>: {prize.prize}
+											{index !== game.prizes!.length - 1 && <span> • </span>}
+										</span>
+									))}
 							</div>
 						</div>
 					)}

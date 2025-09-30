@@ -10,6 +10,8 @@ import {
 	Menu,
 	CircleUserRound,
 	Gamepad2,
+	Info,
+	HelpCircle,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { MenuLink } from './menu-link'
@@ -78,6 +80,18 @@ export function CreatorHeader() {
 						<MenuLink href='/quiz-games' data-testid='button-quiz-games'>
 							<Gamepad2 className='mr-2 h-4 w-4' />
 							Quiz Games
+						</MenuLink>
+
+						{/* About page */}
+						<MenuLink href='/about' data-testid='button-about'>
+							<Info className='mr-2 h-4 w-4' />
+							About
+						</MenuLink>
+
+						{/* FAQ page */}
+						<MenuLink href='/faq' data-testid='button-faq'>
+							<HelpCircle className='mr-2 h-4 w-4' />
+							FAQ
 						</MenuLink>
 
 						{/* Dashboard for authenticated users */}
@@ -172,6 +186,28 @@ export function CreatorHeader() {
 						>
 							<Gamepad2 className='mr-2 h-4 w-4' />
 							Quiz Games
+						</Button>
+						<Button
+							variant='ghost'
+							className='w-full justify-start'
+							onClick={() => {
+								setLocation('/about')
+								setIsSidebarOpen(false)
+							}}
+						>
+							<Info className='mr-2 h-4 w-4' />
+							About
+						</Button>
+						<Button
+							variant='ghost'
+							className='w-full justify-start'
+							onClick={() => {
+								setLocation('/faq')
+								setIsSidebarOpen(false)
+							}}
+						>
+							<HelpCircle className='mr-2 h-4 w-4' />
+							FAQ
 						</Button>
 						{isAuthenticated && (
 							<Button
