@@ -57,7 +57,8 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 
 	return (
 		<Card className='hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-2 h-full flex flex-col'>
-			<CardHeader className='pb-3 px-4 pt-4'>
+			{/* <CardHeader className='pb-3 px-4 pt-4'> */}
+			<CardHeader className='p-4 px-4 pb-2 mb-2 bg-accent/50 rounded-md rounded-b-none'>
 				<div className='flex items-center flex-col'>
 					<CardTitle
 						title={game.gameTitle || game.companyName}
@@ -73,9 +74,9 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 					</Badge>
 				</div>
 			</CardHeader>
-			<CardContent className='space-y-3 px-4 pb-4 flex-1'>
+			<CardContent className='space-y-3 px-4 pb-4 flex  flex-col'>
 				{/* Game Details */}
-				<div className='space-y-2 text-sm text-foreground'>
+				<div className='space-y-2 text-sm text-foreground '>
 					{/* Website/Company */}
 					<div className='flex items-center gap-2'>
 						<Building className='h-4 w-4 text-primary' />
@@ -87,10 +88,10 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 					</div>
 
 					{/* Created Date */}
-					<div className='flex items-center gap-2'>
+					{/* <div className='flex items-center gap-2'>
 						<Calendar className='h-4 w-4 text-primary' />
 						<span>Created {new Date(game.createdAt).toLocaleDateString()}</span>
-					</div>
+					</div> */}
 
 					{/* Question Categories */}
 					{game.categories.length > 0 && (
@@ -110,7 +111,7 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 					{game.prizes && game.prizes.length > 0 && (
 						<div className='flex items-start gap-2'>
 							<Gift className='h-4 w-4 text-primary mt-0.5 flex-shrink-0' />
-							<div className='text-xs'>
+							<div className='text-sm'>
 								{game.prizes.slice(0, 2).map((prize, index) => (
 									<div key={index} className='truncate'>
 										<strong>{prize.placement}</strong>: {prize.prize}
@@ -127,9 +128,9 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 				</div>
 
 				{/* Play Button */}
-				<div className='pt-2 mt-auto'>
+				<div className='pt-2 self-center'>
 					<Link href={`/game/${game.id}`}>
-						<button className='w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors'>
+						<button className=' bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors'>
 							<Play className='h-4 w-4' />
 							Play Game
 						</button>

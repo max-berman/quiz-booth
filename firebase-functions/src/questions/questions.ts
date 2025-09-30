@@ -125,7 +125,7 @@ export const generateQuestions = functions.https.onCall(async (data, context) =>
     }
 
     // Call DeepSeek API to generate questions
-    const deepseekApiKey = functions.config().deepseek?.api_key || process.env.DEEPSEEK_API_KEY;
+    const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
     if (!deepseekApiKey) {
       throw new functions.https.HttpsError('internal', 'DeepSeek API key not configured');
     }
@@ -339,7 +339,7 @@ export const generateSingleQuestion = functions.https.onCall(async (data, contex
     }
 
     // Call DeepSeek API to generate a single question
-    const deepseekApiKey = functions.config().deepseek?.api_key || process.env.DEEPSEEK_API_KEY;
+    const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
     if (!deepseekApiKey) {
       throw new functions.https.HttpsError('internal', 'DeepSeek API key not configured');
     }

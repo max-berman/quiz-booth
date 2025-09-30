@@ -4,13 +4,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "echo 'Use npm run dev:legacy for Express server or npm run emulators for Firebase development' && echo 'See DEVELOPMENT_GUIDE.md for details'",
-    "dev:legacy": "NODE_ENV=development tsx server/index.ts",
+    "dev": "echo 'Use npm run dev:client for client development or npm run emulate for Firebase emulators' && echo 'See DEVELOPMENT_GUIDE.md for details'",
     "dev:client": "vite --config vite.config.ts",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "start": "NODE_ENV=production node dist/index.js",
-    "check": "tsc",
-    "db:push": "drizzle-kit push",
     "build:client": "vite build",
     "build:functions": "cd firebase-functions && npm run build",
     "sitemap": "node scripts/generate-sitemap.js",
@@ -18,7 +13,7 @@
     "deploy:functions": "firebase deploy --only functions",
     "deploy:firestore": "firebase deploy --only firestore",
     "deploy:all": "npm run build:client && npm run build:functions && npm run sitemap && firebase deploy",
-    "emulate": "firebase emulators:start --import=./emulator-data --export-on-exit"
+    "emulate": "npm run build:functions && firebase emulators:start --import=./emulator-data --export-on-exit"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",

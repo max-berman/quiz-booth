@@ -68,7 +68,7 @@ quiz-booth/
 
 ### Backend
 
-- **Runtime**: Node.js with Express.js
+- **Runtime**: Firebase Functions (Node.js)
 - **Language**: TypeScript
 - **Database**: Firebase Firestore
 - **Authentication**: Firebase Admin SDK
@@ -138,16 +138,17 @@ quiz-booth/
 ### Development
 
 ```bash
-npm run dev          # Start development server (frontend + backend)
-npm run check        # TypeScript type checking
-npm run db:push      # Push database schema changes (if using Drizzle)
+npm run dev          # Show development options
+npm run dev:client   # Start client development server
+npm run emulate      # Start Firebase emulators
 ```
 
 ### Production
 
 ```bash
-npm run build        # Build for production
-npm run start        # Start production server
+npm run build:client    # Build client for production
+npm run build:functions # Build Firebase Functions
+npm run deploy:all      # Deploy everything to Firebase
 ```
 
 ## 🔌 Firebase Functions API
@@ -279,9 +280,8 @@ Many endpoints support both systems with graceful fallback:
 ### Adding New Features
 
 1. Update shared types in `shared/firebase-types.ts`
-2. Modify data access methods in `server/storage.ts`
-3. Add API routes in `server/routes.ts`
-4. Create frontend components in `client/src/`
+2. Add new Firebase Functions in `firebase-functions/src/`
+3. Create frontend components in `client/src/`
 
 ### Code Style
 

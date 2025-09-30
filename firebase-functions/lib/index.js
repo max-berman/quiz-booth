@@ -26,6 +26,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userSetup = exports.resetUsage = exports.getUsage = exports.trackUsage = exports.addQuestion = exports.deleteQuestion = exports.updateQuestion = exports.getQuestions = exports.generateSingleQuestion = exports.generateQuestions = exports.getPublicGamesCount = exports.getPublicGames = exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
 // import * as functions from 'firebase-functions';
 const admin = __importStar(require("firebase-admin"));
+const dotenv = __importStar(require("dotenv"));
+// Load environment variables
+dotenv.config();
 // Initialize Firebase Admin
 admin.initializeApp();
 // Import function modules

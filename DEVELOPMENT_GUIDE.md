@@ -1,10 +1,10 @@
-# Development Guide for Firebase Migration
+# Development Guide
 
-After migrating to Firebase, the development workflow has changed. Here are the different ways to run the application in development mode.
+This guide covers the development workflow for the Quiz Booth application using Firebase.
 
-## Option 1: Firebase Emulators (Recommended)
+## Development with Firebase Emulators
 
-The best way to develop locally is using Firebase Emulators, which provide a complete local Firebase environment.
+The recommended way to develop locally is using Firebase Emulators, which provide a complete local Firebase environment.
 
 ### Setup Emulators
 
@@ -16,7 +16,7 @@ npm install -g firebase-tools
 firebase login
 
 # Start all emulators
-npm run emulators
+npm run emulate
 
 # Or start specific emulators
 firebase emulators:start --only functions,firestore,auth,hosting
@@ -27,7 +27,7 @@ firebase emulators:start --only functions,firestore,auth,hosting
 1. **Start the emulators**:
 
    ```bash
-   npm run emulators
+   npm run emulate
    ```
 
 2. **In a separate terminal, start the client development server**:
@@ -54,20 +54,7 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 VITE_FIREBASE_APP_ID=1:123456789:web:abcdef123456
 ```
 
-## Option 2: Legacy Development Mode (Express Server)
-
-If you need to test the original Express server functionality:
-
-```bash
-# Run the original Express server
-npm run dev:legacy
-
-# In another terminal, start the client
-cd client
-npm run dev
-```
-
-## Option 3: Firebase Functions Shell
+## Firebase Functions Shell
 
 For testing Firebase Functions directly:
 
@@ -84,9 +71,10 @@ npm run shell
 
 ### Main Scripts
 
-- `npm run emulators` - Start Firebase Emulators
-- `npm run dev:legacy` - Run original Express server (for comparison)
-- `npm run dev:client` - Start only the client dev server
+- `npm run emulate` - Start Firebase Emulators
+- `npm run dev:client` - Start the client development server
+- `npm run build:client` - Build the client for production
+- `npm run build:functions` - Build Firebase Functions
 
 ### Firebase Functions Scripts (in firebase-functions directory)
 
@@ -98,19 +86,18 @@ npm run shell
 
 ### 1. Database Connection
 
-- The original PostgreSQL database is no longer used in Firebase mode
-- All data is now stored in Firestore (emulated locally)
-- The Express server routes are replaced by Firebase Functions
+- All data is stored in Firestore (emulated locally)
+- Backend functionality is provided by Firebase Functions
 
 ### 2. Authentication
 
-- Firebase Authentication is used instead of custom auth
+- Firebase Authentication is used for user management
 - The emulator provides local auth testing
 - User setup is automatic via the `userSetup` function
 
 ### 3. API Calls
 
-- Frontend now calls Firebase Functions instead of Express API endpoints
+- Frontend calls Firebase Functions for all backend operations
 - The `use-firebase-functions.ts` hook handles all Firebase Function calls
 - Error handling and authentication are managed by Firebase
 
@@ -147,12 +134,12 @@ npm run build
 - Check that `VITE_USE_FIREBASE_EMULATOR` is set correctly
 - Verify the emulators are running on the expected ports
 
-## Testing the Migration
+## Testing
 
-To verify the Firebase migration is working:
+To verify the application is working:
 
-1. Start emulators: `npm run emulators`
-2. Start client: `cd client && npm run dev`
+1. Start emulators: `npm run emulate`
+2. Start client: `npm run dev:client`
 3. Open http://localhost:5173
 4. Test authentication, game creation, and question generation
 5. Check the emulator UI at http://localhost:4000 for logs and data

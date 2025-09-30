@@ -110,7 +110,7 @@ function isWebsiteURL(text) {
 }
 // Generate questions using DeepSeek API
 exports.generateQuestions = functions.https.onCall(async (data, context) => {
-    var _a, _b;
+    var _a;
     const { gameId } = data;
     try {
         // Rate limiting check for AI generation
@@ -129,7 +129,7 @@ exports.generateQuestions = functions.https.onCall(async (data, context) => {
             });
         }
         // Call DeepSeek API to generate questions
-        const deepseekApiKey = ((_a = functions.config().deepseek) === null || _a === void 0 ? void 0 : _a.api_key) || process.env.DEEPSEEK_API_KEY;
+        const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
         if (!deepseekApiKey) {
             throw new functions.https.HttpsError('internal', 'DeepSeek API key not configured');
         }
@@ -140,7 +140,7 @@ exports.generateQuestions = functions.https.onCall(async (data, context) => {
 - Company: ${gameData === null || gameData === void 0 ? void 0 : gameData.companyName}
 - Industry: ${gameData === null || gameData === void 0 ? void 0 : gameData.industry}
 - Description: ${(gameData === null || gameData === void 0 ? void 0 : gameData.productDescription) || 'Not provided'}
-- Categories: ${(_b = gameData === null || gameData === void 0 ? void 0 : gameData.categories) === null || _b === void 0 ? void 0 : _b.join(', ')}
+- Categories: ${(_a = gameData === null || gameData === void 0 ? void 0 : gameData.categories) === null || _a === void 0 ? void 0 : _a.join(', ')}
 
 Return ONLY the title as plain text, no JSON or additional formatting.`;
             const titleResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -304,7 +304,6 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
 });
 // Generate a single question
 exports.generateSingleQuestion = functions.https.onCall(async (data, context) => {
-    var _a;
     const { gameId } = data;
     try {
         // Rate limiting check for AI generation
@@ -323,7 +322,7 @@ exports.generateSingleQuestion = functions.https.onCall(async (data, context) =>
             });
         }
         // Call DeepSeek API to generate a single question
-        const deepseekApiKey = ((_a = functions.config().deepseek) === null || _a === void 0 ? void 0 : _a.api_key) || process.env.DEEPSEEK_API_KEY;
+        const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
         if (!deepseekApiKey) {
             throw new functions.https.HttpsError('internal', 'DeepSeek API key not configured');
         }

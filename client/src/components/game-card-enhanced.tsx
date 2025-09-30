@@ -15,6 +15,7 @@ import {
 	Building,
 	Database,
 	Gift,
+	Target,
 	Wrench,
 	Play,
 	Plus,
@@ -24,6 +25,7 @@ import { ShareEmbedModal } from '@/components/share-embed-modal'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { Game } from '@shared/firebase-types'
 import { useQuery } from '@tanstack/react-query'
+import { Separator } from '@/components/ui/separator'
 
 interface GameCardEnhancedProps {
 	game: Game
@@ -117,22 +119,23 @@ export function GameCardEnhanced({
 
 	return (
 		<Card className='hover:shadow-xl hover:scale-[1.02] transition-all duration-200 border-2'>
-			<CardHeader className='pb-3 px-4 pt-2'>
+			<CardHeader className='p-4 px-4 pb-2 mb-2 bg-accent/50 rounded-md rounded-b-none'>
 				<div className='flex items-center flex-col '>
 					<CardTitle
 						title={game.companyName}
-						className='text-xl font-bold line-clamp-2 text-foreground mb-1'
+						className='text-xl font-bold line-clamp-2 text-foreground mb-2'
 					>
 						{game.gameTitle || game.companyName}
 					</CardTitle>
 					<Badge
 						title={game.industry}
-						className='font-semibold whitespace-nowrap block truncate text-ellipsis overflow-hidden '
+						className='font-semibold whitespace-nowrap block truncate text-ellipsis overflow-hidden mb-2'
 					>
 						{game.industry}
 					</Badge>
 				</div>
 			</CardHeader>
+
 			<CardContent className='space-y-4 px-4'>
 				{/* Game Details */}
 				<div className='space-y-2 text-sm text-foreground'>
@@ -148,6 +151,7 @@ export function GameCardEnhanced({
 								Modified {new Date(game.modifiedAt).toLocaleDateString()}
 							</div>
 						)}
+
 					<div className='flex items-center gap-2'>
 						<Building className='h-4 w-4' />
 						{actualQuestionCount !== undefined
@@ -161,6 +165,27 @@ export function GameCardEnhanced({
 							{playCount} {playCount === 1 ? 'play' : 'plays'}
 						</div>
 					)}
+
+					{/* Prizes if configured */}
+
+					{/* Remove commented prize label */}
+					{game.prizes && Array.isArray(game.prizes) && (
+						<div className='flex gap-2 items-start'>
+							{game.prizes.length > 0 && (
+								// <div className='text-xs font-semibold mr-2'>Prizes:</div>
+								<Gift className='h-4 w-4 mt-0.5' />
+							)}
+							<div className='flex flex-wrap gap-1 mr-2'>
+								{game.prizes.length > 0 &&
+									game.prizes.map((prize, index) => (
+										<span key={index}>
+											<strong>{prize.placement}</strong>: {prize.prize}
+											{index !== game.prizes!.length - 1 && <span> • </span>}
+										</span>
+									))}
+							</div>
+						</div>
+					)}
 					{game.categories.length > 0 && (
 						<div className='flex flex-wrap gap-1 mt-2'>
 							{game.categories.map((category, index) => (
@@ -171,25 +196,6 @@ export function GameCardEnhanced({
 						</div>
 					)}
 				</div>
-
-				{/* Prizes if configured */}
-
-				{/* Remove commented prize label */}
-				{game.prizes && Array.isArray(game.prizes) && (
-					<div className='flex '>
-						{game.prizes.length > 0 && (
-							<div className='text-xs font-semibold mr-2'>Prizes:</div>
-						)}
-						<ul className='text-xs flex flex-col flex-wrap  mr-2'>
-							{game.prizes.length > 0 &&
-								game.prizes.map((prize, index) => (
-									<li key={index} className='mr-2'>
-										<strong>{prize.placement}</strong>: {prize.prize}
-									</li>
-								))}
-						</ul>
-					</div>
-				)}
 
 				{/* Action Buttons */}
 				<div className='space-y-1 pt-2'>
