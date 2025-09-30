@@ -8,6 +8,10 @@
     ],
     "rewrites": [
       {
+        "source": "/",
+        "function": "ssrHandler"
+      },
+      {
         "source": "/about",
         "function": "ssrHandler"
       },
@@ -17,10 +21,6 @@
       },
       {
         "source": "/faq",
-        "function": "ssrHandler"
-      },
-      {
-        "source": "/",
         "function": "ssrHandler"
       }
     ],
