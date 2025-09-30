@@ -13,7 +13,8 @@
     "deploy:hosting": "firebase deploy --only hosting",
     "deploy:functions": "firebase deploy --only functions",
     "deploy:firestore": "firebase deploy --only firestore",
-    "deploy:all": "npm run build:client && npm run build:functions && npm run sitemap && firebase deploy",
+    "deploy:all": "./scripts/deploy-with-ssr.sh",
+    "deploy:ssr": "./scripts/deploy-with-ssr.sh",
     "emulate": "npm run build:functions && firebase emulators:start --import=./emulator-data --export-on-exit",
     "test:ssr": "curl http://127.0.0.1:5000/ && curl http://127.0.0.1:5000/about && curl http://127.0.0.1:5000/quiz-games && curl http://127.0.0.1:5000/faq"
   },

@@ -7,13 +7,17 @@ echo "🚀 Deploying QuizBooth with SSR..."
 
 # Build the client
 echo "📦 Building client..."
-npm run build
+npm run build:client
 
 # Build Firebase functions
 echo "🔨 Building Firebase functions..."
 cd firebase-functions
 npm run build
 cd ..
+
+# Generate sitemap
+echo "🗺️  Generating sitemap..."
+npm run sitemap
 
 # Temporarily move static index.html to allow SSR to work
 echo "🔄 Configuring SSR for root path..."
