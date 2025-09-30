@@ -38,7 +38,7 @@ export function PWARegistration() {
 													newWorker.postMessage({ type: 'SKIP_WAITING' })
 													window.location.reload()
 												}}
-												className='bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700'
+												className='bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90 transition-colors'
 											>
 												Update
 											</button>

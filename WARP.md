@@ -456,7 +456,7 @@ Brief description of changes
 ### Documentation Files
 
 - `README.md` - Comprehensive project documentation
-- `features.md` - Detailed feature list
+- `Features-Summary.md` - Detailed feature list
 - `OPTIMIZATION_REPORT.md` - Performance analysis
 - `SETUP_GUIDE.md` - Setup instructions
 

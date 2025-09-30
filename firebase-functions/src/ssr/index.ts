@@ -26,13 +26,149 @@ export const ssrHandler = functions.https.onRequest(async (req, res) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     ${metaTags}
-    <link rel="stylesheet" href="/assets/index.css">
-    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+    
+    <!-- Essential Meta Tags -->
+    <meta name="description" content="Create AI-powered custom trivia games for trade shows and events. Engage customers, capture leads, and drive business growth through interactive gameplay." />
+    <meta name="keywords" content="trivia games, business events, trade shows, lead capture, AI questions, interactive marketing" />
+    <meta name="author" content="QuizBooth" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="QuizBooth - Create Engaging Trivia Games for Your Business" />
+    <meta property="og:description" content="Create AI-powered custom trivia games for trade shows and events. Engage customers, capture leads, and drive business growth through interactive gameplay." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://quizbooth.games" />
+    <meta property="og:image" content="/assets/quizbooth.png" />
+    <meta property="og:site_name" content="QuizBooth" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="QuizBooth - Create Engaging Trivia Games for Your Business" />
+    <meta name="twitter:description" content="Create AI-powered custom trivia games for trade shows and events. Engage customers, capture leads, and drive business growth through interactive gameplay." />
+    <meta name="twitter:image" content="/assets/quizbooth.png" />
+
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
     <link rel="apple-touch-icon" href="/assets/quiz-booth-icon.png">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="QuizBooth" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="QuizBooth" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://quizbooth.games" />
+
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/assets/fonts/Onest-Regular.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="/assets/fonts/Onest-Bold.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="/assets/fonts/Onest-Medium.ttf" as="font" type="font/ttf" crossorigin />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "QuizBooth",
+      "description": "Create AI-powered custom trivia games for trade shows and events. Engage customers, capture leads, and drive business growth through interactive gameplay.",
+      "url": "https://quizbooth.games",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "category": "SoftwareApplication"
+      },
+      "creator": {
+        "@type": "Organization",
+        "name": "QuizBooth",
+        "url": "https://quizbooth.games"
+      },
+      "featureList": [
+        "AI-Powered Question Generation",
+        "Lead Capture Integration",
+        "QR Code Sharing",
+        "Real-time Analytics",
+        "Custom Branding"
+      ]
+    }
+    </script>
+
+    <!-- FAQ Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is QuizBooth?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "QuizBooth is a platform that helps businesses create engaging trivia games for events and trade shows. It uses AI to generate custom questions and includes lead capture features to turn players into potential customers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does the AI question generation work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our AI analyzes your business context and generates relevant, engaging trivia questions in seconds. You can customize the difficulty, topics, and style to match your brand and audience."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I capture leads through trivia games?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! QuizBooth includes built-in lead capture functionality. Players can optionally provide their contact information before or after playing, helping you build your customer database."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I share my trivia game?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can share your game via QR code, direct link, or embed it on your website. Setup takes just minutes and requires no technical expertise."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is QuizBooth suitable for trade shows?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely! QuizBooth was designed specifically for trade shows and business events. It helps attract visitors to your booth, engage them with interactive content, and capture valuable leads."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <link rel="stylesheet" crossorigin href="/assets/index-juwbc9fD.css">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-react-C8w-UNLI.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-radix-BDMsTCiy.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-query-CiE4Trht.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-charts-BKXKzPuX.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-icons-CipFtPyC.js">
 </head>
 <body>
     <div id="root">${html}</div>
-    <script type="module" src="/assets/index.js"></script>
+    <script type="module" crossorigin src="/assets/index-CLVvZ2oa.js"></script>
+    <script>
+      // Dynamically load PWA manifest only in production
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = '/manifest.webmanifest';
+        document.head.appendChild(link);
+      }
+    </script>
 </body>
 </html>`;
 
