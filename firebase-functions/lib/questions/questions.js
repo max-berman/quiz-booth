@@ -29,6 +29,7 @@ const admin = __importStar(require("firebase-admin"));
 const crypto_1 = require("crypto");
 const firestore_1 = require("firebase-admin/firestore");
 const rate_limit_1 = require("../lib/rate-limit");
+const api_config_1 = require("../config/api-config");
 const db = admin.firestore();
 // Helper function to track usage
 async function trackUsage(userId, eventType, metadata) {
@@ -143,14 +144,14 @@ exports.generateQuestions = functions.https.onCall(async (data, context) => {
 - Categories: ${(_a = gameData === null || gameData === void 0 ? void 0 : gameData.categories) === null || _a === void 0 ? void 0 : _a.join(', ')}
 
 Return ONLY the title as plain text, no JSON or additional formatting.`;
-            const titleResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            const titleResponse = await fetch(`${api_config_1.DEEPSEEK_API_CONFIG.BASE_URL}${api_config_1.DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${deepseekApiKey}`,
-                    'Content-Type': 'application/json',
+                    'Content-Type': api_config_1.API_HEADERS.CONTENT_TYPE,
                 },
                 body: JSON.stringify({
-                    model: 'deepseek-chat',
+                    model: api_config_1.DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
                     messages: [
                         {
                             role: 'user',
@@ -233,14 +234,14 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
     - Vary the position of correct answers
     - Approximately 15% of questions include a relevant emoji in questionText
     - Return valid JSON only, no additional text`;
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        const response = await fetch(`${api_config_1.DEEPSEEK_API_CONFIG.BASE_URL}${api_config_1.DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${deepseekApiKey}`,
-                'Content-Type': 'application/json',
+                'Content-Type': api_config_1.API_HEADERS.CONTENT_TYPE,
             },
             body: JSON.stringify({
-                model: 'deepseek-chat',
+                model: api_config_1.DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
                 messages: [
                     {
                         role: 'user',
@@ -380,14 +381,14 @@ exports.generateSingleQuestion = functions.https.onCall(async (data, context) =>
     - Ensure the question is completely unique and appropriate for the specified difficulty level
     - Use emojis sparingly and only when they enhance understanding or engagement
     - Return valid JSON only, no additional text or formatting`;
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        const response = await fetch(`${api_config_1.DEEPSEEK_API_CONFIG.BASE_URL}${api_config_1.DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${deepseekApiKey}`,
-                'Content-Type': 'application/json',
+                'Content-Type': api_config_1.API_HEADERS.CONTENT_TYPE,
             },
             body: JSON.stringify({
-                model: 'deepseek-chat',
+                model: api_config_1.DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
                 messages: [
                     {
                         role: 'user',

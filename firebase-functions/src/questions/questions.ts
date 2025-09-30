@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin';
 import { randomUUID } from 'crypto';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { rateLimitConfigs, withRateLimit } from '../lib/rate-limit';
+import { DEEPSEEK_API_CONFIG, API_HEADERS } from '../config/api-config';
 
 const db = admin.firestore();
 
@@ -141,14 +142,14 @@ export const generateQuestions = functions.https.onCall(async (data, context) =>
 
 Return ONLY the title as plain text, no JSON or additional formatting.`;
 
-      const titleResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      const titleResponse = await fetch(`${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${deepseekApiKey}`,
-          'Content-Type': 'application/json',
+          'Content-Type': API_HEADERS.CONTENT_TYPE,
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
+          model: DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
           messages: [
             {
               role: 'user',
@@ -237,14 +238,14 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
     - Approximately 15% of questions include a relevant emoji in questionText
     - Return valid JSON only, no additional text`;
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    const response = await fetch(`${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${deepseekApiKey}`,
-        'Content-Type': 'application/json',
+        'Content-Type': API_HEADERS.CONTENT_TYPE,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
         messages: [
           {
             role: 'user',
@@ -401,14 +402,14 @@ export const generateSingleQuestion = functions.https.onCall(async (data, contex
     - Use emojis sparingly and only when they enhance understanding or engagement
     - Return valid JSON only, no additional text or formatting`;
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    const response = await fetch(`${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${deepseekApiKey}`,
-        'Content-Type': 'application/json',
+        'Content-Type': API_HEADERS.CONTENT_TYPE,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
         messages: [
           {
             role: 'user',
