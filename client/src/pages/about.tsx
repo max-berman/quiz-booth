@@ -27,8 +27,8 @@ import {
 } from 'lucide-react'
 
 export default function About() {
-	const appVersion = '2.0.0'
-	const lastUpdated = 'September 2025'
+	const appVersion = '1.0.0-beta.1'
+	const lastUpdated = 'October 2025'
 
 	// Core features organized by category
 	const featureCategories = [
@@ -109,8 +109,8 @@ export default function About() {
 	// Recent updates and version history
 	const versionHistory = [
 		{
-			version: '2.0.0',
-			date: 'September 2025',
+			version: '1.0.0',
+			date: 'October 2025',
 			changes: [
 				'Complete UI redesign with modern components',
 				'Enhanced AI question generation with DeepSeek integration',
@@ -118,10 +118,14 @@ export default function About() {
 				'Improved mobile optimization and PWA support',
 				'Comprehensive analytics and tracking system',
 				'Performance optimizations and caching improvements',
+				'Timer system with resume capability to prevent cheating',
+				'Interval-based timer state saving for reliability',
+				'Page unload protection for timer persistence',
+				'Safety buffer implementation for timer resumption',
 			],
 		},
 		{
-			version: '1.5.0',
+			version: '0.5.0',
 			date: 'August 2025',
 			changes: [
 				'Initial Firebase authentication integration',
@@ -158,9 +162,17 @@ export default function About() {
 				<section className='relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 to-primary/10'>
 					<div className='max-w-6xl mx-auto text-center'>
 						<div className='mb-8'>
-							<Badge variant='secondary' className='mb-4 text-sm'>
-								Version {appVersion} • Last Updated {lastUpdated}
-							</Badge>
+							<div className='flex flex-col sm:flex-row gap-2 justify-center items-center mb-4'>
+								<Badge variant='secondary' className='text-sm'>
+									Version {appVersion} • Last Updated {lastUpdated}
+								</Badge>
+								<Badge
+									variant='default'
+									className='text-sm bg-green-500 text-white'
+								>
+									🚀 Beta Version • Currently Free
+								</Badge>
+							</div>
 							<h1 className='text-4xl md:text-5xl font-bold text-foreground mb-6'>
 								About <span className='text-primary'>QuizBooth</span>
 							</h1>
@@ -193,6 +205,130 @@ export default function About() {
 									<span className='text-lg'>Last Updated: {lastUpdated}</span>
 								</div>
 							</div>
+						</div>
+
+						{/* Version Breakdown */}
+						<div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-12'>
+							<Card>
+								<CardHeader>
+									<CardTitle className='flex items-center gap-2'>
+										<GitBranch className='h-5 w-5 text-primary' />
+										Version Type
+									</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<div className='space-y-3'>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Major Version:</span>
+											<Badge variant='secondary'>2</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Minor Version:</span>
+											<Badge variant='secondary'>0</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Patch Version:</span>
+											<Badge variant='secondary'>0</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Pre-release:</span>
+											<Badge variant='outline'>beta.1</Badge>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+
+							<Card>
+								<CardHeader>
+									<CardTitle className='flex items-center gap-2'>
+										<Shield className='h-5 w-5 text-primary' />
+										Stability & Status
+									</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<div className='space-y-3'>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Release Status:</span>
+											<Badge
+												variant='default'
+												className='bg-yellow-500 text-white'
+											>
+												Beta
+											</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>API Stability:</span>
+											<Badge variant='secondary'>Stable</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Production Ready:</span>
+											<Badge variant='secondary'>Yes</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Free Tier:</span>
+											<Badge variant='secondary'>Active</Badge>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+
+							<Card>
+								<CardHeader>
+									<CardTitle className='flex items-center gap-2'>
+										<Code className='h-5 w-5 text-primary' />
+										Technical Details
+									</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<div className='space-y-3'>
+										<div className='flex justify-between'>
+											<span className='font-medium'>React Version:</span>
+											<Badge variant='secondary'>18.3.1</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>TypeScript:</span>
+											<Badge variant='secondary'>5.6.3</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Firebase:</span>
+											<Badge variant='secondary'>12.2.1</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Build Tool:</span>
+											<Badge variant='secondary'>Vite 6.3.6</Badge>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+
+							<Card>
+								<CardHeader>
+									<CardTitle className='flex items-center gap-2'>
+										<TrendingUp className='h-5 w-5 text-primary' />
+										Next Release
+									</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<div className='space-y-3'>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Target Version:</span>
+											<Badge variant='secondary'>2.0.0</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Timeline:</span>
+											<Badge variant='outline'>Q4 2025</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Focus Areas:</span>
+											<Badge variant='secondary'>Testing</Badge>
+										</div>
+										<div className='flex justify-between'>
+											<span className='font-medium'>Breaking Changes:</span>
+											<Badge variant='secondary'>None</Badge>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
 						</div>
 
 						{/* Version History */}
@@ -357,22 +493,22 @@ export default function About() {
 							Ready to Create Your First Game?
 						</h2>
 						<p className='text-lg text-foreground mb-8 max-w-2xl mx-auto'>
-							Join businesses worldwide that are using QuizBooth to engage their
-							audience, capture leads, and create memorable experiences at their
-							events.
+							Start exploring QuizBooth's features and create engaging trivia
+							experiences for your events. As a new platform, we're excited to
+							help you connect with your audience through interactive gameplay.
 						</p>
 						<div className='flex flex-col sm:flex-row gap-4 justify-center'>
 							<Badge variant='secondary' className='text-sm py-2'>
-								<TrendingUp className='h-4 w-4 mr-2' />
-								Trusted by event organizers worldwide
+								<Sparkles className='h-4 w-4 mr-2' />
+								New platform with modern features
 							</Badge>
 							<Badge variant='secondary' className='text-sm py-2'>
-								<Award className='h-4 w-4 mr-2' />
-								Production-ready platform
+								<Zap className='h-4 w-4 mr-2' />
+								AI-powered question generation
 							</Badge>
 							<Badge variant='secondary' className='text-sm py-2'>
 								<Shield className='h-4 w-4 mr-2' />
-								Enterprise-grade security
+								Secure and reliable
 							</Badge>
 						</div>
 					</div>

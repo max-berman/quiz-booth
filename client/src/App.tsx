@@ -26,6 +26,7 @@ const GameCreated = lazy(() => import('@/pages/game-created'))
 const QuizGames = lazy(() => import('@/pages/quiz-games'))
 const About = lazy(() => import('@/pages/about'))
 const FAQ = lazy(() => import('@/pages/faq'))
+const Pricing = lazy(() => import('@/pages/pricing'))
 const NotFound = lazy(() => import('@/pages/not-found'))
 
 function Router() {
@@ -44,6 +45,7 @@ function Router() {
 				<Route path='/quiz-games' component={QuizGames} />
 				<Route path='/about' component={About} />
 				<Route path='/faq' component={FAQ} />
+				<Route path='/pricing' component={Pricing} />
 				<Route path='/auth/sign-in' component={SignIn} />
 				<Route path='/auth/complete' component={CompleteSignIn} />
 				<Route component={NotFound} />

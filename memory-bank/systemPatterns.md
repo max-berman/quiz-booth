@@ -202,6 +202,55 @@ interface Player {
 - **Code Splitting**: Lazy loading for optimal performance
 - **Route Protection**: Authentication-based route guards
 
+### New Page Creation Pattern
+
+**IMPORTANT**: When adding a new static page, ensure it's properly integrated across the entire application:
+
+1. **Create Page Component** (`client/src/pages/`)
+
+   - Create new page component with proper SEO metadata
+   - Use lazy loading for code splitting
+
+2. **Add to Router** (`client/src/App.tsx`)
+
+   - Import the page component with lazy loading
+   - Add route configuration in the Router component
+
+3. **Add to Header Menu** (`client/src/components/menu-header.tsx`)
+
+   - Add navigation link to desktop menu
+   - Add navigation link to mobile sidebar
+   - Include appropriate icon for visual consistency
+
+4. **Add to Footer** (`client/src/components/footer.tsx`)
+
+   - Add navigation link to footer
+   - Position logically within existing navigation structure
+
+5. **Add to Sitemap** (`scripts/generate-sitemap.js`)
+
+   - Add route to static routes array
+   - Regenerate sitemap to include new page
+
+6. **Testing & Verification**
+   - Verify page loads correctly at the new route
+   - Test navigation from header and footer
+   - Confirm sitemap includes the new page
+   - Check SEO metadata and accessibility
+
+**Example Workflow for Static Pages:**
+
+```typescript
+// 1. Create page component
+// 2. Add to App.tsx router
+// 3. Add to menu-header.tsx navigation
+// 4. Add to footer.tsx navigation
+// 5. Add to generate-sitemap.js
+// 6. Test all navigation paths
+```
+
+**Note**: Dynamic pages (like `/game/:id`) follow different patterns and don't need manual sitemap or navigation entries.
+
 ## Performance Optimization
 
 ### Frontend Optimizations

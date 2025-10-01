@@ -12,6 +12,7 @@ import {
 	Gamepad2,
 	Info,
 	HelpCircle,
+	DollarSign,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { MenuLink } from './menu-link'
@@ -92,6 +93,12 @@ export function CreatorHeader() {
 						<MenuLink href='/faq' data-testid='button-faq'>
 							<HelpCircle className='mr-2 h-4 w-4' />
 							FAQ
+						</MenuLink>
+
+						{/* Pricing page */}
+						<MenuLink href='/pricing' data-testid='button-pricing'>
+							<DollarSign className='mr-2 h-4 w-4' />
+							Pricing
 						</MenuLink>
 
 						{/* Dashboard for authenticated users */}
@@ -208,6 +215,17 @@ export function CreatorHeader() {
 						>
 							<HelpCircle className='mr-2 h-4 w-4' />
 							FAQ
+						</Button>
+						<Button
+							variant='ghost'
+							className='w-full justify-start'
+							onClick={() => {
+								setLocation('/pricing')
+								setIsSidebarOpen(false)
+							}}
+						>
+							<DollarSign className='mr-2 h-4 w-4' />
+							Pricing
 						</Button>
 						{isAuthenticated && (
 							<Button

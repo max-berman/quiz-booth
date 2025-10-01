@@ -4,34 +4,68 @@
 
 ### Recent Development Activities
 
-- **Memory Bank Initialization**: Creating comprehensive project documentation
-- **Project Analysis**: Reviewing existing codebase and architecture
-- **Documentation Enhancement**: Building structured knowledge base for future development
+- **Timer System Enhancement**: Implemented comprehensive timer logic with resume capability and interval-based saving
+- **Memory Bank Update**: Comprehensive review and update of all project documentation
+- **Timer Logic Review**: Analysis and documentation of timer implementation issues and solutions
+- **Performance Optimization**: Continued focus on timer reliability and user experience
 
 ### Current Development State
 
 - **Version**: 2.0.0 - Production ready
 - **Status**: Fully functional with comprehensive feature set
-- **Last Major Update**: Complete authentication system implementation
-- **Recent Focus**: Performance optimization and SSR implementation
+- **Last Major Update**: Timer system implementation with resume functionality
+- **Recent Focus**: Timer logic optimization and documentation
 
 ## Recent Changes and Decisions
 
 ### Technical Decisions Made
 
-1. **Dual Authentication System**: Implemented both Firebase Auth and legacy creator keys for backward compatibility
-2. **Flexible Prize System**: Replaced rigid 1st-3rd place structure with customizable placement system
-3. **AI Integration**: DeepSeek API for context-aware question generation
-4. **Server-Side Rendering**: Firebase Functions SSR for SEO optimization
-5. **Performance Optimization**: Intelligent caching strategies and lazy loading
-6. **Documentation Consolidation**: Removed redundant documentation files and centralized all project knowledge in memory bank
+1. **Timer Resume System**: Implemented comprehensive timer state management with session persistence
+2. **Interval-Based Saving**: Timer state saved at 25, 20, 15, 10, and 5 second intervals for reliability
+3. **Page Unload Protection**: Added `beforeunload` event listener to save timer state immediately
+4. **Race Condition Resolution**: Fixed timer initialization race condition between session loading and question reset
+5. **Safety Buffer**: Added 5-second safety buffer when resuming timers below 5 seconds
+
+### Timer System Implementation
+
+**Key Features Implemented:**
+
+- 30-second per-question timer with real-time countdown
+- Session persistence for timer state across page refreshes
+- Automatic time-out handling with question advancement
+- Visual feedback with color changes and animations for low time
+- Score calculation based on time remaining and streak bonuses
+
+**Technical Implementation:**
+
+```typescript
+// Timer initialization with resume capability
+useEffect(() => {
+	if (isSessionLoaded) {
+		if (sessionState?.currentQuestionTimeLeft !== undefined) {
+			// Resume from saved state with safety buffer
+			let resumedTime = sessionState.currentQuestionTimeLeft
+			if (resumedTime < 5) {
+				resumedTime = Math.min(resumedTime + 5, QUESTION_TIMER_DURATION)
+			}
+			setTimeLeft(resumedTime)
+		} else {
+			// Start new question with full timer
+			setTimeLeft(QUESTION_TIMER_DURATION)
+		}
+	}
+}, [
+	isSessionLoaded,
+	sessionState?.currentQuestionTimeLeft,
+	QUESTION_TIMER_DURATION,
+])
+```
 
 ### Documentation Cleanup (Completed)
 
-- **Removed Redundant Files**: Eliminated 14 redundant documentation files from root directory
-- **Centralized Knowledge**: All essential information now captured in memory bank
-- **Maintained README.md**: Kept main project overview and setup instructions
-- **Preserved Configuration Files**: All technical configuration files remain intact
+- **Memory Bank Update**: Comprehensive review and update of all memory bank files
+- **Timer Documentation**: Detailed analysis of timer logic and implementation patterns
+- **Project State Capture**: Current project status and technical decisions documented
 
 ### Architecture Patterns Established
 
@@ -40,24 +74,25 @@
 - **Serverless Backend**: Firebase Functions for scalability
 - **Modern Frontend**: React 18 with Vite and Tailwind CSS
 - **Real-time Features**: Firestore for live leaderboards and updates
+- **Session Management**: Comprehensive game session state management
 
 ## Active Development Considerations
 
 ### Current Technical Priorities
 
-1. **Performance Monitoring**: Optimizing function memory and timeout settings
-2. **Error Handling**: Comprehensive error tracking and user-friendly messages
-3. **Security**: Input validation, rate limiting, and authentication security
-4. **User Experience**: Mobile-first design and accessibility
-5. **Analytics**: Usage tracking and performance metrics
+1. **Timer Reliability**: Ensuring timer state persistence works reliably across all scenarios
+2. **Performance Monitoring**: Optimizing function memory and timeout settings
+3. **Error Handling**: Comprehensive error tracking and user-friendly messages
+4. **Security**: Input validation, rate limiting, and authentication security
+5. **User Experience**: Mobile-first design and accessibility
 
 ### Known Technical Challenges
 
+- **Timer Race Conditions**: Resolved race condition between session loading and question reset
 - **Cold Start Optimization**: Firebase Functions cold start times
 - **AI API Costs**: Managing DeepSeek API usage and costs
 - **Real-time Performance**: Leaderboard updates and caching strategies
 - **Cross-Device Authentication**: Firebase Auth synchronization
-- **SEO Optimization**: SSR implementation and meta tag management
 
 ## Important Patterns and Preferences
 
@@ -68,6 +103,14 @@
 - **File Naming**: kebab-case for all files and components
 - **Import Organization**: Path aliases for cleaner imports
 - **Type Definitions**: Shared types in `shared/` directory
+
+### Timer Implementation Patterns
+
+- **Session Persistence**: Timer state saved in session storage for resume capability
+- **Interval Saving**: Multiple save points for reliability
+- **Safety Buffers**: Graceful handling of edge cases
+- **Visual Feedback**: Clear user indication of timer state
+- **Error Recovery**: Robust error handling for timer failures
 
 ### Development Workflow Preferences
 
@@ -91,19 +134,19 @@
 
 ### Technical Insights
 
+- **Timer Implementation**: Complex state management required for reliable resume functionality
+- **Race Conditions**: Careful useEffect ordering needed for proper initialization
+- **Session Management**: Comprehensive session state improves user experience
 - **Firebase Functions**: Memory and timeout optimization is critical for performance
 - **Real-time Updates**: Firestore real-time listeners work well for leaderboards
-- **AI Integration**: Prompt engineering significantly impacts question quality
-- **Authentication**: Dual system provides flexibility but requires careful management
-- **SSR Benefits**: Improved SEO and initial load performance
 
 ### User Experience Insights
 
-- **Game Creation**: Multi-step wizard improves user onboarding
-- **Question Quality**: AI-generated questions need validation and editing options
+- **Timer Feedback**: Visual and auditory cues improve user engagement
+- **Session Persistence**: Users expect to resume where they left off
 - **Mobile Experience**: Trade show usage requires excellent mobile performance
-- **QR Codes**: Essential for physical event distribution
-- **Analytics**: Companies value detailed engagement metrics
+- **Error Recovery**: Graceful handling of network issues and interruptions
+- **Performance**: Fast loading and responsive interactions are critical
 
 ### Business Insights
 
@@ -111,25 +154,25 @@
 - **Value Proposition**: Lead generation through engaging gameplay
 - **Competitive Advantage**: AI-powered personalization and flexible prize system
 - **Scalability**: Serverless architecture supports growth
-- **Monetization**: Premium features and enterprise plans
+- **User Retention**: Session persistence increases completion rates
 
 ## Next Steps and Future Work
 
 ### Immediate Next Steps
 
-1. **Performance Testing**: Monitor and optimize Firebase Functions performance
-2. **User Testing**: Gather feedback on question quality and user experience
-3. **Analytics Implementation**: Track usage patterns and engagement metrics
-4. **Documentation Completion**: Finalize all memory bank documentation
-5. **Deployment Verification**: Ensure SSR and all features work correctly
+1. **Timer Testing**: Comprehensive testing of timer resume functionality
+2. **Performance Monitoring**: Monitor timer reliability in production
+3. **User Testing**: Gather feedback on timer experience and reliability
+4. **Documentation Completion**: Finalize timer implementation documentation
+5. **Bug Fixes**: Address any timer-related issues identified in testing
 
 ### Short-term Goals (1-2 months)
 
-- **Enhanced Analytics**: Advanced reporting and insights
+- **Enhanced Analytics**: Advanced reporting and insights including timer metrics
 - **Question Quality**: Improved AI prompts and validation
 - **Mobile Optimization**: PWA enhancements and offline capabilities
 - **User Management**: Enhanced dashboard and game management
-- **Integration Testing**: Comprehensive test coverage
+- **Integration Testing**: Comprehensive test coverage including timer scenarios
 
 ### Medium-term Goals (3-6 months)
 
@@ -137,7 +180,7 @@
 - **Advanced AI**: More sophisticated question generation
 - **Multi-language Support**: Internationalization and localization
 - **Advanced Gamification**: Points, badges, and social features
-- **API Expansion**: Public API for third-party integrations
+- **Timer Customization**: Configurable timer durations per game
 
 ### Long-term Vision (6+ months)
 
@@ -157,40 +200,49 @@
 - **Performance**: Implement lazy loading and code splitting
 - **Error Handling**: Comprehensive error boundaries and user feedback
 
+### Timer Implementation Standards
+
+- **Session Persistence**: Always save timer state for resume capability
+- **Safety Buffers**: Implement graceful error recovery
+- **Visual Feedback**: Clear user indication of timer state
+- **Testing**: Comprehensive timer scenario testing
+- **Documentation**: Clear documentation of timer behavior
+
 ### Testing Requirements
 
-- **Unit Tests**: All utility functions and business logic
-- **Component Tests**: Critical UI components and interactions
+- **Unit Tests**: All utility functions and business logic including timer logic
+- **Component Tests**: Critical UI components and interactions including timer display
 - **Integration Tests**: API endpoints and database operations
-- **End-to-End Tests**: Critical user journeys and flows
+- **End-to-End Tests**: Critical user journeys and flows including timer scenarios
 
 ### Deployment Checklist
 
-- [ ] All tests pass
+- [ ] All tests pass including timer scenarios
 - [ ] Build process completes successfully
 - [ ] SSR pages render correctly
 - [ ] Authentication flows work
 - [ ] AI question generation functional
 - [ ] Real-time features operational
+- [ ] Timer resume functionality verified
 - [ ] Performance metrics within targets
 
 ## Current Technical Debt
 
 ### Areas Requiring Attention
 
+- **Timer Edge Cases**: Additional testing needed for complex timer scenarios
 - **Legacy Creator Keys**: Migration plan to Firebase Auth
 - **Error Handling**: More comprehensive error tracking
 - **Test Coverage**: Expand test suite coverage
 - **Documentation**: Keep memory bank updated
-- **Performance Monitoring**: Enhanced monitoring and alerts
 
 ### Technical Improvements Planned
 
+- **Timer Customization**: Configurable timer durations per game
 - **Database Indexing**: Optimize Firestore query performance
 - **Caching Strategy**: Refine TTL settings based on usage patterns
 - **Bundle Size**: Further optimize client bundle size
 - **Function Optimization**: Memory and timeout tuning
-- **Security Hardening**: Enhanced input validation and rate limiting
 
 ## Active Development Environment
 

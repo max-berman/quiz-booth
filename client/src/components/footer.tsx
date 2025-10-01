@@ -23,6 +23,12 @@ export function Footer() {
 							FAQ
 						</button>
 						<button
+							onClick={() => setLocation('/pricing')}
+							className='text-foreground hover:text-primary transition-colors cursor-pointer'
+						>
+							Pricing
+						</button>
+						<button
 							onClick={() => setLocation('/quiz-games')}
 							className='text-foreground hover:text-primary transition-colors cursor-pointer'
 						>

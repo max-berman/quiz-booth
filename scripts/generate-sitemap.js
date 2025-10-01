@@ -19,6 +19,7 @@ const staticRoutes = [
 	'/auth/sign-in',
 	'/about',
 	'/faq',
+	'/pricing',
 ]
 
 // Dynamic routes that might need to be generated from data

@@ -27,6 +27,7 @@ Quiz Booth is a comprehensive trivia application that generates AI-powered custo
 - **Flexible Prize System**: Customizable prize tiers with any placement names (1st place, top 10, etc.) with detailed prize descriptions
 - **Question Management**: AI-generated question batches, single question generation with uniqueness checks, and manual editing
 - **Category-Based Question Generation**: Support for multiple question categories: Company Facts, Industry Knowledge, Fun Facts, General Knowledge
+- **Timer System**: 30-second per-question timer with resume capability and interval-based saving
 
 ## Target Users
 
@@ -60,6 +61,7 @@ Version 2.0.0 - Production ready with comprehensive feature set including:
 - Real-time analytics
 - PWA capabilities
 - SEO optimization
+- Timer system with resume functionality
 
 ## Future Vision
 
@@ -69,3 +71,4 @@ Version 2.0.0 - Production ready with comprehensive feature set including:
 - Multi-language support
 - Mobile app development
 - Advanced gamification features
+- Timer customization options (30s/60s per question)

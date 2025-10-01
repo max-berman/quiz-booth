@@ -51,7 +51,6 @@ export default function GamePage() {
 
 	const [timeLeft, setTimeLeft] = useState(QUESTION_TIMER_DURATION)
 	const [showExplanation, setShowExplanation] = useState(false)
-	const [isInitialLoad, setIsInitialLoad] = useState(true)
 
 	const {
 		data: game,
@@ -86,15 +85,29 @@ export default function GamePage() {
 		? ((currentQuestionIndex + 1) / questions.length) * 100
 		: 0
 
-	// Load saved timer state when session is loaded
+	// Timer initialization - handles both resume and new questions
 	useEffect(() => {
-		if (
-			isSessionLoaded &&
-			sessionState?.currentQuestionTimeLeft !== undefined
-		) {
-			setTimeLeft(sessionState.currentQuestionTimeLeft)
+		if (isSessionLoaded) {
+			if (sessionState?.currentQuestionTimeLeft !== undefined) {
+				// Resume from saved state
+				let resumedTime = sessionState.currentQuestionTimeLeft
+
+				// Add safety buffer if time is below 10 seconds
+				if (resumedTime < 5) {
+					resumedTime = Math.min(resumedTime + 5, QUESTION_TIMER_DURATION)
+				}
+
+				setTimeLeft(resumedTime)
+			} else {
+				// Start new question with full timer
+				setTimeLeft(QUESTION_TIMER_DURATION)
+			}
 		}
-	}, [isSessionLoaded, sessionState?.currentQuestionTimeLeft])
+	}, [
+		isSessionLoaded,
+		sessionState?.currentQuestionTimeLeft,
+		QUESTION_TIMER_DURATION,
+	])
 
 	// Timer effect
 	useEffect(() => {
@@ -112,32 +125,24 @@ export default function GamePage() {
 		}
 	}, [timeLeft, isAnswered, gameError, questionsError])
 
-	// Save timer state to session only at specific intervals: 25, 20, 15, 10, 5 seconds
+	// Save current timer state when page is about to unload
 	useEffect(() => {
-		if (!isAnswered && timeLeft > 0) {
-			// Only save at specific intervals to avoid excessive localStorage writes
-			const shouldSave = [25, 20, 15, 10, 5].includes(timeLeft)
-
-			if (shouldSave) {
+		const handleBeforeUnload = () => {
+			if (!isAnswered && timeLeft > 0) {
 				updateSessionState({
 					currentQuestionTimeLeft: timeLeft,
 				})
 			}
 		}
+
+		window.addEventListener('beforeunload', handleBeforeUnload)
+		return () => window.removeEventListener('beforeunload', handleBeforeUnload)
 	}, [timeLeft, isAnswered, updateSessionState])
 
-	// Reset timer for new question - only when moving to a new question, not when resuming
+	// Reset explanation when moving to new question
 	useEffect(() => {
-		if (isInitialLoad) {
-			// This is the initial load, use the saved timer state if available
-			setIsInitialLoad(false)
-			return
-		}
-
-		// Always reset timer to full duration when moving to a new question
-		setTimeLeft(QUESTION_TIMER_DURATION)
 		setShowExplanation(false)
-	}, [currentQuestionIndex, isInitialLoad, QUESTION_TIMER_DURATION])
+	}, [currentQuestionIndex])
 
 	const handleAnswerSelect = (answerIndex: number) => {
 		if (isAnswered) return
@@ -188,11 +193,13 @@ export default function GamePage() {
 
 	const handleNextQuestion = () => {
 		if (currentQuestionIndex < (questions?.length || 0) - 1) {
-			// Move to next question - clear the saved timer state
+			// Move to next question - clear the saved timer state and reset timer
 			updateSessionState({
 				currentQuestionIndex: currentQuestionIndex + 1,
 				currentQuestionTimeLeft: undefined, // Clear saved timer for next question
 			})
+			// Reset timer to full duration for the next question
+			setTimeLeft(QUESTION_TIMER_DURATION)
 		} else {
 			// Game finished
 			const finalTimeSpent = Math.floor((Date.now() - gameStartTime) / 1000)
