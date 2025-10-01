@@ -69,7 +69,6 @@ export default function Pricing() {
 				'All Premium features included',
 				'No monthly commitment',
 				'Perfect for one-off events',
-				'Scale up or down as needed',
 				'Priority support included',
 			],
 			cta: 'Create Game',

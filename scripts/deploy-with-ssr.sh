@@ -9,6 +9,10 @@ echo "🚀 Deploying QuizBooth with SSR..."
 echo "📦 Building client..."
 npm run build:client
 
+# Update SSR asset resolver with current build file names
+echo "🔄 Updating SSR asset resolver..."
+npm run update:ssr-assets
+
 # Build Firebase functions
 echo "🔨 Building Firebase functions..."
 cd firebase-functions

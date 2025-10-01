@@ -146,7 +146,7 @@ firebase-functions/
 - `npm run deploy:hosting` - Deploy to Firebase Hosting
 - `npm run deploy:functions` - Deploy Firebase Functions
 - `npm run deploy:firestore` - Deploy Firestore rules
-- `npm run deploy:all` - Deploy everything with SSR
+- `npm run deploy:all` - Deploy everything with SSR (automatically updates asset resolver)
 
 ### Build Process
 
