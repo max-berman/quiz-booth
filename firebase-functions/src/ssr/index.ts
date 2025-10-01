@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import { renderPage } from './renderer';
 import { fetchPageData } from './utils/firestore-ssr';
+import { getResolvedAssets } from './utils/asset-resolver';
 
 export const ssrHandler = functions.https.onRequest(async (req, res) => {
   try {
@@ -17,6 +18,9 @@ export const ssrHandler = functions.https.onRequest(async (req, res) => {
 
     // Render React components to string
     const { html, metaTags } = await renderPage(path, pageData);
+
+    // Get dynamically resolved asset file names
+    const assets = getResolvedAssets();
 
     // Generate final HTML
     const finalHtml = `
@@ -38,14 +42,14 @@ export const ssrHandler = functions.https.onRequest(async (req, res) => {
     <meta property="og:description" content="Create AI-powered custom trivia games for trade shows and events. Engage customers, capture leads, and drive business growth through interactive gameplay." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://quizbooth.games" />
-    <meta property="og:image" content="/assets/quizbooth.png" />
+    <meta property="og:image" content="/assets/quiz-booth-icon.png" />
     <meta property="og:site_name" content="QuizBooth" />
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="QuizBooth - Create Engaging Trivia Games for Your Business" />
     <meta name="twitter:description" content="Create AI-powered custom trivia games for trade shows and events. Engage customers, capture leads, and drive business growth through interactive gameplay." />
-    <meta name="twitter:image" content="/assets/quizbooth.png" />
+    <meta name="twitter:image" content="/assets/quiz-booth-icon.png" />
 
     <!-- Favicon and App Icons -->
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
@@ -150,16 +154,17 @@ export const ssrHandler = functions.https.onRequest(async (req, res) => {
     }
     </script>
 
-    <link rel="stylesheet" crossorigin href="/assets/index-juwbc9fD.css">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-react-C8w-UNLI.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-radix-BDMsTCiy.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-query-CiE4Trht.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-charts-BKXKzPuX.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-icons-CipFtPyC.js">
+    <link rel="stylesheet" crossorigin href="/assets/${assets.cssFile}">
+    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.react}">
+    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.radix}">
+    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.query}">
+    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.charts}">
+    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.icons}">
+    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.forms}">
 </head>
 <body>
     <div id="root">${html}</div>
-    <script type="module" crossorigin src="/assets/index-CLVvZ2oa.js"></script>
+    <script type="module" crossorigin src="/assets/${assets.jsFile}"></script>
     <script>
       // Dynamically load PWA manifest only in production
       if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
@@ -176,7 +181,31 @@ export const ssrHandler = functions.https.onRequest(async (req, res) => {
 
   } catch (error) {
     console.error('SSR Error:', error);
-    // Fallback to client-side rendering
-    res.redirect(302, '/index.html');
+    // Serve a basic error page instead of redirecting
+    // This prevents infinite loops with SSR
+    const errorHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizBooth - Error</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+      .error-container { max-width: 600px; margin: 100px auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+      h1 { color: #dc2626; margin-bottom: 20px; }
+      p { color: #666; margin-bottom: 30px; }
+      a { color: #3b82f6; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>Something went wrong</h1>
+        <p>We're having trouble loading the page. Please try refreshing or come back later.</p>
+        <a href="/">Go to Homepage</a>
+    </div>
+</body>
+</html>`;
+    res.status(500).send(errorHtml);
   }
 });

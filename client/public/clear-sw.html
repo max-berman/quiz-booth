@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clear Service Worker - QuizBooth</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #fcf7e7;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 100px auto;
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      color: #5f5333;
+      margin-bottom: 20px;
+    }
+
+    p {
+      color: #5f5333;
+      margin-bottom: 30px;
+    }
+
+    button {
+      background: #5f5333;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #f4eccf;
+    }
+
+    .success {
+      color: #2a9d90;
+      margin-top: 20px;
+    }
+
+    .error {
+      color: #ef4444;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Clear Service Worker</h1>
+    <p>If you're experiencing issues with QuizBooth loading, this will clear the old service worker and reload the page.
+    </p>
+    <button onclick="clearServiceWorker()">Clear Service Worker & Reload</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    async function clearServiceWorker() {
+      const result = document.getElementById('result');
+      try {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+
+          for (let registration of registrations) {
+            await registration.unregister();
+            console.log('Service worker unregistered:', registration);
+          }
+
+          result.innerHTML = '<p class="success">✅ Service worker cleared successfully! Reloading...</p>';
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 2000);
+        } else {
+          result.innerHTML = '<p class="error">No service workers found.</p>';
+        }
+      } catch (error) {
+        console.error('Error clearing service worker:', error);
+        result.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    }
+
+    // Auto-clear on page load for convenience
+    window.addEventListener('load', () => {
+      clearServiceWorker();
+    });
+  </script>
+</body>
+
+</html>

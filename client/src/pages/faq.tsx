@@ -52,7 +52,7 @@ export default function FAQ() {
 				{
 					question: 'How quickly can I set up a game for my trade show booth?',
 					answer:
-						'Most vendors can create and deploy a fully customized trivia game in under 5 minutes using our AI-powered question generation. Simply provide your company information, select your industry, and our AI will generate relevant questions automatically. QR codes and shareable links are generated instantly.',
+						'Most vendors can create and deploy a fully customized trivia game in under 2 minutes using our AI-powered question generation. Simply provide your company information, select your industry, and our AI will generate relevant questions automatically. QR codes and shareable links are generated instantly.',
 				},
 				{
 					question:

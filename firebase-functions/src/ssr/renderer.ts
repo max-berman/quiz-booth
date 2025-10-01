@@ -114,65 +114,92 @@ export async function renderPage(path: string, pageData: any) {
   let Component;
   let metaTags = '';
 
-  switch (path) {
-    case '/':
-      Component = HomePage;
-      metaTags = `
-        <title>QuizBooth - Create Engaging Trivia Games</title>
-        <meta name="description" content="Create AI-powered custom trivia games for trade shows and events. Engage customers, capture leads, and drive business growth.">
-        <meta property="og:title" content="QuizBooth - Create Engaging Trivia Games">
-        <meta property="og:description" content="AI-powered trivia games for trade shows and events">
-        <meta property="og:image" content="/assets/quizbooth.png">
-        <meta property="og:type" content="website">
-        <meta property="og:url" content="https://quizbooth.games">
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="QuizBooth - Create Engaging Trivia Games">
-        <meta name="twitter:description" content="AI-powered trivia games for trade shows and events">
-      `;
-      break;
+  // Check if this is a dynamic route that should be handled by client-side routing
+  const isDynamicRoute =
+    path.startsWith('/game/') ||
+    path.startsWith('/dashboard') ||
+    path.startsWith('/setup') ||
+    path.startsWith('/edit-questions/') ||
+    path.startsWith('/game-created') ||
+    path.startsWith('/leaderboard/') ||
+    path.startsWith('/results/') ||
+    path.startsWith('/submissions/');
 
-    case '/quiz-games':
-      Component = QuizGamesPage;
-      metaTags = `
-        <title>Public Quiz Games - QuizBooth</title>
-        <meta name="description" content="Browse and play public trivia games created by the QuizBooth community. Discover engaging quizzes on various topics.">
-        <meta property="og:title" content="Public Quiz Games - QuizBooth">
-        <meta property="og:description" content="Play engaging trivia games created by our community">
-        <meta property="og:type" content="website">
-        <meta property="og:url" content="https://quizbooth.games/quiz-games">
-      `;
-      break;
+  if (isDynamicRoute) {
+    // For dynamic routes, serve a generic page that will be hydrated by client-side React
+    Component = () => React.createElement('div', { id: 'root' });
+    metaTags = `
+      <title>QuizBooth - Interactive Trivia Games</title>
+      <meta name="description" content="Play engaging trivia games created with QuizBooth. Interactive gameplay with AI-powered questions and real-time scoring.">
+      <meta property="og:title" content="QuizBooth - Interactive Trivia Games">
+      <meta property="og:description" content="Play engaging trivia games created with QuizBooth">
+      <meta property="og:type" content="website">
+      <meta property="og:url" content="https://quizbooth.games${path}">
+      <meta name="twitter:card" content="summary_large_image">
+      <meta name="twitter:title" content="QuizBooth - Interactive Trivia Games">
+      <meta name="twitter:description" content="Play engaging trivia games created with QuizBooth">
+    `;
+  } else {
+    switch (path) {
+      case '/':
+        Component = HomePage;
+        metaTags = `
+          <title>QuizBooth - Create Engaging Trivia Games</title>
+          <meta name="description" content="Create AI-powered custom trivia games for trade shows and events. Engage customers, capture leads, and drive business growth.">
+          <meta property="og:title" content="QuizBooth - Create Engaging Trivia Games">
+          <meta property="og:description" content="AI-powered trivia games for trade shows and events">
+          <meta property="og:image" content="/assets/quiz-booth-icon.png">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games">
+          <meta name="twitter:card" content="summary_large_image">
+          <meta name="twitter:title" content="QuizBooth - Create Engaging Trivia Games">
+          <meta name="twitter:description" content="AI-powered trivia games for trade shows and events">
+        `;
+        break;
 
-    case '/about':
-      Component = AboutPage;
-      metaTags = `
-        <title>About QuizBooth - Our Mission</title>
-        <meta name="description" content="Learn about QuizBooth's mission to create engaging trivia experiences for businesses and events. Discover how we help companies grow.">
-        <meta property="og:title" content="About QuizBooth - Our Mission">
-        <meta property="og:description" content="Learn about QuizBooth's mission to create engaging trivia experiences">
-        <meta property="og:type" content="website">
-        <meta property="og:url" content="https://quizbooth.games/about">
-      `;
-      break;
+      case '/quiz-games':
+        Component = QuizGamesPage;
+        metaTags = `
+          <title>Public Quiz Games - QuizBooth</title>
+          <meta name="description" content="Browse and play public trivia games created by the QuizBooth community. Discover engaging quizzes on various topics.">
+          <meta property="og:title" content="Public Quiz Games - QuizBooth">
+          <meta property="og:description" content="Play engaging trivia games created by our community">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/quiz-games">
+        `;
+        break;
 
-    case '/faq':
-      Component = FAQPage;
-      metaTags = `
-        <title>FAQ - QuizBooth Help Center</title>
-        <meta name="description" content="Frequently asked questions about creating and playing trivia games with QuizBooth. Get answers about features, pricing, and more.">
-        <meta property="og:title" content="FAQ - QuizBooth Help Center">
-        <meta property="og:description" content="Frequently asked questions about creating and playing trivia games">
-        <meta property="og:type" content="website">
-        <meta property="og:url" content="https://quizbooth.games/faq">
-      `;
-      break;
+      case '/about':
+        Component = AboutPage;
+        metaTags = `
+          <title>About QuizBooth - Our Mission</title>
+          <meta name="description" content="Learn about QuizBooth's mission to create engaging trivia experiences for businesses and events. Discover how we help companies grow.">
+          <meta property="og:title" content="About QuizBooth - Our Mission">
+          <meta property="og:description" content="Learn about QuizBooth's mission to create engaging trivia experiences">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/about">
+        `;
+        break;
 
-    default:
-      Component = NotFoundPage;
-      metaTags = `
-        <title>Page Not Found - QuizBooth</title>
-        <meta name="description" content="The page you're looking for doesn't exist. Return to QuizBooth home page.">
-      `;
+      case '/faq':
+        Component = FAQPage;
+        metaTags = `
+          <title>FAQ - QuizBooth Help Center</title>
+          <meta name="description" content="Frequently asked questions about creating and playing trivia games with QuizBooth. Get answers about features, pricing, and more.">
+          <meta property="og:title" content="FAQ - QuizBooth Help Center">
+          <meta property="og:description" content="Frequently asked questions about creating and playing trivia games">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/faq">
+        `;
+        break;
+
+      default:
+        Component = NotFoundPage;
+        metaTags = `
+          <title>Page Not Found - QuizBooth</title>
+          <meta name="description" content="The page you're looking for doesn't exist. Return to QuizBooth home page.">
+        `;
+    }
   }
 
   const html = renderToString(React.createElement(Component, pageData));

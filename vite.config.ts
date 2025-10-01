@@ -15,7 +15,13 @@ export default defineConfig({
       VitePWA({
         registerType: 'autoUpdate',
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf}'],
+          globPatterns: ['**/*.{js,css,html,ico,svg,woff,woff2,ttf}'],
+          globIgnores: [
+            '**/assets/quiz-booth-icon.png',
+            'index.html' // Don't cache index.html since SSR handles it
+          ],
+          // Disable navigation fallback for SSR routes
+          navigateFallback: null,
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -39,6 +45,20 @@ export default defineConfig({
                 expiration: {
                   maxEntries: 10,
                   maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
+              urlPattern: /\/assets\/.*\.(png|jpg|jpeg|gif)/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'images-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
                 },
                 cacheableResponse: {
                   statuses: [0, 200]
@@ -75,15 +95,7 @@ export default defineConfig({
               purpose: 'maskable'
             }
           ],
-          categories: ['business', 'education', 'entertainment'],
-          screenshots: [
-            {
-              src: '/assets/quizbooth.png',
-              sizes: '1280x720',
-              type: 'image/png',
-              form_factor: 'wide'
-            }
-          ]
+          categories: ['business', 'education', 'entertainment']
         }
       })
     ] : []),

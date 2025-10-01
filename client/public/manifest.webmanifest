@@ -31,13 +31,5 @@
     "business",
     "education",
     "entertainment"
-  ],
-  "screenshots": [
-    {
-      "src": "/assets/quizbooth.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
   ]
 }

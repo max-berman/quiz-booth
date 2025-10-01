@@ -22,6 +22,42 @@
       {
         "source": "/faq",
         "function": "ssrHandler"
+      },
+      {
+        "source": "/game/**",
+        "function": "ssrHandler"
+      },
+      {
+        "source": "/dashboard",
+        "function": "ssrHandler"
+      },
+      {
+        "source": "/setup",
+        "function": "ssrHandler"
+      },
+      {
+        "source": "/edit-questions/**",
+        "function": "ssrHandler"
+      },
+      {
+        "source": "/game-created",
+        "function": "ssrHandler"
+      },
+      {
+        "source": "/leaderboard/**",
+        "function": "ssrHandler"
+      },
+      {
+        "source": "/results/**",
+        "function": "ssrHandler"
+      },
+      {
+        "source": "/submissions/**",
+        "function": "ssrHandler"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
       }
     ],
     "headers": [

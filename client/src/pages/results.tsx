@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useLocation } from 'wouter'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Trophy, RotateCcw, Eye, Edit3, Check } from 'lucide-react'
+import { Trophy, RotateCcw, Eye, Edit3, Check, AlertCircle } from 'lucide-react'
 import { Link } from 'wouter'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
@@ -14,6 +14,7 @@ import { ShareEmbedModal } from '@/components/share-embed-modal'
 import type { Game } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { formatTime } from '@/lib/time-utils'
+import { hasSubmittedScore, markScoreSubmitted } from '@/lib/fingerprint-utils'
 
 export default function Results() {
 	const { id } = useParams()
@@ -22,6 +23,7 @@ export default function Results() {
 	const [playerName, setPlayerName] = useState('')
 	const [playerEmail, setPlayerEmail] = useState('')
 	const [isScoreSaved, setIsScoreSaved] = useState(false)
+	const [hasAlreadySubmitted, setHasAlreadySubmitted] = useState(false)
 
 	// Get URL parameters
 	const urlParams = new URLSearchParams(window.location.search)
@@ -33,6 +35,17 @@ export default function Results() {
 
 	// Initialize Firebase Functions
 	const { getGame, savePlayerScore } = useFirebaseFunctions()
+
+	// Check if player has already submitted for this game
+	useEffect(() => {
+		if (id) {
+			const alreadySubmitted = hasSubmittedScore(id)
+			setHasAlreadySubmitted(alreadySubmitted)
+			if (alreadySubmitted) {
+				setIsScoreSaved(true)
+			}
+		}
+	}, [id])
 
 	const { data: game } = useQuery<Game>({
 		queryKey: [`game-${id}`],
@@ -51,6 +64,10 @@ export default function Results() {
 		},
 		onSuccess: () => {
 			setIsScoreSaved(true)
+			// Mark as submitted in localStorage
+			if (id) {
+				markScoreSubmitted(id)
+			}
 			toast({
 				title: 'Success!',
 				description: 'Your score has been saved to the leaderboard.',
@@ -139,7 +156,7 @@ export default function Results() {
 						</ul>
 
 						{/* Player Registration */}
-						{!isScoreSaved && (
+						{!isScoreSaved && !hasAlreadySubmitted && (
 							<div className='bg-accent/10 p-4 rounded-xl mb-6'>
 								<h3 className='text-base md:text-lg font-semibold text-primary mb-4'>
 									Save Your Score to Leaderboard
@@ -175,11 +192,27 @@ export default function Results() {
 							</div>
 						)}
 
-						{isScoreSaved && (
+						{isScoreSaved && !hasAlreadySubmitted && (
 							<div className='bg-accent/10 p-4 rounded-xl mb-6'>
 								<p className='text-primary font-semibold flex justify-center'>
 									<Check className='h-6 w-6 text-primary' /> Score saved
 									successfully!
+								</p>
+							</div>
+						)}
+
+						{hasAlreadySubmitted && (
+							<div className='bg-accent/10 p-4 rounded-xl mb-6'>
+								<div className='flex items-center justify-center gap-2 mb-2'>
+									<AlertCircle className='h-6 w-6 text-primary' />
+									<h3 className='text-base md:text-lg font-semibold text-primary'>
+										Score Already Submitted
+									</h3>
+								</div>
+								<p className='text-foreground text-sm'>
+									You've already submitted your score for this game. You can
+									still play again for fun, but your score won't be saved to the
+									leaderboard.
 								</p>
 							</div>
 						)}

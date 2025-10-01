@@ -12,27 +12,46 @@ import {
 	Home,
 	ArrowRight,
 	Lightbulb,
+	RotateCcw,
 } from 'lucide-react'
 import type { Game, Question } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
+import { useGameSession } from '@/hooks/use-game-session'
 
 export default function GamePage() {
 	const { id } = useParams()
 	const [, setLocation] = useLocation()
-	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-	const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-	const [score, setScore] = useState(0)
-	const [correctAnswers, setCorrectAnswers] = useState(0)
-	const [wrongAnswers, setWrongAnswers] = useState(0)
-	const [streak, setStreak] = useState(0)
-	const [timeLeft, setTimeLeft] = useState(30)
-	const [totalTime, setTotalTime] = useState(0)
-	const [gameStartTime] = useState(Date.now())
-	const [isAnswered, setIsAnswered] = useState(false)
-	const [showExplanation, setShowExplanation] = useState(false)
 
 	// Initialize Firebase Functions
 	const { getGame, getQuestions } = useFirebaseFunctions()
+
+	// Use game session management
+	const {
+		sessionState,
+		isSessionLoaded,
+		hasExistingSession,
+		updateSessionState,
+		completeSession,
+	} = useGameSession(id)
+
+	// Timer configuration - will be moved to database later
+	const QUESTION_TIMER_DURATION = 30 // seconds - can be 30 or 60 in the future
+
+	// Extract state from session
+	const currentQuestionIndex = sessionState?.currentQuestionIndex || 0
+	const selectedAnswer =
+		sessionState?.selectedAnswers[currentQuestionIndex] ?? null
+	const score = sessionState?.score || 0
+	const correctAnswers = sessionState?.correctAnswers || 0
+	const wrongAnswers = sessionState?.wrongAnswers || 0
+	const streak = sessionState?.streak || 0
+	const totalTime = sessionState?.totalTime || 0
+	const gameStartTime = sessionState?.startTime || Date.now()
+	const isAnswered = selectedAnswer !== null
+
+	const [timeLeft, setTimeLeft] = useState(QUESTION_TIMER_DURATION)
+	const [showExplanation, setShowExplanation] = useState(false)
+	const [isInitialLoad, setIsInitialLoad] = useState(true)
 
 	const {
 		data: game,
@@ -67,6 +86,16 @@ export default function GamePage() {
 		? ((currentQuestionIndex + 1) / questions.length) * 100
 		: 0
 
+	// Load saved timer state when session is loaded
+	useEffect(() => {
+		if (
+			isSessionLoaded &&
+			sessionState?.currentQuestionTimeLeft !== undefined
+		) {
+			setTimeLeft(sessionState.currentQuestionTimeLeft)
+		}
+	}, [isSessionLoaded, sessionState?.currentQuestionTimeLeft])
+
 	// Timer effect
 	useEffect(() => {
 		// Don't run timer if there are errors (game is private)
@@ -83,55 +112,93 @@ export default function GamePage() {
 		}
 	}, [timeLeft, isAnswered, gameError, questionsError])
 
-	// Reset timer for new question
+	// Save timer state to session only at specific intervals: 25, 20, 15, 10, 5 seconds
 	useEffect(() => {
-		setTimeLeft(30)
-		setSelectedAnswer(null)
-		setIsAnswered(false)
+		if (!isAnswered && timeLeft > 0) {
+			// Only save at specific intervals to avoid excessive localStorage writes
+			const shouldSave = [25, 20, 15, 10, 5].includes(timeLeft)
+
+			if (shouldSave) {
+				updateSessionState({
+					currentQuestionTimeLeft: timeLeft,
+				})
+			}
+		}
+	}, [timeLeft, isAnswered, updateSessionState])
+
+	// Reset timer for new question - only when moving to a new question, not when resuming
+	useEffect(() => {
+		if (isInitialLoad) {
+			// This is the initial load, use the saved timer state if available
+			setIsInitialLoad(false)
+			return
+		}
+
+		// Always reset timer to full duration when moving to a new question
+		setTimeLeft(QUESTION_TIMER_DURATION)
 		setShowExplanation(false)
-	}, [currentQuestionIndex])
+	}, [currentQuestionIndex, isInitialLoad, QUESTION_TIMER_DURATION])
 
 	const handleAnswerSelect = (answerIndex: number) => {
 		if (isAnswered) return
 
-		setSelectedAnswer(answerIndex)
-		setIsAnswered(true)
 		setShowExplanation(true)
 
-		const timeSpent = 30 - timeLeft
+		const timeSpent = QUESTION_TIMER_DURATION - timeLeft
 		const isCorrect = answerIndex === currentQuestion?.correctAnswer
+
+		// Calculate score updates
+		let newScore = score
+		let newCorrectAnswers = correctAnswers
+		let newWrongAnswers = wrongAnswers
+		let newStreak = streak
+		let newTotalTime = totalTime + timeSpent
 
 		if (isCorrect) {
 			const basePoints = 100
-			const timeBonus = Math.max(0, 30 - timeSpent) * 2 // Up to 60 bonus points for speed
+			const timeBonus = Math.max(0, QUESTION_TIMER_DURATION - timeSpent) * 2 // Up to 60 bonus points for speed
 			const streakBonus = streak * 10 // 10 points per streak
 			const questionPoints = basePoints + timeBonus + streakBonus
 
-			setScore((prev) => prev + questionPoints)
-			setCorrectAnswers((prev) => prev + 1)
-			setStreak((prev) => prev + 1)
+			newScore = score + questionPoints
+			newCorrectAnswers = correctAnswers + 1
+			newStreak = streak + 1
 		} else {
-			setWrongAnswers((prev) => prev + 1)
-			setStreak(0)
+			newWrongAnswers = wrongAnswers + 1
+			newStreak = 0
 		}
 
-		setTotalTime((prev) => prev + timeSpent)
+		// Update session state
+		updateSessionState({
+			selectedAnswers: {
+				...sessionState?.selectedAnswers,
+				[currentQuestionIndex]: answerIndex,
+			},
+			answeredQuestions: [
+				...(sessionState?.answeredQuestions || []),
+				currentQuestionIndex,
+			],
+			score: newScore,
+			correctAnswers: newCorrectAnswers,
+			wrongAnswers: newWrongAnswers,
+			streak: newStreak,
+			totalTime: newTotalTime,
+		})
 	}
 
 	const handleNextQuestion = () => {
 		if (currentQuestionIndex < (questions?.length || 0) - 1) {
-			setCurrentQuestionIndex((prev) => prev + 1)
+			// Move to next question - clear the saved timer state
+			updateSessionState({
+				currentQuestionIndex: currentQuestionIndex + 1,
+				currentQuestionTimeLeft: undefined, // Clear saved timer for next question
+			})
 		} else {
 			// Game finished
 			const finalTimeSpent = Math.floor((Date.now() - gameStartTime) / 1000)
-			const gameResult = {
-				score,
-				correctAnswers,
-				totalQuestions: questions?.length || 0,
-				timeSpent: finalTimeSpent,
-				streak,
-			}
 
+			// Complete the session and navigate to results
+			completeSession()
 			setLocation(
 				`/results/${id}?score=${score}&correct=${correctAnswers}&total=${questions?.length}&time=${finalTimeSpent}&streak=${streak}`
 			)
@@ -213,16 +280,6 @@ export default function GamePage() {
 			<div className='sticky top-0 z-50 bg-background/80 backdrop-blur-sm shadow-md'>
 				<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8'>
 					<ul className='flex items-center justify-between h-20'>
-						{/* <Button
-							variant='secondary'
-							size='sm'
-							onClick={() => setLocation('/')}
-							className=''
-						>
-							<Home className='h-4 w-4' />
-							Home
-						</Button> */}
-
 						<li className='w-1/4 flex justify-start'>
 							<a
 								href='/'
@@ -296,7 +353,6 @@ export default function GamePage() {
 							Question <strong>{currentQuestionIndex + 1}</strong> of{' '}
 							{questions.length}
 						</div>
-						{/* <div className='text-xs text-muted-foreground'>Score: {score}</div> */}
 						<Progress value={progressPercentage} className='h-4  bg-card' />
 					</div>
 					<div className='text-center p-2 h-full'>
@@ -306,36 +362,10 @@ export default function GamePage() {
 					</div>
 				</div>
 
-				{/* 
-					<div className='grid grid-cols-4 gap-3 mb-6'>
-					<div className='text-center p-3 bg-popover rounded-lg shadow-sm'>
-						<CheckCircle className='h-4 w-4 mx-auto mb-1 text-primary' />
-						<div className='text-lg font-bold text-primary'>
-							{correctAnswers}
-						</div>
-						<div className='text-xs text-muted-foreground'>Correct</div>
-					</div>
-
-					<div className='text-center p-3 bg-popover rounded-lg shadow-sm'>
-						<XCircle className='h-4 w-4 mx-auto mb-1 text-destructive' />
-						<div className='text-lg font-bold text-destructive'>
-							{wrongAnswers}
-						</div>
-						<div className='text-xs text-muted-foreground'>Wrong</div>
-					</div>
-
-					<div className='text-center p-3 bg-popover rounded-lg shadow-sm'>
-						<Zap className='h-4 w-4 mx-auto mb-1 text-foreground' />
-						<div className='text-lg font-bold text-foreground'>{streak}</div>
-						<div className='text-xs text-muted-foreground'>Streak</div>
-					</div> 
-					</div>
-					*/}
-
-				{/* Question Card - Optimized for future customization */}
+				{/* Question Card */}
 				<Card className='game-card !my-8 animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'>
 					<CardContent className='p-0 pb-4 md:p-6'>
-						{/* Question Text - Optimized for readability */}
+						{/* Question Text */}
 						<div className=''>
 							<div className='bg-gradient-to-r from-primary/10 to-secondary/10 rounded-none md:rounded-2xl p-4 mb-4'>
 								<h2 className='text-lg md:text-2xl font-bold text-primary leading-relaxed text-center'>
@@ -343,7 +373,7 @@ export default function GamePage() {
 								</h2>
 							</div>
 
-							{/* Answer Options - Better spacing and visual hierarchy */}
+							{/* Answer Options */}
 							<div className='space-y-4 px-4 md:px-0'>
 								{currentQuestion?.options.map((option, index) => {
 									// Helper function to determine button styling based on answer state
@@ -427,12 +457,11 @@ export default function GamePage() {
 								})}
 							</div>
 
-							{/* Explanation - Enhanced styling */}
+							{/* Explanation */}
 							{showExplanation && currentQuestion?.explanation && (
 								<div className='mt-6 mx-4 md:mx-0 p-6 bg-background/70 rounded-2xl shadow-md animate-slide-up'>
 									<div className='flex items-center gap-3 mb-4'>
 										<div className='w-10 h-10 bg-primary rounded-full flex items-center justify-center'>
-											{/* <span className='text-white text-lg'>💡</span> */}
 											<Lightbulb className='h-6 w-6 text-primary-foreground' />
 										</div>
 										<h3 className='font-bold text-lg text-'>Explanation</h3>
@@ -474,7 +503,6 @@ export default function GamePage() {
 						rel='noopener noreferrer'
 					>
 						<img
-							// src='/assets/owl.svg'
 							src='/assets/logo.png'
 							alt='NaknNick games logo'
 							className='h-32 w-auto'
@@ -485,27 +513,3 @@ export default function GamePage() {
 		</div>
 	)
 }
-// TODO: Add this to FAQ section
-/* 
-__How Your Score is Calculated__
-
-Your final score is based on three factors:
-
-1. __Correct Answers__: You earn 100 points for each question you answer correctly.
-
-2. __Speed Bonus__: Answer quickly to earn bonus points! You get 2 points for every second you save out of the 30-second time limit. Here are some examples:
-
-   - Answer in 10 seconds: (30-10)*2 = 40 bonus points
-   - Answer in 20 seconds: (30-20)*2 = 20 bonus points
-   - Answer in 25 seconds: (30-25)*2 = 10 bonus points
-   - Answer instantly (0 seconds): 60 bonus points (maximum)
-   - Answer at 30 seconds: 0 bonus points
-
-3. __Streak Bonus__: Maintain consecutive correct answers to build your streak. Each correct answer in a row earns you 10 bonus points per streak level.
-
-__Example__: If you answer 3 questions correctly in a row and answer each in 10 seconds, you could earn 170 points per question (100 + 40 + 30)!
-
-The faster you answer and the longer your streak, the higher your score will be. Good luck!
-
-
-*/

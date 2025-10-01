@@ -51,6 +51,13 @@ quiz-booth/
 │   │   └── auth/           # Authentication functions
 │   └── lib/                # Compiled JavaScript files
 ├── shared/                 # Shared TypeScript types and schemas
+├── memory-bank/            # Comprehensive project documentation
+│   ├── projectbrief.md     # Core requirements and goals
+│   ├── productContext.md   # Business value and user experience
+│   ├── systemPatterns.md   # Architecture and technical decisions
+│   ├── techContext.md      # Technology stack and development setup
+│   ├── activeContext.md    # Current work focus and recent changes
+│   └── progress.md         # Current status and future roadmap
 ├── attached_assets/        # Documentation and asset files
 └── dist/                   # Build output (generated)
 ```
@@ -150,6 +157,13 @@ npm run emulate      # Start Firebase emulators
 npm run build:client    # Build client for production
 npm run build:functions # Build Firebase Functions
 npm run deploy:all      # Deploy everything to Firebase
+```
+
+### Documentation
+
+```bash
+# Memory bank provides comprehensive project documentation
+# All documentation is centralized in memory-bank/ directory
 ```
 
 ## 🔌 Firebase Functions API

@@ -6,7 +6,7 @@
       <square150x150logo src="/assets/quiz-booth-icon.png"/>
       <wide310x150logo src="/assets/quizbooth.png"/>
       <square310x310logo src="/assets/quiz-booth-icon.png"/>
-      <TileColor>#3b82f6</TileColor>
+      <TileColor>#f4eccf</TileColor>
     </tile>
   </msapplication>
 </browserconfig>

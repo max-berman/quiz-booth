@@ -120,7 +120,7 @@ export default function Quizzes() {
 				<link rel='canonical' href='https://quizbooth.games/quizzes' />
 			</Helmet>
 
-			<div className='container mx-auto px-4 py-8'>
+			<div className='container flex-col flex-1 flex mx-auto px-4 py-8'>
 				{/* Header */}
 				<div className='mb-8'>
 					<div className='text-center'>
