@@ -17,6 +17,9 @@ import { userSetup } from './auth/userSetup';
 // Import SSR handler
 import { ssrHandler } from './ssr';
 
+// Import API endpoints
+import { getGameQuestionsCount, getGamePlayCount } from './api/games';
+
 // Export all functions
 export {
   createGame,
@@ -42,5 +45,7 @@ export {
   getUsage,
   resetUsage,
   userSetup,
-  ssrHandler
+  ssrHandler,
+  getGameQuestionsCount,
+  getGamePlayCount
 };

@@ -35,6 +35,7 @@ exports.ssrHandler = functions.https.onRequest(async (req, res) => {
         res.set('X-Frame-Options', 'DENY');
         res.set('X-Content-Type-Options', 'nosniff');
         res.set('X-XSS-Protection', '1; mode=block');
+        res.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
         res.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
         // Fetch data based on route
         const pageData = await (0, firestore_ssr_1.fetchPageData)(path, req.query);

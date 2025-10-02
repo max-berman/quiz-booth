@@ -4,18 +4,19 @@
 
 ### Recent Development Activities
 
-- **Deployment Fix**: Resolved SSR asset 404 errors by implementing automated asset file name updates
-- **Timer System Enhancement**: Implemented comprehensive timer logic with resume capability and interval-based saving
 - **Memory Bank Update**: Comprehensive review and update of all project documentation
-- **Timer Logic Review**: Analysis and documentation of timer implementation issues and solutions
-- **Performance Optimization**: Continued focus on timer reliability and user experience
+- **Timer System Analysis**: Detailed review of timer logic implementation and identified race conditions
+- **API Endpoint Development**: Added game-specific API endpoints for questions count and play count
+- **Session Management Enhancement**: Improved game session hook with comprehensive state management
+- **Performance Monitoring**: Ongoing focus on timer reliability and user experience
 
 ### Current Development State
 
 - **Version**: 2.0.0 - Production ready
 - **Status**: Fully functional with comprehensive feature set
 - **Last Major Update**: Timer system implementation with resume functionality
-- **Recent Focus**: Timer logic optimization and documentation
+- **Recent Focus**: Timer logic analysis and memory bank maintenance
+- **Current Analysis**: Timer race condition identified and documented for future resolution
 
 ## Recent Changes and Decisions
 
@@ -218,6 +219,21 @@ useEffect(() => {
 - **End-to-End Tests**: Critical user journeys and flows including timer scenarios
 
 ### Deployment Checklist
+
+**CRITICAL DEPLOYMENT REQUIREMENTS:**
+
+- [ ] **ALWAYS test locally before deploying to production**
+
+  - Run `npm run build:client` and `npm run build:functions` to verify builds work
+  - Test the application locally with emulators to ensure functionality
+
+- [ ] **ALWAYS use `npm run deploy:all` for production deployments**
+  - This script invokes all relevant build and deploy scripts
+  - Ensures Assets and SSR pages get correct content types
+  - Ensures assets get matching build file names via SSR asset resolver
+  - Includes the SSR asset resolver which is critical for preventing 404 errors
+
+**Standard Deployment Verification:**
 
 - [ ] All tests pass including timer scenarios
 - [ ] Build process completes successfully

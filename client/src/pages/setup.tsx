@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/auth-context'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
+import { analytics } from '@/lib/analytics'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -170,6 +171,33 @@ export default function Setup() {
 		onSuccess: async (game: { id: string }) => {
 			setIsGenerating(true)
 			try {
+				// Track game creation event
+				analytics.trackGameCreated({
+					gameId: game.id,
+					companyName: formData.companyName,
+					industry: formData.industry,
+					questionCount: parseInt(formData.questionCount),
+					difficulty: difficulty,
+					categories: Object.entries(categories)
+						.filter(([, selected]) => selected)
+						.map(([key]) => {
+							switch (key) {
+								case 'companyFacts':
+									return 'Company Facts'
+								case 'industryKnowledge':
+									return 'Industry Knowledge'
+								case 'funFacts':
+									return 'Fun Facts'
+								case 'generalKnowledge':
+									return 'General Knowledge'
+								case 'other':
+									return customCategory.trim() || 'Custom Questions'
+								default:
+									return key
+							}
+						}),
+				})
+
 				// Generate questions using Firebase Function
 				await generateQuestionsFunction({ gameId: game.id })
 
@@ -179,6 +207,12 @@ export default function Setup() {
 				setLocation(`/game-created/${game.id}`)
 			} catch (error) {
 				console.error('Question generation failed:', error)
+				// Track AI generation error
+				analytics.trackError({
+					type: 'ai_generation',
+					message: 'Failed to generate questions',
+					context: `Game ID: ${game.id}`,
+				})
 				toast({
 					title: 'Error',
 					description: 'Failed to generate questions. Please try again.',

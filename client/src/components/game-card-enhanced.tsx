@@ -61,27 +61,47 @@ export function GameCardEnhanced({
 	const queryClient = useQueryClient()
 
 	// Fetch actual question count for this game
-	const { data: actualQuestionCount } = useQuery<number>({
-		queryKey: ['/api/games', game.id, 'questions-count'],
+	const {
+		data: actualQuestionCount,
+		isLoading: questionsLoading,
+		error: questionsError,
+	} = useQuery<number>({
+		queryKey: ['/api/games', game.id, 'questions'],
 		queryFn: async () => {
+			console.log(`Fetching questions for game ${game.id}`)
 			const response = await fetch(`/api/games/${game.id}/questions`)
+			if (!response.ok) {
+				throw new Error(`Failed to fetch questions: ${response.status}`)
+			}
 			const questions = await response.json()
+			console.log(`Questions response for game ${game.id}:`, questions)
 			return questions.length
 		},
 		enabled: !!game.id,
 		staleTime: 5 * 60 * 1000, // 5 minutes
+		retry: 2,
 	})
 
 	// Fetch play count for this game
-	const { data: playCount } = useQuery<number>({
+	const {
+		data: playCount,
+		isLoading: playCountLoading,
+		error: playCountError,
+	} = useQuery<number>({
 		queryKey: ['/api/games', game.id, 'play-count'],
 		queryFn: async () => {
+			console.log(`Fetching play count for game ${game.id}`)
 			const response = await fetch(`/api/games/${game.id}/play-count`)
+			if (!response.ok) {
+				throw new Error(`Failed to fetch play count: ${response.status}`)
+			}
 			const data = await response.json()
+			console.log(`Play count response for game ${game.id}:`, data)
 			return data.count
 		},
 		enabled: !!game.id,
 		staleTime: 2 * 60 * 1000, // 2 minutes
+		retry: 2,
 	})
 
 	// Delete game mutation
@@ -217,12 +237,39 @@ export function GameCardEnhanced({
 
 					<div className='flex items-center gap-2'>
 						<GalleryVerticalEnd className='h-4 w-4' />
-						{actualQuestionCount !== undefined
-							? actualQuestionCount
-							: game.questionCount}{' '}
-						questions • {game.difficulty} difficulty
+						{questionsLoading ? (
+							<span className='text-muted-foreground'>
+								Loading questions...
+							</span>
+						) : questionsError ? (
+							<span className='text-destructive text-xs'>
+								Error loading questions
+							</span>
+						) : actualQuestionCount !== undefined ? (
+							<>
+								{actualQuestionCount} questions • {game.difficulty} difficulty
+							</>
+						) : (
+							<>
+								{game.questionCount} questions • {game.difficulty} difficulty
+							</>
+						)}
 					</div>
-					{playCount !== undefined && (
+					{playCountLoading && (
+						<div className='flex items-center gap-2'>
+							<BarChart3 className='h-4 w-4' />
+							<span className='text-muted-foreground'>Loading plays...</span>
+						</div>
+					)}
+					{playCountError && (
+						<div className='flex items-center gap-2'>
+							<BarChart3 className='h-4 w-4 text-destructive' />
+							<span className='text-destructive text-xs'>
+								Error loading plays
+							</span>
+						</div>
+					)}
+					{playCount !== undefined && !playCountLoading && !playCountError && (
 						<div className='flex items-center gap-2'>
 							<BarChart3 className='h-4 w-4' />
 							{playCount} {playCount === 1 ? 'play' : 'plays'}

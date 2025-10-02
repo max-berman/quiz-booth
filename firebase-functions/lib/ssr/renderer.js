@@ -17,6 +17,14 @@ const QuizGamesPage = ({ publicGames = [] }) => (react_1.default.createElement('
     className: 'bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90 transition-colors'
 }, 'Play Game'))))) : (react_1.default.createElement('div', { className: 'text-center text-muted-foreground' }, react_1.default.createElement('p', null, 'No public games available at the moment.'), react_1.default.createElement('p', { className: 'mt-2' }, react_1.default.createElement('a', { href: '/setup', className: 'text-primary hover:underline' }, 'Create the first public game')))))));
 const FAQPage = () => (react_1.default.createElement('div', { className: 'min-h-screen bg-background' }, react_1.default.createElement('div', { className: 'container mx-auto px-4 py-8' }, react_1.default.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'Frequently Asked Questions'), react_1.default.createElement('div', { className: 'max-w-3xl mx-auto space-y-6' }, react_1.default.createElement('div', { className: 'bg-card border rounded-lg p-6' }, react_1.default.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'What is QuizBooth?'), react_1.default.createElement('p', { className: 'text-muted-foreground' }, 'QuizBooth is an AI-powered platform that helps businesses create engaging trivia games for trade shows, events, and marketing campaigns.')), react_1.default.createElement('div', { className: 'bg-card border rounded-lg p-6' }, react_1.default.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'How do I create a game?'), react_1.default.createElement('p', { className: 'text-muted-foreground' }, 'Simply sign up, click "Create Your Game", and our AI will help you generate questions based on your topic and difficulty preferences.')), react_1.default.createElement('div', { className: 'bg-card border rounded-lg p-6' }, react_1.default.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'Is it free to use?'), react_1.default.createElement('p', { className: 'text-muted-foreground' }, 'QuizBooth offers both free and premium plans. The free plan includes basic features while premium plans unlock advanced customization and analytics.'))))));
+const PricingPage = () => (react_1.default.createElement('div', { className: 'min-h-screen bg-background' }, react_1.default.createElement('div', { className: 'container mx-auto px-4 py-8' }, react_1.default.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'Pricing Plans'), react_1.default.createElement('p', { className: 'text-center text-muted-foreground mb-8' }, 'Choose the plan that works best for your business needs'), react_1.default.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto' }, 
+// Free Plan
+react_1.default.createElement('div', { className: 'bg-card border rounded-lg p-6' }, react_1.default.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'Free'), react_1.default.createElement('div', { className: 'text-2xl font-bold mb-4' }, '$0/month'), react_1.default.createElement('ul', { className: 'space-y-2 text-muted-foreground' }, react_1.default.createElement('li', null, '✓ Basic game creation'), react_1.default.createElement('li', null, '✓ AI question generation'), react_1.default.createElement('li', null, '✓ QR code sharing'), react_1.default.createElement('li', null, '✓ Basic analytics'))), 
+// Pro Plan
+react_1.default.createElement('div', { className: 'bg-card border rounded-lg p-6 border-primary' }, react_1.default.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'Pro'), react_1.default.createElement('div', { className: 'text-2xl font-bold mb-4' }, '$29/month'), react_1.default.createElement('ul', { className: 'space-y-2 text-muted-foreground' }, react_1.default.createElement('li', null, '✓ Everything in Free'), react_1.default.createElement('li', null, '✓ Advanced customization'), react_1.default.createElement('li', null, '✓ Priority support'), react_1.default.createElement('li', null, '✓ Export analytics'))), 
+// Enterprise Plan
+react_1.default.createElement('div', { className: 'bg-card border rounded-lg p-6' }, react_1.default.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'Enterprise'), react_1.default.createElement('div', { className: 'text-2xl font-bold mb-4' }, 'Custom'), react_1.default.createElement('ul', { className: 'space-y-2 text-muted-foreground' }, react_1.default.createElement('li', null, '✓ Everything in Pro'), react_1.default.createElement('li', null, '✓ White-label solutions'), react_1.default.createElement('li', null, '✓ API access'), react_1.default.createElement('li', null, '✓ Dedicated account manager')))))));
+const SignInPage = () => (react_1.default.createElement('div', { className: 'min-h-screen bg-background' }, react_1.default.createElement('div', { className: 'container mx-auto px-4 py-8' }, react_1.default.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'Sign In to QuizBooth'), react_1.default.createElement('p', { className: 'text-center text-muted-foreground mb-8' }, 'Access your account to create and manage trivia games'), react_1.default.createElement('div', { className: 'max-w-md mx-auto bg-card border rounded-lg p-6' }, react_1.default.createElement('p', { className: 'text-center text-muted-foreground' }, 'Sign in to access your dashboard and create engaging trivia games.')))));
 const NotFoundPage = () => (react_1.default.createElement('div', { className: 'min-h-screen bg-background flex items-center justify-center' }, react_1.default.createElement('div', { className: 'text-center' }, react_1.default.createElement('h1', { className: 'text-4xl font-bold mb-4' }, 'Page Not Found'), react_1.default.createElement('p', { className: 'text-muted-foreground mb-8' }, `The page you're looking for doesn't exist.`), react_1.default.createElement('a', {
     href: '/',
     className: 'bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors'
@@ -96,6 +104,39 @@ async function renderPage(path, pageData) {
           <meta property="og:description" content="Frequently asked questions about creating and playing trivia games">
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/faq">
+        `;
+                break;
+            case '/pricing':
+                Component = PricingPage;
+                metaTags = `
+          <title>Pricing Plans - QuizBooth</title>
+          <meta name="description" content="Choose the perfect plan for your business. QuizBooth offers free and premium plans for creating engaging trivia games for events and trade shows.">
+          <meta property="og:title" content="Pricing Plans - QuizBooth">
+          <meta property="og:description" content="Choose the perfect plan for your business needs">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/pricing">
+        `;
+                break;
+            case '/auth/sign-in':
+                Component = SignInPage;
+                metaTags = `
+          <title>Sign In - QuizBooth</title>
+          <meta name="description" content="Sign in to your QuizBooth account to create and manage trivia games for your business events and trade shows.">
+          <meta property="og:title" content="Sign In - QuizBooth">
+          <meta property="og:description" content="Access your account to create engaging trivia games">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/auth/sign-in">
+        `;
+                break;
+            case '/auth/complete':
+                Component = SignInPage; // Use same component for complete page
+                metaTags = `
+          <title>Complete Sign In - QuizBooth</title>
+          <meta name="description" content="Complete your QuizBooth sign-in process to access your account and create engaging trivia games.">
+          <meta property="og:title" content="Complete Sign In - QuizBooth">
+          <meta property="og:description" content="Complete your sign-in process">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/auth/complete">
         `;
                 break;
             default:

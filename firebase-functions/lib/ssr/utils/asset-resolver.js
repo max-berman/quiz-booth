@@ -6,8 +6,8 @@ exports.getResolvedAssets = void 0;
  * to match the actual generated file names
  */
 const CURRENT_ASSETS = {
-    cssFile: 'index-09PYxtYA.css',
-    jsFile: 'index-zGMVqnbY.js',
+    cssFile: 'index-Bx38nndp.css',
+    jsFile: 'index-HrLKrtAn.js',
     vendorFiles: {
         react: 'vendor-react-C8w-UNLI.js',
         radix: 'vendor-radix-BDMsTCiy.js',

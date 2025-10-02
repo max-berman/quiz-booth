@@ -4,6 +4,10 @@ import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
+// Import centralized PWA configuration
+import { PWA_CONFIG } from "./client/src/lib/pwa-config";
+import { mockApiPlugin } from "./client/src/mocks/vite-plugin-mock-api";
+
 export default defineConfig({
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
@@ -68,34 +72,17 @@ export default defineConfig({
           ]
         },
         manifest: {
-          name: 'QuizBooth - Create Engaging Trivia Games',
-          short_name: 'QuizBooth',
-          description: 'Create AI-powered custom trivia games for trade shows and events',
-          theme_color: '#3b82f6',
-          background_color: '#ffffff',
-          display: 'standalone',
-          orientation: 'portrait',
-          scope: '/',
-          start_url: '/',
-          icons: [
-            {
-              src: '/assets/quiz-booth-icon.png',
-              sizes: '192x192',
-              type: 'image/png'
-            },
-            {
-              src: '/assets/quiz-booth-icon.png',
-              sizes: '512x512',
-              type: 'image/png'
-            },
-            {
-              src: '/assets/quiz-booth-icon.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'maskable'
-            }
-          ],
-          categories: ['business', 'education', 'entertainment']
+          name: PWA_CONFIG.name,
+          short_name: PWA_CONFIG.shortName,
+          description: PWA_CONFIG.description,
+          theme_color: PWA_CONFIG.themeColor,
+          background_color: PWA_CONFIG.backgroundColor,
+          display: PWA_CONFIG.display,
+          orientation: PWA_CONFIG.orientation,
+          scope: PWA_CONFIG.scope,
+          start_url: PWA_CONFIG.startUrl,
+          icons: [...PWA_CONFIG.icons],
+          categories: [...PWA_CONFIG.categories]
         }
       })
     ] : []),
@@ -168,5 +155,28 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5001/trivia-games-7a81b/us-central1',
+        changeOrigin: true,
+        rewrite: (path) => {
+          // Route API calls to the appropriate Firebase Functions with full path
+          if (path.includes('/questions')) {
+            return '/getGameQuestionsCount' + path;
+          } else if (path.includes('/play-count')) {
+            return '/getGamePlayCount' + path;
+          }
+          return path;
+        },
+        configure: (proxy, options) => {
+          // Add CORS headers for development
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+            proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+            proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization';
+          });
+        }
+      }
+    }
   },
 });

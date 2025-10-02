@@ -39,13 +39,13 @@
 
   <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#f4eccf" />
+  <meta name="msapplication-TileColor" content="#f4eccf" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="QuizBooth" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="application-name" content="QuizBooth" />
   <meta name="format-detection" content="telephone=no" />
-  <meta name="msapplication-TileColor" content="#f4eccf" />
   <meta name="msapplication-config" content="/browserconfig.xml" />
 
   <!-- Canonical URL -->
@@ -139,6 +139,8 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
+
+  <!-- Google Analytics 4 - Initialized via analytics service -->
   <script>
     // Dynamically load PWA manifest only in production
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {

@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { QrCode, Download } from 'lucide-react'
 import QRCode from 'qrcode'
+import { analytics } from '@/lib/analytics'
 
 interface QRCodeModalProps {
 	gameId: string
@@ -22,6 +23,12 @@ export function QRCodeModal({ gameId, gameTitle }: QRCodeModalProps) {
 	// Generate QR code when modal opens
 	useEffect(() => {
 		if (isOpen) {
+			// Track QR code generation event
+			analytics.trackGameShared({
+				gameId,
+				shareMethod: 'qr_code',
+			})
+
 			const gameUrl = `${window.location.origin}/game/${gameId}`
 			QRCode.toDataURL(gameUrl, {
 				width: 256,
@@ -42,6 +49,13 @@ export function QRCodeModal({ gameId, gameTitle }: QRCodeModalProps) {
 
 	const handleDownload = () => {
 		if (qrCodeDataURL) {
+			// Track QR code download event
+			analytics.trackGameShared({
+				gameId,
+				shareMethod: 'qr_code',
+				platform: 'download',
+			})
+
 			const link = document.createElement('a')
 			link.download = `${gameTitle || 'game'}-qr-code.png`
 			link.href = qrCodeDataURL

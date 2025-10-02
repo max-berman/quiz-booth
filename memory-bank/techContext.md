@@ -146,7 +146,34 @@ firebase-functions/
 - `npm run deploy:hosting` - Deploy to Firebase Hosting
 - `npm run deploy:functions` - Deploy Firebase Functions
 - `npm run deploy:firestore` - Deploy Firestore rules
-- `npm run deploy:all` - Deploy everything with SSR (automatically updates asset resolver)
+- `npm run deploy:all` - **PRODUCTION DEPLOYMENT**: Deploy everything with SSR (automatically updates asset resolver)
+
+### Critical Deployment Procedures
+
+**IMPORTANT DEPLOYMENT REQUIREMENTS:**
+
+1. **ALWAYS test locally before deploying to production**
+
+   - Run `npm run build:client` and `npm run build:functions` to verify builds work
+   - Test the application locally with emulators to ensure functionality
+
+2. **ALWAYS use `npm run deploy:all` for production deployments**
+
+   - This script invokes all relevant build and deploy scripts
+   - Ensures Assets and SSR pages get correct content types
+   - Ensures assets get matching build file names via SSR asset resolver
+   - Includes the SSR asset resolver which is critical for preventing 404 errors
+
+3. **Deployment Checklist**
+   - [ ] Local build verification completed
+   - [ ] All tests pass
+   - [ ] SSR pages render correctly
+   - [ ] Authentication flows work
+   - [ ] AI question generation functional
+   - [ ] Real-time features operational
+   - [ ] Timer resume functionality verified
+   - [ ] Performance metrics within targets
+   - [ ] `npm run deploy:all` executed for production deployment
 
 ### Build Process
 

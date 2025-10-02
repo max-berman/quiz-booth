@@ -17,6 +17,7 @@ import {
 import type { Game, Question } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { useGameSession } from '@/hooks/use-game-session'
+import { analytics } from '@/lib/analytics'
 
 export default function GamePage() {
 	const { id } = useParams()
@@ -84,6 +85,18 @@ export default function GamePage() {
 	const progressPercentage = questions
 		? ((currentQuestionIndex + 1) / questions.length) * 100
 		: 0
+
+	// Track game start when game data is loaded
+	useEffect(() => {
+		if (game && questions && !hasExistingSession) {
+			analytics.trackGameStart({
+				gameId: id!,
+				difficulty: game.difficulty,
+				categories: game.categories,
+				questionCount: questions.length,
+			})
+		}
+	}, [game, questions, hasExistingSession, id])
 
 	// Timer initialization - handles both resume and new questions
 	useEffect(() => {
@@ -173,6 +186,16 @@ export default function GamePage() {
 			newStreak = 0
 		}
 
+		// Track question answered event
+		analytics.trackQuestionAnswered({
+			gameId: id!,
+			questionIndex: currentQuestionIndex,
+			isCorrect,
+			timeSpent,
+			currentStreak: newStreak,
+			totalScore: newScore,
+		})
+
 		// Update session state
 		updateSessionState({
 			selectedAnswers: {
@@ -203,6 +226,16 @@ export default function GamePage() {
 		} else {
 			// Game finished
 			const finalTimeSpent = Math.floor((Date.now() - gameStartTime) / 1000)
+
+			// Track game completion event
+			analytics.trackGameCompleted({
+				gameId: id!,
+				finalScore: score,
+				correctAnswers: correctAnswers,
+				totalQuestions: questions?.length || 0,
+				totalTime: finalTimeSpent,
+				maxStreak: streak,
+			})
 
 			// Complete the session and navigate to results
 			completeSession()

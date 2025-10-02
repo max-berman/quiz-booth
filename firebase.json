@@ -8,6 +8,18 @@
     ],
     "rewrites": [
       {
+        "source": "/api/games/:gameId/questions",
+        "function": "getGameQuestionsCount"
+      },
+      {
+        "source": "/api/games/:gameId/play-count",
+        "function": "getGamePlayCount"
+      },
+      {
+        "source": "/assets/**",
+        "destination": "/assets/**"
+      },
+      {
         "source": "/",
         "function": "ssrHandler"
       },
@@ -21,6 +33,10 @@
       },
       {
         "source": "/faq",
+        "function": "ssrHandler"
+      },
+      {
+        "source": "/pricing",
         "function": "ssrHandler"
       },
       {
@@ -56,6 +72,10 @@
         "function": "ssrHandler"
       },
       {
+        "source": "/auth/**",
+        "function": "ssrHandler"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
@@ -65,12 +85,12 @@
         "source": "**",
         "headers": [
           {
-            "key": "X-Frame-Options",
-            "value": "DENY"
-          },
-          {
             "key": "X-Content-Type-Options",
             "value": "nosniff"
+          },
+          {
+            "key": "Cross-Origin-Opener-Policy",
+            "value": "same-origin-allow-popups"
           }
         ]
       },

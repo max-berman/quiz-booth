@@ -95,6 +95,68 @@ const FAQPage = () => (
   )
 );
 
+const PricingPage = () => (
+  React.createElement('div', { className: 'min-h-screen bg-background' },
+    React.createElement('div', { className: 'container mx-auto px-4 py-8' },
+      React.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'Pricing Plans'),
+      React.createElement('p', { className: 'text-center text-muted-foreground mb-8' },
+        'Choose the plan that works best for your business needs'
+      ),
+      React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto' },
+        // Free Plan
+        React.createElement('div', { className: 'bg-card border rounded-lg p-6' },
+          React.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'Free'),
+          React.createElement('div', { className: 'text-2xl font-bold mb-4' }, '$0/month'),
+          React.createElement('ul', { className: 'space-y-2 text-muted-foreground' },
+            React.createElement('li', null, '✓ Basic game creation'),
+            React.createElement('li', null, '✓ AI question generation'),
+            React.createElement('li', null, '✓ QR code sharing'),
+            React.createElement('li', null, '✓ Basic analytics')
+          )
+        ),
+        // Pro Plan
+        React.createElement('div', { className: 'bg-card border rounded-lg p-6 border-primary' },
+          React.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'Pro'),
+          React.createElement('div', { className: 'text-2xl font-bold mb-4' }, '$29/month'),
+          React.createElement('ul', { className: 'space-y-2 text-muted-foreground' },
+            React.createElement('li', null, '✓ Everything in Free'),
+            React.createElement('li', null, '✓ Advanced customization'),
+            React.createElement('li', null, '✓ Priority support'),
+            React.createElement('li', null, '✓ Export analytics')
+          )
+        ),
+        // Enterprise Plan
+        React.createElement('div', { className: 'bg-card border rounded-lg p-6' },
+          React.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'Enterprise'),
+          React.createElement('div', { className: 'text-2xl font-bold mb-4' }, 'Custom'),
+          React.createElement('ul', { className: 'space-y-2 text-muted-foreground' },
+            React.createElement('li', null, '✓ Everything in Pro'),
+            React.createElement('li', null, '✓ White-label solutions'),
+            React.createElement('li', null, '✓ API access'),
+            React.createElement('li', null, '✓ Dedicated account manager')
+          )
+        )
+      )
+    )
+  )
+);
+
+const SignInPage = () => (
+  React.createElement('div', { className: 'min-h-screen bg-background' },
+    React.createElement('div', { className: 'container mx-auto px-4 py-8' },
+      React.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'Sign In to QuizBooth'),
+      React.createElement('p', { className: 'text-center text-muted-foreground mb-8' },
+        'Access your account to create and manage trivia games'
+      ),
+      React.createElement('div', { className: 'max-w-md mx-auto bg-card border rounded-lg p-6' },
+        React.createElement('p', { className: 'text-center text-muted-foreground' },
+          'Sign in to access your dashboard and create engaging trivia games.'
+        )
+      )
+    )
+  )
+);
+
 const NotFoundPage = () => (
   React.createElement('div', { className: 'min-h-screen bg-background flex items-center justify-center' },
     React.createElement('div', { className: 'text-center' },
@@ -190,6 +252,42 @@ export async function renderPage(path: string, pageData: any) {
           <meta property="og:description" content="Frequently asked questions about creating and playing trivia games">
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/faq">
+        `;
+        break;
+
+      case '/pricing':
+        Component = PricingPage;
+        metaTags = `
+          <title>Pricing Plans - QuizBooth</title>
+          <meta name="description" content="Choose the perfect plan for your business. QuizBooth offers free and premium plans for creating engaging trivia games for events and trade shows.">
+          <meta property="og:title" content="Pricing Plans - QuizBooth">
+          <meta property="og:description" content="Choose the perfect plan for your business needs">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/pricing">
+        `;
+        break;
+
+      case '/auth/sign-in':
+        Component = SignInPage;
+        metaTags = `
+          <title>Sign In - QuizBooth</title>
+          <meta name="description" content="Sign in to your QuizBooth account to create and manage trivia games for your business events and trade shows.">
+          <meta property="og:title" content="Sign In - QuizBooth">
+          <meta property="og:description" content="Access your account to create engaging trivia games">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/auth/sign-in">
+        `;
+        break;
+
+      case '/auth/complete':
+        Component = SignInPage; // Use same component for complete page
+        metaTags = `
+          <title>Complete Sign In - QuizBooth</title>
+          <meta name="description" content="Complete your QuizBooth sign-in process to access your account and create engaging trivia games.">
+          <meta property="og:title" content="Complete Sign In - QuizBooth">
+          <meta property="og:description" content="Complete your sign-in process">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/auth/complete">
         `;
         break;
 
