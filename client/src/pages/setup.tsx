@@ -19,6 +19,19 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent } from '@/components/ui/card'
 import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from '@/components/ui/command'
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover'
+import {
 	Building,
 	Settings,
 	Gift,
@@ -28,7 +41,10 @@ import {
 	CheckCircle,
 	AlertCircle,
 	Info,
+	ChevronsUpDown,
+	Check,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { LoadingSpinner } from '@/components/loading-spinner'
 import type { InsertGame } from '@shared/firebase-types'
@@ -102,6 +118,7 @@ export default function Setup() {
 	const [customCategory, setCustomCategory] = useState('')
 	const [customIndustry, setCustomIndustry] = useState('')
 	const [focusedSection, setFocusedSection] = useState<number | null>(null)
+	const [industryOpen, setIndustryOpen] = useState(false)
 
 	const [formData, setFormData] = useState<FormData>({
 		companyName: '',
@@ -477,32 +494,67 @@ export default function Setup() {
 											>
 												Industry *
 											</Label>
-											<Select
-												value={formData.industry}
-												onValueChange={(value) =>
-													setFormData((prev) => ({ ...prev, industry: value }))
-												}
+											<Popover
+												open={industryOpen}
+												onOpenChange={setIndustryOpen}
 											>
-												<SelectTrigger
-													className={`mt-2 h-12 text-base ${
-														formData.industry
-															? 'border-primary'
-															: 'border-border'
-													}`}
-												>
-													<SelectValue
-														className='text-base'
-														placeholder='Select your industry'
-													/>
-												</SelectTrigger>
-												<SelectContent className='text-base'>
-													{INDUSTRY_OPTIONS.map((industry) => (
-														<SelectItem key={industry} value={industry}>
-															{industry}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
+												<PopoverTrigger asChild>
+													<Button
+														variant='outline'
+														role='combobox'
+														aria-expanded={industryOpen}
+														className={`mt-2 h-12 w-full justify-between text-base ${
+															formData.industry
+																? 'border-primary'
+																: 'border-border text-placeholder'
+														}`}
+													>
+														{formData.industry
+															? formData.industry
+															: 'Select your industry...'}
+														<ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+													</Button>
+												</PopoverTrigger>
+												<PopoverContent className='w-full p-0'>
+													<Command>
+														<CommandInput
+															placeholder='Search industry...'
+															className='h-9'
+														/>
+														<CommandList>
+															<CommandEmpty>No industry found.</CommandEmpty>
+															<CommandGroup>
+																{INDUSTRY_OPTIONS.map((industry) => (
+																	<CommandItem
+																		key={industry}
+																		value={industry}
+																		onSelect={(currentValue) => {
+																			setFormData((prev) => ({
+																				...prev,
+																				industry:
+																					currentValue === formData.industry
+																						? ''
+																						: currentValue,
+																			}))
+																			setIndustryOpen(false)
+																		}}
+																	>
+																		{industry}
+																		<Check
+																			className={cn(
+																				'ml-auto',
+																				formData.industry === industry
+																					? 'opacity-100'
+																					: 'opacity-0'
+																			)}
+																		/>
+																	</CommandItem>
+																))}
+															</CommandGroup>
+														</CommandList>
+													</Command>
+												</PopoverContent>
+											</Popover>
 										</div>
 
 										{formData.industry === 'Other' && (

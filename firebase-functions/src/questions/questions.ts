@@ -137,7 +137,7 @@ export const generateQuestions = functions.https.onCall(async (data, context) =>
       const titlePrompt = `Generate a short, creative game title (max 3-5 words) for a trivia game with these characteristics:
 - Company: ${gameData?.companyName}
 - Industry: ${gameData?.industry}
-- Description: ${gameData?.productDescription || 'Not provided'}
+- Products or services description: ${gameData?.productDescription || 'Not provided'}
 - Categories: ${gameData?.categories?.join(', ')}
 
 Return ONLY the title as plain text, no JSON or additional formatting.`;
@@ -199,7 +199,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
     
     ${companyInfo}
     Industry: ${gameData?.industry}
-    Company description: ${gameData?.productDescription || 'Not provided'}
+    Products or services description: ${gameData?.productDescription || 'Not provided'}
     Difficulty: ${gameData?.difficulty}
     
     ${websiteInstruction}
@@ -370,7 +370,7 @@ export const generateSingleQuestion = functions.https.onCall(async (data, contex
     
     ${companyInfo}
     Industry: ${gameData?.industry}
-    Company description: ${gameData?.productDescription || 'Not provided'}
+    Products or services description: ${gameData?.productDescription || 'Not provided'}
     Difficulty: ${gameData?.difficulty}
     
     ${websiteInstruction}
