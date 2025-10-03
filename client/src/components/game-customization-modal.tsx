@@ -25,6 +25,8 @@ import {
 	Sparkles,
 	Crown,
 } from 'lucide-react'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { storage } from '@/lib/firebase'
 import type { Game, GameCustomization } from '@shared/firebase-types'
 
 interface GameCustomizationModalProps {
@@ -135,7 +137,9 @@ export function GameCustomizationModal({
 		}))
 	}
 
-	const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleLogoUpload = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
 		const file = event.target.files?.[0]
 		if (!file) return
 
@@ -159,15 +163,33 @@ export function GameCustomizationModal({
 			return
 		}
 
-		// In a real implementation, you would upload to Firebase Storage here
-		// For now, we'll create a local URL for preview
-		const objectUrl = URL.createObjectURL(file)
-		setFormData((prev) => ({ ...prev, customLogoUrl: objectUrl }))
+		try {
+			// Create a temporary preview URL
+			const objectUrl = URL.createObjectURL(file)
+			setFormData((prev) => ({ ...prev, customLogoUrl: objectUrl }))
 
-		toast({
-			title: 'Logo Uploaded',
-			description: 'Logo has been uploaded successfully.',
-		})
+			// Upload to Firebase Storage
+			const storageRef = ref(storage, `game-logos/${game.id}/${file.name}`)
+			const snapshot = await uploadBytes(storageRef, file)
+			const downloadURL = await getDownloadURL(snapshot.ref)
+
+			// Update form data with the permanent URL
+			setFormData((prev) => ({ ...prev, customLogoUrl: downloadURL }))
+
+			toast({
+				title: 'Logo Uploaded',
+				description: 'Logo has been uploaded successfully.',
+			})
+		} catch (error) {
+			console.error('Logo upload failed:', error)
+			toast({
+				title: 'Upload Failed',
+				description: 'Failed to upload logo. Please try again.',
+				variant: 'destructive',
+			})
+			// Reset the logo URL on error
+			setFormData((prev) => ({ ...prev, customLogoUrl: '' }))
+		}
 	}
 
 	const handleSave = () => {

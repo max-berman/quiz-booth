@@ -1,12 +1,14 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, connectAuthEmulator, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
 // Check if we're in development mode (Vite's way)
 const isDevelopment = import.meta.env.DEV;
 
 let app: any;
 let auth: any;
+let storage: any;
 
 // Check if Firebase is already initialized
 const existingApps = getApps();
@@ -41,6 +43,10 @@ if (existingApps.length > 0) {
         // Connect Functions emulator
         const functions = getFunctions(app);
         connectFunctionsEmulator(functions, 'localhost', 5001);
+
+        // Connect Storage emulator
+        storage = getStorage(app);
+        connectStorageEmulator(storage, 'localhost', 9199);
       } catch (emulatorError) {
         console.error('Emulator connection failed:', emulatorError);
       }
@@ -82,6 +88,7 @@ if (existingApps.length > 0) {
     try {
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
+      storage = getStorage(app);
     } catch (error) {
       console.error('Firebase initialization error:', error);
       // Don't fallback to empty config - this causes duplicate app errors
@@ -95,5 +102,5 @@ if (existingApps.length > 0) {
   }
 }
 
-export { auth };
+export { auth, storage };
 export default app;

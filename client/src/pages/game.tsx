@@ -428,24 +428,14 @@ export default function GamePage() {
 								rel='noopener noreferrer'
 								className='flex items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
 							>
-								{game.customization?.customLogoUrl ? (
-									<img
-										src={game.customization.customLogoUrl}
-										alt='Custom game logo'
-										className='h-8 w-auto'
-									/>
-								) : (
-									<>
-										<img
-											src='/assets/logo_.svg'
-											alt='QuizBooth.games logo'
-											className='h-8 w-auto'
-										/>
-										<span className='hidden lg:block hover:scale-[1.02] transition-all font-medium'>
-											QuizBooth
-										</span>
-									</>
-								)}
+								<img
+									src='/assets/logo_.svg'
+									alt='QuizBooth.games logo'
+									className='h-8 w-auto'
+								/>
+								<span className='hidden lg:block hover:scale-[1.02] transition-all font-medium'>
+									QuizBooth
+								</span>
 							</a>
 						</li>
 
