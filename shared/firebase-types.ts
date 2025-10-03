@@ -6,6 +6,14 @@ export interface PrizePlacement {
   prize: string; // Prize description or amount
 }
 
+export interface GameCustomization {
+  primaryColor: string;    // Main brand color
+  secondaryColor: string;  // Accent color  
+  tertiaryColor: string;   // Background/neutral color
+  customLogoUrl: string;   // Uploaded logo URL
+  isCustomized: boolean;   // Track if customization is applied
+}
+
 export interface Game {
   id: string;
   gameTitle: string | null; // AI-generated or user-edited game title
@@ -24,6 +32,7 @@ export interface Game {
   createdAt: Date;
   modifiedAt?: Date; // Track when game was last modified
   isPublic?: boolean; // Whether the game is publicly accessible
+  customization?: GameCustomization; // Game customization settings
 }
 
 export interface Question {

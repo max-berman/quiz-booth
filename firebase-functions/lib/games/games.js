@@ -159,7 +159,7 @@ exports.getGame = functions.https.onCall(async (data, context) => {
             return Object.assign(Object.assign({}, gameData), { prizes: prizesArray, createdAt: (_c = (_b = (_a = gameData === null || gameData === void 0 ? void 0 : gameData.createdAt) === null || _a === void 0 ? void 0 : _a.toDate) === null || _b === void 0 ? void 0 : _b.call(_a)) === null || _c === void 0 ? void 0 : _c.toISOString(), modifiedAt: (_f = (_e = (_d = gameData === null || gameData === void 0 ? void 0 : gameData.modifiedAt) === null || _d === void 0 ? void 0 : _d.toDate) === null || _e === void 0 ? void 0 : _e.call(_d)) === null || _f === void 0 ? void 0 : _f.toISOString() });
         }
         else if (gameData === null || gameData === void 0 ? void 0 : gameData.isPublic) {
-            // Public game, return limited data
+            // Public game, return limited data but include customization
             return {
                 id: gameData.id,
                 gameTitle: gameData.gameTitle,
@@ -167,6 +167,7 @@ exports.getGame = functions.https.onCall(async (data, context) => {
                 industry: gameData.industry,
                 prizes: prizesArray,
                 isPublic: true,
+                customization: gameData.customization,
                 createdAt: (_j = (_h = (_g = gameData === null || gameData === void 0 ? void 0 : gameData.createdAt) === null || _g === void 0 ? void 0 : _g.toDate) === null || _h === void 0 ? void 0 : _h.call(_g)) === null || _j === void 0 ? void 0 : _j.toISOString(),
             };
         }
@@ -180,6 +181,7 @@ exports.getGame = functions.https.onCall(async (data, context) => {
                 industry: gameData === null || gameData === void 0 ? void 0 : gameData.industry,
                 prizes: prizesArray,
                 isPublic: false,
+                customization: gameData === null || gameData === void 0 ? void 0 : gameData.customization,
                 createdAt: (_m = (_l = (_k = gameData === null || gameData === void 0 ? void 0 : gameData.createdAt) === null || _k === void 0 ? void 0 : _k.toDate) === null || _l === void 0 ? void 0 : _l.call(_k)) === null || _m === void 0 ? void 0 : _m.toISOString(),
             };
         }
@@ -228,7 +230,7 @@ exports.updateGame = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
     }
     const userId = context.auth.uid;
-    const { gameId, updates } = data;
+    const { gameId, updates, customization } = data;
     try {
         // Verify user owns the game
         const gameDoc = await db.collection('games').doc(gameId).get();
@@ -245,9 +247,20 @@ exports.updateGame = functions.https.onCall(async (data, context) => {
         delete allowedUpdates.creatorKey;
         delete allowedUpdates.userId;
         delete allowedUpdates.createdAt;
+        // Prepare update data
+        const updateData = Object.assign(Object.assign({}, allowedUpdates), { modifiedAt: firestore_1.Timestamp.fromDate(new Date()) });
+        // Handle customization if provided
+        if (customization) {
+            updateData.customization = customization;
+            // Track usage for customization
+            await trackUsage(userId, 'custom_theme_applied', {
+                gameId,
+                hasCustomLogo: !!customization.customLogoUrl,
+                hasCustomColors: !!(customization.primaryColor || customization.secondaryColor || customization.tertiaryColor),
+            });
+        }
         // Update game
-        const now = new Date();
-        await db.collection('games').doc(gameId).update(Object.assign(Object.assign({}, allowedUpdates), { modifiedAt: firestore_1.Timestamp.fromDate(now) }));
+        await db.collection('games').doc(gameId).update(updateData);
         // Get updated game
         const updatedGameDoc = await db.collection('games').doc(gameId).get();
         const updatedGame = updatedGameDoc.data();

@@ -86,6 +86,27 @@ export default function GamePage() {
 		? ((currentQuestionIndex + 1) / questions.length) * 100
 		: 0
 
+	// Apply customization styles
+	useEffect(() => {
+		if (game?.customization) {
+			const { primaryColor, secondaryColor, tertiaryColor } = game.customization
+
+			// Set CSS custom properties for dynamic theming
+			const root = document.documentElement
+			if (primaryColor) root.style.setProperty('--primary', primaryColor)
+			if (secondaryColor) root.style.setProperty('--secondary', secondaryColor)
+			if (tertiaryColor) root.style.setProperty('--background', tertiaryColor)
+		}
+
+		// Cleanup function to reset styles
+		return () => {
+			const root = document.documentElement
+			root.style.removeProperty('--primary')
+			root.style.removeProperty('--secondary')
+			root.style.removeProperty('--background')
+		}
+	}, [game?.customization])
+
 	// Track game start when game data is loaded
 	useEffect(() => {
 		if (game && questions && !hasExistingSession) {

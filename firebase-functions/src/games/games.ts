@@ -159,7 +159,7 @@ export const getGame = functions.https.onCall(async (data, context) => {
         modifiedAt: gameData?.modifiedAt?.toDate?.()?.toISOString(),
       };
     } else if (gameData?.isPublic) {
-      // Public game, return limited data
+      // Public game, return limited data but include customization
       return {
         id: gameData.id,
         gameTitle: gameData.gameTitle,
@@ -167,6 +167,7 @@ export const getGame = functions.https.onCall(async (data, context) => {
         industry: gameData.industry,
         prizes: prizesArray,
         isPublic: true,
+        customization: gameData.customization, // Include customization for public games
         createdAt: gameData?.createdAt?.toDate?.()?.toISOString(),
       };
     } else {
@@ -179,6 +180,7 @@ export const getGame = functions.https.onCall(async (data, context) => {
         industry: gameData?.industry,
         prizes: prizesArray,
         isPublic: false,
+        customization: gameData?.customization, // Include customization for shared games
         createdAt: gameData?.createdAt?.toDate?.()?.toISOString(),
       };
     }
@@ -243,7 +245,7 @@ export const updateGame = functions.https.onCall(async (data, context) => {
   }
 
   const userId = context.auth.uid;
-  const { gameId, updates } = data;
+  const { gameId, updates, customization } = data;
 
   try {
     // Verify user owns the game
@@ -264,12 +266,26 @@ export const updateGame = functions.https.onCall(async (data, context) => {
     delete (allowedUpdates as any).userId;
     delete (allowedUpdates as any).createdAt;
 
-    // Update game
-    const now = new Date();
-    await db.collection('games').doc(gameId).update({
+    // Prepare update data
+    const updateData: any = {
       ...allowedUpdates,
-      modifiedAt: Timestamp.fromDate(now),
-    });
+      modifiedAt: Timestamp.fromDate(new Date()),
+    };
+
+    // Handle customization if provided
+    if (customization) {
+      updateData.customization = customization;
+
+      // Track usage for customization
+      await trackUsage(userId, 'custom_theme_applied', {
+        gameId,
+        hasCustomLogo: !!customization.customLogoUrl,
+        hasCustomColors: !!(customization.primaryColor || customization.secondaryColor || customization.tertiaryColor),
+      });
+    }
+
+    // Update game
+    await db.collection('games').doc(gameId).update(updateData);
 
     // Get updated game
     const updatedGameDoc = await db.collection('games').doc(gameId).get();
