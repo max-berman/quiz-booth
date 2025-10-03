@@ -191,6 +191,13 @@ export function GameCustomizationModal({
 			const objectUrl = URL.createObjectURL(file)
 			setFormData((prev) => ({ ...prev, customLogoUrl: objectUrl }))
 
+			// Check if storage is available
+			if (!storage) {
+				throw new Error(
+					'Firebase Storage is not available. Please ensure the Storage emulator is running.'
+				)
+			}
+
 			// Upload to Firebase Storage
 			const storageRef = ref(storage, `game-logos/${game.id}/${file.name}`)
 			const snapshot = await uploadBytes(storageRef, file)
@@ -205,9 +212,24 @@ export function GameCustomizationModal({
 			})
 		} catch (error) {
 			console.error('Logo upload failed:', error)
+
+			let errorMessage = 'Failed to upload logo. Please try again.'
+			if (error instanceof Error) {
+				if (error.message.includes('Storage is not available')) {
+					errorMessage =
+						'Firebase Storage is not available. Please ensure the Storage emulator is running (npm run emulate).'
+				} else if (error.message.includes('permission-denied')) {
+					errorMessage =
+						'Permission denied. Please check your Firebase Storage rules.'
+				} else if (error.message.includes('network')) {
+					errorMessage =
+						'Network error. Please check your connection and try again.'
+				}
+			}
+
 			toast({
 				title: 'Upload Failed',
-				description: 'Failed to upload logo. Please try again.',
+				description: errorMessage,
 				variant: 'destructive',
 			})
 			// Reset the logo URL on error
