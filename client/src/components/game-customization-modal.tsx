@@ -57,24 +57,42 @@ const COLOR_PRESETS = [
 		primary: '#2563eb',
 		secondary: '#7c3aed',
 		tertiary: '#f8fafc',
+		quaternary: '#e0f2fe',
 	},
 	{
 		name: 'Modern Green',
 		primary: '#059669',
 		secondary: '#0d9488',
 		tertiary: '#f0fdf4',
+		quaternary: '#dcfce7',
 	},
 	{
 		name: 'Warm Orange',
 		primary: '#ea580c',
 		secondary: '#dc2626',
 		tertiary: '#fff7ed',
+		quaternary: '#ffedd5',
 	},
 	{
 		name: 'Elegant Purple',
 		primary: '#7c3aed',
 		secondary: '#a855f7',
 		tertiary: '#faf5ff',
+		quaternary: '#f3e8ff',
+	},
+	{
+		name: 'Corporate Gray',
+		primary: '#475569',
+		secondary: '#64748b',
+		tertiary: '#f8fafc',
+		quaternary: '#f1f5f9',
+	},
+	{
+		name: 'Vibrant Teal',
+		primary: '#0d9488',
+		secondary: '#14b8a6',
+		tertiary: '#f0fdfa',
+		quaternary: '#ccfbf1',
 	},
 ]
 
@@ -138,6 +156,7 @@ export function GameCustomizationModal({
 			primaryColor: preset.primary,
 			secondaryColor: preset.secondary,
 			tertiaryColor: preset.tertiary,
+			quaternaryColor: preset.quaternary,
 		}))
 	}
 
