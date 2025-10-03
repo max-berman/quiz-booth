@@ -4,16 +4,38 @@ import { Button } from '@/components/ui/button'
 import { PublicGameCard } from '@/components/public-game-card'
 import { useQuery } from '@tanstack/react-query'
 import type { Game } from '@shared/firebase-types'
-import { ArrowLeft, Loader2, Filter, X } from 'lucide-react'
+import {
+	ArrowLeft,
+	Loader2,
+	Filter,
+	X,
+	ChevronsUpDown,
+	Check,
+} from 'lucide-react'
 import { Link } from 'wouter'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { INDUSTRY_OPTIONS } from '@shared/constants'
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from '@/components/ui/command'
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
 
 export default function Quizzes() {
 	const [page, setPage] = useState(0)
 	const [selectedIndustry, setSelectedIndustry] = useState<string>('all')
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([])
 	const [showFilters, setShowFilters] = useState(false)
+	const [industryOpen, setIndustryOpen] = useState(false)
 	const limit = 12 // 12 cards per page (3x4 grid)
 
 	// Reset page when filters change
@@ -59,10 +81,6 @@ export default function Quizzes() {
 		setPage((prev) => prev + 1)
 	}
 
-	const handleIndustryChange = (industry: string) => {
-		setSelectedIndustry(industry)
-	}
-
 	const handleCategoryToggle = (category: string) => {
 		setSelectedCategories((prev) =>
 			prev.includes(category)
@@ -75,9 +93,6 @@ export default function Quizzes() {
 		setSelectedIndustry('all')
 		setSelectedCategories([])
 	}
-
-	// Industry options from shared constants with "all" option
-	const industries = ['all', ...INDUSTRY_OPTIONS]
 
 	// Extract unique categories from existing games
 	const categories = useMemo(() => {
@@ -207,21 +222,75 @@ export default function Quizzes() {
 									<h3 className='font-semibold text-foreground mb-4'>
 										Industry
 									</h3>
-									<div className='grid px-2 grid-cols-2 md:grid-cols-3 gap-2'>
-										{industries.map((industry) => (
-											<button
-												key={industry}
-												onClick={() => handleIndustryChange(industry)}
-												className={`px-1 py-1 rounded-lg text-xs border transition-colors ${
-													selectedIndustry === industry
-														? 'border-border hover:bg-accent border-primary font-semibold'
-														: 'bg-background border-border hover:bg-accent'
+									<Popover open={industryOpen} onOpenChange={setIndustryOpen}>
+										<PopoverTrigger asChild>
+											<Button
+												variant='outline'
+												role='combobox'
+												aria-expanded={industryOpen}
+												className={`w-full justify-between text-base ${
+													selectedIndustry !== 'all'
+														? 'border-primary'
+														: 'border-border '
 												}`}
 											>
-												{industry === 'all' ? 'All Industries' : industry}
-											</button>
-										))}
-									</div>
+												{selectedIndustry !== 'all'
+													? selectedIndustry
+													: 'All Industries'}
+												<ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+											</Button>
+										</PopoverTrigger>
+										<PopoverContent className='w-full p-0'>
+											<Command>
+												<CommandInput
+													placeholder='Search industry...'
+													className='h-9'
+												/>
+												<CommandList>
+													<CommandEmpty>No industry found.</CommandEmpty>
+													<CommandGroup>
+														<CommandItem
+															value='all'
+															onSelect={() => {
+																setSelectedIndustry('all')
+																setIndustryOpen(false)
+															}}
+														>
+															All Industries
+															<Check
+																className={cn(
+																	'ml-auto',
+																	selectedIndustry === 'all'
+																		? 'opacity-100'
+																		: 'opacity-0'
+																)}
+															/>
+														</CommandItem>
+														{INDUSTRY_OPTIONS.map((industry) => (
+															<CommandItem
+																key={industry}
+																value={industry}
+																onSelect={() => {
+																	setSelectedIndustry(industry)
+																	setIndustryOpen(false)
+																}}
+															>
+																{industry}
+																<Check
+																	className={cn(
+																		'ml-auto',
+																		selectedIndustry === industry
+																			? 'opacity-100'
+																			: 'opacity-0'
+																	)}
+																/>
+															</CommandItem>
+														))}
+													</CommandGroup>
+												</CommandList>
+											</Command>
+										</PopoverContent>
+									</Popover>
 								</div>
 
 								{/* Categories Filter */}

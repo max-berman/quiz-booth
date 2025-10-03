@@ -136,8 +136,9 @@ export default function Setup() {
 
 	const checkSettingsComplete = useCallback(() => {
 		const selectedCategories = Object.values(categories).some(Boolean)
-		return selectedCategories && formData.questionCount
-	}, [categories, formData.questionCount])
+		const customCategoryValid = !categories.other || customCategory.trim()
+		return selectedCategories && formData.questionCount && customCategoryValid
+	}, [categories, formData.questionCount, customCategory])
 
 	// Memoized steps calculation
 	const steps = useMemo(() => {
@@ -293,6 +294,17 @@ export default function Setup() {
 			toast({
 				title: 'Error',
 				description: 'Please select at least one question category.',
+				variant: 'destructive',
+			})
+			return
+		}
+
+		// Check if custom category is required but empty
+		if (categories.other && !customCategory.trim()) {
+			toast({
+				title: 'Error',
+				description:
+					'Please describe your custom questions when selecting Custom Questions category.',
 				variant: 'destructive',
 			})
 			return
@@ -736,7 +748,7 @@ export default function Setup() {
 														htmlFor='customCategory'
 														className='text-base font-medium'
 													>
-														Describe your custom questions
+														Describe your custom questions *
 													</Label>
 													<Textarea
 														id='customCategory'
@@ -746,10 +758,21 @@ export default function Setup() {
 														className={`mt-2 ${
 															customCategory.trim()
 																? 'border-primary'
+																: categories.other && !customCategory.trim()
+																? 'border-destructive'
 																: 'border-border'
 														}`}
 														rows={2}
 													/>
+													{categories.other && !customCategory.trim() && (
+														<div className='flex items-center gap-2 mt-2 text-destructive'>
+															<AlertCircle className='h-4 w-4' />
+															<span className='text-sm'>
+																Custom questions description is required when
+																selecting Custom Questions category
+															</span>
+														</div>
+													)}
 												</div>
 											)}
 											{!Object.values(categories).some(Boolean) && (

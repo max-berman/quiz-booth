@@ -140,7 +140,7 @@ exports.generateQuestions = functions.https.onCall(async (data, context) => {
             const titlePrompt = `Generate a short, creative game title (max 3-5 words) for a trivia game with these characteristics:
 - Company: ${gameData === null || gameData === void 0 ? void 0 : gameData.companyName}
 - Industry: ${gameData === null || gameData === void 0 ? void 0 : gameData.industry}
-- Description: ${(gameData === null || gameData === void 0 ? void 0 : gameData.productDescription) || 'Not provided'}
+- Products or services description: ${(gameData === null || gameData === void 0 ? void 0 : gameData.productDescription) || 'Not provided'}
 - Categories: ${(_a = gameData === null || gameData === void 0 ? void 0 : gameData.categories) === null || _a === void 0 ? void 0 : _a.join(', ')}
 
 Return ONLY the title as plain text, no JSON or additional formatting.`;
@@ -196,7 +196,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
     
     ${companyInfo}
     Industry: ${gameData === null || gameData === void 0 ? void 0 : gameData.industry}
-    Company description: ${(gameData === null || gameData === void 0 ? void 0 : gameData.productDescription) || 'Not provided'}
+    Products or services description: ${(gameData === null || gameData === void 0 ? void 0 : gameData.productDescription) || 'Not provided'}
     Difficulty: ${gameData === null || gameData === void 0 ? void 0 : gameData.difficulty}
     
     ${websiteInstruction}
@@ -350,7 +350,7 @@ exports.generateSingleQuestion = functions.https.onCall(async (data, context) =>
     
     ${companyInfo}
     Industry: ${gameData === null || gameData === void 0 ? void 0 : gameData.industry}
-    Company description: ${(gameData === null || gameData === void 0 ? void 0 : gameData.productDescription) || 'Not provided'}
+    Products or services description: ${(gameData === null || gameData === void 0 ? void 0 : gameData.productDescription) || 'Not provided'}
     Difficulty: ${gameData === null || gameData === void 0 ? void 0 : gameData.difficulty}
     
     ${websiteInstruction}
