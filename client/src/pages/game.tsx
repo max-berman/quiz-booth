@@ -91,21 +91,101 @@ export default function GamePage() {
 		if (game?.customization) {
 			const { primaryColor, secondaryColor, tertiaryColor } = game.customization
 
-			// Set CSS custom properties for dynamic theming
+			// Convert hex colors to HSL and update CSS variables
 			const root = document.documentElement
-			if (primaryColor) root.style.setProperty('--primary', primaryColor)
-			if (secondaryColor) root.style.setProperty('--secondary', secondaryColor)
-			if (tertiaryColor) root.style.setProperty('--background', tertiaryColor)
+
+			if (primaryColor) {
+				const hsl = hexToHSL(primaryColor)
+				root.style.setProperty('--primary-h', hsl.h.toString())
+				root.style.setProperty('--primary-s', `${hsl.s}%`)
+				root.style.setProperty('--primary-l', `${hsl.l}%`)
+			}
+
+			if (secondaryColor) {
+				const hsl = hexToHSL(secondaryColor)
+				root.style.setProperty('--secondary-h', hsl.h.toString())
+				root.style.setProperty('--secondary-s', `${hsl.s}%`)
+				root.style.setProperty('--secondary-l', `${hsl.l}%`)
+			}
+
+			if (tertiaryColor) {
+				const hsl = hexToHSL(tertiaryColor)
+				root.style.setProperty('--background-h', hsl.h.toString())
+				root.style.setProperty('--background-s', `${hsl.s}%`)
+				root.style.setProperty('--background-l', `${hsl.l}%`)
+			}
 		}
 
 		// Cleanup function to reset styles
 		return () => {
 			const root = document.documentElement
-			root.style.removeProperty('--primary')
-			root.style.removeProperty('--secondary')
-			root.style.removeProperty('--background')
+			root.style.removeProperty('--primary-h')
+			root.style.removeProperty('--primary-s')
+			root.style.removeProperty('--primary-l')
+			root.style.removeProperty('--secondary-h')
+			root.style.removeProperty('--secondary-s')
+			root.style.removeProperty('--secondary-l')
+			root.style.removeProperty('--background-h')
+			root.style.removeProperty('--background-s')
+			root.style.removeProperty('--background-l')
 		}
 	}, [game?.customization])
+
+	// Helper function to convert hex to HSL
+	function hexToHSL(hex: string) {
+		// Remove the hash if it exists
+		hex = hex.replace(/^#/, '')
+
+		// Parse the hex values
+		let r, g, b
+		if (hex.length === 3) {
+			r = parseInt(hex[0] + hex[0], 16)
+			g = parseInt(hex[1] + hex[1], 16)
+			b = parseInt(hex[2] + hex[2], 16)
+		} else if (hex.length === 6) {
+			r = parseInt(hex.slice(0, 2), 16)
+			g = parseInt(hex.slice(2, 4), 16)
+			b = parseInt(hex.slice(4, 6), 16)
+		} else {
+			throw new Error('Invalid hex color')
+		}
+
+		// Convert to 0-1 range
+		r /= 255
+		g /= 255
+		b /= 255
+
+		const max = Math.max(r, g, b)
+		const min = Math.min(r, g, b)
+		let h = 0,
+			s = 0,
+			l = (max + min) / 2
+
+		if (max !== min) {
+			const d = max - min
+			s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+
+			switch (max) {
+				case r:
+					h = (g - b) / d + (g < b ? 6 : 0)
+					break
+				case g:
+					h = (b - r) / d + 2
+					break
+				case b:
+					h = (r - g) / d + 4
+					break
+			}
+
+			h /= 6
+		}
+
+		return {
+			h: Math.round(h * 360),
+			s: Math.round(s * 100),
+			l: Math.round(l * 100),
+		}
+	}
 
 	// Track game start when game data is loaded
 	useEffect(() => {
@@ -348,24 +428,42 @@ export default function GamePage() {
 								rel='noopener noreferrer'
 								className='flex items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
 							>
-								<img
-									src='/assets/logo_.svg'
-									alt='QuizBooth.games logo'
-									className='h-8 w-auto'
-								/>
-								<span className='hidden lg:block hover:scale-[1.02] transition-all font-medium'>
-									QuizBooth
-								</span>
+								{game.customization?.customLogoUrl ? (
+									<img
+										src={game.customization.customLogoUrl}
+										alt='Custom game logo'
+										className='h-8 w-auto'
+									/>
+								) : (
+									<>
+										<img
+											src='/assets/logo_.svg'
+											alt='QuizBooth.games logo'
+											className='h-8 w-auto'
+										/>
+										<span className='hidden lg:block hover:scale-[1.02] transition-all font-medium'>
+											QuizBooth
+										</span>
+									</>
+								)}
 							</a>
 						</li>
 
 						<li className='w-2/4 flex justify-center'>
 							<a href='/' target='_blank' rel='noopener noreferrer'>
-								<img
-									src='/assets/naknick-logo.png'
-									alt='QuizBooth.games logo'
-									className='max-h-16 w-auto'
-								/>
+								{game.customization?.customLogoUrl ? (
+									<img
+										src={game.customization.customLogoUrl}
+										alt='Custom game logo'
+										className='max-h-16 w-auto'
+									/>
+								) : (
+									<img
+										src='/assets/naknick-logo.png'
+										alt='QuizBooth.games logo'
+										className='max-h-16 w-auto'
+									/>
+								)}
 							</a>
 						</li>
 

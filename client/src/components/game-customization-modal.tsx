@@ -99,6 +99,7 @@ export function GameCustomizationModal({
 		mutationFn: async (customization: GameCustomization) => {
 			const result = await updateGame({
 				gameId: game.id,
+				updates: {}, // Empty updates object since we're only updating customization
 				customization,
 			})
 			return result.data
