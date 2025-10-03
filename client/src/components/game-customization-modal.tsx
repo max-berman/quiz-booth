@@ -40,6 +40,7 @@ interface CustomizationForm {
 	primaryColor: string
 	secondaryColor: string
 	tertiaryColor: string
+	quaternaryColor: string
 	customLogoUrl: string
 }
 
@@ -47,6 +48,7 @@ const DEFAULT_COLORS = {
 	primaryColor: '#3b82f6', // Blue
 	secondaryColor: '#8b5cf6', // Purple
 	tertiaryColor: '#f1f5f9', // Light gray
+	quaternaryColor: '#fef3c7', // Light yellow for cards
 }
 
 const COLOR_PRESETS = [
@@ -94,6 +96,8 @@ export function GameCustomizationModal({
 			game.customization?.secondaryColor || DEFAULT_COLORS.secondaryColor,
 		tertiaryColor:
 			game.customization?.tertiaryColor || DEFAULT_COLORS.tertiaryColor,
+		quaternaryColor:
+			game.customization?.quaternaryColor || DEFAULT_COLORS.quaternaryColor,
 		customLogoUrl: game.customization?.customLogoUrl || '',
 	})
 
@@ -207,6 +211,7 @@ export function GameCustomizationModal({
 			primaryColor: formData.primaryColor,
 			secondaryColor: formData.secondaryColor,
 			tertiaryColor: formData.tertiaryColor,
+			quaternaryColor: formData.quaternaryColor,
 			customLogoUrl: formData.customLogoUrl,
 			isCustomized: true,
 		}
@@ -219,6 +224,7 @@ export function GameCustomizationModal({
 			primaryColor: DEFAULT_COLORS.primaryColor,
 			secondaryColor: DEFAULT_COLORS.secondaryColor,
 			tertiaryColor: DEFAULT_COLORS.tertiaryColor,
+			quaternaryColor: DEFAULT_COLORS.quaternaryColor,
 			customLogoUrl: '',
 		})
 	}
@@ -385,6 +391,34 @@ export function GameCustomizationModal({
 													handleColorChange('tertiaryColor', e.target.value)
 												}
 												placeholder='#f1f5f9'
+												className='flex-1'
+											/>
+										</div>
+									</div>
+
+									<div>
+										<Label
+											htmlFor='quaternaryColor'
+											className='text-base font-medium'
+										>
+											Card Color
+										</Label>
+										<div className='flex gap-3 mt-2'>
+											<Input
+												id='quaternaryColor'
+												type='color'
+												value={formData.quaternaryColor}
+												onChange={(e) =>
+													handleColorChange('quaternaryColor', e.target.value)
+												}
+												className='w-20 h-10 p-1'
+											/>
+											<Input
+												value={formData.quaternaryColor}
+												onChange={(e) =>
+													handleColorChange('quaternaryColor', e.target.value)
+												}
+												placeholder='#fef3c7'
 												className='flex-1'
 											/>
 										</div>

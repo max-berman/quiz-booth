@@ -89,7 +89,8 @@ export default function GamePage() {
 	// Apply customization styles
 	useEffect(() => {
 		if (game?.customization) {
-			const { primaryColor, secondaryColor, tertiaryColor } = game.customization
+			const { primaryColor, secondaryColor, tertiaryColor, quaternaryColor } =
+				game.customization
 
 			// Convert hex colors to HSL and update CSS variables
 			const root = document.documentElement
@@ -114,6 +115,13 @@ export default function GamePage() {
 				root.style.setProperty('--background-s', `${hsl.s}%`)
 				root.style.setProperty('--background-l', `${hsl.l}%`)
 			}
+
+			if (quaternaryColor) {
+				const hsl = hexToHSL(quaternaryColor)
+				root.style.setProperty('--card-h', hsl.h.toString())
+				root.style.setProperty('--card-s', `${hsl.s}%`)
+				root.style.setProperty('--card-l', `${hsl.l}%`)
+			}
 		}
 
 		// Cleanup function to reset styles
@@ -128,6 +136,9 @@ export default function GamePage() {
 			root.style.removeProperty('--background-h')
 			root.style.removeProperty('--background-s')
 			root.style.removeProperty('--background-l')
+			root.style.removeProperty('--card-h')
+			root.style.removeProperty('--card-s')
+			root.style.removeProperty('--card-l')
 		}
 	}, [game?.customization])
 
@@ -502,7 +513,7 @@ export default function GamePage() {
 							Question <strong>{currentQuestionIndex + 1}</strong> of{' '}
 							{questions.length}
 						</div>
-						<Progress value={progressPercentage} className='h-4  bg-card' />
+						<Progress value={progressPercentage} className='h-4 bg-card' />
 					</div>
 					<div className='text-center p-2 h-full'>
 						<div className='text-primary capitalize'>
@@ -512,7 +523,7 @@ export default function GamePage() {
 				</div>
 
 				{/* Question Card */}
-				<Card className='game-card !my-8 animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'>
+				<Card className='game-card !my-8 bg-card animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'>
 					<CardContent className='p-0 pb-4 md:p-6'>
 						{/* Question Text */}
 						<div className=''>

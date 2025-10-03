@@ -10,6 +10,7 @@ export interface GameCustomization {
   primaryColor: string;    // Main brand color
   secondaryColor: string;  // Accent color  
   tertiaryColor: string;   // Background/neutral color
+  quaternaryColor: string; // Card/component color
   customLogoUrl: string;   // Uploaded logo URL
   isCustomized: boolean;   // Track if customization is applied
 }
