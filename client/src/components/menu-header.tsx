@@ -30,10 +30,11 @@ export function CreatorHeader() {
 	const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
 	const isHomePage = location === '/'
 	const isGamePage = location.startsWith('/game/')
+	const isLeaderboardPage = location.startsWith('/leaderboard/')
 
-	// Hide header on game pages, show for authenticated users or non-home pages
+	// Hide header on game pages and leaderboard pages, show for authenticated users or non-home pages
 	//const shouldShowHeader = !isGamePage && (isAuthenticated || !isHomePage)
-	const shouldShowHeader = !isGamePage
+	const shouldShowHeader = !isGamePage && !isLeaderboardPage
 	if (!shouldShowHeader) return null
 
 	const handleSignOut = async () => {

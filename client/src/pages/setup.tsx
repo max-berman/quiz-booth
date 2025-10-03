@@ -537,7 +537,7 @@ export default function Setup() {
 											</Label>
 											<Textarea
 												id='productDescription'
-												placeholder='Describe your main products or services to get more targeted questions...'
+												placeholder='Describe your main products or services to get more targeted questions ...'
 												value={formData.productDescription}
 												onChange={(e) =>
 													setFormData((prev) => ({
@@ -553,6 +553,8 @@ export default function Setup() {
 												rows={3}
 											/>
 										</div>
+
+										{/* TODO: Provide the key messages that represent your brand. */}
 									</div>
 								</section>
 

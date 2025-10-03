@@ -5,8 +5,9 @@ import {
 	CardHeader,
 	CardTitle,
 	Badge,
+	Button,
 } from '@/lib/ui-imports-basic'
-import { Building, Calendar, Gift, Play, Target } from 'lucide-react'
+import { Building, Calendar, Gift, Play, Target, Trophy } from 'lucide-react'
 import type { Game } from '@shared/firebase-types'
 import { isWebsite, formatWebsite } from '@/lib/website-utils'
 
@@ -103,13 +104,26 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 					)}
 				</div>
 
-				{/* Play Button */}
-				<div className='pt-2 self-center'>
-					<Link href={`/game/${game.id}`}>
-						<button className=' bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors'>
+				{/* Action Buttons */}
+				<div className='pt-2 self-center flex gap-2'>
+					{/* <Link href={`/game/${game.id}`}>
+						<button className='bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors'>
 							<Play className='h-4 w-4' />
 							Play Game
 						</button>
+					</Link> */}
+					<Link href={`/game/${game.id}`}>
+						<Button className='px-2 py-2'>
+							<Play className='h-4 w-4' />
+							Play Game
+						</Button>
+					</Link>
+
+					<Link href={`/leaderboard/${game.id}`}>
+						<Button variant='secondary' className='px-2 py-2'>
+							<Trophy className='h-4 w-4' />
+							Leaderboard
+						</Button>
 					</Link>
 				</div>
 			</CardContent>

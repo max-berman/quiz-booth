@@ -1,4 +1,4 @@
-import { useParams } from 'wouter'
+import { useParams, useLocation } from 'wouter'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,6 +12,7 @@ import { formatDate } from '@/lib/date-utils'
 
 export default function Leaderboard() {
 	const { id } = useParams()
+	const [, setLocation] = useLocation()
 
 	// If ID is provided, show game-specific leaderboard, otherwise show global
 	const isGameSpecific = Boolean(id)
@@ -60,40 +61,91 @@ export default function Leaderboard() {
 
 	if (isLoading) {
 		return (
-			<div className='flex-1 flex items-center justify-center'>
+			<div className='flex-1 bg-background flex items-center justify-center'>
 				<div className='text-center'>
+					<p className='flex items-center justify-center my-4'>
+						<a
+							href='https://www.naknick.com'
+							target='_blank'
+							rel='noopener noreferrer'
+						>
+							<img
+								src='/assets/logo.png'
+								alt='NaknNick games logo'
+								className='h-32 w-auto '
+							/>
+						</a>
+					</p>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
-					<p>Loading leaderboard...</p>
+					<p className='animate-bounce'>Loading leaderboard...</p>
 				</div>
 			</div>
 		)
 	}
 
 	return (
-		<div className='flex-1 py-8'>
-			<div className='max-w-4xl mx-auto px-2 sm:px-4 lg:px-8'>
-				<Card className='shadow-xl overflow-hidden'>
+		<div className='flex-1 bg-background'>
+			{/* Top Navigation Bar - Same as game page */}
+			<div className='sticky top-0 z-50 bg-background/80 backdrop-blur-sm shadow-md'>
+				<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8'>
+					<ul className='flex items-center justify-between h-20'>
+						<li className='w-1/4 flex justify-start'>
+							<a
+								href='/'
+								target='_blank'
+								rel='noopener noreferrer'
+								className='flex items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
+							>
+								<img
+									src='/assets/logo_.svg'
+									alt='QuizBooth.games logo'
+									className='h-8 w-auto'
+								/>
+								<span className='hidden lg:block hover:scale-[1.02] transition-all font-medium'>
+									QuizBooth
+								</span>
+							</a>
+						</li>
+
+						<li className='w-2/4 flex justify-center'>
+							<a href='/' target='_blank' rel='noopener noreferrer'>
+								<img
+									src='/assets/naknick-logo.png'
+									alt='QuizBooth.games logo'
+									className='max-h-16 w-auto'
+								/>
+							</a>
+						</li>
+
+						<li className='w-1/4 flex justify-end'>
+							{/* Empty space to maintain layout balance */}
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div className='max-w-4xl mx-auto px-2 sm:px-4 lg:px-8 py-4'>
+				<Card className='shadow-xl overflow-hidden my-8'>
 					<div className='bg-primary p-4 text-primary-foreground'>
-						<div className='flex items-center justify-between'>
-							<div>
-								<h3 className='text-2xl font-bold mb-2 flex items-center'>
-									<Trophy className='mr-2 h-6 w-6' />
+						<div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
+							<div className='text-center sm:text-left'>
+								<h3 className='text-xl sm:text-2xl font-bold mb-2 flex items-center justify-center sm:justify-start'>
+									<Trophy className='mr-2 h-5 w-5 sm:h-6 sm:w-6' />
 									{isGameSpecific
 										? `${game?.companyName} Leaderboard`
 										: 'Global Leaderboard'}
 								</h3>
-								<p className='opacity-90'>
-									{isGameSpecific
-										? 'Top performers in this trivia challenge'
-										: 'Top performers across all trivia games'}
-								</p>
+								{isGameSpecific && (
+									<p className='text-sm opacity-90 hidden sm:block'>
+										Top performers in this trivia challenge
+									</p>
+								)}
 							</div>
-							<div className='text-right'>
-								<div className='text-3xl font-bold'>
+							<div className='text-center sm:text-right'>
+								<div className='text-2xl sm:text-3xl font-bold'>
 									{leaderboard?.length || 0}
 								</div>
-								<div className='text-sm opacity-90 flex items-center'>
-									<Users className='mr-1 h-4 w-4' />
+								<div className='text-xs sm:text-sm opacity-90 flex items-center justify-center sm:justify-end'>
+									<Users className='mr-1 h-3 w-3 sm:h-4 sm:w-4' />
 									Total Players
 								</div>
 							</div>
@@ -137,22 +189,22 @@ export default function Leaderboard() {
 								{leaderboard.map((player, index) => (
 									<div
 										key={player.id}
-										className={`flex items-center justify-between p-4 transition-colors duration-150 ${
+										className={`flex items-center justify-between p-3 sm:p-4 transition-colors duration-150 ${
 											index % 2 === 0 ? 'bg-accent' : ''
 										}`}
 									>
-										<div className='flex items-center space-x-4'>
+										<div className='flex items-center space-x-3 sm:space-x-4'>
 											<div className='flex-shrink-0'>
 												<div
-													className={`w-10 h-10 ${getRankIcon(
+													className={`w-8 h-8 sm:w-10 sm:h-10 ${getRankIcon(
 														index + 1
-													)} flex items-center justify-center font-bold`}
+													)} flex items-center justify-center font-bold text-sm sm:text-base`}
 												>
 													{index + 1}
 												</div>
 											</div>
-											<div>
-												<div className='font-semibold text-foreground'>
+											<div className='min-w-0 flex-1'>
+												<div className='font-semibold text-foreground text-sm sm:text-base truncate'>
 													{player.name}
 												</div>
 												<div className='text-xs text-muted-foreground'>
@@ -161,11 +213,11 @@ export default function Leaderboard() {
 												</div>
 											</div>
 										</div>
-										<div className='text-right'>
-											<div className='text-xl font-bold text-primary'>
+										<div className='text-right flex-shrink-0 ml-2'>
+											<div className='text-lg sm:text-xl font-bold text-primary'>
 												{player.score}
 											</div>
-											<div className='text-sm text-muted-foreground'>
+											<div className='text-xs text-muted-foreground'>
 												{player.correctAnswers}/{player.totalQuestions} correct
 											</div>
 										</div>
@@ -195,17 +247,30 @@ export default function Leaderboard() {
 									Back to Home
 								</Button>
 							</Link>
-							{isGameSpecific && (
+							{/* {isGameSpecific && (
 								<Link href='/leaderboard'>
 									<Button variant='outline' className='px-6 py-3'>
 										<Trophy className='mr-2 h-4 w-4' />
 										Global Leaderboard
 									</Button>
 								</Link>
-							)}
+							)} */}
 						</div>
 					</div>
 				</Card>
+				<div className='flex items-center justify-center mb-2'>
+					<a
+						href='https://www.naknick.com'
+						target='_blank'
+						rel='noopener noreferrer'
+					>
+						<img
+							src='/assets/logo.png'
+							alt='NaknNick games logo'
+							className='h-32 w-auto'
+						/>
+					</a>
+				</div>
 			</div>
 		</div>
 	)

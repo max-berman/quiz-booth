@@ -57,10 +57,11 @@ function Router() {
 function App() {
 	const [location] = useLocation()
 
-	// Don't show footer on actual game play pages, but show on game creation/management pages
+	// Don't show footer on actual game play pages and leaderboard pages, but show on game creation/management pages
 	const isGamePlayPage =
 		location.startsWith('/game/') && !location.startsWith('/game-created')
-	const showFooter = !isGamePlayPage
+	const isLeaderboardPage = location.startsWith('/leaderboard/')
+	const showFooter = !isGamePlayPage && !isLeaderboardPage
 
 	return (
 		<HelmetProvider>
