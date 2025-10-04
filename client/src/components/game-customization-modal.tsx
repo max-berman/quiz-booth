@@ -51,21 +51,30 @@ const DEFAULT_COLORS = {
 	quaternaryColor: '#fef3c7', // Light yellow for cards
 }
 
+const COLOR_FIELDS = [
+	{
+		id: 'primaryColor',
+		label: 'Primary Color',
+		placeholder: '#3b82f6',
+	},
+	{
+		id: 'secondaryColor',
+		label: 'Secondary Color',
+		placeholder: '#8b5cf6',
+	},
+	{
+		id: 'tertiaryColor',
+		label: 'Background Color',
+		placeholder: '#f1f5f9',
+	},
+	{
+		id: 'quaternaryColor',
+		label: 'Card Color',
+		placeholder: '#fef3c7',
+	},
+]
+
 const COLOR_PRESETS = [
-	{
-		name: 'Professional Blue',
-		primary: '#2563eb',
-		secondary: '#7c3aed',
-		tertiary: '#f8fafc',
-		quaternary: '#e0f2fe',
-	},
-	{
-		name: 'Modern Green',
-		primary: '#059669',
-		secondary: '#0d9488',
-		tertiary: '#f0fdf4',
-		quaternary: '#dcfce7',
-	},
 	{
 		name: 'Warm Orange',
 		primary: '#ea580c',
@@ -342,7 +351,12 @@ export function GameCustomizationModal({
 															className='w-6 h-6 rounded border'
 															style={{ backgroundColor: preset.tertiary }}
 														/>
+														<div
+															className='w-6 h-6 rounded border'
+															style={{ backgroundColor: preset.quaternary }}
+														/>
 													</div>
+
 													<span className='text-sm font-medium'>
 														{preset.name}
 													</span>
@@ -353,117 +367,49 @@ export function GameCustomizationModal({
 								</div>
 
 								<div className='space-y-4'>
-									<div>
-										<Label
-											htmlFor='primaryColor'
-											className='text-base font-medium'
-										>
-											Primary Color
-										</Label>
-										<div className='flex gap-3 mt-2'>
-											<Input
-												id='primaryColor'
-												type='color'
-												value={formData.primaryColor}
-												onChange={(e) =>
-													handleColorChange('primaryColor', e.target.value)
-												}
-												className='w-20 h-10 p-1'
-											/>
-											<Input
-												value={formData.primaryColor}
-												onChange={(e) =>
-													handleColorChange('primaryColor', e.target.value)
-												}
-												placeholder='#3b82f6'
-												className='flex-1'
-											/>
+									{COLOR_FIELDS.map((field) => (
+										<div key={field.id}>
+											<Label
+												htmlFor={field.id}
+												className='text-base font-medium'
+											>
+												{field.label}
+											</Label>
+											<div className='flex gap-3 mt-2'>
+												<Input
+													id={field.id}
+													type='color'
+													value={
+														formData[
+															field.id as keyof CustomizationForm
+														] as string
+													}
+													onChange={(e) =>
+														handleColorChange(
+															field.id as keyof CustomizationForm,
+															e.target.value
+														)
+													}
+													className='w-20 h-10 p-1'
+												/>
+												<Input
+													value={
+														formData[
+															field.id as keyof CustomizationForm
+														] as string
+													}
+													onChange={(e) =>
+														handleColorChange(
+															field.id as keyof CustomizationForm,
+															e.target.value
+														)
+													}
+													placeholder={field.placeholder}
+													className='w-auto'
+												/>
+											</div>
 										</div>
-									</div>
-
-									<div>
-										<Label
-											htmlFor='secondaryColor'
-											className='text-base font-medium'
-										>
-											Secondary Color
-										</Label>
-										<div className='flex gap-3 mt-2'>
-											<Input
-												id='secondaryColor'
-												type='color'
-												value={formData.secondaryColor}
-												onChange={(e) =>
-													handleColorChange('secondaryColor', e.target.value)
-												}
-												className='w-20 h-10 p-1'
-											/>
-											<Input
-												value={formData.secondaryColor}
-												onChange={(e) =>
-													handleColorChange('secondaryColor', e.target.value)
-												}
-												placeholder='#8b5cf6'
-												className='flex-1'
-											/>
-										</div>
-									</div>
-
-									<div>
-										<Label
-											htmlFor='tertiaryColor'
-											className='text-base font-medium'
-										>
-											Background Color
-										</Label>
-										<div className='flex gap-3 mt-2'>
-											<Input
-												id='tertiaryColor'
-												type='color'
-												value={formData.tertiaryColor}
-												onChange={(e) =>
-													handleColorChange('tertiaryColor', e.target.value)
-												}
-												className='w-20 h-10 p-1'
-											/>
-											<Input
-												value={formData.tertiaryColor}
-												onChange={(e) =>
-													handleColorChange('tertiaryColor', e.target.value)
-												}
-												placeholder='#f1f5f9'
-												className='flex-1'
-											/>
-										</div>
-									</div>
-
-									<div>
-										<Label
-											htmlFor='quaternaryColor'
-											className='text-base font-medium'
-										>
-											Card Color
-										</Label>
-										<div className='flex gap-3 mt-2'>
-											<Input
-												id='quaternaryColor'
-												type='color'
-												value={formData.quaternaryColor}
-												onChange={(e) =>
-													handleColorChange('quaternaryColor', e.target.value)
-												}
-												className='w-20 h-10 p-1'
-											/>
-											<Input
-												value={formData.quaternaryColor}
-												onChange={(e) =>
-													handleColorChange('quaternaryColor', e.target.value)
-												}
-												placeholder='#fef3c7'
-												className='flex-1'
-											/>
-										</div>
-									</div>
+									))}
 								</div>
 							</TabsContent>
 
