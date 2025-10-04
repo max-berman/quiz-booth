@@ -25,7 +25,6 @@ import {
 } from 'lucide-react'
 import { QRCodeModal } from '@/components/qr-code-modal'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
-import { GameCustomizationModal } from '@/components/game-customization-modal'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
 	AlertDialog,
@@ -59,7 +58,6 @@ export function GameCardEnhanced({
 	const [, setLocation] = useLocation()
 	const [isPublic, setIsPublic] = useState(game.isPublic === true)
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-	const [isCustomizationOpen, setIsCustomizationOpen] = useState(false)
 	const { toast } = useToast()
 	const queryClient = useQueryClient()
 
@@ -421,7 +419,7 @@ export function GameCardEnhanced({
 								variant='outline'
 								className='w-full'
 								size='sm'
-								onClick={() => setIsCustomizationOpen(true)}
+								onClick={() => setLocation(`/game-customization/${game.id}`)}
 								data-testid={`button-customize-game-${game.id}`}
 								aria-label={`Customize appearance for ${game.companyName}`}
 							>
@@ -500,14 +498,6 @@ export function GameCardEnhanced({
 					</div>
 				</CardContent>
 			</Card>
-
-			{/* Customization Modal */}
-			<GameCustomizationModal
-				open={isCustomizationOpen}
-				onOpenChange={setIsCustomizationOpen}
-				game={game}
-				canCustomize={true} // For now, allow all users to customize during beta
-			/>
 		</>
 	)
 }

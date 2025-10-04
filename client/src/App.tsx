@@ -10,6 +10,7 @@ import { Footer } from '@/components/footer'
 import { AuthProvider } from '@/contexts/auth-context'
 import { LoadingSpinner } from '@/components/loading-spinner'
 import { PWARegistration } from '@/components/pwa-registration'
+import { shouldShowHeader, shouldShowFooter } from '@/config/page-visibility'
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import('@/pages/home'))
@@ -27,6 +28,7 @@ const QuizGames = lazy(() => import('@/pages/quiz-games'))
 const About = lazy(() => import('@/pages/about'))
 const FAQ = lazy(() => import('@/pages/faq'))
 const Pricing = lazy(() => import('@/pages/pricing'))
+const GameCustomization = lazy(() => import('@/pages/game-customization'))
 const NotFound = lazy(() => import('@/pages/not-found'))
 
 function Router() {
@@ -46,6 +48,7 @@ function Router() {
 				<Route path='/about' component={About} />
 				<Route path='/faq' component={FAQ} />
 				<Route path='/pricing' component={Pricing} />
+				<Route path='/game-customization/:id' component={GameCustomization} />
 				<Route path='/auth/sign-in' component={SignIn} />
 				<Route path='/auth/complete' component={CompleteSignIn} />
 				<Route component={NotFound} />
@@ -57,11 +60,9 @@ function Router() {
 function App() {
 	const [location] = useLocation()
 
-	// Don't show footer on actual game play pages and leaderboard pages, but show on game creation/management pages
-	const isGamePlayPage =
-		location.startsWith('/game/') && !location.startsWith('/game-created')
-	const isLeaderboardPage = location.startsWith('/leaderboard/')
-	const showFooter = !isGamePlayPage && !isLeaderboardPage
+	// Use configuration to determine which components to show
+	const showHeader = shouldShowHeader(location)
+	const showFooter = shouldShowFooter(location)
 
 	return (
 		<HelmetProvider>
@@ -69,8 +70,8 @@ function App() {
 				<TooltipProvider>
 					<AuthProvider>
 						<div className='h-screen bg-background flex flex-col'>
-							{/* CreatorHeader is intentionally hidden on game pages to maintain immersive gameplay experience */}
-							<CreatorHeader />
+							{/* CreatorHeader is intentionally hidden on game pages and customization pages to maintain immersive experience */}
+							{showHeader && <CreatorHeader />}
 							<Router />
 							{showFooter && <Footer />}
 						</div>

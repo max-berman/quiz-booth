@@ -25,6 +25,7 @@ import {
 	Sparkles,
 	Crown,
 } from 'lucide-react'
+import { GamePreview } from './game-preview'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 import type { Game, GameCustomization } from '@shared/firebase-types'
@@ -95,13 +96,6 @@ const COLOR_PRESETS = [
 		secondary: '#64748b',
 		tertiary: '#f8fafc',
 		quaternary: '#f1f5f9',
-	},
-	{
-		name: 'Vibrant Teal',
-		primary: '#0d9488',
-		secondary: '#14b8a6',
-		tertiary: '#f0fdfa',
-		quaternary: '#ccfbf1',
 	},
 ]
 
@@ -287,7 +281,7 @@ export function GameCustomizationModal({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className='max-w-4xl max-h-[90vh] overflow-hidden'>
+			<DialogContent className='max-w-4xl max-h-[90vh]  overflow-x-hidden'>
 				<DialogHeader>
 					<DialogTitle className='flex items-center gap-2'>
 						<Palette className='h-5 w-5' />
@@ -303,113 +297,20 @@ export function GameCustomizationModal({
 
 				<div className='grid grid-cols-1 lg:grid-cols-3 gap-6 h-full'>
 					{/* Customization Controls */}
-					<div className='lg:col-span-2 space-y-6 overflow-y-auto'>
+					<div className='lg:col-span-2 space-y-6 '>
 						<Tabs value={activeTab} onValueChange={setActiveTab}>
-							<TabsList className='grid w-full grid-cols-3'>
-								<TabsTrigger value='colors' className='flex items-center gap-2'>
-									<Palette className='h-4 w-4' />
-									Colors
-								</TabsTrigger>
-								<TabsTrigger
-									value='branding'
-									className='flex items-center gap-2'
-								>
-									<Image className='h-4 w-4' />
-									Branding
-								</TabsTrigger>
-								<TabsTrigger
-									value='preview'
-									className='flex items-center gap-2'
-								>
-									<Eye className='h-4 w-4' />
-									Preview
-								</TabsTrigger>
-							</TabsList>
-
 							{/* Colors Tab */}
-							<TabsContent value='colors' className='space-y-6'>
+							<TabsContent value='colors' className='space-y-6 '>
 								<div>
-									<h3 className='text-lg font-semibold mb-4'>Color Presets</h3>
-									<div className='grid grid-cols-2 gap-3 mb-6'>
-										{COLOR_PRESETS.map((preset) => (
-											<button
-												key={preset.name}
-												onClick={() => handlePresetSelect(preset)}
-												className='p-3 border rounded-lg hover:border-primary transition-colors text-left'
-											>
-												<div className='flex items-center gap-3 mb-2'>
-													<div className='flex gap-1'>
-														<div
-															className='w-6 h-6 rounded border'
-															style={{ backgroundColor: preset.primary }}
-														/>
-														<div
-															className='w-6 h-6 rounded border'
-															style={{ backgroundColor: preset.secondary }}
-														/>
-														<div
-															className='w-6 h-6 rounded border'
-															style={{ backgroundColor: preset.tertiary }}
-														/>
-														<div
-															className='w-6 h-6 rounded border'
-															style={{ backgroundColor: preset.quaternary }}
-														/>
-													</div>
-
-													<span className='text-sm font-medium'>
-														{preset.name}
-													</span>
-												</div>
-											</button>
-										))}
+									<div className=''>
+										<GamePreview
+											primaryColor={formData.primaryColor}
+											secondaryColor={formData.secondaryColor}
+											tertiaryColor={formData.tertiaryColor}
+											quaternaryColor={formData.quaternaryColor}
+											customLogoUrl={formData.customLogoUrl}
+										/>
 									</div>
-								</div>
-
-								<div className='space-y-4'>
-									{COLOR_FIELDS.map((field) => (
-										<div key={field.id}>
-											<Label
-												htmlFor={field.id}
-												className='text-base font-medium'
-											>
-												{field.label}
-											</Label>
-											<div className='flex gap-3 mt-2'>
-												<Input
-													id={field.id}
-													type='color'
-													value={
-														formData[
-															field.id as keyof CustomizationForm
-														] as string
-													}
-													onChange={(e) =>
-														handleColorChange(
-															field.id as keyof CustomizationForm,
-															e.target.value
-														)
-													}
-													className='w-20 h-10 p-1'
-												/>
-												<Input
-													value={
-														formData[
-															field.id as keyof CustomizationForm
-														] as string
-													}
-													onChange={(e) =>
-														handleColorChange(
-															field.id as keyof CustomizationForm,
-															e.target.value
-														)
-													}
-													placeholder={field.placeholder}
-													className='w-auto'
-												/>
-											</div>
-										</div>
-									))}
 								</div>
 							</TabsContent>
 
@@ -475,124 +376,95 @@ export function GameCustomizationModal({
 							<TabsContent value='preview' className='space-y-6'>
 								<div>
 									<h3 className='text-lg font-semibold mb-4'>Live Preview</h3>
-									<Card style={previewStyles} className='customization-preview'>
-										<CardHeader className='bg-[var(--primary-color)] text-white'>
-											<CardTitle className='flex items-center justify-between'>
-												<span>Game Preview</span>
-												{formData.customLogoUrl && (
-													<img
-														src={formData.customLogoUrl}
-														alt='Custom logo'
-														className='h-8'
-													/>
-												)}
-											</CardTitle>
-										</CardHeader>
-										<CardContent className='p-4 space-y-4 bg-[var(--tertiary-color)]'>
-											<div className='p-4 rounded-lg bg-white border border-[var(--secondary-color)]/20'>
-												<h4 className='font-semibold text-[var(--primary-color)] mb-2'>
-													Sample Question
-												</h4>
-												<p className='text-sm'>
-													What is the capital of France?
-												</p>
-											</div>
-											<div className='grid grid-cols-2 gap-2'>
-												{['A', 'B', 'C', 'D'].map((letter) => (
-													<button
-														key={letter}
-														className='p-3 rounded border border-[var(--primary-color)] text-[var(--primary-color)] hover:bg-[var(--primary-color)] hover:text-white transition-colors'
-													>
-														Option {letter}
-													</button>
-												))}
-											</div>
-											<Button className='w-full bg-[var(--primary-color)] hover:bg-[var(--primary-color)]/90'>
-												Continue
-											</Button>
-										</CardContent>
-									</Card>
+									<div className='border rounded-lg overflow-hidden'>
+										<GamePreview
+											primaryColor={formData.primaryColor}
+											secondaryColor={formData.secondaryColor}
+											tertiaryColor={formData.tertiaryColor}
+											quaternaryColor={formData.quaternaryColor}
+											customLogoUrl={formData.customLogoUrl}
+										/>
+									</div>
 								</div>
 							</TabsContent>
 						</Tabs>
 					</div>
 
-					{/* Live Preview Sidebar */}
+					{/* Sidebar */}
 					<div className='lg:col-span-1'>
-						<Card className='sticky top-0'>
-							<CardHeader>
-								<CardTitle className='flex items-center gap-2'>
-									<Sparkles className='h-4 w-4' />
-									Preview
-								</CardTitle>
-							</CardHeader>
-							<CardContent className='space-y-4'>
-								<div className='space-y-2'>
-									<div className='flex items-center justify-between'>
-										<span className='text-sm font-medium'>Primary</span>
-										<div
-											className='w-6 h-6 rounded border'
-											style={{ backgroundColor: formData.primaryColor }}
-										/>
-									</div>
-									<div className='flex items-center justify-between'>
-										<span className='text-sm font-medium'>Secondary</span>
-										<div
-											className='w-6 h-6 rounded border'
-											style={{ backgroundColor: formData.secondaryColor }}
-										/>
-									</div>
-									<div className='flex items-center justify-between'>
-										<span className='text-sm font-medium'>Background</span>
-										<div
-											className='w-6 h-6 rounded border'
-											style={{ backgroundColor: formData.tertiaryColor }}
-										/>
-									</div>
-								</div>
-
-								{formData.customLogoUrl && (
-									<div className='pt-4 border-t'>
-										<p className='text-sm font-medium mb-2'>Logo Preview</p>
-										<img
-											src={formData.customLogoUrl}
-											alt='Logo preview'
-											className='max-h-16 mx-auto'
-										/>
-									</div>
-								)}
-
-								<div className='pt-4 border-t space-y-3'>
-									<Button
-										onClick={handleSave}
-										disabled={updateGameMutation.isPending || !canCustomize}
-										className='w-full'
+						<div>
+							<h3 className='text-lg font-semibold mb-4'>Color Presets</h3>
+							<div className='grid grid-cols-2 gap-3 mb-6'>
+								{COLOR_PRESETS.map((preset) => (
+									<button
+										key={preset.name}
+										onClick={() => handlePresetSelect(preset)}
+										className='p-3 border rounded-lg hover:border-primary transition-colors text-left'
 									>
-										<Save className='h-4 w-4 mr-2' />
-										{updateGameMutation.isPending
-											? 'Saving...'
-											: 'Apply Customization'}
-									</Button>
+										<div className='flex items-center gap-3 mb-2'>
+											<div className='flex gap-1'>
+												<div
+													className='w-6 h-6 rounded border'
+													style={{ backgroundColor: preset.primary }}
+												/>
+												<div
+													className='w-6 h-6 rounded border'
+													style={{ backgroundColor: preset.secondary }}
+												/>
+												<div
+													className='w-6 h-6 rounded border'
+													style={{ backgroundColor: preset.tertiary }}
+												/>
+												<div
+													className='w-6 h-6 rounded border'
+													style={{ backgroundColor: preset.quaternary }}
+												/>
+											</div>
 
-									<Button
-										variant='outline'
-										onClick={handleReset}
-										className='w-full'
-									>
-										Reset to Defaults
-									</Button>
-
-									{!canCustomize && (
-										<div className='p-3 bg-amber-50 border border-amber-200 rounded-lg'>
-											<p className='text-sm text-amber-800'>
-												<strong>Premium Feature:</strong> Upgrade to customize
-												your game appearance.
-											</p>
+											<span className='text-sm font-medium'>{preset.name}</span>
 										</div>
-									)}
+									</button>
+								))}
+							</div>
+						</div>
+						<div className='space-y-4'>
+							{COLOR_FIELDS.map((field) => (
+								<div key={field.id}>
+									<Label htmlFor={field.id} className='text-base font-medium'>
+										{field.label}
+									</Label>
+									<div className='flex gap-3 mt-2'>
+										<Input
+											id={field.id}
+											type='color'
+											value={
+												formData[field.id as keyof CustomizationForm] as string
+											}
+											onChange={(e) =>
+												handleColorChange(
+													field.id as keyof CustomizationForm,
+													e.target.value
+												)
+											}
+											className='w-20 h-10 p-1'
+										/>
+										<Input
+											value={
+												formData[field.id as keyof CustomizationForm] as string
+											}
+											onChange={(e) =>
+												handleColorChange(
+													field.id as keyof CustomizationForm,
+													e.target.value
+												)
+											}
+											placeholder={field.placeholder}
+											className='w-auto'
+										/>
+									</div>
 								</div>
-							</CardContent>
-						</Card>
+							))}
+						</div>
 					</div>
 				</div>
 
