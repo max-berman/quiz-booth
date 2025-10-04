@@ -176,11 +176,11 @@ export function GameCustomizationModal({
 			return
 		}
 
-		if (file.size > 5 * 1024 * 1024) {
-			// 5MB limit
+		if (file.size > 1 * 1024 * 1024) {
+			// 1MB limit
 			toast({
 				title: 'File Too Large',
-				description: 'Please upload an image smaller than 5MB.',
+				description: 'Please upload an image smaller than 1MB.',
 				variant: 'destructive',
 			})
 			return
@@ -508,7 +508,7 @@ export function GameCustomizationModal({
 															or drag and drop
 														</Label>
 														<p className='text-sm text-muted-foreground mt-1'>
-															PNG, JPG up to 5MB
+															PNG, JPG up to 1MB
 														</p>
 													</div>
 													<Input
