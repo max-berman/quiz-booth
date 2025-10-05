@@ -20,6 +20,8 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 import type { Game, GameCustomization } from '@shared/firebase-types'
 
+const buttonDefaultStyle = `border-[##746c56] bg-[##fcf7e7] shadow-sm hover:bg-[#fcfdfe] hover:border-[##979181] hover:shadow-md ring-offset-[##fcf7e7]`
+
 interface CustomizationForm {
 	primaryColor: string
 	secondaryColor: string
@@ -103,6 +105,7 @@ export default function GameCustomizationPage() {
 		quaternaryColor: DEFAULT_COLORS.quaternaryColor,
 		customLogoUrl: '',
 	})
+	const [isDragOver, setIsDragOver] = useState(false)
 
 	// Fetch game data
 	const {
@@ -145,7 +148,45 @@ export default function GameCustomizationPage() {
 			return result.data
 		},
 		onSuccess: () => {
+			// Always invalidate user games list
 			queryClient.invalidateQueries({ queryKey: ['getGamesByUser'] })
+
+			// Smart invalidation: Only invalidate specific game query if customization changed
+			// This prevents unnecessary Firestore reads when no actual changes occurred
+			const currentCustomization = {
+				primaryColor: formData.primaryColor,
+				secondaryColor: formData.secondaryColor,
+				tertiaryColor: formData.tertiaryColor,
+				quaternaryColor: formData.quaternaryColor,
+				customLogoUrl: formData.customLogoUrl,
+			}
+
+			const initialCustomization = game?.customization || {
+				primaryColor: DEFAULT_COLORS.primaryColor,
+				secondaryColor: DEFAULT_COLORS.secondaryColor,
+				tertiaryColor: DEFAULT_COLORS.tertiaryColor,
+				quaternaryColor: DEFAULT_COLORS.quaternaryColor,
+				customLogoUrl: '',
+			}
+
+			// Check if customization actually changed
+			const hasCustomizationChanged =
+				currentCustomization.primaryColor !==
+					initialCustomization.primaryColor ||
+				currentCustomization.secondaryColor !==
+					initialCustomization.secondaryColor ||
+				currentCustomization.tertiaryColor !==
+					initialCustomization.tertiaryColor ||
+				currentCustomization.quaternaryColor !==
+					initialCustomization.quaternaryColor ||
+				currentCustomization.customLogoUrl !==
+					initialCustomization.customLogoUrl
+
+			if (hasCustomizationChanged) {
+				// Invalidate the specific game query to force refetch with updated customization
+				queryClient.invalidateQueries({ queryKey: [`game-${id}`] })
+			}
+
 			toast({
 				title: 'Customization Saved',
 				description: 'Your game customization has been applied successfully.',
@@ -177,10 +218,7 @@ export default function GameCustomizationPage() {
 		}))
 	}
 
-	const handleLogoUpload = async (
-		event: React.ChangeEvent<HTMLInputElement>
-	) => {
-		const file = event.target.files?.[0]
+	const handleLogoUpload = async (file: File) => {
 		if (!file) return
 
 		// Basic validation
@@ -254,6 +292,39 @@ export default function GameCustomizationPage() {
 		}
 	}
 
+	const handleFileInputChange = (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const file = event.target.files?.[0]
+		if (file) {
+			handleLogoUpload(file)
+		}
+	}
+
+	const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+		event.preventDefault()
+		event.stopPropagation()
+		setIsDragOver(false)
+
+		const files = event.dataTransfer.files
+		if (files.length > 0) {
+			const file = files[0]
+			handleLogoUpload(file)
+		}
+	}
+
+	const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+		event.preventDefault()
+		event.stopPropagation()
+		setIsDragOver(true)
+	}
+
+	const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+		event.preventDefault()
+		event.stopPropagation()
+		setIsDragOver(false)
+	}
+
 	const handleSave = () => {
 		const customization: GameCustomization = {
 			primaryColor: formData.primaryColor,
@@ -273,7 +344,7 @@ export default function GameCustomizationPage() {
 			secondaryColor: DEFAULT_COLORS.secondaryColor,
 			tertiaryColor: DEFAULT_COLORS.tertiaryColor,
 			quaternaryColor: DEFAULT_COLORS.quaternaryColor,
-			customLogoUrl: '',
+			customLogoUrl: game?.customization?.customLogoUrl || '',
 		})
 	}
 
@@ -304,7 +375,7 @@ export default function GameCustomizationPage() {
 							The game you're trying to customize could not be found.
 						</p>
 					</div>
-					<Button onClick={handleBackToDashboard} className='mt-4'>
+					<Button onClick={handleBackToDashboard} variant='outline'>
 						Return to Dashboard
 					</Button>
 				</div>
@@ -313,26 +384,27 @@ export default function GameCustomizationPage() {
 	}
 
 	return (
-		<div className='flex-1 bg-background p-6'>
+		<div className='flex-1 bg-[#fff] py-6'>
 			{/* Header */}
 			<div className='max-w-7xl mx-auto mb-6'>
 				<div className='flex items-center justify-between'>
-					<div className='flex items-center gap-4'>
+					<div className='flex flex-row items-center gap-4 w-full'>
 						<Button
 							variant='outline'
 							size='sm'
 							onClick={handleBackToDashboard}
-							className='flex items-center gap-2'
+							className={buttonDefaultStyle}
 						>
 							<ArrowLeft className='h-4 w-4' />
 							Back to Dashboard
 						</Button>
-						<div>
+						<div className='flex-1'>
 							<h1 className='text-2xl font-bold flex items-center gap-2'>
 								<Palette className='h-6 w-6' />
 								Customize Game Appearance
 							</h1>
 						</div>
+						<div className='ml-auto'>close</div>
 					</div>
 				</div>
 			</div>
@@ -361,7 +433,7 @@ export default function GameCustomizationPage() {
 							<Image className='h-4 w-4' />
 							<h3 className='font-semibold'>Branding</h3>
 						</div>
-						<div className='space-y-4'>
+						<div className='space-y-4 mb-4'>
 							<div>
 								<h4 className='text-sm font-semibold mb-3'>Color Presets</h4>
 								<div className='grid grid-cols-4 gap-2 mb-4'>
@@ -369,7 +441,7 @@ export default function GameCustomizationPage() {
 										<button
 											key={preset.name}
 											onClick={() => handlePresetSelect(preset)}
-											className='p-0.5 border rounded hover:border-[#ccc] transition-colors text-left text-xs'
+											className='p-0.5 border  rounded hover:border-gray-700 transition-colors text-left text-xs'
 										>
 											<div className='flex gap-0.5 justify-around items-center'>
 												<div
@@ -439,11 +511,17 @@ export default function GameCustomizationPage() {
 							</div>
 						</div>
 
-						<div className='flex items-center gap-2 mb-4'></div>
-						<div className='space-y-4'>
+						<div className='space-y-4 border-t pt-4  mb-4'>
 							<div>
 								<h4 className='text-sm font-semibold mb-3'>Logo</h4>
-								<div className='border-2 border-dashed rounded-lg p-4 text-center bg-slate-100'>
+								<div
+									className={`border-2 border-dashed rounded-lg p-4 text-center bg-slate-100 transition-colors duration-200 ${
+										isDragOver ? 'border-[#ef4444]' : 'border-gray-300'
+									}`}
+									onDrop={handleDrop}
+									onDragOver={handleDragOver}
+									onDragLeave={handleDragLeave}
+								>
 									{formData.customLogoUrl ? (
 										<div className='space-y-3'>
 											<img
@@ -460,7 +538,7 @@ export default function GameCustomizationPage() {
 														customLogoUrl: '',
 													}))
 												}
-												className='flex items-center gap-1 w-full'
+												className='flex items-center gap-1 w-full bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
 											>
 												<X className='h-3 w-3' />
 												Remove Logo
@@ -468,7 +546,7 @@ export default function GameCustomizationPage() {
 										</div>
 									) : (
 										<div className='space-y-2'>
-											<Upload className='h-6 w-6 text-muted-foreground mx-auto' />
+											<Upload className='h-6 w-6 text-muted-foreground  mx-auto' />
 											<div>
 												<Label
 													htmlFor='logo-upload'
@@ -487,7 +565,7 @@ export default function GameCustomizationPage() {
 												id='logo-upload'
 												type='file'
 												accept='image/*'
-												onChange={handleLogoUpload}
+												onChange={handleFileInputChange}
 												className='hidden'
 											/>
 										</div>
@@ -496,7 +574,6 @@ export default function GameCustomizationPage() {
 							</div>
 						</div>
 
-						<div className='flex items-center gap-2 mb-4'></div>
 						<div className='space-y-4'>
 							{formData.customLogoUrl && (
 								<div className='pt-4 border-t'>
@@ -510,24 +587,26 @@ export default function GameCustomizationPage() {
 							)}
 
 							<div className='pt-4 border-t space-y-3'>
-								<Button
-									variant='outline'
-									onClick={handleReset}
-									className='w-full bg-[#fff7e6] hover:bg-[#fff7e6] border border-[#56492c]'
-								>
-									Reset to Defaults
-								</Button>
-								<Button
-									variant='outline'
-									onClick={handleBackToDashboard}
-									className='w-full  bg-[#fff7e6] hover:bg-[#fff7e6] border border-[#56492c]'
-								>
-									Cancel
-								</Button>{' '}
+								<div className='flex items-center gap-2'>
+									<Button
+										variant='outline'
+										onClick={handleReset}
+										className={`w-full ${buttonDefaultStyle}`}
+									>
+										Reset to Defaults
+									</Button>
+									<Button
+										variant='outline'
+										onClick={handleBackToDashboard}
+										className={`w-full ${buttonDefaultStyle}`}
+									>
+										Cancel
+									</Button>
+								</div>
 								<Button
 									onClick={handleSave}
 									disabled={updateGameMutation.isPending}
-									className='w-full bg-[#56492c] hover:bg-[#56492c] border border-[#56492c]'
+									className='w-full bg-[#645331] text-white shadow-none hover:bg-[##57482b]'
 								>
 									<Save className='h-4 w-4 mr-2' />
 									{updateGameMutation.isPending
