@@ -190,6 +190,10 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
           return `Create entertaining trivia questions with fun or historical facts about the ${gameData?.industry} industry, interesting stories, lesser-known facts, or amusing industry-related trivia.`;
         case "General Knowledge":
           return `Create general knowledge questions that any visitor might enjoy answering, not specifically related to the company or industry.`;
+        case "Custom Questions":
+          // Use the custom category description if provided, otherwise use generic description
+          const customDesc = gameData?.customCategoryDescription || 'custom topics';
+          return `Create questions about: ${customDesc} (related to ${gameData?.industry} industry context)`;
         default:
           return `Create questions about: ${category} (related to ${gameData?.industry} industry context)`;
       }
@@ -361,6 +365,10 @@ export const generateSingleQuestion = functions.https.onCall(async (data, contex
           return `Create an entertaining trivia question with fun or historical facts about the ${gameData?.industry} industry, interesting stories, lesser-known facts, or amusing industry-related trivia.`;
         case "General Knowledge":
           return `Create a general knowledge question that any visitor might enjoy answering, not specifically related to the company or industry.`;
+        case "Custom Questions":
+          // Use the custom category description if provided, otherwise use generic description
+          const customDesc = gameData?.customCategoryDescription || 'custom topics';
+          return `Create a question about: ${customDesc} (related to ${gameData?.industry} industry context)`;
         default:
           return `Create a question about: ${category} (related to ${gameData?.industry} industry context)`;
       }

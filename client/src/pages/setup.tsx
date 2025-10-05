@@ -180,6 +180,7 @@ export default function Setup() {
 				questionCount: gameData.questionCount,
 				difficulty: gameData.difficulty,
 				categories: gameData.categories,
+				customCategoryDescription: gameData.customCategoryDescription || null,
 				prizes: gameData.prizes || null,
 			}
 
@@ -284,7 +285,7 @@ export default function Setup() {
 					case 'generalKnowledge':
 						return 'General Knowledge'
 					case 'other':
-						return customCategory.trim() || 'Custom Questions'
+						return 'Custom Questions' // Always use fixed string for storage
 					default:
 						return key
 				}
@@ -320,6 +321,10 @@ export default function Setup() {
 			questionCount: parseInt(formData.questionCount),
 			difficulty,
 			categories: selectedCategories,
+			customCategoryDescription:
+				categories.other && customCategory.trim()
+					? customCategory.trim()
+					: undefined,
 			prizes: validPrizes.length > 0 ? validPrizes : null,
 		}
 

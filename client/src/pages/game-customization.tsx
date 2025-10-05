@@ -18,6 +18,7 @@ import {
 import { GamePreview } from '@/components/game-preview'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
+import { colorToHex, isValidHexColor } from '@/lib/color-utils'
 import type { Game, GameCustomization } from '@shared/firebase-types'
 
 const buttonDefaultStyle = `border-[##746c56] bg-[##fcf7e7] shadow-sm hover:bg-[#fcfdfe] hover:border-[##979181] hover:shadow-md ring-offset-[##fcf7e7]`
@@ -205,7 +206,28 @@ export default function GameCustomizationPage() {
 	})
 
 	const handleColorChange = (field: keyof CustomizationForm, value: string) => {
-		setFormData((prev) => ({ ...prev, [field]: value }))
+		// Sanitize the color value before setting it in state
+		let sanitizedValue = value
+
+		// If it's already a valid hex color, use it as-is
+		if (isValidHexColor(value)) {
+			sanitizedValue = value.startsWith('#') ? value : `#${value}`
+		} else {
+			// Try to convert other color formats to hex
+			const hexColor = colorToHex(value)
+			if (hexColor) {
+				sanitizedValue = hexColor
+			} else {
+				// If conversion fails and it's an invalid color, use the current value as fallback
+				// This prevents breaking the UI while allowing manual correction
+				console.warn(
+					`Invalid color value: ${value}, using current value as fallback`
+				)
+				sanitizedValue = formData[field]
+			}
+		}
+
+		setFormData((prev) => ({ ...prev, [field]: sanitizedValue }))
 	}
 
 	const handlePresetSelect = (preset: (typeof COLOR_PRESETS)[0]) => {
@@ -509,7 +531,7 @@ export default function GameCustomizationPage() {
 												)
 											}
 											placeholder={field.placeholder}
-											className='f text-xs w-1/3 p-1 h-8 bg-white'
+											className='text-xs w-2/3 p-1 h-8 bg-white'
 										/>
 									</div>
 								))}

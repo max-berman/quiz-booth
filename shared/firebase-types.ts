@@ -24,6 +24,7 @@ export interface Game {
   questionCount: number;
   difficulty: string;
   categories: string[];
+  customCategoryDescription?: string; // Store actual custom category description separately
   firstPrize: string | null;
   secondPrize: string | null;
   thirdPrize: string | null;
@@ -72,6 +73,7 @@ export const insertGameSchema = z.object({
   questionCount: z.number().default(10),
   difficulty: z.string().default("easy"),
   categories: z.array(z.string()),
+  customCategoryDescription: z.string().optional(), // Store actual custom category description separately
   firstPrize: z.string().optional().nullable(),
   secondPrize: z.string().optional().nullable(),
   thirdPrize: z.string().optional().nullable(),

@@ -3,7 +3,8 @@
 // Industry options for better organization
 export const INDUSTRY_OPTIONS = [
   // 🔥 Highest Potential Impact
-  'Gaming & Esports',
+  'Esports',
+  'Gaming',
   'Retail (Physical & Omni-channel)',
   'E-commerce & Online Marketplaces',
   'Food, Beverage & Restaurants',

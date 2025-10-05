@@ -59,7 +59,7 @@ export const createGame = functions.runWith({
   }
 
   const userId = context.auth.uid;
-  const { title, description, questionCount, difficulty, categories, companyName, productDescription, prizes } = data;
+  const { title, description, questionCount, difficulty, categories, companyName, productDescription, prizes, customCategoryDescription } = data;
 
   try {
     // Rate limiting check
@@ -99,6 +99,7 @@ export const createGame = functions.runWith({
       questionCount,
       difficulty,
       categories,
+      customCategoryDescription: customCategoryDescription || null,
       prizes: prizesObject,
       creatorKey,
       userId,
