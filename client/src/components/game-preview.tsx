@@ -164,6 +164,9 @@ export function GamePreview({
 									alt='QuizBooth.games logo'
 									className='h-8 w-auto'
 								/>
+								<span className='hidden lg:block hover:scale-[1.02] transition-all font-medium'>
+									QuizBooth
+								</span>
 							</a>
 						</li>
 
