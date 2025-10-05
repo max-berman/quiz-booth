@@ -44,11 +44,6 @@ const COLOR_FIELDS = [
 		placeholder: '#5c4a2a',
 	},
 	{
-		id: 'secondaryColor',
-		label: 'Secondary',
-		placeholder: '#e6e6e6',
-	},
-	{
 		id: 'tertiaryColor',
 		label: 'Background',
 		placeholder: '#f2f0e9',
@@ -58,36 +53,41 @@ const COLOR_FIELDS = [
 		label: 'Card',
 		placeholder: '#e8d9b5',
 	},
+	{
+		id: 'secondaryColor',
+		label: 'Button Text',
+		placeholder: '#e6e6e6',
+	},
 ]
 
 const COLOR_PRESETS = [
 	{
 		name: 'Warm Orange',
 		primary: '#ea580c',
-		secondary: '#dc2626',
-		tertiary: '#fff7ed',
-		quaternary: '#ffedd5',
+		secondary: '#ffffff',
+		tertiary: '#fff2e5',
+		quaternary: '#fffaf5',
 	},
 	{
 		name: 'Elegant Purple',
 		primary: '#7c3aed',
-		secondary: '#a855f7',
+		secondary: '#ffffff',
 		tertiary: '#faf5ff',
 		quaternary: '#f3e8ff',
 	},
 	{
 		name: 'Corporate Gray',
 		primary: '#475569',
-		secondary: '#64748b',
+		secondary: '#ffffff',
 		tertiary: '#f8fafc',
 		quaternary: '#f1f5f9',
 	},
 	{
 		name: 'Vibrant Teal',
-		primary: '#0d9488',
-		secondary: '#14b8a6',
-		tertiary: '#f0fdfa',
-		quaternary: '#ccfbf1',
+		primary: '#ff004c',
+		secondary: '#ffffff',
+		tertiary: '#ffe5ee',
+		quaternary: '#fffafe',
 	},
 ]
 
@@ -384,7 +384,7 @@ export default function GameCustomizationPage() {
 	}
 
 	return (
-		<div className='flex-1 bg-[#fff] py-6'>
+		<div className='flex-1 bg-[#fff] py-6 px-2'>
 			{/* Header */}
 			<div className='max-w-7xl mx-auto mb-6'>
 				<div className='flex items-center justify-between'>
@@ -393,7 +393,7 @@ export default function GameCustomizationPage() {
 							variant='outline'
 							size='sm'
 							onClick={handleBackToDashboard}
-							className={buttonDefaultStyle}
+							className={`hidden lg:flex ${buttonDefaultStyle}`}
 						>
 							<ArrowLeft className='h-4 w-4' />
 							Back to Dashboard
@@ -404,24 +404,29 @@ export default function GameCustomizationPage() {
 								Customize Game Appearance
 							</h1>
 						</div>
-						<div className='ml-auto'>close</div>
+						<Button
+							variant='outline'
+							size='icon'
+							onClick={handleBackToDashboard}
+							className={`ml-auto ${buttonDefaultStyle}`}
+						>
+							<X className='h-4 w-4' />
+						</Button>
 					</div>
 				</div>
 			</div>
 
-			<div className='grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto'>
+			<div className='grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-7xl mx-auto'>
 				{/* Main Content - Preview Only */}
 				<div className='lg:col-span-2 space-y-6'>
-					<div>
-						<div className='border rounded-lg overflow-hidden'>
-							<GamePreview
-								primaryColor={formData.primaryColor}
-								secondaryColor={formData.secondaryColor}
-								tertiaryColor={formData.tertiaryColor}
-								quaternaryColor={formData.quaternaryColor}
-								customLogoUrl={formData.customLogoUrl}
-							/>
-						</div>
+					<div className='border border-stone-700 rounded-lg overflow-hidden'>
+						<GamePreview
+							primaryColor={formData.primaryColor}
+							secondaryColor={formData.secondaryColor}
+							tertiaryColor={formData.tertiaryColor}
+							quaternaryColor={formData.quaternaryColor}
+							customLogoUrl={formData.customLogoUrl}
+						/>
 					</div>
 				</div>
 
@@ -441,23 +446,23 @@ export default function GameCustomizationPage() {
 										<button
 											key={preset.name}
 											onClick={() => handlePresetSelect(preset)}
-											className='p-0.5 border  rounded hover:border-gray-700 transition-colors text-left text-xs'
+											className='p-1 border  rounded hover:border-primary transition-colors text-left text-xs'
 										>
 											<div className='flex gap-0.5 justify-around items-center'>
 												<div
-													className='w-4 h-4 rounded border'
+													className='w-6 h-6 rounded-full border-primary'
 													style={{ backgroundColor: preset.primary }}
 												/>
-												<div
-													className='w-4 h-4 rounded border'
+												{/* <div
+													className='w-6 h-6 rounded-full border'
 													style={{ backgroundColor: preset.secondary }}
-												/>
+												/> */}
 												<div
-													className='w-4 h-4 rounded border'
+													className='w-6 h-6 rounded-full border-background'
 													style={{ backgroundColor: preset.tertiary }}
 												/>
 												<div
-													className='w-4 h-4 rounded border'
+													className='w-6 h-6 rounded-full border-card'
 													style={{ backgroundColor: preset.quaternary }}
 												/>
 											</div>

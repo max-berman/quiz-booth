@@ -1,5 +1,6 @@
 import { useParams, useLocation } from 'wouter'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -9,6 +10,10 @@ import type { Player, Game } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { formatTime } from '@/lib/time-utils'
 import { formatDate } from '@/lib/date-utils'
+import {
+	applyGameCustomization,
+	cleanupGameCustomization,
+} from '@/lib/color-utils'
 
 export default function Leaderboard() {
 	const { id } = useParams()
@@ -45,6 +50,18 @@ export default function Leaderboard() {
 		},
 		enabled: isGameSpecific ? !!id : true,
 	})
+
+	// Apply customization styles for game-specific leaderboards
+	useEffect(() => {
+		if (isGameSpecific && game?.customization) {
+			applyGameCustomization(game.customization)
+		}
+
+		// Cleanup function to reset styles
+		return () => {
+			cleanupGameCustomization()
+		}
+	}, [isGameSpecific, game?.customization])
 
 	const getRankIcon = (rank: number) => {
 		switch (rank) {

@@ -191,8 +191,8 @@ export function GamePreview({
 						<li className='w-1/4 flex justify-end'>
 							<Button
 								size='sm'
-								className='flex items-center gap-2 !text-white'
-								style={{ backgroundColor: primaryColor }}
+								className='flex items-center gap-2 '
+								style={{ backgroundColor: primaryColor, color: secondaryColor }}
 							>
 								Next <ArrowRight className='h-4 w-4' />
 							</Button>
@@ -240,9 +240,9 @@ export function GamePreview({
 						{/* Question Text */}
 						<div className=''>
 							<div
-								className='bg-gradient-to-r from-primary/10 to-secondary/10 rounded-none md:rounded-2xl p-4 mb-4'
+								className='bg-gradient-to-r  rounded-none md:rounded-2xl p-4 mb-4'
 								style={{
-									background: `linear-gradient(to right, ${primaryColor}10, ${secondaryColor}10)`,
+									background: `linear-gradient(to right, ${primaryColor}20, ${quaternaryColor}10)`,
 								}}
 							>
 								<h2
@@ -333,7 +333,7 @@ export function GamePreview({
 								type='button'
 								size='lg'
 								className='px-8 py-4 text-xl font-semibold uppercase'
-								style={{ backgroundColor: primaryColor }}
+								style={{ backgroundColor: primaryColor, color: secondaryColor }}
 							>
 								Continue →
 							</Button>
