@@ -40,6 +40,10 @@
         "function": "ssrHandler"
       },
       {
+        "source": "/contact",
+        "function": "ssrHandler"
+      },
+      {
         "source": "/game/**",
         "function": "ssrHandler"
       },

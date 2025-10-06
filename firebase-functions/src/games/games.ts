@@ -166,10 +166,15 @@ export const getGame = functions.https.onCall(async (data, context) => {
         gameTitle: gameData.gameTitle,
         companyName: gameData.companyName,
         industry: gameData.industry,
+        productDescription: gameData.productDescription,
+        questionCount: gameData.questionCount,
+        difficulty: gameData.difficulty,
+        categories: gameData.categories,
         prizes: prizesArray,
         isPublic: true,
         customization: gameData.customization, // Include customization for public games
         createdAt: gameData?.createdAt?.toDate?.()?.toISOString(),
+        modifiedAt: gameData?.modifiedAt?.toDate?.()?.toISOString(),
       };
     } else {
       // Shared game (not public but accessible via direct link)
@@ -179,10 +184,15 @@ export const getGame = functions.https.onCall(async (data, context) => {
         gameTitle: gameData?.gameTitle,
         companyName: gameData?.companyName,
         industry: gameData?.industry,
+        productDescription: gameData?.productDescription,
+        questionCount: gameData?.questionCount,
+        difficulty: gameData?.difficulty,
+        categories: gameData?.categories,
         prizes: prizesArray,
         isPublic: false,
         customization: gameData?.customization, // Include customization for shared games
         createdAt: gameData?.createdAt?.toDate?.()?.toISOString(),
+        modifiedAt: gameData?.modifiedAt?.toDate?.()?.toISOString(),
       };
     }
   } catch (error) {
@@ -645,6 +655,7 @@ export const getPublicGames = functions.https.onCall(async (data, context) => {
         categories: data.categories,
         prizes: prizesArray,
         isPublic: data.isPublic,
+        customization: data.customization, // Include customization for public games
         createdAt: data.createdAt?.toDate?.()?.toISOString(),
         modifiedAt: data.modifiedAt?.toDate?.()?.toISOString(),
       };

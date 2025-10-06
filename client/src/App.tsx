@@ -28,6 +28,7 @@ const QuizGames = lazy(() => import('@/pages/quiz-games'))
 const About = lazy(() => import('@/pages/about'))
 const FAQ = lazy(() => import('@/pages/faq'))
 const Pricing = lazy(() => import('@/pages/pricing'))
+const Contact = lazy(() => import('@/pages/contact'))
 const GameCustomization = lazy(() => import('@/pages/game-customization'))
 const NotFound = lazy(() => import('@/pages/not-found'))
 
@@ -48,6 +49,7 @@ function Router() {
 				<Route path='/about' component={About} />
 				<Route path='/faq' component={FAQ} />
 				<Route path='/pricing' component={Pricing} />
+				<Route path='/contact' component={Contact} />
 				<Route path='/game-customization/:id' component={GameCustomization} />
 				<Route path='/auth/sign-in' component={SignIn} />
 				<Route path='/auth/complete' component={CompleteSignIn} />

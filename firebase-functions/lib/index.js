@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getGamePlayCount = exports.getGameQuestionsCount = exports.ssrHandler = exports.userSetup = exports.resetUsage = exports.getUsage = exports.trackUsage = exports.addQuestion = exports.deleteQuestion = exports.updateQuestion = exports.getQuestions = exports.generateSingleQuestion = exports.generateQuestions = exports.deleteGame = exports.getPublicGamesCount = exports.getPublicGames = exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
+exports.sendContactForm = exports.getGamePlayCount = exports.getGameQuestionsCount = exports.ssrHandler = exports.userSetup = exports.resetUsage = exports.getUsage = exports.trackUsage = exports.addQuestion = exports.deleteQuestion = exports.updateQuestion = exports.getQuestions = exports.generateSingleQuestion = exports.generateQuestions = exports.deleteGame = exports.getPublicGamesCount = exports.getPublicGames = exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
 // import * as functions from 'firebase-functions';
 const admin = __importStar(require("firebase-admin"));
 const dotenv = __importStar(require("dotenv"));
@@ -66,4 +66,6 @@ Object.defineProperty(exports, "ssrHandler", { enumerable: true, get: function (
 const games_2 = require("./api/games");
 Object.defineProperty(exports, "getGameQuestionsCount", { enumerable: true, get: function () { return games_2.getGameQuestionsCount; } });
 Object.defineProperty(exports, "getGamePlayCount", { enumerable: true, get: function () { return games_2.getGamePlayCount; } });
+const contact_1 = require("./api/contact");
+Object.defineProperty(exports, "sendContactForm", { enumerable: true, get: function () { return contact_1.sendContactForm; } });
 //# sourceMappingURL=index.js.map

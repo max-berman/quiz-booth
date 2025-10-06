@@ -12,6 +12,7 @@
 - **Session Management Enhancement**: Improved game session hook with comprehensive state management
 - **Performance Monitoring**: Ongoing focus on timer reliability and user experience
 - **Firebase Routing Fix**: Resolved 404 error for game-customization page by adding missing route to Firebase hosting configuration
+- **Storage Rules Fix**: Fixed Firebase Storage rules to allow public read access for game logos in public game cards
 
 ### Current Development State
 
@@ -250,6 +251,11 @@ useEffect(() => {
 ### Deployment Checklist
 
 **CRITICAL DEPLOYMENT REQUIREMENTS:**
+
+- [ ] **NEVER DEPLOY CHANGES WITHOUT EXPLICIT USER PERMISSION**
+
+  - Always ask for approval before running any deployment commands
+  - Deployment can have production impact and should only be done with explicit consent
 
 - [ ] **ALWAYS test locally before deploying to production**
 

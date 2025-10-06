@@ -141,7 +141,7 @@ exports.createGame = functions.runWith({
 });
 // Get game by ID
 exports.getGame = functions.https.onCall(async (data, context) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
     const { gameId } = data;
     try {
         const gameDoc = await db.collection('games').doc(gameId).get();
@@ -166,10 +166,15 @@ exports.getGame = functions.https.onCall(async (data, context) => {
                 gameTitle: gameData.gameTitle,
                 companyName: gameData.companyName,
                 industry: gameData.industry,
+                productDescription: gameData.productDescription,
+                questionCount: gameData.questionCount,
+                difficulty: gameData.difficulty,
+                categories: gameData.categories,
                 prizes: prizesArray,
                 isPublic: true,
                 customization: gameData.customization,
                 createdAt: (_j = (_h = (_g = gameData === null || gameData === void 0 ? void 0 : gameData.createdAt) === null || _g === void 0 ? void 0 : _g.toDate) === null || _h === void 0 ? void 0 : _h.call(_g)) === null || _j === void 0 ? void 0 : _j.toISOString(),
+                modifiedAt: (_m = (_l = (_k = gameData === null || gameData === void 0 ? void 0 : gameData.modifiedAt) === null || _k === void 0 ? void 0 : _k.toDate) === null || _l === void 0 ? void 0 : _l.call(_k)) === null || _m === void 0 ? void 0 : _m.toISOString(),
             };
         }
         else {
@@ -180,10 +185,15 @@ exports.getGame = functions.https.onCall(async (data, context) => {
                 gameTitle: gameData === null || gameData === void 0 ? void 0 : gameData.gameTitle,
                 companyName: gameData === null || gameData === void 0 ? void 0 : gameData.companyName,
                 industry: gameData === null || gameData === void 0 ? void 0 : gameData.industry,
+                productDescription: gameData === null || gameData === void 0 ? void 0 : gameData.productDescription,
+                questionCount: gameData === null || gameData === void 0 ? void 0 : gameData.questionCount,
+                difficulty: gameData === null || gameData === void 0 ? void 0 : gameData.difficulty,
+                categories: gameData === null || gameData === void 0 ? void 0 : gameData.categories,
                 prizes: prizesArray,
                 isPublic: false,
                 customization: gameData === null || gameData === void 0 ? void 0 : gameData.customization,
-                createdAt: (_m = (_l = (_k = gameData === null || gameData === void 0 ? void 0 : gameData.createdAt) === null || _k === void 0 ? void 0 : _k.toDate) === null || _l === void 0 ? void 0 : _l.call(_k)) === null || _m === void 0 ? void 0 : _m.toISOString(),
+                createdAt: (_q = (_p = (_o = gameData === null || gameData === void 0 ? void 0 : gameData.createdAt) === null || _o === void 0 ? void 0 : _o.toDate) === null || _p === void 0 ? void 0 : _p.call(_o)) === null || _q === void 0 ? void 0 : _q.toISOString(),
+                modifiedAt: (_t = (_s = (_r = gameData === null || gameData === void 0 ? void 0 : gameData.modifiedAt) === null || _r === void 0 ? void 0 : _r.toDate) === null || _s === void 0 ? void 0 : _s.call(_r)) === null || _t === void 0 ? void 0 : _t.toISOString(),
             };
         }
     }
@@ -555,6 +565,7 @@ exports.getPublicGames = functions.https.onCall(async (data, context) => {
                 categories: data.categories,
                 prizes: prizesArray,
                 isPublic: data.isPublic,
+                customization: data.customization,
                 createdAt: (_c = (_b = (_a = data.createdAt) === null || _a === void 0 ? void 0 : _a.toDate) === null || _b === void 0 ? void 0 : _b.call(_a)) === null || _c === void 0 ? void 0 : _c.toISOString(),
                 modifiedAt: (_f = (_e = (_d = data.modifiedAt) === null || _d === void 0 ? void 0 : _d.toDate) === null || _e === void 0 ? void 0 : _e.call(_d)) === null || _f === void 0 ? void 0 : _f.toISOString(),
             };

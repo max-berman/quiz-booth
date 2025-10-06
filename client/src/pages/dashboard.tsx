@@ -55,14 +55,14 @@ export default function Dashboard() {
 			}
 
 			try {
-				logger.log(
-					'Dashboard: Fetching games for authenticated user:',
-					user?.uid
-				)
+				// logger.log(
+				// 	'Dashboard: Fetching games for authenticated user:',
+				// 	user?.uid
+				// )
 
 				const result = await getGamesByUser({})
 				const games = result.data as Game[]
-				logger.log('Dashboard: Received games:', games)
+				// logger.log('Dashboard: Received games:', games)
 
 				return games.sort(
 					(a: Game, b: Game) =>

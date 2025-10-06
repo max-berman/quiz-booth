@@ -13,7 +13,17 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 	return (
 		<Card className='hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-2 h-full flex flex-col'>
 			<GameCardHeader game={game} />
-			<CardContent className='space-y-3 px-4 pb-4 flex flex-col'>
+
+			{game.customization?.customLogoUrl && (
+				<div className='p-2 pt-0 flex items-center justify-center'>
+					<img
+						src={game.customization.customLogoUrl}
+						alt='Custom Logo'
+						className='h-10 w-auto'
+					/>
+				</div>
+			)}
+			<CardContent className='space-y-3 px-4 pb-4 flex flex-col h-full justify-between'>
 				<GameDetails
 					game={game}
 					showPlayCount={true}
@@ -21,16 +31,16 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 				/>
 
 				{/* Action Buttons */}
-				<div className='pt-2 self-center flex gap-2'>
-					<Link href={`/game/${game.id}`}>
-						<Button className='px-3 py-3'>
+				<div className='pt-2 self-center flex md:flex-col flex-row items-center justify-center gap-2 w-full md:w-[90%]'>
+					<Link href={`/game/${game.id}`} className='w-full'>
+						<Button className=' px-2 h-8 w-full py-0'>
 							<Play className='h-4 w-4' />
 							Play Game
 						</Button>
 					</Link>
 
-					<Link href={`/leaderboard/${game.id}`}>
-						<Button variant='secondary' className='px-3 py-3'>
+					<Link href={`/leaderboard/${game.id}`} className='w-full'>
+						<Button variant='secondary' className='px-2 h-8 w-full py-0 '>
 							<Trophy className='h-4 w-4' />
 							Leaderboard
 						</Button>

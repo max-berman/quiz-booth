@@ -13,6 +13,7 @@ import {
 	Info,
 	HelpCircle,
 	DollarSign,
+	Mail,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { MenuLink } from './menu-link'
@@ -100,6 +101,12 @@ export function CreatorHeader() {
 						<MenuLink href='/pricing' data-testid='button-pricing'>
 							<DollarSign className='mr-2 h-4 w-4' />
 							Pricing
+						</MenuLink>
+
+						{/* Contact page */}
+						<MenuLink href='/contact' data-testid='button-contact'>
+							<Mail className='mr-2 h-4 w-4' />
+							Contact
 						</MenuLink>
 
 						{/* Dashboard for authenticated users */}
@@ -227,6 +234,17 @@ export function CreatorHeader() {
 						>
 							<DollarSign className='mr-2 h-4 w-4' />
 							Pricing
+						</Button>
+						<Button
+							variant='ghost'
+							className='w-full justify-start'
+							onClick={() => {
+								setLocation('/contact')
+								setIsSidebarOpen(false)
+							}}
+						>
+							<Mail className='mr-2 h-4 w-4' />
+							Contact
 						</Button>
 						{isAuthenticated && (
 							<Button

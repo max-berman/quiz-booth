@@ -272,12 +272,6 @@ export function GameCardDashboard({
 							</Button>
 						</div>
 
-						{/* Sharing Actions */}
-						<div className='grid grid-cols-2 gap-2'>
-							<QRCodeModal gameId={game.id} gameTitle={game.companyName} />
-							<ShareEmbedModal gameId={game.id} gameTitle={game.companyName} />
-						</div>
-
 						{/* Customization Action */}
 						<div className='grid grid-cols-2 gap-2'>
 							<Button
@@ -291,10 +285,9 @@ export function GameCardDashboard({
 								<Palette className='mr-1 h-4 w-4' />
 								Customize
 							</Button>
-						</div>
 
-						{/* Delete Action */}
-						<div className='grid grid-cols-2 gap-2'>
+							{/* Delete Action */}
+
 							<AlertDialog
 								open={isDeleteDialogOpen}
 								onOpenChange={setIsDeleteDialogOpen}
@@ -359,6 +352,12 @@ export function GameCardDashboard({
 									</AlertDialogFooter>
 								</AlertDialogContent>
 							</AlertDialog>
+						</div>
+
+						{/* Sharing Actions */}
+						<div className='grid grid-cols-2 gap-2'>
+							<QRCodeModal gameId={game.id} gameTitle={game.companyName} />
+							<ShareEmbedModal gameId={game.id} gameTitle={game.companyName} />
 						</div>
 					</div>
 				</CardContent>
