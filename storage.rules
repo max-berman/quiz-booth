@@ -1,11 +1,16 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow public read access to game logos (for players)
-    // Allow write access only for authenticated users
+    // Game logos: public read, authenticated users can only write to their own game logos
     match /game-logos/{gameId}/{fileName} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read: if true; // Public read for game logos
+      allow write: if request.auth != null && 
+                   request.auth.uid == gameId; // Users can only write to their own game directory
+    }
+    
+    // User uploads: authenticated users can only access their own files
+    match /user-uploads/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }

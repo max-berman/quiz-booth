@@ -20,6 +20,7 @@ const staticRoutes = [
 	'/about',
 	'/faq',
 	'/pricing',
+	'/contact',
 ]
 
 // Dynamic routes that might need to be generated from data

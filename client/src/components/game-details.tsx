@@ -1,7 +1,14 @@
 // Common component for displaying game details to eliminate duplication
 
 import { Badge } from '@/lib/ui-imports-basic'
-import { Building, Calendar, Target, Gift, BarChart3 } from 'lucide-react'
+import {
+	Building,
+	Calendar,
+	Target,
+	Gift,
+	BarChart3,
+	HelpCircle,
+} from 'lucide-react'
 import type { Game } from '@shared/firebase-types'
 import { formatCompanyName } from '@/lib/game-utils'
 import { formatDate } from '@/lib/date-utils'
@@ -64,7 +71,7 @@ export function GameDetails({
 			{/* Question Count */}
 			{showQuestionCount && (
 				<div className='flex items-center gap-2'>
-					<BarChart3 className='h-4 w-4' />
+					<HelpCircle className='h-4 w-4' />
 					<span>
 						{game.questionCount} questions • {game.difficulty} difficulty
 					</span>

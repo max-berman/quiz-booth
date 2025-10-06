@@ -28,6 +28,7 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 					game={game}
 					showPlayCount={true}
 					showModifiedDate={false}
+					showQuestionCount={true}
 				/>
 
 				{/* Action Buttons */}

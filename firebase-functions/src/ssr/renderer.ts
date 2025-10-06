@@ -141,6 +141,32 @@ const PricingPage = () => (
   )
 );
 
+const ContactPage = () => (
+  React.createElement('div', { className: 'min-h-screen bg-background' },
+    React.createElement('div', { className: 'container mx-auto px-4 py-8' },
+      React.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'Contact QuizBooth'),
+      React.createElement('p', { className: 'text-center text-muted-foreground mb-8' },
+        'Have questions, feedback, or need support? We\'d love to hear from you.'
+      ),
+      React.createElement('div', { className: 'max-w-2xl mx-auto bg-card border rounded-lg p-6' },
+        React.createElement('p', { className: 'text-muted-foreground mb-4' },
+          'Get in touch with our team and we\'ll get back to you as soon as possible.'
+        ),
+        React.createElement('div', { className: 'space-y-4' },
+          React.createElement('div', null,
+            React.createElement('strong', null, 'Email Support:'),
+            React.createElement('p', { className: 'text-muted-foreground' }, 'contact@quizbooth.games')
+          ),
+          React.createElement('div', null,
+            React.createElement('strong', null, 'Response Time:'),
+            React.createElement('p', { className: 'text-muted-foreground' }, 'We typically respond within 24 hours during business days.')
+          )
+        )
+      )
+    )
+  )
+);
+
 const SignInPage = () => (
   React.createElement('div', { className: 'min-h-screen bg-background' },
     React.createElement('div', { className: 'container mx-auto px-4 py-8' },
@@ -288,6 +314,21 @@ export async function renderPage(path: string, pageData: any) {
           <meta property="og:description" content="Complete your sign-in process">
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/auth/complete">
+        `;
+        break;
+
+      case '/contact':
+        Component = ContactPage;
+        metaTags = `
+          <title>Contact Us - QuizBooth</title>
+          <meta name="description" content="Get in touch with the QuizBooth team. We're here to help with technical support, partnerships, feature requests, and any questions you may have.">
+          <meta property="og:title" content="Contact Us - QuizBooth">
+          <meta property="og:description" content="Contact the QuizBooth team for support, partnerships, and inquiries about our AI-powered trivia platform.">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/contact">
+          <meta name="twitter:card" content="summary_large_image">
+          <meta name="twitter:title" content="Contact Us - QuizBooth">
+          <meta name="twitter:description" content="Contact the QuizBooth team for support, partnerships, and inquiries">
         `;
         break;
 

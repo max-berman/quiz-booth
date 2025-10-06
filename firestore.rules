@@ -19,19 +19,19 @@ service cloud.firestore {
     // Questions: tied to games
     match /questions/{questionId} {
       allow read: if exists(/databases/$(database)/documents/games/$(resource.data.gameId)) &&
-                   (resource.data.gameId.isPublic == true ||
-                    resource.data.gameId.userId == request.auth.uid);
+                   (get(/databases/$(database)/documents/games/$(resource.data.gameId)).data.isPublic == true ||
+                    get(/databases/$(database)/documents/games/$(resource.data.gameId)).data.userId == request.auth.uid);
       allow create, update, delete: if request.auth != null &&
                                      exists(/databases/$(database)/documents/games/$(request.resource.data.gameId)) &&
-                                     resource.data.gameId.userId == request.auth.uid;
+                                     get(/databases/$(database)/documents/games/$(request.resource.data.gameId)).data.userId == request.auth.uid;
     }
 
     // Players: anyone can create, game creator can read
     match /players/{playerId} {
-      allow create: if true; // Anyone can submit scores
+      allow create: if exists(/databases/$(database)/documents/games/$(request.resource.data.gameId)); // Only allow creation for existing games
       allow read: if request.auth != null &&
                    exists(/databases/$(database)/documents/games/$(resource.data.gameId)) &&
-                   resource.data.gameId.userId == request.auth.uid;
+                   get(/databases/$(database)/documents/games/$(resource.data.gameId)).data.userId == request.auth.uid;
     }
 
     // Usage tracking: users can only access their own data

@@ -70,22 +70,35 @@ export default function Contact() {
 		setIsSubmitting(true)
 
 		try {
-			// Import the Firebase function
-			const { getFunctions, httpsCallable, connectFunctionsEmulator } =
-				await import('firebase/functions')
-			const functions = getFunctions()
-
-			// Use local emulator for development
+			// Determine the function URL based on environment
+			let functionUrl
 			if (
 				window.location.hostname === 'localhost' ||
 				window.location.hostname === '127.0.0.1'
 			) {
-				connectFunctionsEmulator(functions, 'localhost', 5001)
+				// Local development
+				functionUrl =
+					'http://localhost:5001/trivia-games-7a81b/us-central1/sendContactForm'
+			} else {
+				// Production
+				functionUrl =
+					'https://us-central1-trivia-games-7a81b.cloudfunctions.net/sendContactForm'
 			}
 
-			const sendContactForm = httpsCallable(functions, 'sendContactForm')
+			const response = await fetch(functionUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			})
 
-			const result = await sendContactForm(data)
+			if (!response.ok) {
+				const errorData = await response.json()
+				throw new Error(errorData.error || 'Failed to send message')
+			}
+
+			const result = await response.json()
 
 			toast({
 				title: 'Message Sent!',

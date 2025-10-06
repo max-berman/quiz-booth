@@ -24,6 +24,7 @@ react_1.default.createElement('div', { className: 'bg-card border rounded-lg p-6
 react_1.default.createElement('div', { className: 'bg-card border rounded-lg p-6 border-primary' }, react_1.default.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'Pro'), react_1.default.createElement('div', { className: 'text-2xl font-bold mb-4' }, '$29/month'), react_1.default.createElement('ul', { className: 'space-y-2 text-muted-foreground' }, react_1.default.createElement('li', null, '✓ Everything in Free'), react_1.default.createElement('li', null, '✓ Advanced customization'), react_1.default.createElement('li', null, '✓ Priority support'), react_1.default.createElement('li', null, '✓ Export analytics'))), 
 // Enterprise Plan
 react_1.default.createElement('div', { className: 'bg-card border rounded-lg p-6' }, react_1.default.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'Enterprise'), react_1.default.createElement('div', { className: 'text-2xl font-bold mb-4' }, 'Custom'), react_1.default.createElement('ul', { className: 'space-y-2 text-muted-foreground' }, react_1.default.createElement('li', null, '✓ Everything in Pro'), react_1.default.createElement('li', null, '✓ White-label solutions'), react_1.default.createElement('li', null, '✓ API access'), react_1.default.createElement('li', null, '✓ Dedicated account manager')))))));
+const ContactPage = () => (react_1.default.createElement('div', { className: 'min-h-screen bg-background' }, react_1.default.createElement('div', { className: 'container mx-auto px-4 py-8' }, react_1.default.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'Contact QuizBooth'), react_1.default.createElement('p', { className: 'text-center text-muted-foreground mb-8' }, 'Have questions, feedback, or need support? We\'d love to hear from you.'), react_1.default.createElement('div', { className: 'max-w-2xl mx-auto bg-card border rounded-lg p-6' }, react_1.default.createElement('p', { className: 'text-muted-foreground mb-4' }, 'Get in touch with our team and we\'ll get back to you as soon as possible.'), react_1.default.createElement('div', { className: 'space-y-4' }, react_1.default.createElement('div', null, react_1.default.createElement('strong', null, 'Email Support:'), react_1.default.createElement('p', { className: 'text-muted-foreground' }, 'contact@quizbooth.games')), react_1.default.createElement('div', null, react_1.default.createElement('strong', null, 'Response Time:'), react_1.default.createElement('p', { className: 'text-muted-foreground' }, 'We typically respond within 24 hours during business days.')))))));
 const SignInPage = () => (react_1.default.createElement('div', { className: 'min-h-screen bg-background' }, react_1.default.createElement('div', { className: 'container mx-auto px-4 py-8' }, react_1.default.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'Sign In to QuizBooth'), react_1.default.createElement('p', { className: 'text-center text-muted-foreground mb-8' }, 'Access your account to create and manage trivia games'), react_1.default.createElement('div', { className: 'max-w-md mx-auto bg-card border rounded-lg p-6' }, react_1.default.createElement('p', { className: 'text-center text-muted-foreground' }, 'Sign in to access your dashboard and create engaging trivia games.')))));
 const NotFoundPage = () => (react_1.default.createElement('div', { className: 'min-h-screen bg-background flex items-center justify-center' }, react_1.default.createElement('div', { className: 'text-center' }, react_1.default.createElement('h1', { className: 'text-4xl font-bold mb-4' }, 'Page Not Found'), react_1.default.createElement('p', { className: 'text-muted-foreground mb-8' }, `The page you're looking for doesn't exist.`), react_1.default.createElement('a', {
     href: '/',
@@ -137,6 +138,20 @@ async function renderPage(path, pageData) {
           <meta property="og:description" content="Complete your sign-in process">
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/auth/complete">
+        `;
+                break;
+            case '/contact':
+                Component = ContactPage;
+                metaTags = `
+          <title>Contact Us - QuizBooth</title>
+          <meta name="description" content="Get in touch with the QuizBooth team. We're here to help with technical support, partnerships, feature requests, and any questions you may have.">
+          <meta property="og:title" content="Contact Us - QuizBooth">
+          <meta property="og:description" content="Contact the QuizBooth team for support, partnerships, and inquiries about our AI-powered trivia platform.">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/contact">
+          <meta name="twitter:card" content="summary_large_image">
+          <meta name="twitter:title" content="Contact Us - QuizBooth">
+          <meta name="twitter:description" content="Contact the QuizBooth team for support, partnerships, and inquiries">
         `;
                 break;
             default:

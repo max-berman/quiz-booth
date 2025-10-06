@@ -11,6 +11,7 @@ import { AuthProvider } from '@/contexts/auth-context'
 import { LoadingSpinner } from '@/components/loading-spinner'
 import { PWARegistration } from '@/components/pwa-registration'
 import { shouldShowHeader, shouldShowFooter } from '@/config/page-visibility'
+import { initializeSessionMonitoring } from '@/lib/auth-utils'
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import('@/pages/home'))
@@ -61,6 +62,9 @@ function Router() {
 
 function App() {
 	const [location] = useLocation()
+
+	// Initialize session monitoring for security
+	initializeSessionMonitoring()
 
 	// Use configuration to determine which components to show
 	const showHeader = shouldShowHeader(location)

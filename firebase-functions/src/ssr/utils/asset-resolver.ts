@@ -19,15 +19,15 @@ export interface ResolvedAssets {
  * to match the actual generated file names
  */
 const CURRENT_ASSETS: ResolvedAssets = {
-  cssFile: 'index-dzy7fEk5.css',
-  jsFile: 'index-COpzhpvI.js',
+  cssFile: 'index-BMvdaoxI.css',
+  jsFile: 'index-wishXcmu.js',
   vendorFiles: {
     react: 'vendor-react-C8w-UNLI.js',
-    radix: 'vendor-radix-Bc0FetqD.js',
-    query: 'vendor-query-DzEs-1cG.js',
-    charts: 'vendor-charts-Bo6bkFXk.js',
-    icons: 'vendor-icons-BIWDsoQv.js',
-    forms: 'vendor-forms-ZEB_K3z5.js'
+    radix: 'vendor-radix-CtIS3uZQ.js',
+    query: 'vendor-query-CtO4k8ZD.js',
+    charts: 'vendor-charts-C96dEXy9.js',
+    icons: 'vendor-icons-BxfxEJUM.js',
+    forms: 'vendor-forms-DNNZqBgj.js'
   }
 };
 

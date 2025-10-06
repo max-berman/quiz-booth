@@ -120,7 +120,7 @@ export default function Results() {
 							<p className='text-primary'>Here are your results</p>
 						</div>
 
-						<ul className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-2'>
+						<ul className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
 							<li className='p-2 md:p-6 rounded-xl bg-primary/30'>
 								<div className='text-xl md:text-3xl font-bold text-primary mb-2'>
 									{score}
