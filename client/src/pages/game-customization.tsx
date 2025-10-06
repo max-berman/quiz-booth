@@ -14,6 +14,8 @@ import {
 	Upload,
 	Sparkles,
 	ArrowLeft,
+	Edit,
+	Link,
 } from 'lucide-react'
 import { GamePreview } from '@/components/game-preview'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
@@ -29,6 +31,7 @@ interface CustomizationForm {
 	tertiaryColor: string
 	quaternaryColor: string
 	customLogoUrl: string
+	customLogoLink: string
 }
 
 const DEFAULT_COLORS = {
@@ -105,8 +108,11 @@ export default function GameCustomizationPage() {
 		tertiaryColor: DEFAULT_COLORS.tertiaryColor,
 		quaternaryColor: DEFAULT_COLORS.quaternaryColor,
 		customLogoUrl: '',
+		customLogoLink: '',
 	})
 	const [isDragOver, setIsDragOver] = useState(false)
+	const [isEditingTitle, setIsEditingTitle] = useState(false)
+	const [editedTitle, setEditedTitle] = useState('')
 
 	// Fetch game data
 	const {
@@ -135,6 +141,7 @@ export default function GameCustomizationPage() {
 				quaternaryColor:
 					game.customization.quaternaryColor || DEFAULT_COLORS.quaternaryColor,
 				customLogoUrl: game.customization.customLogoUrl || '',
+				customLogoLink: game.customization.customLogoLink || '',
 			})
 		}
 	}, [game?.customization])
@@ -354,6 +361,7 @@ export default function GameCustomizationPage() {
 			tertiaryColor: formData.tertiaryColor,
 			quaternaryColor: formData.quaternaryColor,
 			customLogoUrl: formData.customLogoUrl,
+			customLogoLink: formData.customLogoLink,
 			isCustomized: true,
 		}
 
@@ -367,11 +375,57 @@ export default function GameCustomizationPage() {
 			tertiaryColor: DEFAULT_COLORS.tertiaryColor,
 			quaternaryColor: DEFAULT_COLORS.quaternaryColor,
 			customLogoUrl: game?.customization?.customLogoUrl || '',
+			customLogoLink: game?.customization?.customLogoLink || '',
 		})
 	}
 
 	const handleBackToDashboard = () => {
 		setLocation('/dashboard')
+	}
+
+	const handleStartEditing = () => {
+		setEditedTitle(game?.gameTitle || '')
+		setIsEditingTitle(true)
+	}
+
+	const handleCancelEditing = () => {
+		setIsEditingTitle(false)
+		setEditedTitle('')
+	}
+
+	const handleSaveTitle = async () => {
+		if (!editedTitle.trim()) {
+			toast({
+				title: 'Error',
+				description: 'Game title cannot be empty.',
+				variant: 'destructive',
+			})
+			return
+		}
+
+		try {
+			const result = await updateGame({
+				gameId: id!,
+				updates: { gameTitle: editedTitle.trim() },
+				customization: undefined,
+			})
+
+			// The updateGame function should succeed if there's no error
+			// Invalidate the game query to refetch with updated title
+			queryClient.invalidateQueries({ queryKey: [`game-${id}`] })
+			setIsEditingTitle(false)
+			toast({
+				title: 'Title Updated',
+				description: 'Game title has been updated successfully.',
+			})
+		} catch (error) {
+			console.error('Failed to update game title:', error)
+			toast({
+				title: 'Error',
+				description: 'Failed to update game title. Please try again.',
+				variant: 'destructive',
+			})
+		}
 	}
 
 	if (gameLoading) {
@@ -421,10 +475,52 @@ export default function GameCustomizationPage() {
 							Back to Dashboard
 						</Button>
 						<div className='flex-1'>
-							<h1 className='text-2xl font-bold flex items-center gap-2'>
-								<Palette className='h-6 w-6' />
-								Customize Game Appearance
-							</h1>
+							{isEditingTitle ? (
+								<div className='flex items-center gap-2'>
+									<Input
+										value={editedTitle}
+										onChange={(e) => setEditedTitle(e.target.value)}
+										placeholder='Enter game title'
+										className='text-xl h-10 bg-#f9fafc'
+										autoFocus
+										onKeyDown={(e) => {
+											if (e.key === 'Enter') {
+												handleSaveTitle()
+											} else if (e.key === 'Escape') {
+												handleCancelEditing()
+											}
+										}}
+									/>
+									<Button
+										variant='outline'
+										size='sm'
+										onClick={handleSaveTitle}
+										className={buttonDefaultStyle}
+									>
+										<Save className='h-4 w-4' />
+									</Button>
+									<Button
+										variant='outline'
+										size='sm'
+										onClick={handleCancelEditing}
+										className={buttonDefaultStyle}
+									>
+										<X className='h-4 w-4' />
+									</Button>
+								</div>
+							) : (
+								<h1 className='text-2xl font-bold flex items-center gap-2'>
+									{game?.gameTitle || 'Game'}
+									<Button
+										variant='ghost'
+										size='sm'
+										onClick={handleStartEditing}
+										className={`h-6 w-6 p-0 ${buttonDefaultStyle}`}
+									>
+										<Edit className='h-4 w-4' />
+									</Button>
+								</h1>
+							)}
 						</div>
 						<Button
 							variant='outline'
@@ -457,12 +553,14 @@ export default function GameCustomizationPage() {
 					{/* Colors Section */}
 					<div className='bg-white border border-stone-700 rounded-lg p-4'>
 						<div className='flex items-center gap-2 mb-4'>
-							<Image className='h-4 w-4' />
 							<h3 className='font-semibold'>Branding</h3>
 						</div>
 						<div className='space-y-4 mb-4'>
 							<div>
-								<h4 className='text-sm font-semibold mb-3'>Color Presets</h4>
+								<div className='flex items-center gap-2 mb-4'>
+									<Palette className='h-4 w-4' />
+									<h4 className='text-sm font-semibold '>Color Presets</h4>
+								</div>
 								<div className='grid grid-cols-4 gap-2 mb-4'>
 									{COLOR_PRESETS.map((preset) => (
 										<button
@@ -540,7 +638,11 @@ export default function GameCustomizationPage() {
 
 						<div className='space-y-4 border-t pt-4  mb-4'>
 							<div>
-								<h4 className='text-sm font-semibold mb-3'>Logo</h4>
+								<div className='flex items-center gap-2 mb-4'>
+									<Image className='h-4 w-4' />
+									<h4 className='text-sm font-semibold '>Logo</h4>
+								</div>
+
 								<div
 									className={`border-2 border-dashed rounded-lg p-4 text-center bg-slate-100 transition-colors duration-200 ${
 										isDragOver ? 'border-[#ef4444]' : 'border-gray-300'
@@ -601,18 +703,37 @@ export default function GameCustomizationPage() {
 							</div>
 						</div>
 
-						<div className='space-y-4'>
-							{formData.customLogoUrl && (
-								<div className='pt-4 border-t'>
-									<p className='text-sm font-medium mb-2'>Logo Preview</p>
-									<img
-										src={formData.customLogoUrl}
-										alt='Logo preview'
-										className='max-h-16 mx-auto'
-									/>
+						<div className='space-y-4 border-t pt-4  mb-4'>
+							<div>
+								<div className='flex items-center gap-2 mb-4'>
+									<Link className='h-4 w-4' />
+									<h4 className='text-sm font-semibold '>Logo Link</h4>
 								</div>
-							)}
+								<div className='space-y-2'>
+									<Label htmlFor='logo-link' className='text-sm'>
+										Logo Click-through URL
+									</Label>
+									<Input
+										id='logo-link'
+										type='url'
+										value={formData.customLogoLink}
+										onChange={(e) =>
+											setFormData((prev) => ({
+												...prev,
+												customLogoLink: e.target.value,
+											}))
+										}
+										placeholder='https://example.com'
+										className='text-sm bg-white'
+									/>
+									<p className='text-xs text-muted-foreground'>
+										Optional: Where users should go when clicking the logo
+									</p>
+								</div>
+							</div>
+						</div>
 
+						<div className='space-y-4'>
 							<div className='pt-4 border-t space-y-3'>
 								<div className='flex items-center gap-2'>
 									<Button

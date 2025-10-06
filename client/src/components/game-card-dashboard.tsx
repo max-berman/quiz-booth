@@ -1,27 +1,15 @@
 import { useState } from 'react'
 import { useLocation } from 'wouter'
-import {
-	Button,
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-	Badge,
-} from '@/lib/ui-imports-basic'
+import { Button, Card, CardContent } from '@/lib/ui-imports-basic'
 import {
 	Edit3,
-	BarChart3,
-	Calendar,
-	Building,
 	Database,
-	Gift,
-	Target,
-	Wrench,
 	Play,
 	Plus,
 	Trash2,
 	GalleryVerticalEnd,
 	Palette,
+	BarChart3,
 } from 'lucide-react'
 import { QRCodeModal } from '@/components/qr-code-modal'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
@@ -38,10 +26,16 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import type { Game } from '@shared/firebase-types'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
-import { isWebsite, formatWebsite } from '@/lib/website-utils'
+import { GameCardHeader } from './game-card-header'
+import { GameDetails } from './game-details'
+import {
+	getExistingPrizes,
+	useQuestionCount,
+	usePlayCount,
+} from '@/lib/game-utils'
 
 interface GameCardEnhancedProps {
 	game: Game
@@ -51,7 +45,7 @@ interface GameCardEnhancedProps {
 	) => void
 }
 
-export function GameCardEnhanced({
+export function GameCardDashboard({
 	game,
 	onEditPrizes,
 }: GameCardEnhancedProps) {
@@ -61,49 +55,18 @@ export function GameCardEnhanced({
 	const { toast } = useToast()
 	const queryClient = useQueryClient()
 
-	// Fetch actual question count for this game
+	// Use the new helper hooks
 	const {
 		data: actualQuestionCount,
 		isLoading: questionsLoading,
 		error: questionsError,
-	} = useQuery<number>({
-		queryKey: ['/api/games', game.id, 'questions'],
-		queryFn: async () => {
-			console.log(`Fetching questions for game ${game.id}`)
-			const response = await fetch(`/api/games/${game.id}/questions`)
-			if (!response.ok) {
-				throw new Error(`Failed to fetch questions: ${response.status}`)
-			}
-			const questions = await response.json()
-			console.log(`Questions response for game ${game.id}:`, questions)
-			return questions.length
-		},
-		enabled: !!game.id,
-		staleTime: 5 * 60 * 1000, // 5 minutes
-		retry: 2,
-	})
+	} = useQuestionCount(game.id)
 
-	// Fetch play count for this game
 	const {
 		data: playCount,
 		isLoading: playCountLoading,
 		error: playCountError,
-	} = useQuery<number>({
-		queryKey: ['/api/games', game.id, 'play-count'],
-		queryFn: async () => {
-			console.log(`Fetching play count for game ${game.id}`)
-			const response = await fetch(`/api/games/${game.id}/play-count`)
-			if (!response.ok) {
-				throw new Error(`Failed to fetch play count: ${response.status}`)
-			}
-			const data = await response.json()
-			console.log(`Play count response for game ${game.id}:`, data)
-			return data.count
-		},
-		enabled: !!game.id,
-		staleTime: 2 * 60 * 1000, // 2 minutes
-		retry: 2,
-	})
+	} = usePlayCount(game.id)
 
 	// Delete game mutation
 	const deleteGameMutation = useMutation({
@@ -141,16 +104,7 @@ export function GameCardEnhanced({
 	}
 
 	const handleEditPrizes = () => {
-		const existingPrizes = []
-		if (game.prizes && Array.isArray(game.prizes) && game.prizes.length > 0) {
-			existingPrizes.push(...game.prizes)
-		}
-		if (existingPrizes.length === 0) {
-			existingPrizes.push({
-				placement: '1st Place',
-				prize: '',
-			})
-		}
+		const existingPrizes = getExistingPrizes(game)
 		onEditPrizes(game.id, existingPrizes)
 	}
 
@@ -194,127 +148,41 @@ export function GameCardEnhanced({
 	return (
 		<>
 			<Card className='hover:shadow-xl hover:scale-[1.02] transition-all duration-200 border-2'>
-				<CardHeader className='p-4 px-4 pb-2 mb-2 bg-accent/50 rounded-md rounded-b-none'>
-					<div className='flex items-center flex-col '>
-						<CardTitle
-							title={game.companyName}
-							className='text-xl font-bold line-clamp-2 text-foreground mb-2'
-						>
-							{game.gameTitle || game.companyName}
-						</CardTitle>
-						<Badge
-							title={game.industry}
-							className='font-semibold whitespace-nowrap block truncate text-ellipsis overflow-hidden mb-2'
-						>
-							{game.industry}
-						</Badge>
-					</div>
-				</CardHeader>
-
+				<GameCardHeader game={game} />
 				<CardContent className='space-y-4 px-4'>
 					{/* Game Details */}
-					<div className='space-y-2 text-sm text-foreground'>
-						{/* Website/Company */}
-						<div className='flex items-center gap-2'>
-							<Building className='h-4 w-4 text-primary' />
-							<span className='truncate'>
-								{isWebsite(game.companyName)
-									? formatWebsite(game.companyName)
-									: game.companyName}
+					<GameDetails
+						game={game}
+						showPlayCount={true}
+						showModifiedDate={true}
+						showQuestionCount={false}
+					/>
+
+					{/* Question Count with Loading States */}
+					<div className='flex items-center gap-2'>
+						<GalleryVerticalEnd className='h-4 w-4' />
+						{questionsLoading ? (
+							<span className='text-muted-foreground'>
+								Loading questions...
 							</span>
-						</div>
-
-						<div className='flex items-center gap-2'>
-							<Calendar className='h-4 w-4' />
-							Created {new Date(game.createdAt).toLocaleDateString()}
-						</div>
-						{game.modifiedAt &&
-							new Date(game.modifiedAt).getTime() !==
-								new Date(game.createdAt).getTime() && (
-								<div className='flex items-center gap-2'>
-									<Calendar className='h-4 w-4' />
-									Modified {new Date(game.modifiedAt).toLocaleDateString()}
-								</div>
-							)}
-
-						<div className='flex items-center gap-2'>
-							<GalleryVerticalEnd className='h-4 w-4' />
-							{questionsLoading ? (
-								<span className='text-muted-foreground'>
-									Loading questions...
-								</span>
-							) : questionsError ? (
-								<span className='text-destructive text-xs'>
-									Error loading questions
-								</span>
-							) : actualQuestionCount !== undefined ? (
-								<>
-									{actualQuestionCount} questions • {game.difficulty} difficulty
-								</>
-							) : (
-								<>
-									{game.questionCount} questions • {game.difficulty} difficulty
-								</>
-							)}
-						</div>
-						{playCountLoading && (
-							<div className='flex items-center gap-2'>
-								<BarChart3 className='h-4 w-4' />
-								<span className='text-muted-foreground'>Loading plays...</span>
-							</div>
-						)}
-						{playCountError && (
-							<div className='flex items-center gap-2'>
-								<BarChart3 className='h-4 w-4 text-destructive' />
-								<span className='text-destructive text-xs'>
-									Error loading plays
-								</span>
-							</div>
-						)}
-						{playCount !== undefined &&
-							!playCountLoading &&
-							!playCountError && (
-								<div className='flex items-center gap-2'>
-									<BarChart3 className='h-4 w-4' />
-									{playCount} {playCount === 1 ? 'play' : 'plays'}
-								</div>
-							)}
-
-						{/* Prizes if configured */}
-						{game.prizes && Array.isArray(game.prizes) && (
-							<div className='flex gap-2 items-start'>
-								{game.prizes.length > 0 && <Gift className='h-4 w-4 mt-0.5' />}
-								<div className='flex flex-wrap gap-1 mr-2'>
-									{game.prizes.length > 0 &&
-										game.prizes.map((prize, index) => (
-											<span key={index}>
-												<strong>{prize.placement}</strong>: {prize.prize}
-												{index !== game.prizes!.length - 1 && <span> • </span>}
-											</span>
-										))}
-								</div>
-							</div>
-						)}
-
-						{/* Question Categories */}
-						{game.categories.length > 0 && (
-							<div className='flex gap-1 mt-2 items-start'>
-								<Target className='h-4 w-4 text-primary' />
-								<div className='flex flex-wrap gap-1'>
-									{game.categories.map((category, index) => (
-										<Badge key={index} variant='secondary' className='text-xs'>
-											{category}
-										</Badge>
-									))}
-								</div>
-							</div>
+						) : questionsError ? (
+							<span className='text-destructive text-xs'>
+								Error loading questions
+							</span>
+						) : actualQuestionCount !== undefined ? (
+							<>
+								{actualQuestionCount} questions • {game.difficulty} difficulty
+							</>
+						) : (
+							<>
+								{game.questionCount} questions • {game.difficulty} difficulty
+							</>
 						)}
 					</div>
 
 					{/* Action Buttons */}
 					<div className='space-y-3'>
 						{/* Management Actions */}
-
 						<div className='grid grid-cols-2 gap-2'>
 							{/* Public/Private Toggle */}
 							<div className='flex items-center justify-center border-primary border px-4 rounded-lg bg-background'>
@@ -330,9 +198,6 @@ export function GameCardEnhanced({
 								>
 									Public
 								</label>
-								{/* <span className='text-xs text-muted-foreground'>
-								{isPublic ? 'Public' : 'Private'}
-							</span> */}
 							</div>
 							<Button
 								variant='outline'

@@ -12,6 +12,7 @@ export interface GameCustomization {
   tertiaryColor: string;   // Background/neutral color
   quaternaryColor: string; // Card/component color
   customLogoUrl: string;   // Uploaded logo URL
+  customLogoLink: string;  // Logo click-through link
   isCustomized: boolean;   // Track if customization is applied
 }
 

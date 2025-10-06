@@ -90,6 +90,12 @@ export default function GamePage() {
 		? ((currentQuestionIndex + 1) / questions.length) * 100
 		: 0
 
+	// Determine which logo to show - use game data if available, otherwise use default
+	const logoUrl = game?.customization?.customLogoUrl || '/assets/logo.png'
+	const logoAlt = game?.customization?.customLogoUrl
+		? 'Custom game logo'
+		: 'NaknNick games logo'
+
 	// Apply customization styles
 	useEffect(() => {
 		if (game?.customization) {
@@ -310,16 +316,8 @@ export default function GamePage() {
 			<div className='flex-1 bg-background flex items-center justify-center'>
 				<div className='text-center'>
 					<p className='flex items-center justify-center my-4'>
-						<a
-							href='https://www.naknick.com'
-							target='_blank'
-							rel='noopener noreferrer'
-						>
-							<img
-								src='/assets/logo.png'
-								alt='NaknNick games logo'
-								className='h-32 w-auto '
-							/>
+						<a href='/' target='_blank' rel='noopener noreferrer'>
+							<img src={logoUrl} alt={logoAlt} className='h-32 w-auto' />
 						</a>
 					</p>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
@@ -329,6 +327,12 @@ export default function GamePage() {
 			</div>
 		)
 	}
+
+	/* <img
+									src={game?.customization.customLogoUrl}
+									alt='Custom game logo'
+									className='max-h-16 w-auto'
+								/> */
 
 	return (
 		<div className='flex-1 bg-background'>
@@ -355,7 +359,11 @@ export default function GamePage() {
 						</li>
 
 						<li className='w-2/4 flex justify-center'>
-							<a href='/' target='_blank' rel='noopener noreferrer'>
+							<a
+								href={game.customization?.customLogoLink || '/'}
+								target='_blank'
+								rel='noopener noreferrer'
+							>
 								{game.customization?.customLogoUrl ? (
 									<img
 										src={game.customization.customLogoUrl}

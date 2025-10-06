@@ -15,6 +15,7 @@ import {
 	Edit3,
 	Home,
 	Plus,
+	Palette,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import QRCode from 'qrcode'
@@ -32,6 +33,7 @@ import { PrizeEditModal } from '@/components/prize-edit-modal'
 import type { Game } from '@shared/firebase-types'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { auth } from '@/lib/firebase'
+import { getExistingPrizes } from '@/lib/game-utils'
 
 export default function GameCreated() {
 	const { id } = useParams<{ id: string }>()
@@ -125,18 +127,11 @@ export default function GameCreated() {
 	}
 
 	const handleEditPrizes = () => {
-		const existingPrizes = []
-		if (game?.prizes && Array.isArray(game.prizes) && game.prizes.length > 0) {
-			existingPrizes.push(...game.prizes)
+		if (game) {
+			const existingPrizes = getExistingPrizes(game)
+			setInitialPrizes(existingPrizes)
+			setEditingPrizes(id || null)
 		}
-		if (existingPrizes.length === 0) {
-			existingPrizes.push({
-				placement: '1st Place',
-				prize: '',
-			})
-		}
-		setInitialPrizes(existingPrizes)
-		setEditingPrizes(id || null)
 	}
 
 	if (isLoading) {
@@ -247,16 +242,18 @@ export default function GameCreated() {
 
 						{/* Action Buttons - Enhanced styling to match game-card-enhanced */}
 						<div className='space-y-2 mb-4'>
+							{/* Customization Action */}
 							<div className='grid grid-cols-3 gap-2'>
 								<Button
 									variant='outline'
 									className='w-full'
 									size='sm'
-									onClick={() => setLocation(`/game/${id}`)}
-									data-testid='button-play-game'
+									onClick={() => setLocation(`/game-customization/${game.id}`)}
+									data-testid={`button-customize-game-${game.id}`}
+									aria-label={`Customize appearance for ${game.companyName}`}
 								>
-									<Play className='mr-2 h-4 w-4' />
-									Play Game
+									<Palette className='mr-1 h-4 w-4' />
+									Customize
 								</Button>
 								<Button
 									variant='outline'
@@ -295,11 +292,11 @@ export default function GameCreated() {
 									variant='outline'
 									className='w-full'
 									size='sm'
-									onClick={() => setLocation('/dashboard')}
-									data-testid='button-dashboard'
+									onClick={() => setLocation(`/game/${id}`)}
+									data-testid='button-play-game'
 								>
-									<BarChart3 className='mr-1 h-4 w-4' />
-									Dashboard
+									<Play className='mr-2 h-4 w-4' />
+									Play Game
 								</Button>
 								<Button
 									variant='outline'

@@ -27,6 +27,7 @@ export const INDUSTRY_OPTIONS = [
   'Advertising & Marketing',
   'Telecommunications & Connectivity',
   'Environmental & Sustainability Services',
+  'Cannabis',
 
   // 🌍 Emerging & Sector-Specific
   'Agriculture & Agritech',

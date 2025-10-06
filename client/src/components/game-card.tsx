@@ -1,26 +1,12 @@
 import { useLocation } from 'wouter'
-import {
-	Button,
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-	Badge,
-} from '@/lib/ui-imports-basic'
-import {
-	Edit3,
-	BarChart3,
-	Calendar,
-	Building,
-	Database,
-	Gift,
-	Wrench,
-	Play,
-	Plus,
-} from 'lucide-react'
+import { Button, Card, CardContent } from '@/lib/ui-imports-basic'
+import { Edit3, BarChart3, Database, Play, Plus } from 'lucide-react'
 import { QRCodeModal } from '@/components/qr-code-modal'
 import { ShareEmbedModal } from '@/components/share-embed-modal'
 import type { Game } from '@shared/firebase-types'
+import { GameCardHeader } from './game-card-header'
+import { GameDetails } from './game-details'
+import { getExistingPrizes } from '@/lib/game-utils'
 
 interface GameCardProps {
 	game: Game
@@ -34,66 +20,25 @@ export function GameCard({ game, onEditPrizes }: GameCardProps) {
 	const [, setLocation] = useLocation()
 
 	const handleEditPrizes = () => {
-		const existingPrizes = []
-		if (game.prizes && Array.isArray(game.prizes) && game.prizes.length > 0) {
-			existingPrizes.push(...game.prizes)
-		}
-		if (existingPrizes.length === 0) {
-			existingPrizes.push({
-				placement: '1st Place',
-				prize: '',
-			})
-		}
+		const existingPrizes = getExistingPrizes(game)
 		onEditPrizes(game.id, existingPrizes)
 	}
 
 	return (
 		<Card className='hover:shadow-xl hover:scale-[1.02] transition-all duration-200 border-2'>
-			<CardHeader className='pb-3 px-4 pt-2'>
-				<div className='flex items-center flex-col '>
-					<CardTitle
-						title={game.companyName}
-						className='text-xl font-bold line-clamp-2 text-foreground mb-1'
-					>
-						{game.companyName}
-					</CardTitle>
-					<Badge
-						title={game.industry}
-						className='font-semibold whitespace-nowrap block truncate text-ellipsis overflow-hidden '
-					>
-						{game.industry}
-					</Badge>
-				</div>
-			</CardHeader>
+			<GameCardHeader
+				game={game}
+				showBackground={false}
+				className='pb-3 px-4 pt-2'
+			/>
 			<CardContent className='space-y-4 px-4'>
 				{/* Game Details */}
-				<div className='space-y-2 text-sm text-foreground'>
-					<div className='flex items-center gap-2'>
-						<Calendar className='h-4 w-4' />
-						Created {new Date(game.createdAt).toLocaleDateString()}
-					</div>
-					{game.modifiedAt &&
-						new Date(game.modifiedAt).getTime() !==
-							new Date(game.createdAt).getTime() && (
-							<div className='flex items-center gap-2'>
-								<Calendar className='h-4 w-4' />
-								Modified {new Date(game.modifiedAt).toLocaleDateString()}
-							</div>
-						)}
-					<div className='flex items-center gap-2'>
-						<Building className='h-4 w-4' />
-						{game.questionCount} questions • {game.difficulty} difficulty
-					</div>
-					{game.categories.length > 0 && (
-						<div className='flex flex-wrap gap-1 mt-2'>
-							{game.categories.map((category, index) => (
-								<Badge key={index} variant='secondary' className='text-xs'>
-									{category}
-								</Badge>
-							))}
-						</div>
-					)}
-				</div>
+				<GameDetails
+					game={game}
+					showPlayCount={false}
+					showModifiedDate={true}
+					showQuestionCount={true}
+				/>
 
 				{/* Action Buttons */}
 				<div className='space-y-2 pt-2'>

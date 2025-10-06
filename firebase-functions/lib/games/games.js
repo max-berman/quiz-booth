@@ -74,7 +74,7 @@ exports.createGame = functions.runWith({
         throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
     }
     const userId = context.auth.uid;
-    const { title, description, questionCount, difficulty, categories, companyName, productDescription, prizes } = data;
+    const { title, description, questionCount, difficulty, categories, companyName, productDescription, prizes, customCategoryDescription } = data;
     try {
         // Rate limiting check
         await (0, rate_limit_1.withRateLimit)(rate_limit_1.rateLimitConfigs.gameCreation)(data, context);
@@ -109,6 +109,7 @@ exports.createGame = functions.runWith({
             questionCount,
             difficulty,
             categories,
+            customCategoryDescription: customCategoryDescription || null,
             prizes: prizesObject,
             creatorKey,
             userId,

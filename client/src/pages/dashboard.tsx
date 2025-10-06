@@ -15,7 +15,7 @@ import {
 } from '@/lib/ui-imports-basic'
 import { Plus, ArrowLeft, Building } from 'lucide-react'
 import { PrizeEditModal } from '@/components/prize-edit-modal'
-import { GameCardEnhanced } from '@/components/game-card-enhanced'
+import { GameCardDashboard } from '@/components/game-card-dashboard'
 import type { Game } from '@shared/firebase-types'
 
 export default function Dashboard() {
@@ -181,7 +181,7 @@ export default function Dashboard() {
 				{allGames.length > 0 ? (
 					<div className='grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4'>
 						{allGames.map((game) => (
-							<GameCardEnhanced
+							<GameCardDashboard
 								key={game.id}
 								game={game}
 								onEditPrizes={handleEditPrizes}

@@ -170,6 +170,11 @@ export default function FAQ() {
 					answer:
 						'The leaderboard creates friendly competition that increases engagement and repeat plays. Attendees often return to improve their scores, giving you multiple touchpoints and increasing the likelihood of meaningful conversations at your booth.',
 				},
+				{
+					question: 'How are scores calculated in QuizBooth?',
+					answer:
+						'QuizBooth uses a sophisticated scoring system that rewards both accuracy and speed. For each correct answer, you earn: 1) Base Points: 100 points for getting the answer right, 2) Time Bonus: Up to 60 bonus points based on how quickly you answer (faster answers earn more points), 3) Streak Bonus: 10 points per consecutive correct answer in your current streak. This system encourages both knowledge and quick thinking, creating engaging competition while ensuring fair scoring across all players.',
+				},
 			],
 		},
 		{

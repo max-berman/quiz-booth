@@ -126,11 +126,19 @@ export default function Leaderboard() {
 
 						<li className='w-2/4 flex justify-center'>
 							<a href='/' target='_blank' rel='noopener noreferrer'>
-								<img
-									src='/assets/naknick-logo.png'
-									alt='QuizBooth.games logo'
-									className='max-h-16 w-auto'
-								/>
+								{game?.customization?.customLogoUrl ? (
+									<img
+										src={game.customization.customLogoUrl}
+										alt='Custom game logo'
+										className='max-h-16 w-auto'
+									/>
+								) : (
+									<img
+										src='/assets/naknick-logo.png'
+										alt='QuizBooth.games logo'
+										className='max-h-16 w-auto'
+									/>
+								)}
 							</a>
 						</li>
 

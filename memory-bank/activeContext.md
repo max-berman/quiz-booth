@@ -11,6 +11,7 @@
 - **API Endpoint Development**: Added game-specific API endpoints for questions count and play count
 - **Session Management Enhancement**: Improved game session hook with comprehensive state management
 - **Performance Monitoring**: Ongoing focus on timer reliability and user experience
+- **Firebase Routing Fix**: Resolved 404 error for game-customization page by adding missing route to Firebase hosting configuration
 
 ### Current Development State
 
@@ -124,6 +125,32 @@ useEffect(() => {
 - **Deployment**: Automated deployment scripts with SSR
 - **Testing Strategy**: Unit, integration, and end-to-end testing
 - **Documentation**: Comprehensive README and memory bank
+
+### Firebase Routing Configuration (CRITICAL)
+
+**IMPORTANT**: When creating new pages with client-side routing, you MUST add the route to Firebase hosting rewrites configuration in `firebase.json` to prevent 404 errors on hard refresh.
+
+**Problem**: Client-side routing works when navigating from internal links but fails on hard refresh because Firebase Hosting doesn't know how to handle the route.
+
+**Solution**: Add the route pattern to the `rewrites` array in `firebase.json`:
+
+```json
+{
+	"source": "/your-new-route/**",
+	"function": "ssrHandler"
+}
+```
+
+**Example**: For `/game-customization/:id` route, add:
+
+```json
+{
+	"source": "/game-customization/**",
+	"function": "ssrHandler"
+}
+```
+
+**Required for all new routes**: Any new page route added to the React router must also be added to Firebase hosting configuration.
 
 ### Performance Patterns
 
