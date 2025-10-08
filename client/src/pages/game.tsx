@@ -277,6 +277,27 @@ export default function GamePage() {
 		}
 	}
 
+	// Keyboard event handler for SPACE key
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			// Only trigger if SPACE key is pressed and question is answered
+			if (event.code === 'Space' || event.key === ' ' || event.keyCode === 32) {
+				event.preventDefault() // Prevent default space behavior (scrolling)
+				if (isAnswered) {
+					handleNextQuestion()
+				}
+			}
+		}
+
+		// Add event listener
+		document.addEventListener('keydown', handleKeyDown)
+
+		// Cleanup function to remove event listener
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown)
+		}
+	}, [isAnswered, handleNextQuestion])
+
 	// Check for permission denied errors (game is private)
 	if (gameError || questionsError) {
 		const error = gameError || questionsError

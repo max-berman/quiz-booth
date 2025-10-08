@@ -67,7 +67,7 @@ export function ShareEmbedModal({
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>
-				<Button variant='secondary' size='sm'>
+				<Button variant='outline' size='sm'>
 					<Share className='mr-1 h-4 w-4' />
 					{isBuilder ? 'Share Trivia Builder' : 'Share'}
 				</Button>

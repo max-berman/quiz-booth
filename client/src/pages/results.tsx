@@ -14,6 +14,7 @@ import {
 	Check,
 	AlertCircle,
 	Loader2,
+	Home,
 } from 'lucide-react'
 import { Link } from 'wouter'
 import { queryClient } from '@/lib/queryClient'
@@ -24,6 +25,10 @@ import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { formatTime } from '@/lib/time-utils'
 import { hasSubmittedScore, markScoreSubmitted } from '@/lib/fingerprint-utils'
 import { loadGameResults, hasValidResults } from '@/lib/session-utils'
+import {
+	applyGameCustomization,
+	cleanupGameCustomization,
+} from '@/lib/color-utils'
 
 export default function Results() {
 	const { id } = useParams()
@@ -87,6 +92,24 @@ export default function Results() {
 		},
 		enabled: !!id,
 	})
+
+	// Apply customization styles
+	useEffect(() => {
+		if (game?.customization) {
+			applyGameCustomization(game.customization)
+		}
+
+		// Cleanup function to reset styles
+		return () => {
+			cleanupGameCustomization()
+		}
+	}, [game?.customization])
+
+	// Determine which logo to show - use game data if available, otherwise use default
+	const logoUrl = game?.customization?.customLogoUrl || '/assets/logo.png'
+	const logoAlt = game?.customization?.customLogoUrl
+		? 'Custom game logo'
+		: 'NaknNick games logo'
 
 	const saveScoreMutation = useMutation({
 		mutationFn: async (playerData: any) => {
@@ -161,11 +184,18 @@ export default function Results() {
 
 		saveScoreMutation.mutate(playerData)
 	}
-
 	return (
-		<div className='flex-1 py-4 flex items-center'>
+		<div className='flex-1 py-4 flex  items-center justify-center'>
 			<div className='w-full md:max-w-4xl mx-auto px-2 md:px-6'>
-				<Card className='shadow-sm  border-border'>
+				<div className=' my-4 text-center self-start justify-self-start'>
+					<Link href='/'>
+						<Button className='px-6 py-3'>
+							<Home className='mr-2 h-4 w-4' />
+							Home
+						</Button>
+					</Link>
+				</div>
+				<Card className='shadow-sm mb-4 border-border'>
 					<CardContent className='p-4 md:p-8 text-center'>
 						<div className='mb-4'>
 							<div className=' w-16 h-16 md:w-20 md:h-20 border-primary border-2 bg-background  text-4xl rounded-full flex items-center justify-center mx-auto mb-4'>
@@ -292,7 +322,7 @@ export default function Results() {
 									{/* Primary Actions Row */}
 									<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
 										<Button
-											variant='secondary'
+											variant='outline'
 											onClick={() => setLocation(`/game/${id}`)}
 											className='px-6 py-3 w-full'
 											data-testid='button-play-again'
@@ -301,7 +331,7 @@ export default function Results() {
 											Play Again
 										</Button>
 										<Button
-											variant='secondary'
+											variant='outline'
 											onClick={() => setLocation(`/leaderboard/${id}`)}
 											className='px-6 py-3 w-full'
 											data-testid='button-view-leaderboard'
@@ -317,24 +347,25 @@ export default function Results() {
 											gameId={id}
 											gameTitle={game?.companyName}
 										/>
-										{/* Creator-only links */}
-										{localStorage.getItem(`game-${id}-creator-key`) && (
-											<Button
-												onClick={() => setLocation(`/edit-questions/${id}`)}
-												variant='outline'
-												className='px-6 py-3 w-full'
-												data-testid='button-edit-questions'
-											>
-												<Edit3 className='mr-2 h-4 w-4' />
-												Edit Questions
-											</Button>
-										)}
 									</div>
 								</div>
 							</>
 						)}
 					</CardContent>
 				</Card>
+				<div className='flex items-center justify-center mb-2'>
+					<a
+						href='https://www.naknick.com'
+						target='_blank'
+						rel='noopener noreferrer'
+					>
+						<img
+							src='/assets/logo.png'
+							alt='NaknNick games logo'
+							className='h-32 w-auto'
+						/>
+					</a>
+				</div>
 			</div>
 		</div>
 	)

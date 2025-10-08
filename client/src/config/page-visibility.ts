@@ -7,7 +7,7 @@
 export const PAGES_WITHOUT_HEADER = [
   '/game/', // Game play pages
   '/game-customization/', // Game customization pages
-  //'/results/', // Results page
+  '/results/', // Results page
 ]
 
 // Pages that should hide the footer (immersive experience)
@@ -15,7 +15,7 @@ export const PAGES_WITHOUT_FOOTER = [
   '/game/', // Game play pages
   '/leaderboard/', // Leaderboard pages
   '/game-customization/', // Game customization pages
-  //'/results/', // Results page
+  '/results/', // Results page
 ]
 
 // Pages that should show header even if they match patterns above

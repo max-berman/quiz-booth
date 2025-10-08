@@ -62,7 +62,7 @@ QuizBooth is a platform that helps businesses create engaging trivia games for e
 - Performance improvements
 
 ## Contact Information
-For business inquiries, visit the main website or use the contact form on the homepage.
+For business inquiries, visit the main website or use the contact form on the page.
 
 ## Sitemap Reference
 For complete URL structure, see: https://quizbooth.games/sitemap.xml
