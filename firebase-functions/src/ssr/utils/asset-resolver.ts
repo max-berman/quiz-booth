@@ -19,17 +19,35 @@ export interface ResolvedAssets {
  * to match the actual generated file names
  */
 const CURRENT_ASSETS: ResolvedAssets = {
-  cssFile: 'index-Bgbe2GQi.css',
-  jsFile: 'index-TNabJ5o-.js',
+  cssFile: 'index-CoieYAlj.css',
+  jsFile: 'index-CKC9Za2P.js',
   vendorFiles: {
     react: 'vendor-react-C8w-UNLI.js',
     radix: 'vendor-radix-DVK6rLv8.js',
     query: 'vendor-query-DIWBT0ED.js',
     charts: 'vendor-charts-BybkUXTr.js',
-    icons: 'vendor-icons-lCX8gI2t.js',
+    icons: 'vendor-icons-_mPLIzkG.js',
     forms: 'vendor-forms-pX7iQRS_.js'
   }
 };
+
+/**
+ * Generate deployment hash based on current asset file names
+ * This ensures functions are redeployed when assets change
+ */
+function generateDeploymentHash(assets: ResolvedAssets): string {
+  const assetString = JSON.stringify(assets);
+  // Simple hash function to create a unique identifier
+  let hash = 0;
+  for (let i = 0; i < assetString.length; i++) {
+    const char = assetString.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString(36);
+}
+
+export const DEPLOYMENT_HASH = generateDeploymentHash(CURRENT_ASSETS);
 
 /**
  * Get resolved assets

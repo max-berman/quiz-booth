@@ -336,7 +336,7 @@ interface ApiError {
    - Run `npm run build:client` and `npm run build:functions` to verify builds work
    - Test the application locally with emulators to ensure functionality
 
-2. **ALWAYS use `npm run deploy:all` for production deployments**
+2. **ALWAYS use `npm run deploy:prod` for production deployments**
    - This script invokes all relevant build and deploy scripts
    - Ensures Assets and SSR pages get correct content types
    - Ensures assets get matching build file names via SSR asset resolver

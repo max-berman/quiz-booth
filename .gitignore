@@ -25,3 +25,8 @@ vite.config.ts.*
 *.tar.gz
 attached_assets/
 .continue/
+# Firebase emulator data
+emulator-data/
+.firebase/
+# Firebase Functions build artifacts
+firebase-functions/lib/

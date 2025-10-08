@@ -4,11 +4,12 @@
 
 ### Recent Development Activities
 
+- **Asset Serving Fix**: Fixed production deployment asset serving issues by removing incorrect Firebase hosting rewrite rule that was preventing static assets from being served with correct MIME types
 - **Security Vulnerability Fix**: Implemented secure results transfer system to prevent URL parameter manipulation
 - **Session-Based Results Storage**: Replaced insecure URL parameter passing with secure localStorage session storage
 - **Server-Side Score Validation**: Added comprehensive validation in Firebase functions to detect and prevent score manipulation
 - **Environment Configuration System**: Implemented comprehensive environment-specific configuration for development and production environments
-- **SSR Asset Resolution Fix**: Resolved production deployment issues with SSR serving incorrect asset file names
+- **SSR Asset Resolution Fix**: Resolved production deployment issues with SSR serving incorrect asset file names by implementing automated asset resolver updates and forced deployment
 - **UI Component Enhancement**: Improved game preview, customization, game, and leaderboard components with better styling and functionality
 - **Color Utilities**: Created comprehensive color-utils.ts for consistent color management across the application
 - **Memory Bank Update**: Comprehensive review and update of all project documentation
@@ -37,6 +38,44 @@
 4. **Race Condition Resolution**: Fixed timer initialization race condition between session loading and question reset
 5. **Safety Buffer**: Added 5-second safety buffer when resuming timers below 5 seconds
 6. **SSR Asset Resolution**: Implemented automated asset file name updates for SSR to prevent 404 errors
+7. **Forced Deployment**: Added `--force` flag to Firebase deployment to prevent skipping when asset resolver changes
+
+### Production Deployment Asset Resolution Fix
+
+**Problem Identified:**
+
+- Production site was serving old asset file names (`index-Bgbe2GQi.css`, `vendor-icons-lCX8gI2t.js`, `index-TNabJ5o-.js`)
+- SSR handler was using outdated asset references causing 404 errors and incorrect MIME types
+- Firebase Functions deployment was being skipped even when asset resolver was updated
+
+**Root Causes:**
+
+1. **Hardcoded asset file names** in SSR handler that weren't being updated automatically
+2. **Firebase Functions deployment skipping** when Firebase didn't detect changes
+3. **Caching issues** where old SSR handler responses were being served
+
+**Solution Implemented:**
+
+1. **Automated Asset Resolver Updates**: `scripts/update-ssr-assets.js` automatically updates asset file names after each build
+2. **Deployment Hash System**: Automatic hash generation based on current asset file names to force redeployment
+3. **Forced Deployment**: Added `--force` flag to `firebase deploy` command to prevent skipping
+4. **Hosting Cache Clear**: Redeployed hosting to clear cached responses
+
+**Critical Fix in Deployment Script:**
+
+```bash
+# BEFORE: Could skip deployment if Firebase doesn't detect changes
+firebase deploy
+
+# AFTER: Forces deployment even when no changes detected
+firebase deploy --force
+```
+
+**Deployment Process Now:**
+
+1. Build client → Update SSR assets → Rebuild functions → Force deployment
+2. Automatic deployment hash ensures functions are redeployed when assets change
+3. Production always serves correct asset file names with proper MIME types
 
 ### Timer System Implementation
 
@@ -267,7 +306,7 @@ useEffect(() => {
   - Run `npm run build:client` and `npm run build:functions` to verify builds work
   - Test the application locally with emulators to ensure functionality
 
-- [ ] **ALWAYS use `npm run deploy:all` for production deployments**
+- [ ] **ALWAYS use `npm run deploy:prod` for production deployments**
   - This script invokes all relevant build and deploy scripts
   - Ensures Assets and SSR pages get correct content types
   - Ensures assets get matching build file names via SSR asset resolver

@@ -3,7 +3,13 @@ import { renderPage } from './renderer';
 import { fetchPageData } from './utils/firestore-ssr';
 import { getResolvedAssets } from './utils/asset-resolver';
 
+// Import deployment hash to ensure functions are redeployed when assets change
+import { DEPLOYMENT_HASH } from './utils/asset-resolver';
+
 export const ssrHandler = functions.https.onRequest(async (req, res) => {
+  // SSR handler for serving React pages with correct asset references
+  // Deployment hash: ${DEPLOYMENT_HASH} - ensures redeployment when assets change
+  // Current deployment hash: ${DEPLOYMENT_HASH}
   try {
     const path = req.path;
 
@@ -26,6 +32,7 @@ export const ssrHandler = functions.https.onRequest(async (req, res) => {
     // Generate final HTML
     const finalHtml = `
 <!DOCTYPE html>
+<!-- Deployment Hash: ${DEPLOYMENT_HASH} -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">

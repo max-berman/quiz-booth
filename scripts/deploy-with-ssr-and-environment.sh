@@ -95,7 +95,7 @@ else
   mv dist/public/index.html dist/public/index.html.bak
 
   echo "📤 Deploying to Firebase Production..."
-  firebase deploy
+  firebase deploy --force
 
   # Restore static index.html for development
   echo "🔄 Restoring static index.html for development..."
