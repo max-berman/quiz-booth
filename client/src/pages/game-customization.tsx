@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
+import { httpsCallable } from 'firebase/functions'
+import { functions } from '@/lib/firebase'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import {
 	Palette,
@@ -19,7 +21,7 @@ import {
 } from 'lucide-react'
 import { GamePreview } from '@/components/game-preview'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { storage } from '@/lib/firebase'
+import { storage, auth } from '@/lib/firebase'
 import { colorToHex, isValidHexColor } from '@/lib/color-utils'
 import type { Game, GameCustomization } from '@shared/firebase-types'
 
@@ -260,11 +262,11 @@ export default function GameCustomizationPage() {
 			return
 		}
 
-		if (file.size > 1 * 1024 * 1024) {
-			// 1MB limit
+		if (file.size > 5 * 1024 * 1024) {
+			// 5MB limit (increased from 1MB for future flexibility)
 			toast({
 				title: 'File Too Large',
-				description: 'Please upload an image smaller than 1MB.',
+				description: 'Please upload an image smaller than 5MB.',
 				variant: 'destructive',
 			})
 			return
@@ -275,20 +277,51 @@ export default function GameCustomizationPage() {
 			const objectUrl = URL.createObjectURL(file)
 			setFormData((prev) => ({ ...prev, customLogoUrl: objectUrl }))
 
-			// Check if storage is available
-			if (!storage) {
+			// Get current user token for authentication
+			const currentUser = auth.currentUser
+			if (!currentUser) {
+				throw new Error('User not authenticated')
+			}
+			const token = await currentUser.getIdToken()
+
+			// Create form data for direct upload
+			const formData = new FormData()
+			formData.append('gameId', id!)
+			formData.append('uploadType', 'LOGO')
+			formData.append('fileName', file.name)
+			formData.append('file', file)
+
+			// Use direct upload function to avoid CORS issues
+			// Use emulator URL in development, production URL otherwise
+			const isDevelopment = import.meta.env.DEV
+			const uploadUrl = isDevelopment
+				? 'http://localhost:5001/trivia-games-7a81b/us-central1/directImageUpload'
+				: 'https://us-central1-trivia-games-7a81b.cloudfunctions.net/directImageUpload'
+
+			const response = await fetch(uploadUrl, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+				body: formData,
+			})
+
+			if (!response.ok) {
+				const errorData = await response.json()
+				console.error('Upload failed:', {
+					status: response.status,
+					statusText: response.statusText,
+					error: errorData,
+				})
 				throw new Error(
-					'Firebase Storage is not available. Please ensure the Storage emulator is running.'
+					`Upload failed with status: ${response.status} - ${response.statusText}`
 				)
 			}
 
-			// Upload to Firebase Storage
-			const storageRef = ref(storage, `game-logos/${id}/${file.name}`)
-			const snapshot = await uploadBytes(storageRef, file)
-			const downloadURL = await getDownloadURL(snapshot.ref)
+			const result = await response.json()
 
 			// Update form data with the permanent URL
-			setFormData((prev) => ({ ...prev, customLogoUrl: downloadURL }))
+			setFormData((prev) => ({ ...prev, customLogoUrl: result.imageUrl }))
 
 			toast({
 				title: 'Logo Uploaded',
@@ -299,15 +332,22 @@ export default function GameCustomizationPage() {
 
 			let errorMessage = 'Failed to upload logo. Please try again.'
 			if (error instanceof Error) {
-				if (error.message.includes('Storage is not available')) {
+				if (error.message.includes('permission-denied')) {
 					errorMessage =
-						'Firebase Storage is not available. Please ensure the Storage emulator is running (npm run emulate).'
-				} else if (error.message.includes('permission-denied')) {
+						'You do not have permission to upload images for this game.'
+				} else if (error.message.includes('not-found')) {
 					errorMessage =
-						'Permission denied. Please check your Firebase Storage rules.'
+						'Game not found. Please refresh the page and try again.'
 				} else if (error.message.includes('network')) {
 					errorMessage =
 						'Network error. Please check your connection and try again.'
+				} else if (error.message.includes('invalid-argument')) {
+					errorMessage = 'Invalid file type or upload configuration.'
+				} else if (error.message.includes('403')) {
+					errorMessage =
+						'Upload permission denied. Please check your authentication.'
+				} else if (error.message.includes('401')) {
+					errorMessage = 'Authentication failed. Please log in again.'
 				}
 			}
 

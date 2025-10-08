@@ -74,38 +74,38 @@ export function CreatorHeader() {
 					<div className='hidden lg:flex items-center gap-2'>
 						{/* {!isHomePage && (
 							<MenuLink href='/' data-testid='button-home'>
-								<Home className='mr-2 h-4 w-4' />
+								<Home className=' h-4 w-4' />
 								Home
 							</MenuLink>
 						)} */}
 
 						{/* Quiz Games - visible to all users */}
 						<MenuLink href='/quiz-games' data-testid='button-quiz-games'>
-							<Gamepad2 className='mr-2 h-4 w-4' />
+							<Gamepad2 className=' h-4 w-4' />
 							Quiz Games
 						</MenuLink>
 
 						{/* About page */}
 						<MenuLink href='/about' data-testid='button-about'>
-							<Info className='mr-2 h-4 w-4' />
+							<Info className=' h-4 w-4' />
 							About
 						</MenuLink>
 
 						{/* FAQ page */}
 						<MenuLink href='/faq' data-testid='button-faq'>
-							<HelpCircle className='mr-2 h-4 w-4' />
+							<HelpCircle className=' h-4 w-4' />
 							FAQ
 						</MenuLink>
 
 						{/* Pricing page */}
 						<MenuLink href='/pricing' data-testid='button-pricing'>
-							<DollarSign className='mr-2 h-4 w-4' />
+							<DollarSign className=' h-4 w-4' />
 							Pricing
 						</MenuLink>
 
 						{/* Contact page */}
 						<MenuLink href='/contact' data-testid='button-contact'>
-							<Mail className='mr-2 h-4 w-4' />
+							<Mail className=' h-4 w-4' />
 							Contact
 						</MenuLink>
 
@@ -113,7 +113,7 @@ export function CreatorHeader() {
 						{isAuthenticated && (
 							<>
 								<MenuLink href='/dashboard' data-testid='button-dashboard'>
-									<BarChart3 className='mr-2 h-4 w-4' />
+									<BarChart3 className=' h-4 w-4' />
 									Dashboard
 								</MenuLink>
 							</>
@@ -140,7 +140,7 @@ export function CreatorHeader() {
 								align='end'
 							>
 								<SimpleDropdownItem onClick={handleSignOut}>
-									<LogOut className='mr-2 h-4 w-4' />
+									<LogOut className=' h-4 w-4' />
 									Sign Out
 								</SimpleDropdownItem>
 							</SimpleDropdown>
@@ -151,7 +151,7 @@ export function CreatorHeader() {
 								variant='ghost'
 								data-testid='button-sign-in'
 							>
-								<LogIn className='mr-2 h-4 w-4' />
+								<LogIn className=' h-4 w-4' />
 								Sign In
 							</MenuLink>
 						)}
@@ -188,7 +188,7 @@ export function CreatorHeader() {
 								setIsSidebarOpen(false)
 							}}
 						>
-							<Home className='mr-2 h-4 w-4' />
+							<Home className=' h-4 w-4' />
 							Home
 						</Button>
 						<Button
@@ -199,7 +199,7 @@ export function CreatorHeader() {
 								setIsSidebarOpen(false)
 							}}
 						>
-							<Gamepad2 className='mr-2 h-4 w-4' />
+							<Gamepad2 className=' h-4 w-4' />
 							Quiz Games
 						</Button>
 						<Button
@@ -210,7 +210,7 @@ export function CreatorHeader() {
 								setIsSidebarOpen(false)
 							}}
 						>
-							<Info className='mr-2 h-4 w-4' />
+							<Info className=' h-4 w-4' />
 							About
 						</Button>
 						<Button
@@ -221,7 +221,7 @@ export function CreatorHeader() {
 								setIsSidebarOpen(false)
 							}}
 						>
-							<HelpCircle className='mr-2 h-4 w-4' />
+							<HelpCircle className=' h-4 w-4' />
 							FAQ
 						</Button>
 						<Button
@@ -232,7 +232,7 @@ export function CreatorHeader() {
 								setIsSidebarOpen(false)
 							}}
 						>
-							<DollarSign className='mr-2 h-4 w-4' />
+							<DollarSign className=' h-4 w-4' />
 							Pricing
 						</Button>
 						<Button
@@ -243,7 +243,7 @@ export function CreatorHeader() {
 								setIsSidebarOpen(false)
 							}}
 						>
-							<Mail className='mr-2 h-4 w-4' />
+							<Mail className=' h-4 w-4' />
 							Contact
 						</Button>
 						{isAuthenticated && (
@@ -255,32 +255,32 @@ export function CreatorHeader() {
 									setIsSidebarOpen(false)
 								}}
 							>
-								<BarChart3 className='mr-2 h-4 w-4' />
+								<BarChart3 className=' h-4 w-4' />
 								Dashboard
 							</Button>
 						)}
 						{isAuthenticated ? (
 							<Button
-								variant='ghost'
+								variant='outline'
 								className='w-full justify-start'
 								onClick={() => {
 									handleSignOut()
 									setIsSidebarOpen(false)
 								}}
 							>
-								<LogOut className='mr-2 h-4 w-4' />
+								<LogOut className=' h-4 w-4' />
 								Sign Out
 							</Button>
 						) : (
 							<Button
-								variant='ghost'
+								variant='outline'
 								className='w-full justify-start'
 								onClick={() => {
 									setLocation('/auth/sign-in')
 									setIsSidebarOpen(false)
 								}}
 							>
-								<LogIn className='mr-2 h-4 w-4' />
+								<LogIn className=' h-4 w-4' />
 								Sign In
 							</Button>
 						)}

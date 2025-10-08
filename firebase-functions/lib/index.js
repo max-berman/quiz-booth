@@ -23,14 +23,36 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendContactForm = exports.getGamePlayCount = exports.getGameQuestionsCount = exports.ssrHandler = exports.userSetup = exports.resetUsage = exports.getUsage = exports.trackUsage = exports.addQuestion = exports.deleteQuestion = exports.updateQuestion = exports.getQuestions = exports.generateSingleQuestion = exports.generateQuestions = exports.deleteGame = exports.getPublicGamesCount = exports.getPublicGames = exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
-// import * as functions from 'firebase-functions';
+exports.sendContactForm = exports.getGamePlayCount = exports.getGameQuestionsCount = exports.ssrHandler = exports.userSetup = exports.resetUsage = exports.getUsage = exports.trackUsage = exports.addQuestion = exports.deleteQuestion = exports.updateQuestion = exports.getQuestions = exports.generateSingleQuestion = exports.generateQuestions = exports.directImageUpload = exports.deleteGameImage = exports.handleImageUploadComplete = exports.generateImageUploadUrl = exports.deleteGame = exports.getPublicGamesCount = exports.getPublicGames = exports.getGamePlayers = exports.getGameLeaderboard = exports.savePlayerScore = exports.updateGamePrizes = exports.updateGamePublicStatus = exports.updateGameTitle = exports.updateGame = exports.getGamesByUser = exports.getGame = exports.createGame = void 0;
 const admin = __importStar(require("firebase-admin"));
 const dotenv = __importStar(require("dotenv"));
 // Load environment variables
 dotenv.config();
 // Initialize Firebase Admin
-admin.initializeApp();
+// For emulator environment, we need to provide explicit configuration
+if (process.env.FUNCTIONS_EMULATOR === 'true' || process.env.FIRESTORE_EMULATOR_HOST) {
+    // Initialize with emulator configuration
+    admin.initializeApp({
+        projectId: 'trivia-games-7a81b',
+        storageBucket: 'trivia-games-7a81b.appspot.com'
+    });
+    // Configure emulator settings
+    process.env.STORAGE_EMULATOR_HOST = 'localhost:9199';
+    // Configure Firebase Admin to use emulator for Firestore
+    admin.firestore().settings({
+        host: 'localhost:8081',
+        ssl: false
+    });
+    console.log('Firebase Admin initialized with emulator configuration');
+}
+else {
+    // Initialize for production with explicit configuration
+    admin.initializeApp({
+        projectId: 'trivia-games-7a81b',
+        storageBucket: 'trivia-games-7a81b.appspot.com'
+    });
+    console.log('Firebase Admin initialized for production - image upload fix deployed');
+}
 // Import function modules
 const games_1 = require("./games/games");
 Object.defineProperty(exports, "createGame", { enumerable: true, get: function () { return games_1.createGame; } });
@@ -46,6 +68,12 @@ Object.defineProperty(exports, "getGamePlayers", { enumerable: true, get: functi
 Object.defineProperty(exports, "getPublicGames", { enumerable: true, get: function () { return games_1.getPublicGames; } });
 Object.defineProperty(exports, "getPublicGamesCount", { enumerable: true, get: function () { return games_1.getPublicGamesCount; } });
 Object.defineProperty(exports, "deleteGame", { enumerable: true, get: function () { return games_1.deleteGame; } });
+const upload_logo_1 = require("./games/upload-logo");
+Object.defineProperty(exports, "generateImageUploadUrl", { enumerable: true, get: function () { return upload_logo_1.generateImageUploadUrl; } });
+Object.defineProperty(exports, "handleImageUploadComplete", { enumerable: true, get: function () { return upload_logo_1.handleImageUploadComplete; } });
+Object.defineProperty(exports, "deleteGameImage", { enumerable: true, get: function () { return upload_logo_1.deleteGameImage; } });
+const direct_upload_1 = require("./games/direct-upload");
+Object.defineProperty(exports, "directImageUpload", { enumerable: true, get: function () { return direct_upload_1.directImageUpload; } });
 const questions_1 = require("./questions/questions");
 Object.defineProperty(exports, "generateQuestions", { enumerable: true, get: function () { return questions_1.generateQuestions; } });
 Object.defineProperty(exports, "generateSingleQuestion", { enumerable: true, get: function () { return questions_1.generateSingleQuestion; } });

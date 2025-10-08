@@ -110,7 +110,7 @@
           },
           {
             "key": "Cross-Origin-Opener-Policy",
-            "value": "same-origin-allow-popups"
+            "value": "unsafe-none"
           },
           {
             "key": "Permissions-Policy",
@@ -164,7 +164,8 @@
       "port": 8081
     },
     "storage": {
-      "port": 9199
+      "port": 9199,
+      "rules": "storage.rules.emulator"
     },
     "hosting": {
       "port": 5000

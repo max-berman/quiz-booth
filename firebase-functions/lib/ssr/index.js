@@ -40,7 +40,7 @@ exports.ssrHandler = functions.https.onRequest(async (req, res) => {
         // Fetch data based on route
         const pageData = await (0, firestore_ssr_1.fetchPageData)(path, req.query);
         // Render React components to string
-        const { html, metaTags } = await (0, renderer_1.renderPage)(path, pageData);
+        const { html, metaTags, structuredData } = await (0, renderer_1.renderPage)(path, pageData);
         // Get dynamically resolved asset file names
         const assets = (0, asset_resolver_1.getResolvedAssets)();
         // Generate final HTML
@@ -96,84 +96,8 @@ exports.ssrHandler = functions.https.onRequest(async (req, res) => {
     <link rel="preload" href="/assets/fonts/Onest-Bold.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="preload" href="/assets/fonts/Onest-Medium.ttf" as="font" type="font/ttf" crossorigin />
 
-    <!-- Structured Data (JSON-LD) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "QuizBooth",
-      "description": "Create AI-powered custom trivia games for trade shows and events. Engage customers, capture leads, and drive business growth through interactive gameplay.",
-      "url": "https://quizbooth.games",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web Browser",
-      "offers": {
-        "@type": "Offer",
-        "category": "SoftwareApplication"
-      },
-      "creator": {
-        "@type": "Organization",
-        "name": "QuizBooth",
-        "url": "https://quizbooth.games"
-      },
-      "featureList": [
-        "AI-Powered Question Generation",
-        "Lead Capture Integration",
-        "QR Code Sharing",
-        "Real-time Analytics",
-        "Custom Branding"
-      ]
-    }
-    </script>
-
-    <!-- FAQ Schema -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is QuizBooth?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "QuizBooth is a platform that helps businesses create engaging trivia games for events and trade shows. It uses AI to generate custom questions and includes lead capture features to turn players into potential customers."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How does the AI question generation work?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Our AI analyzes your business context and generates relevant, engaging trivia questions in seconds. You can customize the difficulty, topics, and style to match your brand and audience."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can I capture leads through trivia games?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes! QuizBooth includes built-in lead capture functionality. Players can optionally provide their contact information before or after playing, helping you build your customer database."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do I share my trivia game?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "You can share your game via QR code, direct link, or embed it on your website. Setup takes just minutes and requires no technical expertise."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is QuizBooth suitable for trade shows?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely! QuizBooth was designed specifically for trade shows and business events. It helps attract visitors to your booth, engage them with interactive content, and capture valuable leads."
-          }
-        }
-      ]
-    }
-    </script>
+    <!-- Page-Specific Structured Data (JSON-LD) -->
+    ${structuredData}
 
     <link rel="stylesheet" crossorigin href="/assets/${assets.cssFile}">
     <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.react}">

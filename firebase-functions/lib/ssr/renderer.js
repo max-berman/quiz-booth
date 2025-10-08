@@ -31,8 +31,10 @@ const NotFoundPage = () => (react_1.default.createElement('div', { className: 'm
     className: 'bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors'
 }, 'Go Home'))));
 async function renderPage(path, pageData) {
+    var _a, _b;
     let Component;
     let metaTags = '';
+    let structuredData = '';
     // Check if this is a dynamic route that should be handled by client-side routing
     const isDynamicRoute = path.startsWith('/game/') ||
         path.startsWith('/dashboard') ||
@@ -42,6 +44,21 @@ async function renderPage(path, pageData) {
         path.startsWith('/leaderboard/') ||
         path.startsWith('/results/') ||
         path.startsWith('/submissions/');
+    // Base organization structured data
+    const baseOrganizationData = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "QuizBooth",
+        "url": "https://quizbooth.games",
+        "logo": "https://quizbooth.games/assets/quiz-booth-icon.png",
+        "description": "AI-powered platform for creating custom trivia games for trade shows and events",
+        "sameAs": [],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "contact@quizbooth.games",
+            "contactType": "customer service"
+        }
+    };
     if (isDynamicRoute) {
         // For dynamic routes, serve a generic page that will be hydrated by client-side React
         Component = () => react_1.default.createElement('div', { id: 'root' });
@@ -55,6 +72,18 @@ async function renderPage(path, pageData) {
       <meta name="twitter:card" content="summary_large_image">
       <meta name="twitter:title" content="QuizBooth - Interactive Trivia Games">
       <meta name="twitter:description" content="Play engaging trivia games created with QuizBooth">
+    `;
+        structuredData = `
+      <script type="application/ld+json">
+        ${JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "QuizBooth - Interactive Trivia Games",
+            "description": "Play engaging trivia games created with QuizBooth",
+            "url": `https://quizbooth.games${path}`,
+            "publisher": baseOrganizationData
+        })}
+      </script>
     `;
     }
     else {
@@ -73,6 +102,39 @@ async function renderPage(path, pageData) {
           <meta name="twitter:title" content="QuizBooth - Create Engaging Trivia Games">
           <meta name="twitter:description" content="AI-powered trivia games for trade shows and events">
         `;
+                structuredData = `
+          <script type="application/ld+json">
+            ${JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@graph": [
+                        baseOrganizationData,
+                        {
+                            "@type": "WebSite",
+                            "name": "QuizBooth",
+                            "url": "https://quizbooth.games",
+                            "description": "AI-powered platform for creating custom trivia games for trade shows and events",
+                            "publisher": {
+                                "@type": "Organization",
+                                "name": "QuizBooth"
+                            }
+                        },
+                        {
+                            "@type": "SoftwareApplication",
+                            "name": "QuizBooth",
+                            "applicationCategory": "BusinessApplication",
+                            "operatingSystem": "Web Browser",
+                            "description": "AI-powered platform for creating custom trivia games for trade shows and events",
+                            "url": "https://quizbooth.games",
+                            "offers": {
+                                "@type": "Offer",
+                                "price": "0",
+                                "priceCurrency": "USD"
+                            }
+                        }
+                    ]
+                })}
+          </script>
+        `;
                 break;
             case '/quiz-games':
                 Component = QuizGamesPage;
@@ -83,6 +145,35 @@ async function renderPage(path, pageData) {
           <meta property="og:description" content="Play engaging trivia games created by our community">
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/quiz-games">
+        `;
+                structuredData = `
+          <script type="application/ld+json">
+            ${JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "CollectionPage",
+                    "name": "Public Quiz Games - QuizBooth",
+                    "description": "Browse and play public trivia games created by the QuizBooth community",
+                    "url": "https://quizbooth.games/quiz-games",
+                    "mainEntity": {
+                        "@type": "ItemList",
+                        "name": "Public Trivia Games",
+                        "description": "Collection of public trivia games available to play",
+                        "numberOfItems": ((_a = pageData === null || pageData === void 0 ? void 0 : pageData.publicGames) === null || _a === void 0 ? void 0 : _a.length) || 0,
+                        "itemListElement": ((_b = pageData === null || pageData === void 0 ? void 0 : pageData.publicGames) === null || _b === void 0 ? void 0 : _b.slice(0, 6).map((game, index) => ({
+                            "@type": "ListItem",
+                            "position": index + 1,
+                            "item": {
+                                "@type": "Game",
+                                "name": game.title || "Untitled Game",
+                                "description": game.description || "No description available",
+                                "url": `https://quizbooth.games/game/${game.id}`,
+                                "gameLocation": "Online",
+                                "numberOfPlayers": "1"
+                            }
+                        }))) || []
+                    }
+                })}
+          </script>
         `;
                 break;
             case '/about':
@@ -95,6 +186,23 @@ async function renderPage(path, pageData) {
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/about">
         `;
+                structuredData = `
+          <script type="application/ld+json">
+            ${JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@graph": [
+                        baseOrganizationData,
+                        {
+                            "@type": "AboutPage",
+                            "name": "About QuizBooth",
+                            "description": "Learn about QuizBooth's mission to create engaging trivia experiences for businesses and events",
+                            "url": "https://quizbooth.games/about",
+                            "publisher": baseOrganizationData
+                        }
+                    ]
+                })}
+          </script>
+        `;
                 break;
             case '/faq':
                 Component = FAQPage;
@@ -105,6 +213,43 @@ async function renderPage(path, pageData) {
           <meta property="og:description" content="Frequently asked questions about creating and playing trivia games">
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/faq">
+        `;
+                structuredData = `
+          <script type="application/ld+json">
+            ${JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    "name": "QuizBooth FAQ",
+                    "description": "Frequently asked questions about creating and playing trivia games with QuizBooth",
+                    "url": "https://quizbooth.games/faq",
+                    "mainEntity": [
+                        {
+                            "@type": "Question",
+                            "name": "What is QuizBooth?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "QuizBooth is an AI-powered platform that helps businesses create engaging trivia games for trade shows, events, and marketing campaigns."
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": "How do I create a game?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "Simply sign up, click 'Create Your Game', and our AI will help you generate questions based on your topic and difficulty preferences."
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": "Is it free to use?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "QuizBooth offers both free and premium plans. The free plan includes basic features while premium plans unlock advanced customization and analytics."
+                            }
+                        }
+                    ]
+                })}
+          </script>
         `;
                 break;
             case '/pricing':
@@ -117,6 +262,45 @@ async function renderPage(path, pageData) {
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/pricing">
         `;
+                structuredData = `
+          <script type="application/ld+json">
+            ${JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "Product",
+                    "name": "QuizBooth Pro",
+                    "description": "Premium plan for creating engaging trivia games with advanced features",
+                    "brand": baseOrganizationData,
+                    "offers": {
+                        "@type": "AggregateOffer",
+                        "offerCount": 3,
+                        "offers": [
+                            {
+                                "@type": "Offer",
+                                "name": "Free Plan",
+                                "price": "0",
+                                "priceCurrency": "USD",
+                                "description": "Basic game creation with AI question generation"
+                            },
+                            {
+                                "@type": "Offer",
+                                "name": "Pro Plan",
+                                "price": "29",
+                                "priceCurrency": "USD",
+                                "priceValidUntil": "2025-12-31",
+                                "description": "Advanced customization and priority support"
+                            },
+                            {
+                                "@type": "Offer",
+                                "name": "Enterprise Plan",
+                                "price": "0",
+                                "priceCurrency": "USD",
+                                "description": "Custom pricing for white-label solutions and API access"
+                            }
+                        ]
+                    }
+                })}
+          </script>
+        `;
                 break;
             case '/auth/sign-in':
                 Component = SignInPage;
@@ -128,6 +312,17 @@ async function renderPage(path, pageData) {
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/auth/sign-in">
         `;
+                structuredData = `
+          <script type="application/ld+json">
+            ${JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "WebPage",
+                    "name": "Sign In - QuizBooth",
+                    "description": "Sign in to your QuizBooth account to create and manage trivia games",
+                    "url": "https://quizbooth.games/auth/sign-in"
+                })}
+          </script>
+        `;
                 break;
             case '/auth/complete':
                 Component = SignInPage; // Use same component for complete page
@@ -138,6 +333,17 @@ async function renderPage(path, pageData) {
           <meta property="og:description" content="Complete your sign-in process">
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/auth/complete">
+        `;
+                structuredData = `
+          <script type="application/ld+json">
+            ${JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "WebPage",
+                    "name": "Complete Sign In - QuizBooth",
+                    "description": "Complete your QuizBooth sign-in process",
+                    "url": "https://quizbooth.games/auth/complete"
+                })}
+          </script>
         `;
                 break;
             case '/contact':
@@ -153,6 +359,23 @@ async function renderPage(path, pageData) {
           <meta name="twitter:title" content="Contact Us - QuizBooth">
           <meta name="twitter:description" content="Contact the QuizBooth team for support, partnerships, and inquiries">
         `;
+                structuredData = `
+          <script type="application/ld+json">
+            ${JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "ContactPage",
+                    "name": "Contact QuizBooth",
+                    "description": "Get in touch with the QuizBooth team for support, partnerships, and inquiries",
+                    "url": "https://quizbooth.games/contact",
+                    "mainEntity": {
+                        "@type": "ContactPoint",
+                        "email": "contact@quizbooth.games",
+                        "contactType": "customer service",
+                        "availableLanguage": "English"
+                    }
+                })}
+          </script>
+        `;
                 break;
             default:
                 Component = NotFoundPage;
@@ -160,10 +383,21 @@ async function renderPage(path, pageData) {
           <title>Page Not Found - QuizBooth</title>
           <meta name="description" content="The page you're looking for doesn't exist. Return to QuizBooth home page.">
         `;
+                structuredData = `
+          <script type="application/ld+json">
+            ${JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "WebPage",
+                    "name": "Page Not Found - QuizBooth",
+                    "description": "The page you're looking for doesn't exist",
+                    "url": "https://quizbooth.games${path}"
+                })}
+          </script>
+        `;
         }
     }
     const html = (0, server_1.renderToString)(react_1.default.createElement(Component, pageData));
-    return { html, metaTags };
+    return { html, metaTags, structuredData };
 }
 exports.renderPage = renderPage;
 //# sourceMappingURL=renderer.js.map

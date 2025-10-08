@@ -1,3 +1,7 @@
+// Drizzle ORM schema - currently not used in Firebase/Firestore implementation
+// Uncomment and install drizzle-orm, drizzle-zod if switching to PostgreSQL
+
+/*
 import { sql, relations } from "drizzle-orm";
 import { pgTable, text, varchar, integer, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
@@ -82,3 +86,4 @@ export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
 export type Question = typeof questions.$inferSelect;
 export type InsertPlayer = z.infer<typeof insertPlayerSchema>;
 export type Player = typeof players.$inferSelect;
+*/

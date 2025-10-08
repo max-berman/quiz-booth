@@ -13,9 +13,11 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@types/busboy": "^1.5.4",
     "@types/cors": "^2.8.19",
     "@vitejs/plugin-react": "^4.7.0",
     "axios": "^1.6.0",
+    "busboy": "^1.6.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "firebase-admin": "^12.1.0",

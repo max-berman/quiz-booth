@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Download, Users, Trophy, Clock, Mail } from 'lucide-react'
-import type { Player, Game } from '@shared/schema'
+import type { Player, Game } from '@shared/firebase-types'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { auth } from '@/lib/firebase'
 import { formatTime } from '@/lib/time-utils'

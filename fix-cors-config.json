@@ -1,0 +1,24 @@
+[
+  {
+    "origin": [
+      "https://quizbooth.games",
+      "http://localhost:5173",
+      "http://127.0.0.1:5173"
+    ],
+    "method": [
+      "PUT",
+      "POST",
+      "GET",
+      "DELETE",
+      "HEAD"
+    ],
+    "responseHeader": [
+      "Content-Type",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Headers",
+      "Access-Control-Max-Age"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]

@@ -22,7 +22,7 @@ if (existingApps.length > 0) {
       apiKey: 'demo-1-api-key',
       authDomain: 'localhost',
       projectId: 'trivia-games-7a81b',
-      storageBucket: 'trivia-games-7a81b.appspot.com',
+      storageBucket: 'trivia-games-7a81b.firebasestorage.app',
       messagingSenderId: '123456789',
       appId: '1:123456789:web:abcdef123456',
     };
@@ -102,5 +102,17 @@ if (existingApps.length > 0) {
   }
 }
 
-export { auth, storage };
+// Export functions instance
+const functions = getFunctions(app);
+
+// Ensure functions connect to emulator in development
+if (isDevelopment) {
+  try {
+    connectFunctionsEmulator(functions, 'localhost', 5001);
+  } catch (error) {
+    console.error('Failed to connect functions to emulator:', error);
+  }
+}
+
+export { auth, storage, functions };
 export default app;

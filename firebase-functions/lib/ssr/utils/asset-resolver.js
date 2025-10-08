@@ -6,14 +6,14 @@ exports.getResolvedAssets = void 0;
  * to match the actual generated file names
  */
 const CURRENT_ASSETS = {
-    cssFile: 'index-BMvdaoxI.css',
-    jsFile: 'index-wishXcmu.js',
+    cssFile: 'index-fC7EB8Hw.css',
+    jsFile: 'index-2TFhOIXP.js',
     vendorFiles: {
         react: 'vendor-react-C8w-UNLI.js',
         radix: 'vendor-radix-CtIS3uZQ.js',
         query: 'vendor-query-CtO4k8ZD.js',
         charts: 'vendor-charts-C96dEXy9.js',
-        icons: 'vendor-icons-BxfxEJUM.js',
+        icons: 'vendor-icons-CsKV8dNw.js',
         forms: 'vendor-forms-DNNZqBgj.js'
     }
 };

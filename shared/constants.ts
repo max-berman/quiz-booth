@@ -16,11 +16,13 @@ export const INDUSTRY_OPTIONS = [
   'Technology, Software & IT Services',
   'Consumer Goods & Electronics',
   'Automotive & Mobility',
+  'Blockchain, Crypto & WEB3',
+  'Fintech and DeFi',
 
   // ⚡ Strong Opportunities
   'Healthcare & Pharmaceuticals',
   'Wellness, Lifestyle & Mental Health',
-  'Finance, Banking & Fintech',
+  'Finance, Banking',
   'Education & EdTech',
   'Art, Design & Creative',
   'Luxury Goods & Jewelry',

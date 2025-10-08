@@ -1,3 +1,7 @@
+// Drizzle ORM schema - currently not used in Firebase/Firestore implementation
+// Uncomment and install drizzle-orm, drizzle-zod if switching to PostgreSQL
+
+/*
 import { pgTable, varchar, text, integer, timestamp, jsonb, boolean, decimal } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -107,3 +111,4 @@ export const PUBLIC_BETA_LIMITS = {
     exports: 10, // 10 exports per month
   }
 } as const;
+*/
