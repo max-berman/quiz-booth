@@ -141,6 +141,101 @@ const PricingPage = () => (
   )
 );
 
+const ContactPage = () => (
+  React.createElement('div', { className: 'min-h-screen bg-background' },
+    React.createElement('div', { className: 'flex-1 flex flex-col' },
+      // Hero Section
+      React.createElement('section', { className: 'relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 to-primary/10' },
+        React.createElement('div', { className: 'max-w-4xl mx-auto text-center' },
+          React.createElement('div', { className: 'mb-8' },
+            React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-foreground mb-6' },
+              'Contact ',
+              React.createElement('span', { className: 'text-primary' }, 'QuizBooth')
+            ),
+            React.createElement('p', { className: 'text-xl text-foreground max-w-2xl mx-auto leading-relaxed' },
+              "Have questions, feedback, or need support? We'd love to hear from you. Get in touch with our team and we'll get back to you as soon as possible."
+            )
+          )
+        )
+      ),
+      // Contact Form Section
+      React.createElement('section', { className: 'py-12 px-2 lg:px-8' },
+        React.createElement('div', { className: 'max-w-2xl mx-auto' },
+          React.createElement('div', { className: 'bg-card border rounded-lg p-6 shadow-sm' },
+            React.createElement('div', { className: 'text-center mb-6' },
+              React.createElement('h2', { className: 'text-2xl font-bold flex items-center justify-center gap-2' },
+                React.createElement('span', { className: 'text-primary' }, '✉️'),
+                'Send us a Message'
+              ),
+              React.createElement('p', { className: 'text-muted-foreground mt-2' },
+                "Fill out the form below and we'll respond within 24 hours"
+              )
+            ),
+            React.createElement('div', { className: 'space-y-4' },
+              // Name Field
+              React.createElement('div', null,
+                React.createElement('label', { className: 'block text-sm font-medium mb-1' }, 'Full Name'),
+                React.createElement('input', {
+                  type: 'text',
+                  placeholder: 'Enter your full name',
+                  className: 'w-full px-3 py-2 border rounded-md bg-background'
+                })
+              ),
+              // Email Field
+              React.createElement('div', null,
+                React.createElement('label', { className: 'block text-sm font-medium mb-1' }, 'Email Address'),
+                React.createElement('input', {
+                  type: 'email',
+                  placeholder: 'your.email@example.com',
+                  className: 'w-full px-3 py-2 border rounded-md bg-background'
+                })
+              ),
+              // Message Field
+              React.createElement('div', null,
+                React.createElement('label', { className: 'block text-sm font-medium mb-1' }, 'Message'),
+                React.createElement('textarea', {
+                  placeholder: 'Tell us how we can help you...',
+                  rows: 6,
+                  className: 'w-full px-3 py-2 border rounded-md bg-background'
+                })
+              ),
+              // Submit Button
+              React.createElement('button', {
+                className: 'w-full bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors'
+              }, 'Send Message')
+            )
+          ),
+          // Additional Contact Information
+          React.createElement('div', { className: 'mt-12 grid grid-cols-1 md:grid-cols-2 gap-6' },
+            React.createElement('div', { className: 'bg-card border rounded-lg p-6' },
+              React.createElement('h3', { className: 'text-xl font-semibold mb-4 flex items-center gap-2' },
+                React.createElement('span', { className: 'text-primary' }, '📧'),
+                'Email Support'
+              ),
+              React.createElement('p', { className: 'text-foreground mb-2' },
+                'For direct support, you can also email us at:'
+              ),
+              React.createElement('a', {
+                href: 'mailto:contact@quizbooth.games',
+                className: 'text-primary hover:underline font-medium'
+              }, 'contact@quizbooth.games')
+            ),
+            React.createElement('div', { className: 'bg-card border rounded-lg p-6' },
+              React.createElement('h3', { className: 'text-xl font-semibold mb-4 flex items-center gap-2' },
+                React.createElement('span', { className: 'text-primary' }, '⏱️'),
+                'Response Time'
+              ),
+              React.createElement('p', { className: 'text-foreground' },
+                'We typically respond to all inquiries within 24 hours during business days. For urgent matters, please indicate in your message.'
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+);
+
 const SignInPage = () => (
   React.createElement('div', { className: 'min-h-screen bg-background' },
     React.createElement('div', { className: 'container mx-auto px-4 py-8' },
@@ -288,6 +383,21 @@ export async function renderPage(path: string, pageData: any) {
           <meta property="og:description" content="Complete your sign-in process">
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/auth/complete">
+        `;
+        break;
+
+      case '/contact':
+        Component = ContactPage;
+        metaTags = `
+          <title>Contact Us - QuizBooth</title>
+          <meta name="description" content="Get in touch with the QuizBooth team. We're here to help with technical support, partnerships, feature requests, and any questions you may have.">
+          <meta property="og:title" content="Contact Us - QuizBooth">
+          <meta property="og:description" content="Contact the QuizBooth team for support, partnerships, and inquiries about our AI-powered trivia platform.">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/contact">
+          <meta name="twitter:card" content="summary_large_image">
+          <meta name="twitter:title" content="Contact Us - QuizBooth">
+          <meta name="twitter:description" content="Contact the QuizBooth team for support, partnerships, and inquiries about our AI-powered trivia platform.">
         `;
         break;
 

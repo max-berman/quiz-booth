@@ -6,15 +6,15 @@ exports.getResolvedAssets = void 0;
  * to match the actual generated file names
  */
 const CURRENT_ASSETS = {
-    cssFile: 'index-dzy7fEk5.css',
-    jsFile: 'index-COpzhpvI.js',
+    cssFile: 'index-Bgbe2GQi.css',
+    jsFile: 'index-DJ99EWkz.js',
     vendorFiles: {
         react: 'vendor-react-C8w-UNLI.js',
-        radix: 'vendor-radix-Bc0FetqD.js',
-        query: 'vendor-query-DzEs-1cG.js',
-        charts: 'vendor-charts-Bo6bkFXk.js',
-        icons: 'vendor-icons-BIWDsoQv.js',
-        forms: 'vendor-forms-ZEB_K3z5.js'
+        radix: 'vendor-radix-DVK6rLv8.js',
+        query: 'vendor-query-DIWBT0ED.js',
+        charts: 'vendor-charts-BybkUXTr.js',
+        icons: 'vendor-icons-lCX8gI2t.js',
+        forms: 'vendor-forms-pX7iQRS_.js'
     }
 };
 /**

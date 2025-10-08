@@ -1,7 +1,15 @@
+import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+} from '@/components/ui/dialog'
 import {
 	Check,
 	Crown,
@@ -18,6 +26,8 @@ import {
 } from 'lucide-react'
 
 export default function Pricing() {
+	const [showBetaModal, setShowBetaModal] = useState(false)
+
 	const pricingPlans = [
 		{
 			name: 'Starter Plan (Free)',
@@ -39,7 +49,7 @@ export default function Pricing() {
 		{
 			name: 'Professional Plan',
 			description: 'Ideal for regular trade shows and events',
-			price: '$19',
+			price: '$29',
 			period: 'per month',
 			popular: true,
 			features: [
@@ -212,6 +222,7 @@ export default function Pricing() {
 													: 'bg-primary/80 hover:bg-primary/60'
 											}`}
 											size='lg'
+											onClick={() => setShowBetaModal(true)}
 										>
 											{plan.cta}
 										</Button>
@@ -221,7 +232,7 @@ export default function Pricing() {
 						</div>
 
 						{/* Beta Notice */}
-						<div className='mt-12 text-center'>
+						{/* <div className='mt-12 text-center'>
 							<Card className='bg-green-50 border-green-200'>
 								<CardContent className='pt-6'>
 									<div className='flex items-center justify-center gap-3 mb-4'>
@@ -238,7 +249,7 @@ export default function Pricing() {
 									</p>
 								</CardContent>
 							</Card>
-						</div>
+						</div> */}
 					</div>
 				</section>
 
@@ -366,6 +377,34 @@ export default function Pricing() {
 					</div>
 				</section>
 			</div>
+
+			{/* Beta Notice Modal */}
+			<Dialog open={showBetaModal} onOpenChange={setShowBetaModal}>
+				<DialogContent className='sm:max-w-md'>
+					<DialogHeader>
+						<div className='flex items-center gap-3 mb-4'>
+							<Zap className='h-6 w-6 text-green-600' />
+							<DialogTitle className='text-xl font-semibold text-green-800'>
+								Beta Program Notice
+							</DialogTitle>
+						</div>
+					</DialogHeader>
+					<DialogDescription className='text-green-700'>
+						During our beta period, all plans are completely free! This includes
+						unlimited games, premium features, and priority support. We're
+						gathering feedback to improve the platform before launching our
+						official pricing.
+					</DialogDescription>
+					<div className='mt-6 flex justify-end'>
+						<Button
+							onClick={() => setShowBetaModal(false)}
+							className='bg-green-600 hover:bg-green-700'
+						>
+							Got it!
+						</Button>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</>
 	)
 }

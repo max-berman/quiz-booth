@@ -25,6 +25,52 @@ import {
 } from './simple-dropdown'
 import { SimpleSidebar } from './simple-sidebar'
 
+// Menu items configuration
+const MENU_ITEMS = [
+	{
+		href: '/quiz-games',
+		label: 'Quiz Games',
+		icon: Gamepad2,
+		testId: 'button-quiz-games',
+		requiresAuth: false,
+	},
+	{
+		href: '/about',
+		label: 'About',
+		icon: Info,
+		testId: 'button-about',
+		requiresAuth: false,
+	},
+	{
+		href: '/faq',
+		label: 'FAQ',
+		icon: HelpCircle,
+		testId: 'button-faq',
+		requiresAuth: false,
+	},
+	{
+		href: '/pricing',
+		label: 'Pricing',
+		icon: DollarSign,
+		testId: 'button-pricing',
+		requiresAuth: false,
+	},
+	{
+		href: '/contact',
+		label: 'Contact',
+		icon: Mail,
+		testId: 'button-contact',
+		requiresAuth: false,
+	},
+	{
+		href: '/dashboard',
+		label: 'Dashboard',
+		icon: BarChart3,
+		testId: 'button-dashboard',
+		requiresAuth: true,
+	},
+]
+
 export function CreatorHeader() {
 	const [location, setLocation] = useLocation()
 	const { user, isAuthenticated, signOut } = useAuth()
@@ -79,45 +125,23 @@ export function CreatorHeader() {
 							</MenuLink>
 						)} */}
 
-						{/* Quiz Games - visible to all users */}
-						<MenuLink href='/quiz-games' data-testid='button-quiz-games'>
-							<Gamepad2 className='mr-2 h-4 w-4' />
-							Quiz Games
-						</MenuLink>
+						{/* Render menu items from configuration */}
+						{MENU_ITEMS.map((item) => {
+							// Skip items that require authentication if user is not authenticated
+							if (item.requiresAuth && !isAuthenticated) return null
 
-						{/* About page */}
-						<MenuLink href='/about' data-testid='button-about'>
-							<Info className='mr-2 h-4 w-4' />
-							About
-						</MenuLink>
-
-						{/* FAQ page */}
-						<MenuLink href='/faq' data-testid='button-faq'>
-							<HelpCircle className='mr-2 h-4 w-4' />
-							FAQ
-						</MenuLink>
-
-						{/* Pricing page */}
-						<MenuLink href='/pricing' data-testid='button-pricing'>
-							<DollarSign className='mr-2 h-4 w-4' />
-							Pricing
-						</MenuLink>
-
-						{/* Contact page */}
-						<MenuLink href='/contact' data-testid='button-contact'>
-							<Mail className='mr-2 h-4 w-4' />
-							Contact
-						</MenuLink>
-
-						{/* Dashboard for authenticated users */}
-						{isAuthenticated && (
-							<>
-								<MenuLink href='/dashboard' data-testid='button-dashboard'>
-									<BarChart3 className='mr-2 h-4 w-4' />
-									Dashboard
+							const IconComponent = item.icon
+							return (
+								<MenuLink
+									key={item.href}
+									href={item.href}
+									data-testid={item.testId}
+								>
+									<IconComponent className='h-4 w-4' />
+									{item.label}
 								</MenuLink>
-							</>
-						)}
+							)
+						})}
 						{isAuthenticated ? (
 							// Authenticated user dropdown
 							<SimpleDropdown
@@ -140,7 +164,7 @@ export function CreatorHeader() {
 								align='end'
 							>
 								<SimpleDropdownItem onClick={handleSignOut}>
-									<LogOut className='mr-2 h-4 w-4' />
+									<LogOut className='h-4 w-4' />
 									Sign Out
 								</SimpleDropdownItem>
 							</SimpleDropdown>
@@ -151,7 +175,7 @@ export function CreatorHeader() {
 								variant='ghost'
 								data-testid='button-sign-in'
 							>
-								<LogIn className='mr-2 h-4 w-4' />
+								<LogIn className='h-4 w-4' />
 								Sign In
 							</MenuLink>
 						)}
@@ -180,6 +204,7 @@ export function CreatorHeader() {
 			>
 				<div className='space-y-4'>
 					<div className='space-y-4'>
+						{/* Home button */}
 						<Button
 							variant='ghost'
 							className='w-full justify-start'
@@ -188,77 +213,31 @@ export function CreatorHeader() {
 								setIsSidebarOpen(false)
 							}}
 						>
-							<Home className='mr-2 h-4 w-4' />
+							<Home className='h-4 w-4' />
 							Home
 						</Button>
-						<Button
-							variant='ghost'
-							className='w-full justify-start'
-							onClick={() => {
-								setLocation('/quiz-games')
-								setIsSidebarOpen(false)
-							}}
-						>
-							<Gamepad2 className='mr-2 h-4 w-4' />
-							Quiz Games
-						</Button>
-						<Button
-							variant='ghost'
-							className='w-full justify-start'
-							onClick={() => {
-								setLocation('/about')
-								setIsSidebarOpen(false)
-							}}
-						>
-							<Info className='mr-2 h-4 w-4' />
-							About
-						</Button>
-						<Button
-							variant='ghost'
-							className='w-full justify-start'
-							onClick={() => {
-								setLocation('/faq')
-								setIsSidebarOpen(false)
-							}}
-						>
-							<HelpCircle className='mr-2 h-4 w-4' />
-							FAQ
-						</Button>
-						<Button
-							variant='ghost'
-							className='w-full justify-start'
-							onClick={() => {
-								setLocation('/pricing')
-								setIsSidebarOpen(false)
-							}}
-						>
-							<DollarSign className='mr-2 h-4 w-4' />
-							Pricing
-						</Button>
-						<Button
-							variant='ghost'
-							className='w-full justify-start'
-							onClick={() => {
-								setLocation('/contact')
-								setIsSidebarOpen(false)
-							}}
-						>
-							<Mail className='mr-2 h-4 w-4' />
-							Contact
-						</Button>
-						{isAuthenticated && (
-							<Button
-								variant='ghost'
-								className='w-full justify-start'
-								onClick={() => {
-									setLocation('/dashboard')
-									setIsSidebarOpen(false)
-								}}
-							>
-								<BarChart3 className='mr-2 h-4 w-4' />
-								Dashboard
-							</Button>
-						)}
+
+						{/* Render menu items from configuration */}
+						{MENU_ITEMS.map((item) => {
+							// Skip items that require authentication if user is not authenticated
+							if (item.requiresAuth && !isAuthenticated) return null
+
+							const IconComponent = item.icon
+							return (
+								<Button
+									key={item.href}
+									variant='ghost'
+									className='w-full justify-start'
+									onClick={() => {
+										setLocation(item.href)
+										setIsSidebarOpen(false)
+									}}
+								>
+									<IconComponent className=' h-4 w-4' />
+									{item.label}
+								</Button>
+							)
+						})}
 						{isAuthenticated ? (
 							<Button
 								variant='ghost'
@@ -268,7 +247,7 @@ export function CreatorHeader() {
 									setIsSidebarOpen(false)
 								}}
 							>
-								<LogOut className='mr-2 h-4 w-4' />
+								<LogOut className=' h-4 w-4' />
 								Sign Out
 							</Button>
 						) : (
@@ -280,7 +259,7 @@ export function CreatorHeader() {
 									setIsSidebarOpen(false)
 								}}
 							>
-								<LogIn className='mr-2 h-4 w-4' />
+								<LogIn className=' h-4 w-4' />
 								Sign In
 							</Button>
 						)}
