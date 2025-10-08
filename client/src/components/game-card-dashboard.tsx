@@ -155,11 +155,11 @@ export function GameCardDashboard({
 						game={game}
 						showPlayCount={true}
 						showModifiedDate={true}
-						showQuestionCount={false}
+						showQuestionCount={true}
 					/>
 
 					{/* Question Count with Loading States */}
-					<div className='flex items-center gap-2'>
+					{/* <div className='flex items-center gap-2 !mt-2'>
 						<GalleryVerticalEnd className='h-4 w-4' />
 						{questionsLoading ? (
 							<span className='text-muted-foreground'>
@@ -170,15 +170,15 @@ export function GameCardDashboard({
 								Error loading questions
 							</span>
 						) : actualQuestionCount !== undefined ? (
-							<>
+							<span className=' text-sm'>
 								{actualQuestionCount} questions • {game.difficulty} difficulty
-							</>
+							</span>
 						) : (
-							<>
+							<span className=' text-sm'>
 								{game.questionCount} questions • {game.difficulty} difficulty
-							</>
+							</span>
 						)}
-					</div>
+					</div> */}
 
 					{/* Action Buttons */}
 					<div className='space-y-3'>

@@ -4,7 +4,9 @@
 export const INDUSTRY_OPTIONS = [
   // 🔥 Highest Potential Impact
   'Esports & Competitive Gaming',
+  'Gaming & Entertainment',
   'Video Games & Interactive Entertainment',
+  'Game Publishing & Development',
   'Retail & E-commerce',
   'Food, Beverage & Hospitality',
   'Fashion & Apparel',

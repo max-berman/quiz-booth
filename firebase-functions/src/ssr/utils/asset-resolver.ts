@@ -20,7 +20,7 @@ export interface ResolvedAssets {
  */
 const CURRENT_ASSETS: ResolvedAssets = {
   cssFile: 'index-Bgbe2GQi.css',
-  jsFile: 'index-DJ99EWkz.js',
+  jsFile: 'index-TNabJ5o-.js',
   vendorFiles: {
     react: 'vendor-react-C8w-UNLI.js',
     radix: 'vendor-radix-DVK6rLv8.js',

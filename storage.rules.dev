@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // DEVELOPMENT RULES - More permissive for testing
+    
+    // Allow all operations for development testing
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+    
+    // Note: These rules are intentionally permissive for development
+    // They allow any authenticated or unauthenticated user to read/write any data
+    // This is useful for testing but should NEVER be used in production
+  }
+}

@@ -156,7 +156,7 @@ export default function Results() {
 						</ul>
 
 						{/* Player Registration */}
-						{!isScoreSaved && !hasAlreadySubmitted && (
+						{!isScoreSaved && !hasAlreadySubmitted && score > 0 && (
 							<div className='bg-accent/10 p-4 rounded-xl mb-6'>
 								<h3 className='text-base md:text-lg font-semibold text-primary mb-4'>
 									Save Your Score to Leaderboard

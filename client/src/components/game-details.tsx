@@ -61,16 +61,6 @@ export function GameDetails({
 					</div>
 				)}
 
-			{/* Question Count */}
-			{showQuestionCount && (
-				<div className='flex items-center gap-2'>
-					<BarChart3 className='h-4 w-4' />
-					<span>
-						{game.questionCount} questions • {game.difficulty} difficulty
-					</span>
-				</div>
-			)}
-
 			{/* Play Count */}
 			{showPlayCount && (
 				<>
@@ -92,11 +82,23 @@ export function GameDetails({
 						<div className='flex items-center gap-2'>
 							<BarChart3 className='h-4 w-4' />
 							<span>
-								{playCount} {playCount === 1 ? 'play' : 'plays'}
+								<strong>{playCount}</strong>{' '}
+								{playCount === 1 ? 'play' : 'plays'}
 							</span>
 						</div>
 					)}
 				</>
+			)}
+
+			{/* Question Count */}
+			{showQuestionCount && (
+				<div className='flex items-center gap-2'>
+					<BarChart3 className='h-4 w-4' />
+					<span>
+						<strong>{game.questionCount}</strong> questions • {game.difficulty}{' '}
+						difficulty
+					</span>
+				</div>
 			)}
 
 			{/* Categories */}
