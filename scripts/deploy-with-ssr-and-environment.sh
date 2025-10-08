@@ -76,14 +76,14 @@ else
   echo "📦 Building client..."
   npm run build:client
 
-  # Update SSR asset resolver with current build file names
-  echo "🔄 Updating SSR asset resolver..."
-  npm run update:ssr-assets
-
-  # Rebuild Firebase functions to include updated asset resolver
+  # Rebuild Firebase functions
   echo "🔨 Building Firebase functions..."
   cd firebase-functions
   npm run build
+  
+  # Fix TypeScript output structure - copy built files to correct location
+  echo "🔄 Fixing TypeScript output structure..."
+  cp -r lib/firebase-functions/src/* lib/
   cd ..
 
   # Generate sitemap

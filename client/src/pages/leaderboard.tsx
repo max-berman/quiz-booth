@@ -255,7 +255,7 @@ export default function Leaderboard() {
 							<Link href='/'>
 								<Button className='px-6 py-3'>
 									<Home className='mr-2 h-4 w-4' />
-									Back to Home
+									Home
 								</Button>
 							</Link>
 							{/* {isGameSpecific && (

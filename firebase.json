@@ -16,6 +16,14 @@
         "function": "getGamePlayCount"
       },
       {
+        "source": "**/*.@(js|css|json|txt|xml|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|webmanifest)",
+        "destination": "/$1"
+      },
+      {
+        "source": "/assets/**",
+        "destination": "/assets/$1"
+      },
+      {
         "source": "/",
         "function": "ssrHandler"
       },

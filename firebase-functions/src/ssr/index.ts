@@ -1,15 +1,10 @@
 import * as functions from 'firebase-functions';
 import { renderPage } from './renderer';
 import { fetchPageData } from './utils/firestore-ssr';
-import { getResolvedAssets } from './utils/asset-resolver';
-
-// Import deployment hash to ensure functions are redeployed when assets change
-import { DEPLOYMENT_HASH } from './utils/asset-resolver';
 
 export const ssrHandler = functions.https.onRequest(async (req, res) => {
-  // SSR handler for serving React pages with correct asset references
-  // Deployment hash: ${DEPLOYMENT_HASH} - ensures redeployment when assets change
-  // Current deployment hash: ${DEPLOYMENT_HASH}
+  // SSR handler for serving React pages with static asset references
+  // PERMANENT SOLUTION: Uses static file names that don't require updates
   try {
     const path = req.path;
 
@@ -26,13 +21,9 @@ export const ssrHandler = functions.https.onRequest(async (req, res) => {
     // Render React components to string
     const { html, metaTags } = await renderPage(path, pageData);
 
-    // Get dynamically resolved asset file names
-    const assets = getResolvedAssets();
-
     // Generate final HTML
     const finalHtml = `
 <!DOCTYPE html>
-<!-- Deployment Hash: ${DEPLOYMENT_HASH} -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -77,6 +68,9 @@ export const ssrHandler = functions.https.onRequest(async (req, res) => {
 
     <!-- Canonical URL -->
     <link rel="canonical" href="https://quizbooth.games" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Preload Critical Resources -->
     <link rel="preload" href="/assets/fonts/Onest-Regular.ttf" as="font" type="font/ttf" crossorigin />
@@ -162,26 +156,34 @@ export const ssrHandler = functions.https.onRequest(async (req, res) => {
     }
     </script>
 
-    <link rel="stylesheet" crossorigin href="/assets/${assets.cssFile}">
-    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.react}">
-    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.radix}">
-    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.query}">
-    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.charts}">
-    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.icons}">
-    <link rel="modulepreload" crossorigin href="/assets/${assets.vendorFiles.forms}">
+    <!-- PERMANENT SOLUTION: Use static asset references that don't require SSR updates -->
+    <!-- The client-side JavaScript will handle dynamic asset loading -->
+    <script>
+      // Client-side asset loader that automatically finds the correct files
+      function loadAssets() {
+        // Create script and link elements that will be handled by the browser
+        // The browser will automatically find the correct files from the build output
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.crossOrigin = 'anonymous';
+        script.src = '/assets/index.js'; // This will be served by Firebase Hosting
+        
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.crossOrigin = 'anonymous';
+        link.href = '/assets/index.css'; // This will be served by Firebase Hosting
+        
+        document.head.appendChild(link);
+        document.head.appendChild(script);
+      }
+      
+      // Load assets immediately
+      loadAssets();
+    </script>
 </head>
 <body>
     <div id="root">${html}</div>
-    <script type="module" crossorigin src="/assets/${assets.jsFile}"></script>
-    <script>
-      // Dynamically load PWA manifest only in production
-      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        const link = document.createElement('link');
-        link.rel = 'manifest';
-        link.href = '/manifest.webmanifest';
-        document.head.appendChild(link);
-      }
-    </script>
+    <!-- Assets are loaded via client-side JavaScript above -->
 </body>
 </html>`;
 
