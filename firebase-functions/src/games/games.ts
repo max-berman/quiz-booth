@@ -463,6 +463,33 @@ export const savePlayerScore = functions.https.onCall(async (data, context) => {
       throw new functions.https.HttpsError('permission-denied', 'Access denied');
     }
 
+    // Server-side validation for score manipulation detection
+    const validationErrors = validateScoreSubmission({
+      score,
+      correctAnswers,
+      totalQuestions,
+      timeSpent,
+      gameQuestionCount: gameData?.questionCount || 0,
+    });
+
+    if (validationErrors.length > 0) {
+      console.warn('Score validation failed:', {
+        gameId,
+        playerName,
+        score,
+        correctAnswers,
+        totalQuestions,
+        timeSpent,
+        validationErrors,
+      });
+
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'Score validation failed. Please complete the game properly to save your score.',
+        { validationErrors }
+      );
+    }
+
     // Usage tracking (if authenticated)
     if (context.auth) {
       await trackUsage(context.auth.uid, 'player_submission', {
@@ -501,6 +528,73 @@ export const savePlayerScore = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('internal', 'Failed to save player score');
   }
 });
+
+// Score validation helper function
+function validateScoreSubmission(data: {
+  score: number;
+  correctAnswers: number;
+  totalQuestions: number;
+  timeSpent: number;
+  gameQuestionCount: number;
+}): string[] {
+  const errors: string[] = [];
+  const { score, correctAnswers, totalQuestions, timeSpent, gameQuestionCount } = data;
+
+  // Validate basic numeric ranges
+  if (score < 0) {
+    errors.push('Score cannot be negative');
+  }
+
+  if (correctAnswers < 0 || correctAnswers > totalQuestions) {
+    errors.push('Invalid correct answers count');
+  }
+
+  if (totalQuestions <= 0 || totalQuestions > 100) {
+    errors.push('Invalid total questions count');
+  }
+
+  if (timeSpent < 0) {
+    errors.push('Time spent cannot be negative');
+  }
+
+  // Validate consistency between correct answers and total questions
+  if (correctAnswers > totalQuestions) {
+    errors.push('Correct answers cannot exceed total questions');
+  }
+
+  // Validate score calculation consistency
+  // Maximum possible score: 100 points per question + time bonus + streak bonus
+  const maxPointsPerQuestion = 100;
+  const maxTimeBonusPerQuestion = 60; // Up to 60 bonus points for speed
+  const maxStreakBonusPerQuestion = 10; // Up to 10 points per streak
+
+  const maxPossibleScore = totalQuestions * (maxPointsPerQuestion + maxTimeBonusPerQuestion + maxStreakBonusPerQuestion);
+
+  if (score > maxPossibleScore) {
+    errors.push('Score exceeds maximum possible value for this game');
+  }
+
+  // Validate that total questions matches game configuration
+  if (gameQuestionCount > 0 && totalQuestions !== gameQuestionCount) {
+    errors.push('Submitted question count does not match game configuration');
+  }
+
+  // Validate time spent is reasonable (minimum 10 seconds per question, maximum 5 minutes per question)
+  const minTimePerQuestion = 10; // seconds
+  const maxTimePerQuestion = 300; // seconds (5 minutes)
+
+  const avgTimePerQuestion = totalQuestions > 0 ? timeSpent / totalQuestions : 0;
+
+  if (avgTimePerQuestion < minTimePerQuestion) {
+    errors.push('Time spent per question is unrealistically low');
+  }
+
+  if (avgTimePerQuestion > maxTimePerQuestion) {
+    errors.push('Time spent per question is unrealistically high');
+  }
+
+  return errors;
+}
 
 // Get leaderboard for a game
 export const getGameLeaderboard = functions.https.onCall(async (data, context) => {

@@ -2,6 +2,17 @@
  * Game session management utilities for persisting game state
  */
 
+export interface GameFinalResults {
+  score: number;
+  correctAnswers: number;
+  totalQuestions: number;
+  timeSpent: number;
+  streak: number;
+  gameId: string;
+  sessionId: string;
+  completedAt: number;
+}
+
 export interface GameSessionState {
   sessionId: string;
   gameId: string;
@@ -18,6 +29,7 @@ export interface GameSessionState {
   isCompleted?: boolean;
   questionStartTimes: Record<number, number>; // questionIndex -> start timestamp
   currentQuestionTimeLeft?: number; // Time left for current question when session was saved
+  finalResults?: GameFinalResults; // Store final results when game is completed
 }
 
 export interface GameSessionData {
@@ -121,4 +133,73 @@ export function createInitialSessionState(gameId: string): GameSessionState {
     lastUpdated: Date.now(),
     isCompleted: false,
   };
+}
+
+/**
+ * Get results storage key for localStorage
+ */
+export function getResultsKey(gameId: string): string {
+  return `quizbooth_game_results_${gameId}`;
+}
+
+/**
+ * Save final game results to localStorage
+ */
+export function saveGameResults(gameId: string, results: GameFinalResults): void {
+  const resultsKey = getResultsKey(gameId);
+  const resultsData = {
+    results,
+    expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutes from now
+  };
+
+  try {
+    localStorage.setItem(resultsKey, JSON.stringify(resultsData));
+  } catch (error) {
+    console.error('Failed to save game results:', error);
+  }
+}
+
+/**
+ * Load final game results from localStorage
+ */
+export function loadGameResults(gameId: string): GameFinalResults | null {
+  const resultsKey = getResultsKey(gameId);
+
+  try {
+    const stored = localStorage.getItem(resultsKey);
+    if (!stored) return null;
+
+    const resultsData = JSON.parse(stored);
+
+    // Check if results have expired
+    if (Date.now() > resultsData.expiresAt) {
+      clearGameResults(gameId);
+      return null;
+    }
+
+    return resultsData.results;
+  } catch (error) {
+    console.error('Failed to load game results:', error);
+    clearGameResults(gameId);
+    return null;
+  }
+}
+
+/**
+ * Clear game results from localStorage
+ */
+export function clearGameResults(gameId: string): void {
+  const resultsKey = getResultsKey(gameId);
+  try {
+    localStorage.removeItem(resultsKey);
+  } catch (error) {
+    console.error('Failed to clear game results:', error);
+  }
+}
+
+/**
+ * Check if valid results exist for a game
+ */
+export function hasValidResults(gameId: string): boolean {
+  return loadGameResults(gameId) !== null;
 }

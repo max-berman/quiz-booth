@@ -215,7 +215,7 @@ export default function Leaderboard() {
 									<div
 										key={player.id}
 										className={`flex items-center justify-between p-3 sm:p-4 transition-colors duration-150 ${
-											index % 2 === 0 ? 'bg-primary-foreground' : ''
+											index % 2 === 0 ? 'bg-primary-foreground' : 'bg-secondary'
 										}`}
 									>
 										<div className='flex items-center space-x-3 sm:space-x-4'>

@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   GameSessionState,
+  GameFinalResults,
   loadGameSession,
   saveGameSession,
   clearGameSession,
   createInitialSessionState,
   hasValidSession,
+  saveGameResults,
+  clearGameResults,
 } from '@/lib/session-utils';
 
 interface UseGameSessionReturn {
@@ -13,7 +16,7 @@ interface UseGameSessionReturn {
   isSessionLoaded: boolean;
   hasExistingSession: boolean;
   updateSessionState: (updates: Partial<GameSessionState>) => void;
-  completeSession: () => void;
+  completeSession: (finalResults?: GameFinalResults) => void;
   clearCurrentSession: () => void;
 }
 
@@ -65,13 +68,19 @@ export function useGameSession(gameId: string | undefined): UseGameSessionReturn
   }, [gameId]);
 
   // Mark session as completed and clear it
-  const completeSession = useCallback(() => {
+  const completeSession = useCallback((finalResults?: GameFinalResults) => {
     if (!gameId || !sessionStateRef.current) return;
+
+    // Save final results if provided
+    if (finalResults) {
+      saveGameResults(gameId, finalResults);
+    }
 
     // Update session to mark as completed
     const completedState = {
       ...sessionStateRef.current,
       isCompleted: true,
+      finalResults,
       lastUpdated: Date.now(),
     };
 

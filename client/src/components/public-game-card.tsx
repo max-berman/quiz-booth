@@ -27,6 +27,7 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 				<GameDetails
 					game={game}
 					showPlayCount={true}
+					showQuestionCount={true}
 					showModifiedDate={false}
 				/>
 

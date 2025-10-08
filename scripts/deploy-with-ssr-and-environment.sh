@@ -41,6 +41,10 @@ if [[ "$ENVIRONMENT" == "development" ]]; then
   cp firestore.rules.dev firestore.rules
   cp storage.rules.dev storage.rules
   echo "✅ Using development rules (permissive)"
+
+    # Build the client
+  echo "📦 Building client..."
+  npm run build:client
   
   # Build Firebase functions for emulator use
   echo "🔨 Building Firebase functions for emulators..."

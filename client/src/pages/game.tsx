@@ -259,11 +259,21 @@ export default function GamePage() {
 				maxStreak: streak,
 			})
 
-			// Complete the session and navigate to results
-			completeSession()
-			setLocation(
-				`/results/${id}?score=${score}&correct=${correctAnswers}&total=${questions?.length}&time=${finalTimeSpent}&streak=${streak}`
-			)
+			// Create final results object
+			const finalResults = {
+				score,
+				correctAnswers,
+				totalQuestions: questions?.length || 0,
+				timeSpent: finalTimeSpent,
+				streak,
+				gameId: id!,
+				sessionId: sessionState?.sessionId || '',
+				completedAt: Date.now(),
+			}
+
+			// Complete the session with final results and navigate to results
+			completeSession(finalResults)
+			setLocation(`/results/${id}`)
 		}
 	}
 
