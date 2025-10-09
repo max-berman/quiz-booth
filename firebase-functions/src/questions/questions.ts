@@ -7,8 +7,337 @@ import { DEEPSEEK_API_CONFIG, API_HEADERS } from '../config/api-config';
 
 const db = admin.firestore();
 
+// Type definitions for better type safety
+interface Question {
+  id: string;
+  gameId: string;
+  questionText: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+  order: number;
+}
+
+interface GeneratedQuestion {
+  questionText?: string;
+  question?: string;
+  text?: string;
+  options?: string[];
+  choices?: string[];
+  correctAnswer?: number;
+  correct?: number;
+  explanation?: string;
+  answer_explanation?: string;
+}
+
+interface UsageMetadata {
+  questionCount?: number;
+  gameId?: string;
+  singleQuestion?: boolean;
+}
+
+
+interface ShuffleResult<T> {
+  shuffled: T[];
+  newIndex: number;
+}
+
+// Performance: Configuration for timeouts and retries
+const API_CONFIG = {
+  TIMEOUT_MS: 30000, // 30 seconds timeout for API calls
+  MAX_RETRIES: 3, // Maximum number of retry attempts
+  RETRY_DELAY_MS: 1000, // Initial retry delay in milliseconds
+  MAX_RETRY_DELAY_MS: 10000, // Maximum retry delay in milliseconds
+} as const;
+
+// Performance: Helper function for exponential backoff with jitter
+function calculateRetryDelay(attempt: number): number {
+  const baseDelay = API_CONFIG.RETRY_DELAY_MS * Math.pow(2, attempt);
+  const jitter = Math.random() * 1000; // Add up to 1 second of jitter
+  return Math.min(baseDelay + jitter, API_CONFIG.MAX_RETRY_DELAY_MS);
+}
+
+// Performance: Helper function to sleep for a specified duration
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Security: Input sanitization functions
+function sanitizePromptInput(input: string): string {
+  if (!input) return '';
+
+  // Remove or escape potentially dangerous characters for prompt injection
+  return input
+    .replace(/[{}[\]\\]/g, '') // Remove JSON/control characters
+    .replace(/["']/g, '') // Remove quotes that could break JSON
+    .replace(/[\n\r\t]/g, ' ') // Normalize whitespace
+    .replace(/\s+/g, ' ') // Collapse multiple spaces
+    .trim()
+    .substring(0, 500); // Limit length to prevent abuse
+}
+
+
+
+function validateGameData(gameData: any): void {
+  if (!gameData) {
+    throw new functions.https.HttpsError('invalid-argument', 'Game data is required');
+  }
+
+  // Validate required fields
+  if (!gameData.companyName?.trim()) {
+    throw new functions.https.HttpsError('invalid-argument', 'Company name is required');
+  }
+
+  if (!gameData.industry?.trim()) {
+    throw new functions.https.HttpsError('invalid-argument', 'Industry is required');
+  }
+
+  // Validate question count
+  const questionCount = gameData.questionCount || 0;
+  if (questionCount < 1 || questionCount > 50) {
+    throw new functions.https.HttpsError('invalid-argument', 'Question count must be between 1 and 50');
+  }
+
+  // Validate categories
+  if (!Array.isArray(gameData.categories) || gameData.categories.length === 0) {
+    throw new functions.https.HttpsError('invalid-argument', 'At least one category is required');
+  }
+
+  // Validate difficulty
+  const validDifficulties = ['Easy', 'Medium', 'Hard'];
+  if (!validDifficulties.includes(gameData.difficulty)) {
+    throw new functions.https.HttpsError('invalid-argument', 'Difficulty must be Easy, Medium, or Hard');
+  }
+}
+
+
+// Helper functions to reduce code duplication
+interface PromptOptions {
+  isSingleQuestion: boolean;
+  gameData: any;
+  isWebsite: boolean;
+}
+
+function buildPrompt(options: PromptOptions): string {
+  const { isSingleQuestion, gameData, isWebsite } = options;
+
+  // Security: Sanitize all user inputs to prevent prompt injection
+  const sanitizedCompanyName = sanitizePromptInput(gameData?.companyName || '');
+  const sanitizedIndustry = sanitizePromptInput(gameData?.industry || '');
+  const sanitizedCustomCategoryDescription = sanitizePromptInput(gameData?.customCategoryDescription || '');
+  const sanitizedCategories = (gameData?.categories || []).map((cat: string) => sanitizePromptInput(cat));
+
+  const companyInfo = isWebsite ? `Company website: ${sanitizedCompanyName}` : `Company name: ${sanitizedCompanyName}`;
+  const websiteInstruction = isWebsite ? 'IMPORTANT: If a website is provided, use your knowledge about that company from the web to create more accurate and specific questions about their business, products, services, and history.' : '';
+
+  // Create category-specific instructions
+  const categoryInstructions = sanitizedCategories.map((category: string) => {
+    switch (category) {
+      case "Company Facts":
+        return `${isSingleQuestion ? 'Create a question' : 'Create questions'} specifically about ${sanitizedCompanyName} and their business practices, history, products, or services. ${isWebsite ? 'Use information from the provided website to create accurate company-specific questions.' : ''}`;
+      case "Industry Knowledge":
+        return `${isSingleQuestion ? 'Create a question' : 'Create questions'} about the ${sanitizedIndustry} industry in general, including trends, terminology, best practices, key players, innovations, and industry-specific knowledge.`;
+      case "Fun Facts":
+        return `${isSingleQuestion ? 'Create an entertaining trivia question' : 'Create entertaining trivia questions'} with fun or historical facts about the ${sanitizedIndustry} industry, interesting stories, lesser-known facts, or amusing industry-related trivia.`;
+      case "General Knowledge":
+        return `${isSingleQuestion ? 'Create a general knowledge question' : 'Create general knowledge questions'} that any visitor might enjoy answering, not specifically related to the company or industry.`;
+      case "Custom Questions":
+        const customDesc = sanitizedCustomCategoryDescription || 'custom topics';
+        return `${isSingleQuestion ? 'Create a question' : 'Create questions'} about: ${customDesc} (related to ${sanitizedIndustry} industry context)`;
+      default:
+        return `${isSingleQuestion ? 'Create a question' : 'Create questions'} about: ${category} (related to ${sanitizedIndustry} industry context)`;
+    }
+  }).join(" ");
+
+  const questionCountText = isSingleQuestion ? 'exactly ONE' : `${gameData?.questionCount}`;
+  const uniquenessRequirement = isSingleQuestion ? `
+    
+    CRITICAL - UNIQUENESS REQUIREMENT:
+    - Ensure the question is clear and unambiguous
+    - This question must be completely unique and not duplicate any existing questions for this game.
+    - Question should be interesting, educational, and factually accurate` : '';
+
+  const responseFormat = isSingleQuestion ? `{
+      "questionText": "Clear and concise question? 🎯",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": 0,
+      "explanation": "Brief educational explanation citing verifiable facts"
+    }` : `{
+      "questions": [
+        {
+          "questionText": "Question here?🌟",
+          "options": ["Option A", "Option B", "Option C", "Option D"],
+          "correctAnswer": 0,
+          "explanation": "Brief explanation of the answer"
+        }
+      ]
+    }`;
+
+  return `Generate ${questionCountText} multiple choice trivia question${isSingleQuestion ? '' : 's'} based on these requirements:
+    
+    ${companyInfo}
+    Industry: ${gameData?.industry}
+    Products or services description: ${gameData?.productDescription || 'Not provided'}
+    Difficulty: ${gameData?.difficulty}
+    
+    ${websiteInstruction}
+    
+    IMPORTANT - Question Category Instructions:
+    ${categoryInstructions}
+    ${uniquenessRequirement}
+
+    CRITICAL - ENHANCEMENT REQUIREMENTS:
+    - Approximately 15% of questions should include one relevant emoji in the question text
+    - Use emojis sparingly and only when they enhance engagement or clarity
+    - The emoji should complement the question topic without being distracting
+    - Never use emojis in answer options or explanations
+    - Appropriate emoji contexts: science/tech 🧪, nature 🌿, history 🏛️, geography 🌍, pop culture 🎬, etc.
+    - Ensure questions are engaging, educational, and factually accurate
+    - Vary the position of correct answers randomly
+    
+    Return ONLY a JSON object ${isSingleQuestion ? 'with a single question' : 'with a "questions" array containing the questions'} in this exact format:
+    ${responseFormat}
+
+    
+    Make sure:
+    - Follow the category instructions precisely
+    - ${isSingleQuestion ? 'The question has' : 'Each question has'} exactly 4 options
+    - correctAnswer is the index (0-3) of the correct option
+    - Include a brief explanation for ${isSingleQuestion ? 'the answer' : 'each answer'}
+    - Vary the position of correct answers
+    - Approximately 15% of questions include a relevant emoji in questionText
+    - Return valid JSON only, no additional text${isSingleQuestion ? ' or formatting' : ''}`;
+}
+
+async function callDeepSeekAPI(prompt: string, deepseekApiKey: string): Promise<any> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
+    try {
+      // Performance: Create AbortController for timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
+
+      try {
+        const response = await fetch(`${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${deepseekApiKey}`,
+            'Content-Type': API_HEADERS.CONTENT_TYPE,
+          },
+          body: JSON.stringify({
+            model: DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            response_format: { type: 'json_object' }
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          // Performance: Retry on 5xx errors, fail fast on 4xx errors
+          if (response.status >= 500) {
+            throw new functions.https.HttpsError('internal', `DeepSeek API error: ${response.status} ${response.statusText}`);
+          } else {
+            throw new functions.https.HttpsError('internal', `DeepSeek API error: ${response.status} ${response.statusText}`);
+          }
+        }
+
+        return await response.json();
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+
+        // Performance: Handle timeout and network errors
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          throw new functions.https.HttpsError('deadline-exceeded', `DeepSeek API request timed out after ${API_CONFIG.TIMEOUT_MS}ms`);
+        }
+        throw fetchError;
+      }
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      // Performance: Don't retry on client errors or authentication issues
+      if (error instanceof functions.https.HttpsError) {
+        if (error.code === 'deadline-exceeded' || error.code === 'internal') {
+          // Retry on timeout or server errors
+          if (attempt < API_CONFIG.MAX_RETRIES) {
+            const delay = calculateRetryDelay(attempt);
+            console.warn(`DeepSeek API attempt ${attempt + 1} failed, retrying in ${delay}ms:`, error.message);
+            await sleep(delay);
+            continue;
+          }
+        } else {
+          // Don't retry on other HttpsErrors (permission, not-found, etc.)
+          throw error;
+        }
+      } else {
+        // Retry on network errors
+        if (attempt < API_CONFIG.MAX_RETRIES) {
+          const delay = calculateRetryDelay(attempt);
+          console.warn(`DeepSeek API attempt ${attempt + 1} failed, retrying in ${delay}ms:`, lastError.message);
+          await sleep(delay);
+          continue;
+        }
+      }
+
+      // If we've exhausted all retries, throw the last error
+      if (attempt === API_CONFIG.MAX_RETRIES) {
+        if (lastError instanceof functions.https.HttpsError) {
+          throw lastError;
+        } else {
+          throw new functions.https.HttpsError('internal', `DeepSeek API failed after ${API_CONFIG.MAX_RETRIES + 1} attempts: ${lastError.message}`);
+        }
+      }
+    }
+  }
+
+  // This should never be reached, but TypeScript requires it
+  throw new functions.https.HttpsError('internal', 'Unexpected error in callDeepSeekAPI');
+}
+
+function parseAIResponse(content: string, isSingleQuestion: boolean): GeneratedQuestion[] {
+  try {
+    const parsed = JSON.parse(content);
+
+    if (isSingleQuestion) {
+      // Handle single question response formats
+      if (parsed.questionText && parsed.options) {
+        return [parsed];
+      } else if (parsed.question || parsed.text) {
+        return [{
+          questionText: parsed.questionText || parsed.question || parsed.text,
+          options: parsed.options || parsed.choices || [],
+          correctAnswer: typeof parsed.correctAnswer === 'number' ? parsed.correctAnswer : (parsed.correct || 0),
+          explanation: parsed.explanation || parsed.answer_explanation || '',
+        }];
+      } else {
+        throw new functions.https.HttpsError('internal', `Unexpected response format: ${JSON.stringify(parsed)}`);
+      }
+    } else {
+      // Handle multiple questions response formats
+      if (Array.isArray(parsed)) {
+        return parsed;
+      } else if (parsed.questions && Array.isArray(parsed.questions)) {
+        return parsed.questions;
+      } else if (parsed.question || parsed.questionText) {
+        return [parsed];
+      } else {
+        throw new functions.https.HttpsError('internal', `Unexpected response format: ${JSON.stringify(parsed)}`);
+      }
+    }
+  } catch (parseError) {
+    throw new functions.https.HttpsError('internal', `Failed to parse DeepSeek response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+  }
+}
+
 // Helper function to track usage
-async function trackUsage(userId: string, eventType: string, metadata?: any): Promise<void> {
+async function trackUsage(userId: string, eventType: string, metadata?: UsageMetadata): Promise<void> {
   try {
     await db.collection('usageEvents').add({
       userId,
@@ -47,7 +376,7 @@ function getCounterField(eventType: string): string {
 }
 
 // Helper function to shuffle array and track the new position of an element
-function shuffleArrayAndTrackIndex<T>(array: T[], trackedIndex: number): { shuffled: T[], newIndex: number } {
+function shuffleArrayAndTrackIndex<T>(array: T[], trackedIndex: number): ShuffleResult<T> {
   const shuffled = [...array];
   const originalValue = shuffled[trackedIndex];
 
@@ -117,6 +446,9 @@ export const generateQuestions = functions.https.onCall(async (data, context) =>
 
     const gameData = gameDoc.data();
 
+    // Security: Validate game data before processing
+    validateGameData(gameData);
+
     // Track AI question generation usage for authenticated users
     if (gameData?.userId) {
       await trackUsage(gameData.userId, 'ai_question_generated', {
@@ -176,117 +508,22 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
 
     // Determine if company name contains a website URL
     const isWebsite = isWebsiteURL(gameData?.companyName || '');
-    const companyInfo = isWebsite ? `Company website: ${gameData?.companyName}` : `Company name: ${gameData?.companyName}`;
-    const websiteInstruction = isWebsite ? 'IMPORTANT: If a website is provided, use your knowledge about that company from the web to create more accurate and specific questions about their business, products, services, and history.' : '';
 
-    // Create category-specific instructions
-    const categoryInstructions = (gameData?.categories || []).map((category: string) => {
-      switch (category) {
-        case "Company Facts":
-          return `Create questions specifically about ${gameData?.companyName} and their business practices, history, products, or services. ${isWebsite ? 'Use information from the provided website to create accurate company-specific questions.' : ''}`;
-        case "Industry Knowledge":
-          return `Create questions about the ${gameData?.industry} industry in general, including trends, terminology, best practices, key players, innovations, and industry-specific knowledge.`;
-        case "Fun Facts":
-          return `Create entertaining trivia questions with fun or historical facts about the ${gameData?.industry} industry, interesting stories, lesser-known facts, or amusing industry-related trivia.`;
-        case "General Knowledge":
-          return `Create general knowledge questions that any visitor might enjoy answering, not specifically related to the company or industry.`;
-        case "Custom Questions":
-          // Use the custom category description if provided, otherwise use generic description
-          const customDesc = gameData?.customCategoryDescription || 'custom topics';
-          return `Create questions about: ${customDesc} (related to ${gameData?.industry} industry context)`;
-        default:
-          return `Create questions about: ${category} (related to ${gameData?.industry} industry context)`;
-      }
-    }).join(" ");
-
-    const prompt = `Generate ${gameData?.questionCount} multiple choice trivia questions based on these requirements:
-    
-    ${companyInfo}
-    Industry: ${gameData?.industry}
-    Products or services description: ${gameData?.productDescription || 'Not provided'}
-    Difficulty: ${gameData?.difficulty}
-    
-    ${websiteInstruction}
-    
-    IMPORTANT - Question Category Instructions:
-    ${categoryInstructions}
-
-    CRITICAL - ENHANCEMENT REQUIREMENTS:
-    - Approximately 15% of questions should include one relevant emoji in the question text
-    - Use emojis sparingly and only when they enhance engagement or clarity
-    - The emoji should complement the question topic without being distracting
-    - Never use emojis in answer options or explanations
-    - Appropriate emoji contexts: science/tech 🧪, nature 🌿, history 🏛️, geography 🌍, pop culture 🎬, etc.
-    - Ensure questions are engaging, educational, and factually accurate
-    - Vary the position of correct answers randomly
-    
-    Return ONLY a JSON object with a "questions" array containing the questions in this exact format:
-    {
-      "questions": [
-        {
-          "questionText": "Question here?🌟",
-          "options": ["Option A", "Option B", "Option C", "Option D"],
-          "correctAnswer": 0,
-          "explanation": "Brief explanation of the answer"
-        }
-      ]
-    }
-
-    
-    Make sure:
-    - Follow the category instructions precisely
-    - Each question has exactly 4 options
-    - correctAnswer is the index (0-3) of the correct option
-    - Include a brief explanation for each answer
-    - Vary the position of correct answers
-    - Approximately 15% of questions include a relevant emoji in questionText
-    - Return valid JSON only, no additional text`;
-
-    const response = await fetch(`${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${deepseekApiKey}`,
-        'Content-Type': API_HEADERS.CONTENT_TYPE,
-      },
-      body: JSON.stringify({
-        model: DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        response_format: { type: 'json_object' }
-      }),
+    // Build prompt using helper function
+    const prompt = buildPrompt({
+      isSingleQuestion: false,
+      gameData,
+      isWebsite
     });
 
-    if (!response.ok) {
-      throw new Error(`DeepSeek API error: ${response.status} ${response.statusText}`);
-    }
+    // Call DeepSeek API using helper function
+    const dataResponse = await callDeepSeekAPI(prompt, deepseekApiKey);
 
-    const dataResponse = await response.json();
-    let generatedQuestions;
-
-    try {
-      const content = dataResponse.choices[0].message.content;
-      const parsed = JSON.parse(content);
-
-      // Handle different response formats
-      if (Array.isArray(parsed)) {
-        generatedQuestions = parsed;
-      } else if (parsed.questions && Array.isArray(parsed.questions)) {
-        generatedQuestions = parsed.questions;
-      } else if (parsed.question || parsed.questionText) {
-        generatedQuestions = [parsed];
-      } else {
-        throw new Error(`Unexpected response format: ${JSON.stringify(parsed)}`);
-      }
-    } catch (parseError) {
-      throw new Error(`Failed to parse DeepSeek response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
-    }
+    // Parse response using helper function
+    const generatedQuestions = parseAIResponse(dataResponse.choices[0].message.content, false);
 
     // Create questions with shuffled options
-    const questionsToInsert = generatedQuestions.map((q: any, index: number) => {
+    const questionsToInsert = generatedQuestions.map((q: GeneratedQuestion, index: number) => {
       const { shuffled: shuffledOptions, newIndex: newCorrectAnswer } = shuffleArrayAndTrackIndex(
         q.options || q.choices || [],
         typeof q.correctAnswer === 'number' ? q.correctAnswer : (q.correct || 0)
@@ -295,7 +532,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
       return {
         id: randomUUID(),
         gameId: gameId,
-        questionText: q.questionText || q.question || q.text,
+        questionText: q.questionText || q.question || q.text || '',
         options: shuffledOptions,
         correctAnswer: newCorrectAnswer,
         explanation: q.explanation || q.answer_explanation || '',
@@ -305,7 +542,7 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
 
     // Batch insert questions
     const batch = db.batch();
-    questionsToInsert.forEach((question: any) => {
+    questionsToInsert.forEach((question: Question) => {
       const questionRef = db.collection('questions').doc(question.id);
       batch.set(questionRef, question);
     });
@@ -351,120 +588,32 @@ export const generateSingleQuestion = functions.https.onCall(async (data, contex
 
     // Determine if company name contains a website URL
     const isWebsite = isWebsiteURL(gameData?.companyName || '');
-    const companyInfo = isWebsite ? `Company website: ${gameData?.companyName}` : `Company name: ${gameData?.companyName}`;
-    const websiteInstruction = isWebsite ? 'IMPORTANT: If a website is provided, use your knowledge about that company from the web to create more accurate and specific questions about their business, products, services, and history.' : '';
 
-    // Create category-specific instructions
-    const categoryInstructions = (gameData?.categories || []).map((category: string) => {
-      switch (category) {
-        case "Company Facts":
-          return `Create a question specifically about ${gameData?.companyName} and their business practices, history, products, or services. ${isWebsite ? 'Use information from the provided website to create accurate company-specific questions.' : ''}`;
-        case "Industry Knowledge":
-          return `Create a question about the ${gameData?.industry} industry in general, including trends, terminology, best practices, key players, innovations, and industry-specific knowledge.`;
-        case "Fun Facts":
-          return `Create an entertaining trivia question with fun or historical facts about the ${gameData?.industry} industry, interesting stories, lesser-known facts, or amusing industry-related trivia.`;
-        case "General Knowledge":
-          return `Create a general knowledge question that any visitor might enjoy answering, not specifically related to the company or industry.`;
-        case "Custom Questions":
-          // Use the custom category description if provided, otherwise use generic description
-          const customDesc = gameData?.customCategoryDescription || 'custom topics';
-          return `Create a question about: ${customDesc} (related to ${gameData?.industry} industry context)`;
-        default:
-          return `Create a question about: ${category} (related to ${gameData?.industry} industry context)`;
-      }
-    }).join(" ");
-
-    const prompt = `Generate exactly ONE multiple choice trivia question based on these requirements:
-    
-    ${companyInfo}
-    Industry: ${gameData?.industry}
-    Products or services description: ${gameData?.productDescription || 'Not provided'}
-    Difficulty: ${gameData?.difficulty}
-    
-    ${websiteInstruction}
-    
-    IMPORTANT - Question Category Instructions:
-    ${categoryInstructions}
-    
-    CRITICAL - UNIQUENESS REQUIREMENT:
-    - Ensure the question is clear and unambiguous
-    - This question must be completely unique and not duplicate any existing questions for this game.
-    - Question should be interesting, educational, and factually accurate
-    - **Approximately 15% of questions should include one relevant emoji in the question text**
-    
-    Return ONLY a JSON object with a single question in this exact format:
-    {
-      "questionText": "Clear and concise question? 🎯",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correctAnswer": 0,
-      "explanation": "Brief educational explanation citing verifiable facts"
-    }
-
-    
-    Make sure:
-    - Follow the category instructions precisely
-    - The question has exactly 4 options
-    - correctAnswer is the index (0-3) of the correct option
-    - Include a brief explanation for the answer
-    - Ensure the question is completely unique and appropriate for the specified difficulty level
-    - Use emojis sparingly and only when they enhance understanding or engagement
-    - Return valid JSON only, no additional text or formatting`;
-
-    const response = await fetch(`${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${deepseekApiKey}`,
-        'Content-Type': API_HEADERS.CONTENT_TYPE,
-      },
-      body: JSON.stringify({
-        model: DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        response_format: { type: 'json_object' }
-      }),
+    // Build prompt using helper function
+    const prompt = buildPrompt({
+      isSingleQuestion: true,
+      gameData,
+      isWebsite
     });
 
-    if (!response.ok) {
-      throw new Error(`DeepSeek API error: ${response.status} ${response.statusText}`);
-    }
+    // Call DeepSeek API using helper function
+    const dataResponse = await callDeepSeekAPI(prompt, deepseekApiKey);
 
-    const dataResponse = await response.json();
-    let generatedQuestion;
+    // Parse response using helper function
+    const generatedQuestions = parseAIResponse(dataResponse.choices[0].message.content, true);
 
-    try {
-      const content = dataResponse.choices[0].message.content;
-      const parsed = JSON.parse(content);
-
-      // Handle different response formats
-      if (parsed.questionText && parsed.options) {
-        generatedQuestion = parsed;
-      } else if (parsed.question || parsed.text) {
-        generatedQuestion = {
-          questionText: parsed.questionText || parsed.question || parsed.text,
-          options: parsed.options || parsed.choices || [],
-          correctAnswer: typeof parsed.correctAnswer === 'number' ? parsed.correctAnswer : (parsed.correct || 0),
-          explanation: parsed.explanation || parsed.answer_explanation || '',
-        };
-      } else {
-        throw new Error(`Unexpected response format: ${JSON.stringify(parsed)}`);
-      }
-    } catch (parseError) {
-      throw new Error(`Failed to parse DeepSeek response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
-    }
+    // Get the single question
+    const generatedQuestion = generatedQuestions[0];
 
     // Validate the question structure
     if (!generatedQuestion.questionText || !Array.isArray(generatedQuestion.options) || generatedQuestion.options.length !== 4) {
-      throw new Error('Invalid question format received from AI');
+      throw new functions.https.HttpsError('internal', 'Invalid question format received from AI');
     }
 
     // Shuffle the options
     const { shuffled: shuffledOptions, newIndex: newCorrectAnswer } = shuffleArrayAndTrackIndex(
-      generatedQuestion.options,
-      generatedQuestion.correctAnswer
+      generatedQuestion.options || [],
+      generatedQuestion.correctAnswer || 0
     );
 
     const randomizedQuestion = {
