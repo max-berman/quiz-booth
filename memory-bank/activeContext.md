@@ -407,6 +407,20 @@ useEffect(() => {
   - Ensures assets get matching build file names via SSR asset resolver
   - Includes the SSR asset resolver which is critical for preventing 404 errors
 
+### Build Commands Reference
+
+**IMPORTANT: Always use the correct build commands:**
+
+- `npm run build:functions` - Build Firebase Functions only
+- `npm run build:client` - Build client application only
+- `npm run build` - Build both client and functions
+- `npm run deploy:prod` - Full production deployment
+
+**Firebase Functions Import Paths:**
+
+- From `firebase-functions/src/games/games.ts` to `shared/constants.ts`: `../../../shared/constants`
+- From `firebase-functions/src/config/environment.ts` to `shared/environment.ts`: `../../../shared/environment`
+
 **Standard Deployment Verification:**
 
 - [ ] All tests pass including timer scenarios

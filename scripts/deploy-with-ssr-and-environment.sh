@@ -84,7 +84,7 @@ else
   # Fix TypeScript output structure - copy built files to correct location
   # echo "🔄 Fixing TypeScript output structure..."
   # cp -r lib/firebase-functions/src/* lib/
-  # cd ..
+  cd ..
 
   # Generate sitemap
   echo "🗺️  Generating sitemap..."
