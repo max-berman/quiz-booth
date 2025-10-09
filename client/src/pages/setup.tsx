@@ -178,7 +178,9 @@ export default function Setup() {
 				companyName: gameData.companyName,
 				productDescription: gameData.productDescription || null,
 				questionCount: gameData.questionCount,
-				difficulty: gameData.difficulty,
+				difficulty:
+					gameData.difficulty.charAt(0).toUpperCase() +
+					gameData.difficulty.slice(1), // Capitalize first letter
 				categories: gameData.categories,
 				customCategoryDescription: gameData.customCategoryDescription || null,
 				prizes: gameData.prizes || null,

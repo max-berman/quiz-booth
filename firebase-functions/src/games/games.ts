@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 import { randomUUID } from 'crypto';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { rateLimitConfigs, withRateLimit } from '../lib/rate-limit';
-import { SCORE_VALIDATION_CONFIG } from '../../../shared/constants';
+import { SCORE_VALIDATION_CONFIG } from '@shared/constants';
 
 const db = admin.firestore();
 

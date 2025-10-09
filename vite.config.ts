@@ -168,17 +168,8 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:5001/trivia-games-7a81b/us-central1',
+        target: 'http://localhost:5000',
         changeOrigin: true,
-        rewrite: (path) => {
-          // Route API calls to the appropriate Firebase Functions with full path
-          if (path.includes('/questions')) {
-            return '/getGameQuestionsCount' + path;
-          } else if (path.includes('/play-count')) {
-            return '/getGamePlayCount' + path;
-          }
-          return path;
-        },
         configure: (proxy, options) => {
           // Add CORS headers for development
           proxy.on('proxyRes', (proxyRes, req, res) => {
