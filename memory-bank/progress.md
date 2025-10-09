@@ -107,6 +107,7 @@
 - **Error Tracking**: More comprehensive error monitoring
 - **Test Coverage**: Expand test suite coverage
 - **SSR Asset Resolution**: ✅ RESOLVED - Automated asset file name updates with forced deployment
+- **PWA Manifest Script**: ✅ RESOLVED - Removed dynamic manifest loading, simplified to static link
 
 ### User Experience Issues
 
@@ -160,6 +161,7 @@
 - **PWA Support**: Offline capabilities and app installation
 - **Timer System**: Comprehensive timer with resume functionality
 - **Memory Bank**: Comprehensive project documentation and update
+- **Code Review**: Comprehensive improvements to question generation system (type safety, security, performance)
 
 ### Technical Improvements
 

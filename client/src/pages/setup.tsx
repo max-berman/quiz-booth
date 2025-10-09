@@ -399,47 +399,6 @@ export default function Setup() {
 						</p>
 					</div>
 
-					{/* Progress Steps */}
-					{/* <div className='mb-8'>
-					<div className='flex items-center justify-center space-x-8 mb-6 '>
-						{steps.map((step, index) => (
-							<div key={step.id} className='flex items-center'>
-								<div
-									className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
-										step.complete
-											? 'bg-primary border-primary text-primary-foreground'
-											: 'bg-background border-border text-muted-foreground'
-									}`}
-								>
-									{step.complete ? (
-										<CheckCircle className='h-6 w-6' />
-									) : (
-										<step.icon className='h-6 w-6' />
-									)}
-								</div>
-								<div className='ml-3 hidden sm:block'>
-									<p
-										className={`text-sm font-medium ${
-											step.complete
-												? 'text-foreground'
-												: 'text-muted-foreground'
-										}`}
-									>
-										{step.title}
-									</p>
-								</div>
-								{index < steps.length - 1 && (
-									<div
-										className={`w-16 h-1 mx-4 rounded ${
-											step.complete ? 'bg-primary' : 'bg-border'
-										}`}
-									/>
-								)}
-							</div>
-						))}
-					</div>
-				</div> */}
-
 					<Card className='border-none bg-background shadow-none py-2'>
 						{!isAuthenticated && (
 							<div className='flex items-center justify-center gap-2 text-destructive  p-2 rounded-lg'>

@@ -82,9 +82,9 @@ else
   npm run build
   
   # Fix TypeScript output structure - copy built files to correct location
-  echo "🔄 Fixing TypeScript output structure..."
-  cp -r lib/firebase-functions/src/* lib/
-  cd ..
+  # echo "🔄 Fixing TypeScript output structure..."
+  # cp -r lib/firebase-functions/src/* lib/
+  # cd ..
 
   # Generate sitemap
   echo "🗺️  Generating sitemap..."

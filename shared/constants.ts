@@ -5,10 +5,10 @@ export const INDUSTRY_OPTIONS = [
   // 🔥 Highest Potential Impact
   'Esports & Competitive Gaming',
   'Video Games & Interactive Entertainment',
-  'Console & Platform Gaming (Nintendo, Sega, etc.)',
-  'Independent Game Development',
+  'Gaming',
+  'Software-as-a-Service (SaaS)',
   'Retail & E-commerce',
-  'Food, Beverage & Hospitality',
+  'Food & Beverage',
   'Fashion & Apparel',
   'Vintage & Retro Fashion',
   'Beauty, Cosmetics & Personal Care',
@@ -51,19 +51,29 @@ export const INDUSTRY_OPTIONS = [
   'Smart Cities & Urban Tech',
 
   // 🎯 Niche / Specialized
+  'Car & Vehicle Rental',
+  'Consumer Goods Rental',
+  'Equipment & Industrial Rental',
+  'Home Services',
   'Events & Conferences',
   'Pet Care & Animal Health',
   'Home & Interior Design',
   'Music & Performing Arts',
   'Virtual & Augmented Reality',
   'Aerospace & Aviation',
-  'Insurance (Insurtech)',
-  'Legal & Professional Services',
+  'Insurance',
+  'Legal Services',
   'Recruitment & HR Tech',
   'Senior Care & Aging Tech',
   'Food Tech & Alternative Proteins',
   'Freelance & Gig Economy Platforms',
+  'iGaming',
   'Other'
 ] as const
 
 export type Industry = typeof INDUSTRY_OPTIONS[number]
+
+// Timer constants for consistent timing across client and server
+export const QUESTION_TIMER_DURATION = 30 // seconds per question
+export const MAX_TIME_PER_QUESTION = 35 // seconds (timer duration + buffer for transitions)
+export const MIN_TIME_PER_QUESTION = 0.5 // seconds (reasonable minimum to prevent instant answers)

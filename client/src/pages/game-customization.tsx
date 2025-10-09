@@ -23,7 +23,7 @@ import { storage } from '@/lib/firebase'
 import { colorToHex, isValidHexColor } from '@/lib/color-utils'
 import type { Game, GameCustomization } from '@shared/firebase-types'
 
-const buttonDefaultStyle = `border-[##746c56] bg-[##fcf7e7] shadow-sm hover:bg-[#fcfdfe] hover:border-[##979181] hover:shadow-md ring-offset-[##fcf7e7]`
+const buttonDefaultStyle = `border-[#746c56] bg-[#fcf7e7] shadow-sm hover:bg-[#fcfdfe] hover:border-[#979181] hover:shadow-md ring-offset-[#fcf7e7]`
 
 interface CustomizationForm {
 	primaryColor: string
@@ -145,6 +145,18 @@ export default function GameCustomizationPage() {
 			})
 		}
 	}, [game?.customization])
+
+	// Cleanup object URLs to prevent memory leaks
+	useEffect(() => {
+		return () => {
+			if (
+				formData.customLogoUrl &&
+				formData.customLogoUrl.startsWith('blob:')
+			) {
+				URL.revokeObjectURL(formData.customLogoUrl)
+			}
+		}
+	}, [formData.customLogoUrl])
 
 	const updateGameMutation = useMutation({
 		mutationFn: async (customization: GameCustomization) => {
@@ -754,7 +766,7 @@ export default function GameCustomizationPage() {
 								<Button
 									onClick={handleSave}
 									disabled={updateGameMutation.isPending}
-									className='w-full bg-[#645331] text-white shadow-none hover:bg-[##57482b]'
+									className='w-full bg-[#645331] text-white shadow-none hover:bg-[#57482b]'
 								>
 									<Save className='h-4 w-4 mr-2' />
 									{updateGameMutation.isPending
