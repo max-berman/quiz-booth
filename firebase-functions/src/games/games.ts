@@ -3,7 +3,6 @@ import * as admin from 'firebase-admin';
 import { randomUUID } from 'crypto';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { rateLimitConfigs, withRateLimit } from '../lib/rate-limit';
-import { SCORE_VALIDATION_CONFIG } from '../../../shared/constants';
 
 const db = admin.firestore();
 
@@ -557,7 +556,7 @@ function validateBasicNumericRanges(data: ScoreValidationData): string[] {
     errors.push('Invalid correct answers count');
   }
 
-  if (totalQuestions <= 0 || totalQuestions > SCORE_VALIDATION_CONFIG.MAX_QUESTIONS) {
+  if (totalQuestions <= 0 || totalQuestions > 100) {
     errors.push('Invalid total questions count');
   }
 
@@ -577,7 +576,7 @@ function validateConsistency(data: ScoreValidationData): string[] {
   }
 
   // Allow some flexibility in question count (e.g., if some questions were skipped)
-  if (gameQuestionCount > 0 && Math.abs(totalQuestions - gameQuestionCount) > SCORE_VALIDATION_CONFIG.QUESTION_COUNT_TOLERANCE) {
+  if (gameQuestionCount > 0 && Math.abs(totalQuestions - gameQuestionCount) > 2) {
     errors.push('Submitted question count does not match game configuration');
   }
 
@@ -588,24 +587,20 @@ function validateScoreRange(data: ScoreValidationData): string[] {
   const errors: string[] = [];
   const { score, correctAnswers, totalQuestions } = data;
 
-  const {
-    MAX_POINTS_PER_QUESTION,
-    MAX_TIME_BONUS_PER_QUESTION,
-    MAX_STREAK_BONUS_PER_QUESTION,
-    SCORE_RANGE_BUFFER,
-    MIN_SCORE_FOR_CORRECT_BUFFER
-  } = SCORE_VALIDATION_CONFIG;
+  const maxPointsPerQuestion = 100;
+  const maxTimeBonusPerQuestion = 60;
+  const maxStreakBonusPerQuestion = 10;
 
   const minPossibleScore = 0;
-  const maxPossibleScore = totalQuestions * (MAX_POINTS_PER_QUESTION + MAX_TIME_BONUS_PER_QUESTION + MAX_STREAK_BONUS_PER_QUESTION);
+  const maxPossibleScore = totalQuestions * (maxPointsPerQuestion + maxTimeBonusPerQuestion + maxStreakBonusPerQuestion);
 
   // Allow some buffer for rounding errors
-  if (score < minPossibleScore - SCORE_RANGE_BUFFER || score > maxPossibleScore + SCORE_RANGE_BUFFER) {
+  if (score < minPossibleScore - 10 || score > maxPossibleScore + 10) {
     errors.push('Score is outside possible range for this game');
   }
 
-  const minScoreForCorrect = correctAnswers * MAX_POINTS_PER_QUESTION;
-  if (score < minScoreForCorrect - MIN_SCORE_FOR_CORRECT_BUFFER) { // Allow small buffer for rounding
+  const minScoreForCorrect = correctAnswers * maxPointsPerQuestion;
+  if (score < minScoreForCorrect - 10) { // Allow small buffer for rounding
     errors.push('Score is too low for the number of correct answers');
   }
 
@@ -616,39 +611,37 @@ function validateTimeConsistency(data: ScoreValidationData): string[] {
   const errors: string[] = [];
   const { score, correctAnswers, totalQuestions, timeSpent } = data;
 
-  const {
-    MIN_TIME_PER_QUESTION,
-    MAX_TIME_PER_QUESTION,
-    MAX_SCORE_PER_SECOND,
-    MIN_TIME_PER_QUESTION_PERFECT,
-    MAX_POINTS_PER_QUESTION,
-    MAX_TIME_BONUS_PER_QUESTION,
-    MAX_STREAK_BONUS_PER_QUESTION
-  } = SCORE_VALIDATION_CONFIG;
-
   const avgTimePerQuestion = totalQuestions > 0 ? timeSpent / totalQuestions : 0;
 
   // Check for unrealistically low time (potential tampering)
-  if (avgTimePerQuestion < MIN_TIME_PER_QUESTION) {
+  // Allow for very fast answers - reduced from 0.5 to 0.1 seconds per question
+  if (avgTimePerQuestion < 0.1) {
     errors.push('Time spent per question is unrealistically low');
   }
 
   // Check for unrealistically high time (potential tampering)
-  if (avgTimePerQuestion > MAX_TIME_PER_QUESTION) {
+  // Allow up to 60 seconds per question (increased from 35)
+  if (avgTimePerQuestion > 60) {
     errors.push('Time spent per question is unrealistically high');
   }
 
   // Additional validation: Check if score-to-time ratio is suspicious
+  // A very high score with very low time could indicate tampering
+  // But be more lenient - allow up to 500 points per second for fast players
   const scorePerSecond = timeSpent > 0 ? score / timeSpent : Infinity;
-  if (scorePerSecond > MAX_SCORE_PER_SECOND) {
+  if (scorePerSecond > 500) { // Increased from 200 to 500 to allow faster gameplay
     errors.push('Score-to-time ratio indicates potential tampering');
   }
 
   // Validate that perfect scores have reasonable time
-  const maxPossibleScore = totalQuestions * (MAX_POINTS_PER_QUESTION + MAX_TIME_BONUS_PER_QUESTION + MAX_STREAK_BONUS_PER_QUESTION);
+  // But be more lenient - allow perfect scores with 1 second per question
+  const maxPointsPerQuestion = 100;
+  const maxTimeBonusPerQuestion = 60;
+  const maxStreakBonusPerQuestion = 10;
+  const maxPossibleScore = totalQuestions * (maxPointsPerQuestion + maxTimeBonusPerQuestion + maxStreakBonusPerQuestion);
 
   if (correctAnswers === totalQuestions && score === maxPossibleScore) {
-    const minTimeForPerfectScore = totalQuestions * MIN_TIME_PER_QUESTION_PERFECT;
+    const minTimeForPerfectScore = totalQuestions * 1; // Reduced from 3 to 1 second per question
     if (timeSpent < minTimeForPerfectScore) {
       errors.push('Perfect score achieved in unrealistically short time');
     }

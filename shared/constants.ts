@@ -75,29 +75,5 @@ export type Industry = typeof INDUSTRY_OPTIONS[number]
 
 // Timer constants for consistent timing across client and server
 export const QUESTION_TIMER_DURATION = 30 // seconds per question
-export const MAX_TIME_PER_QUESTION = 31 // seconds (timer duration + buffer for transitions)
+export const MAX_TIME_PER_QUESTION = 35 // seconds (timer duration + buffer for transitions)
 export const MIN_TIME_PER_QUESTION = 0.5 // seconds (reasonable minimum to prevent instant answers)
-
-// Score validation constants for consistent validation across client and server
-export const SCORE_VALIDATION_CONFIG = {
-  // Time validation thresholds (use timer constants for consistency)
-  MIN_TIME_PER_QUESTION: MIN_TIME_PER_QUESTION, // Minimum seconds per question (reasonable minimum to prevent instant answers)
-  MAX_TIME_PER_QUESTION: MAX_TIME_PER_QUESTION,  // Maximum seconds per question (increased from 35 for validation leniency)
-  MIN_TIME_PER_QUESTION_PERFECT: 1, // Minimum seconds per question for perfect score (reduced from 3 for validation leniency)
-
-  // Score validation thresholds
-  MAX_SCORE_PER_SECOND: 300, // Maximum points per second (increased from 200 for validation leniency)
-
-  // Score calculation constants
-  MAX_POINTS_PER_QUESTION: 100,
-  MAX_TIME_BONUS_PER_QUESTION: 60,
-  MAX_STREAK_BONUS_PER_QUESTION: 10,
-
-  // Range validation buffers
-  SCORE_RANGE_BUFFER: 10, // Buffer for score range validation
-  MIN_SCORE_FOR_CORRECT_BUFFER: 10, // Buffer for minimum score validation
-
-  // Question count validation
-  MAX_QUESTIONS: 100,
-  QUESTION_COUNT_TOLERANCE: 2, // Allow some flexibility in question count
-} as const
