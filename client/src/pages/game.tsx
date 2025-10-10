@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useLocation } from 'wouter'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,8 @@ import {
 import type { Game, Question } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { useGameSession } from '@/hooks/use-game-session'
+import { useSwipeGesture } from '@/hooks/use-swipe-gesture'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { analytics } from '@/lib/analytics'
 import {
 	applyGameCustomization,
@@ -38,6 +40,10 @@ export default function GamePage() {
 		updateSessionState,
 		completeSession,
 	} = useGameSession(id)
+
+	// Mobile detection and swipe gesture setup
+	const isMobile = useIsMobile()
+	const gameCardRef = useRef<HTMLDivElement>(null)
 
 	// Timer configuration - will be moved to database later
 	const QUESTION_TIMER_DURATION = 30 // seconds - can be 30 or 60 in the future
@@ -187,6 +193,16 @@ export default function GamePage() {
 		const timeSpent = QUESTION_TIMER_DURATION - timeLeft
 		const isCorrect = answerIndex === currentQuestion?.correctAnswer
 
+		// Vibration feedback for wrong answers
+		if (!isCorrect && 'vibrate' in navigator) {
+			// Check if vibration API is supported
+			try {
+				navigator.vibrate(200) // 200ms vibration for wrong answers
+			} catch (error) {
+				console.warn('Vibration API not supported or failed:', error)
+			}
+		}
+
 		// Calculate score updates
 		let newScore = score
 		let newCorrectAnswers = correctAnswers
@@ -297,6 +313,18 @@ export default function GamePage() {
 			document.removeEventListener('keydown', handleKeyDown)
 		}
 	}, [isAnswered, handleNextQuestion])
+
+	// Swipe gesture handler for mobile devices
+	useSwipeGesture(gameCardRef, {
+		onSwipeLeft: () => {
+			// Only trigger swipe left if question is answered and on mobile
+			if (isMobile && isAnswered) {
+				handleNextQuestion()
+			}
+		},
+		threshold: 50, // Minimum swipe distance in pixels
+		preventDefault: false, // Allow button taps to work properly
+	})
 
 	// Check for permission denied errors (game is private)
 	if (gameError || questionsError) {
@@ -466,7 +494,10 @@ export default function GamePage() {
 				</div>
 
 				{/* Question Card */}
-				<Card className='game-card !my-8 bg-card animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'>
+				<Card
+					ref={gameCardRef}
+					className='game-card !my-8 bg-card animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'
+				>
 					<CardContent className='p-0 pb-4 md:p-6'>
 						{/* Question Text */}
 						<div className=''>

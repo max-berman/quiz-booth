@@ -25,6 +25,9 @@
 - **Firebase Routing Fix**: Resolved 404 error for game-customization page by adding missing route to Firebase hosting configuration
 - **Storage Rules Fix**: Fixed Firebase Storage rules to allow public read access for game logos in public game cards
 - **API Consistency Fix**: Resolved CORS errors by implementing consistent `httpsCallable` pattern across all Firebase Functions
+- **Mobile Swipe Gestures**: Added swipe left functionality for mobile devices to trigger next question navigation
+- **Mobile Button Fix**: Fixed mobile button tapability by disabling preventDefault in swipe gesture handler
+- **Vibration Feedback**: Added vibration feedback (200ms) for wrong answers with browser compatibility checking
 
 ### Current Development State
 

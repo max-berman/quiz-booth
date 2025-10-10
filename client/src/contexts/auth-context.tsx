@@ -71,20 +71,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
 	}, [])
 
 	const sendSignInLink = async (email: string): Promise<void> => {
-		// For now, let's use a simple approach that works with any domain
+		// Use dynamic URL that works with any domain
 		const actionCodeSettings = {
 			url: `${window.location.origin}/auth/complete`,
 			handleCodeInApp: true,
+			// iOS and Android settings for better mobile experience
+			dynamicLinkDomain: 'quizbooth.page.link', // Optional: Set up Firebase Dynamic Links
 		}
 
 		try {
 			await sendSignInLinkToEmail(auth, email, actionCodeSettings)
 			localStorage.setItem('emailForSignIn', email)
+
+			// Track email sign-in attempt for analytics
+			analytics.trackUserSignIn('email')
 		} catch (error: any) {
 			console.error('Email link error:', error)
-			throw new Error(
-				'Email authentication is not configured. Please use Google sign-in instead.'
-			)
+
+			// Track authentication error
+			analytics.trackError({
+				type: 'authentication',
+				message: error.message || 'Email sign-in failed',
+				context: 'sendSignInLink',
+			})
+
+			// Provide more specific error messages
+			if (error.code === 'auth/invalid-email') {
+				throw new Error('Please enter a valid email address.')
+			} else if (error.code === 'auth/too-many-requests') {
+				throw new Error('Too many sign-in attempts. Please try again later.')
+			} else {
+				throw new Error(
+					'Unable to send sign-in link. This may be due to email deliverability issues. Please try Google sign-in instead or contact support.'
+				)
+			}
 		}
 	}
 
