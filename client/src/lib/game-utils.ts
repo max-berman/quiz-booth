@@ -3,20 +3,29 @@
 import { Game } from '@shared/firebase-types'
 import { useQuery } from '@tanstack/react-query'
 import { isWebsite, formatWebsite } from './website-utils'
+import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
+
+interface PlayCountResponse {
+  count: number
+}
+
+interface QuestionCountResponse {
+  count: number
+  questions: any[]
+}
 
 /**
  * Hook for fetching play count for a game
  */
 export function usePlayCount(gameId: string) {
+  const { getGamePlayCount } = useFirebaseFunctions()
+
   return useQuery<number>({
     queryKey: ['/api/games', gameId, 'play-count'],
     queryFn: async () => {
       // console.log(`Fetching play count for game ${gameId}`)
-      const response = await fetch(`/api/games/${gameId}/play-count`)
-      if (!response.ok) {
-        throw new Error(`Failed to fetch play count: ${response.status}`)
-      }
-      const data = await response.json()
+      const result = await getGamePlayCount({ gameId })
+      const data = result.data as PlayCountResponse
       // console.log(`Play count response for game ${gameId}:`, data)
       return data.count
     },
@@ -30,17 +39,16 @@ export function usePlayCount(gameId: string) {
  * Hook for fetching question count for a game
  */
 export function useQuestionCount(gameId: string) {
+  const { getGameQuestionsCount } = useFirebaseFunctions()
+
   return useQuery<number>({
     queryKey: ['/api/games', gameId, 'questions'],
     queryFn: async () => {
       // console.log(`Fetching questions for game ${gameId}`)
-      const response = await fetch(`/api/games/${gameId}/questions`)
-      if (!response.ok) {
-        throw new Error(`Failed to fetch questions: ${response.status}`)
-      }
-      const questions = await response.json()
-      // console.log(`Questions response for game ${gameId}:`, questions)
-      return questions.length
+      const result = await getGameQuestionsCount({ gameId })
+      const data = result.data as QuestionCountResponse
+      // console.log(`Questions response for game ${gameId}:`, data)
+      return data.count
     },
     enabled: !!gameId,
     staleTime: 5 * 60 * 1000, // 5 minutes

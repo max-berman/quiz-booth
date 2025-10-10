@@ -17,6 +17,8 @@ export const useFirebaseFunctions = () => {
   const updateGamePrizes = httpsCallable(functions, 'updateGamePrizes');
   const savePlayerScore = httpsCallable(functions, 'savePlayerScore');
   const getGameLeaderboard = httpsCallable(functions, 'getGameLeaderboard');
+  const getGamePlayCount = httpsCallable(functions, 'getGamePlayCount');
+  const getGameQuestionsCount = httpsCallable(functions, 'getGameQuestionsCount');
 
   // Question functions
   const generateQuestions = httpsCallable(functions, 'generateQuestions');
@@ -122,6 +124,8 @@ export const useFirebaseFunctions = () => {
     updateGamePrizes,
     savePlayerScore,
     getGameLeaderboard,
+    getGamePlayCount,
+    getGameQuestionsCount,
     generateQuestions,
     generateSingleQuestion,
     getQuestions,
