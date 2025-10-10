@@ -2,12 +2,6 @@ import { Helmet } from 'react-helmet-async'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from '@/components/ui/accordion'
-import {
 	Users,
 	Target,
 	TrendingUp,
@@ -340,32 +334,31 @@ export default function FAQ() {
 										</h2>
 									</div>
 
-									<Accordion type='single' collapsible className='space-y-4'>
+									<div className='space-y-4'>
 										{category.questions.map((faq, faqIndex) => (
-											<AccordionItem
+											<details
 												key={faqIndex}
-												value={`item-${categoryIndex}-${faqIndex}`}
-												className='border rounded-lg px-4 bg-background'
+												className='border rounded-lg px-4 bg-background group'
 											>
-												<AccordionTrigger className='text-left hover:no-underline py-4'>
+												<summary className='cursor-pointer py-4 list-none'>
 													<div className='flex items-start gap-3'>
 														<HelpCircle className='h-5 w-5 text-primary mt-0.5 flex-shrink-0' />
 														<span className='font-semibold text-foreground'>
 															{faq.question}
 														</span>
 													</div>
-												</AccordionTrigger>
-												<AccordionContent className='pb-4'>
+												</summary>
+												<div className='pb-4'>
 													<div className='flex items-start gap-3 pl-8'>
 														<Lightbulb className='h-4 w-4 text-green-500 mt-0.5 flex-shrink-0' />
-														<div className='text-primary leading-relaxed prose  max-w-none'>
+														<div className='text-primary leading-relaxed prose max-w-none'>
 															<ReactMarkdown>{faq.answer}</ReactMarkdown>
 														</div>
 													</div>
-												</AccordionContent>
-											</AccordionItem>
+												</div>
+											</details>
 										))}
-									</Accordion>
+									</div>
 								</div>
 							))}
 						</div>

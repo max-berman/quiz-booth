@@ -1,34 +1,258 @@
 import { renderToString } from 'react-dom/server';
 import React from 'react';
+import { isDynamicRoute } from './config/dynamic-routes';
 
-// Server-side components (simplified versions for SSR)
+// Server-side components that match the actual React app structure
 const HomePage = () => (
-  React.createElement('div', { className: 'min-h-screen bg-background' },
-    React.createElement('div', { className: 'container mx-auto px-4 py-8' },
-      React.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'QuizBooth'),
-      React.createElement('p', { className: 'text-xl text-center text-muted-foreground mb-8' },
-        'Create AI-powered custom trivia games for trade shows and events'
-      ),
-      React.createElement('div', { className: 'text-center' },
-        React.createElement('a', {
-          href: '/setup',
-          className: 'bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors'
-        }, 'Create Your Game')
+  React.createElement('div', { className: 'flex-1 flex flex-col' },
+    // Hero Section
+    React.createElement('section', { className: 'relative mt-4 md:pt-0 px-4 md:px-8' },
+      React.createElement('div', { className: 'max-w-5xl mx-auto' },
+        React.createElement('div', { className: 'text-center relative z-10' },
+          React.createElement('div', { className: 'mb-8 animate-slide-up' },
+            React.createElement('h1', { className: 'text-h1 text-foreground my-8' },
+              'Create ',
+              React.createElement('span', { className: 'text-primary font-bold' }, 'Trivia Games'),
+              React.createElement('br'),
+              'for your business'
+            ),
+            React.createElement('p', { className: 'text-xl text-foreground max-w-3xl mx-auto mb-12 leading-relaxed' },
+              'Engage your customers through play. Generate AI-powered custom trivia questions for your trade show booth and capture leads while visitors have fun competing for prizes.'
+            )
+          ),
+          React.createElement('div', {
+            className: 'flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up',
+            style: { animationDelay: '0.2s' }
+          },
+            React.createElement('a', { href: '/setup' },
+              React.createElement('button', {
+                className: 'px-8 py-3 w-full text-lg sm:w-auto bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors'
+              },
+                'Create Your Game'
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    // Value Proposition Section
+    React.createElement('section', { className: 'relative pt-4 lg:pt-0 px-4 sm:px-6 lg:px-8 my-4' },
+      React.createElement('div', { className: 'max-w-5xl mx-auto' },
+        React.createElement('div', { className: 'text-center mb-4 md:mb-16' },
+          React.createElement('h2', { className: 'text-2xl md:text-3xl font-bold text-foreground my-4 md:my-8' },
+            'Why Choose QuizBooth?'
+          )
+        ),
+        React.createElement('ul', { className: 'grid grid-cols-1 md:grid-cols-3 gap-4' },
+          [
+            {
+              title: 'AI-Powered Questions',
+              description: 'Never run out of engaging content. Our AI generates unique questions in seconds.'
+            },
+            {
+              title: 'Lead Capture',
+              description: 'Turn players into leads. Seamlessly collect contact information at your event.'
+            },
+            {
+              title: 'Easy Sharing',
+              description: 'Go live in seconds. Share your game via QR code or a simple link.'
+            }
+          ].map((feature, index) =>
+            React.createElement('li', {
+              key: feature.title,
+              className: 'text-center animate-slide-up',
+              style: { animationDelay: `${0.1 * index}s` }
+            },
+              React.createElement('div', { className: 'flex justify-center mb-4' },
+                React.createElement('div', { className: 'p-2 md:p-3 bg-primary/10 rounded-full border-2 border-primary' },
+                  React.createElement('div', { className: 'h-4 w-4 md:h-8 md:w-8 text-primary' })
+                )
+              ),
+              React.createElement('h3', { className: 'text-xl font-semibold text-foreground mb-3' },
+                feature.title
+              ),
+              React.createElement('p', { className: 'text-primary leading-relaxed' },
+                feature.description
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    // Recent Games Section
+    React.createElement('section', { className: 'relative pt-4 lg:pt-0 px-4 sm:px-6 lg:px-8 my-12' },
+      React.createElement('div', { className: 'max-w-7xl mx-auto' },
+        React.createElement('div', { className: 'text-center mb-8' },
+          React.createElement('h2', { className: 'text-2xl md:text-3xl font-bold text-foreground mb-4' },
+            'Recently Added Games'
+          ),
+          React.createElement('p', { className: 'text-lg text-foreground max-w-2xl mx-auto' },
+            'Check out the latest trivia games created by our community. Play, learn, and have fun!'
+          )
+        ),
+        React.createElement('div', { className: 'text-center py-12' },
+          React.createElement('div', { className: 'max-w-md mx-auto bg-card border rounded-lg p-6' },
+            React.createElement('div', { className: 'h-12 w-12 text-muted-foreground mx-auto mb-4' }),
+            React.createElement('h3', { className: 'text-lg font-semibold text-foreground mb-2' },
+              'No Public Games Yet'
+            ),
+            React.createElement('p', { className: 'text-muted-foreground mb-4' },
+              'Be the first to create a public trivia game!'
+            ),
+            React.createElement('a', { href: '/setup' },
+              React.createElement('button', {
+                className: 'bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors'
+              },
+                'Create Your Game'
+              )
+            )
+          )
+        )
       )
     )
   )
 );
 
 const AboutPage = () => (
-  React.createElement('div', { className: 'min-h-screen bg-background' },
-    React.createElement('div', { className: 'container mx-auto px-4 py-8' },
-      React.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'About QuizBooth'),
-      React.createElement('div', { className: 'max-w-2xl mx-auto text-lg text-muted-foreground' },
-        React.createElement('p', { className: 'mb-4' },
-          'QuizBooth is an AI-powered platform that helps businesses create engaging trivia games for trade shows, events, and marketing campaigns.'
+  React.createElement('div', { className: 'flex-1 flex flex-col' },
+    // Hero Section
+    React.createElement('section', { className: 'relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 to-primary/10' },
+      React.createElement('div', { className: 'max-w-6xl mx-auto text-center' },
+        React.createElement('div', { className: 'mb-8' },
+          React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-foreground mb-6' },
+            'About ',
+            React.createElement('span', { className: 'text-primary' }, 'QuizBooth')
+          ),
+          React.createElement('p', { className: 'text-xl text-foreground max-w-3xl mx-auto leading-relaxed' },
+            'QuizBooth is a comprehensive platform designed specifically for trade shows and events, combining AI-powered content generation with robust engagement tools to help businesses connect with their audience through interactive trivia experiences.'
+          )
+        )
+      )
+    ),
+
+    // Version Information
+    React.createElement('section', { className: 'py-12 px-4 sm:px-6 lg:px-8' },
+      React.createElement('div', { className: 'max-w-6xl mx-auto' },
+        React.createElement('div', { className: 'text-center mb-12' },
+          React.createElement('h2', { className: 'text-3xl font-bold text-foreground mb-4' },
+            'Version Information'
+          ),
+          React.createElement('div', { className: 'flex flex-col sm:flex-row justify-center items-center gap-4 mb-8' },
+            React.createElement('div', { className: 'flex items-center gap-2' },
+              React.createElement('span', { className: 'text-lg font-semibold' },
+                'Current Version: 1.0.0-beta.1'
+              )
+            ),
+            React.createElement('div', { className: 'flex items-center gap-2' },
+              React.createElement('span', { className: 'text-lg' }, 'Last Updated: October 2025')
+            )
+          )
+        )
+      )
+    ),
+
+    // Features Overview
+    React.createElement('section', { className: 'py-12 px-4 sm:px-6 lg:px-8 bg-muted/30' },
+      React.createElement('div', { className: 'max-w-6xl mx-auto' },
+        React.createElement('div', { className: 'text-center mb-12' },
+          React.createElement('h2', { className: 'text-3xl font-bold text-foreground mb-4' },
+            'Comprehensive Feature Set'
+          ),
+          React.createElement('p', { className: 'text-lg text-foreground max-w-2xl mx-auto' },
+            'QuizBooth offers a complete suite of tools designed specifically for trade show engagement and lead generation through interactive trivia experiences.'
+          )
         ),
-        React.createElement('p', { className: 'mb-4' },
-          'Our mission is to make it easy for companies to capture leads, engage customers, and drive business growth through interactive gameplay.'
+        React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' },
+          [
+            {
+              title: 'AI-Powered Question Generation',
+              features: [
+                'DeepSeek AI Integration for intelligent question generation',
+                'Category-specific prompts',
+                'Website-based company detection',
+                'Batch question generation',
+              ]
+            },
+            {
+              title: 'Game Creation & Management',
+              features: [
+                'Multi-step game creation wizard',
+                'Flexible prize system with multiple tiers',
+                'AI-generated game titles',
+                'User dashboard for game management',
+              ]
+            },
+            {
+              title: 'Player Experience & Engagement',
+              features: [
+                'Immersive gameplay interface',
+                'Multiple choice questions with randomized answers',
+                'Real-time scoring and progress tracking',
+                'Mobile-optimized responsive design',
+              ]
+            },
+            {
+              title: 'Leaderboard & Analytics',
+              features: [
+                'Real-time game-specific leaderboards',
+                'Global cross-game rankings',
+                'Intelligent caching system',
+                'Player submissions and engagement tracking',
+              ]
+            },
+            {
+              title: 'Sharing & Distribution',
+              features: [
+                'Dynamic QR code generation',
+                'Shareable embed codes for websites',
+                'Public URLs for direct game access',
+                'Event-ready distribution system',
+              ]
+            },
+            {
+              title: 'Technical Architecture',
+              features: [
+                'Full-stack TypeScript with React 18',
+                'Firebase Firestore real-time database',
+                'Performance-optimized caching system',
+                'Intelligent code splitting and lazy loading',
+              ]
+            }
+          ].map((category, index) =>
+            React.createElement('div', {
+              key: category.title,
+              className: 'bg-card border rounded-lg p-6 hover:shadow-lg transition-shadow duration-300'
+            },
+              React.createElement('h3', { className: 'text-lg font-semibold text-foreground mb-4' },
+                category.title
+              ),
+              React.createElement('ul', { className: 'space-y-2' },
+                category.features.map((feature, featureIndex) =>
+                  React.createElement('li', {
+                    key: featureIndex,
+                    className: 'flex items-start gap-2 text-sm'
+                  },
+                    React.createElement('span', { className: 'text-primary' }, '•'),
+                    React.createElement('span', { className: 'text-foreground' }, feature)
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    // Call to Action
+    React.createElement('section', { className: 'py-12 px-4 sm:px-6 lg:px-8 bg-primary/5' },
+      React.createElement('div', { className: 'max-w-4xl mx-auto text-center' },
+        React.createElement('h2', { className: 'text-3xl font-bold text-foreground mb-6' },
+          'Ready to Create Your First Game?'
+        ),
+        React.createElement('p', { className: 'text-lg text-foreground mb-8 max-w-2xl mx-auto' },
+          "Start exploring QuizBooth's features and create engaging trivia experiences for your events. As a new platform, we're excited to help you connect with your audience through interactive gameplay."
         )
       )
     )
@@ -68,26 +292,170 @@ const QuizGamesPage = ({ publicGames = [] }: { publicGames?: any[] }) => (
 );
 
 const FAQPage = () => (
-  React.createElement('div', { className: 'min-h-screen bg-background' },
-    React.createElement('div', { className: 'container mx-auto px-4 py-8' },
-      React.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'Frequently Asked Questions'),
-      React.createElement('div', { className: 'max-w-3xl mx-auto space-y-6' },
-        React.createElement('div', { className: 'bg-card border rounded-lg p-6' },
-          React.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'What is QuizBooth?'),
-          React.createElement('p', { className: 'text-muted-foreground' },
-            'QuizBooth is an AI-powered platform that helps businesses create engaging trivia games for trade shows, events, and marketing campaigns.'
+  React.createElement('div', { className: 'flex-1 flex flex-col' },
+    // Hero Section
+    React.createElement('section', { className: 'relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 to-primary/10' },
+      React.createElement('div', { className: 'max-w-6xl mx-auto text-center' },
+        React.createElement('div', { className: 'mb-8' },
+          React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-foreground mb-6' },
+            'Frequently Asked Questions'
+          ),
+          React.createElement('p', { className: 'text-xl text-foreground max-w-3xl mx-auto leading-relaxed' },
+            'Everything you need to know about using QuizBooth for trade shows and events. Learn how to engage attendees, capture leads, and maximize your event ROI.'
+          )
+        )
+      )
+    ),
+
+    // Vendor Benefits Section
+    React.createElement('section', { className: 'py-12 px-4 sm:px-6 lg:px-8' },
+      React.createElement('div', { className: 'max-w-6xl mx-auto' },
+        React.createElement('div', { className: 'text-center mb-12' },
+          React.createElement('h2', { className: 'text-3xl font-bold text-foreground mb-4' },
+            'Key Benefits for Trade Show Vendors'
+          ),
+          React.createElement('p', { className: 'text-lg text-foreground max-w-2xl mx-auto' },
+            'Discover how QuizBooth transforms your trade show presence with measurable results and enhanced engagement.'
           )
         ),
-        React.createElement('div', { className: 'bg-card border rounded-lg p-6' },
-          React.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'How do I create a game?'),
-          React.createElement('p', { className: 'text-muted-foreground' },
-            'Simply sign up, click "Create Your Game", and our AI will help you generate questions based on your topic and difficulty preferences.'
+        React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' },
+          [
+            {
+              title: 'Increased Booth Traffic',
+              description: 'Attract more visitors with engaging trivia that stands out from traditional booth activities'
+            },
+            {
+              title: 'Qualified Lead Generation',
+              description: 'Capture contact information from genuinely interested prospects through voluntary participation'
+            },
+            {
+              title: 'Brand Differentiation',
+              description: 'Stand out from competitors with innovative, tech-forward engagement that positions your brand as modern and customer-focused'
+            },
+            {
+              title: 'Extended Dwell Time',
+              description: 'Keep attendees at your booth longer with compelling content that encourages exploration and conversation'
+            },
+            {
+              title: 'Easy Distribution',
+              description: 'Quick setup with QR codes and shareable links that work instantly without complex installations'
+            },
+            {
+              title: 'Event Analytics',
+              description: 'Measure engagement, track performance, and demonstrate ROI with comprehensive event-specific analytics'
+            }
+          ].map((benefit, index) =>
+            React.createElement('div', {
+              key: benefit.title,
+              className: 'bg-card border rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300'
+            },
+              React.createElement('div', { className: 'flex justify-center mb-4' },
+                React.createElement('div', { className: 'p-3 bg-primary/10 rounded-full border-2 border-primary' },
+                  React.createElement('div', { className: 'h-6 w-6 text-primary' })
+                )
+              ),
+              React.createElement('h3', { className: 'text-lg font-semibold mb-3' }, benefit.title),
+              React.createElement('p', { className: 'text-foreground text-sm' }, benefit.description)
+            )
           )
-        ),
-        React.createElement('div', { className: 'bg-card border rounded-lg p-6' },
-          React.createElement('h3', { className: 'text-xl font-semibold mb-2' }, 'Is it free to use?'),
-          React.createElement('p', { className: 'text-muted-foreground' },
-            'QuizBooth offers both free and premium plans. The free plan includes basic features while premium plans unlock advanced customization and analytics.'
+        )
+      )
+    ),
+
+    // FAQ Sections
+    React.createElement('section', { className: 'py-12 px-4 sm:px-6 lg:px-8 bg-muted/30' },
+      React.createElement('div', { className: 'max-w-6xl mx-auto' },
+        React.createElement('div', { className: 'space-y-12' },
+          // Trade Show & Event Focus
+          React.createElement('div', null,
+            React.createElement('div', { className: 'flex items-center gap-3 mb-6' },
+              React.createElement('div', { className: 'h-6 w-6 text-primary' }),
+              React.createElement('h2', { className: 'text-2xl font-bold text-foreground' },
+                'Trade Show & Event Focus'
+              )
+            ),
+            React.createElement('div', { className: 'space-y-4' },
+              React.createElement('div', { className: 'border rounded-lg px-4 bg-background' },
+                React.createElement('div', { className: 'py-4' },
+                  React.createElement('div', { className: 'flex items-start gap-3' },
+                    React.createElement('div', { className: 'h-5 w-5 text-primary mt-0.5 flex-shrink-0' }),
+                    React.createElement('span', { className: 'font-semibold text-foreground' },
+                      'How can QuizBooth specifically help vendors at trade shows?'
+                    )
+                  )
+                ),
+                React.createElement('div', { className: 'pb-4' },
+                  React.createElement('div', { className: 'flex items-start gap-3 pl-8' },
+                    React.createElement('div', { className: 'h-4 w-4 text-green-500 mt-0.5 flex-shrink-0' }),
+                    React.createElement('div', { className: 'text-primary leading-relaxed' },
+                      'QuizBooth is designed specifically for trade show environments to help vendors stand out from competitors with engaging trivia, engage attendees with interactive content, and capture qualified leads through voluntary participation.'
+                    )
+                  )
+                )
+              ),
+              React.createElement('div', { className: 'border rounded-lg px-4 bg-background' },
+                React.createElement('div', { className: 'py-4' },
+                  React.createElement('div', { className: 'flex items-start gap-3' },
+                    React.createElement('div', { className: 'h-5 w-5 text-primary mt-0.5 flex-shrink-0' }),
+                    React.createElement('span', { className: 'font-semibold text-foreground' },
+                      'How quickly can I set up a game for my trade show booth?'
+                    )
+                  )
+                ),
+                React.createElement('div', { className: 'pb-4' },
+                  React.createElement('div', { className: 'flex items-start gap-3 pl-8' },
+                    React.createElement('div', { className: 'h-4 w-4 text-green-500 mt-0.5 flex-shrink-0' }),
+                    React.createElement('div', { className: 'text-primary leading-relaxed' },
+                      'Most vendors can create and deploy a fully customized trivia game in under 2 minutes using our AI-powered question generation.'
+                    )
+                  )
+                )
+              )
+            )
+          ),
+
+          // Vendor Benefits & ROI
+          React.createElement('div', null,
+            React.createElement('div', { className: 'flex items-center gap-3 mb-6' },
+              React.createElement('div', { className: 'h-6 w-6 text-primary' }),
+              React.createElement('h2', { className: 'text-2xl font-bold text-foreground' },
+                'Vendor Benefits & ROI'
+              )
+            ),
+            React.createElement('div', { className: 'space-y-4' },
+              React.createElement('div', { className: 'border rounded-lg px-4 bg-background' },
+                React.createElement('div', { className: 'py-4' },
+                  React.createElement('div', { className: 'flex items-start gap-3' },
+                    React.createElement('div', { className: 'h-5 w-5 text-primary mt-0.5 flex-shrink-0' }),
+                    React.createElement('span', { className: 'font-semibold text-foreground' },
+                      'What are the key benefits for trade show vendors?'
+                    )
+                  )
+                ),
+                React.createElement('div', { className: 'pb-4' },
+                  React.createElement('div', { className: 'flex items-start gap-3 pl-8' },
+                    React.createElement('div', { className: 'h-4 w-4 text-green-500 mt-0.5 flex-shrink-0' }),
+                    React.createElement('div', { className: 'text-primary leading-relaxed' },
+                      'Vendors benefit from increased booth traffic, higher quality lead generation, brand awareness, competitive differentiation, measurable ROI, and cost-effective alternatives to expensive booth activities.'
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    // Call to Action
+    React.createElement('section', { className: 'py-12 px-4 sm:px-6 lg:px-8' },
+      React.createElement('div', { className: 'max-w-4xl mx-auto text-center' },
+        React.createElement('div', { className: 'bg-primary/5 rounded-2xl p-8' },
+          React.createElement('h2', { className: 'text-3xl font-bold text-foreground mb-4' },
+            'Ready to Transform Your Trade Show Experience?'
+          ),
+          React.createElement('p', { className: 'text-lg text-foreground mb-6 max-w-2xl mx-auto' },
+            'Join hundreds of vendors who are using QuizBooth to stand out, engage attendees, and capture qualified leads at their events.'
           )
         )
       )
@@ -252,6 +620,22 @@ const SignInPage = () => (
   )
 );
 
+const SetupPage = () => (
+  React.createElement('div', { className: 'min-h-screen bg-background' },
+    React.createElement('div', { className: 'container mx-auto px-4 py-8' },
+      React.createElement('h1', { className: 'text-4xl font-bold text-center mb-8' }, 'Create Your Trivia Game'),
+      React.createElement('p', { className: 'text-center text-muted-foreground mb-8' },
+        'Set up your custom trivia game with AI-powered questions and engaging gameplay'
+      ),
+      React.createElement('div', { className: 'max-w-md mx-auto bg-card border rounded-lg p-6' },
+        React.createElement('p', { className: 'text-center text-muted-foreground' },
+          'Create your first trivia game with our easy setup wizard. Customize questions, prizes, and game settings.'
+        )
+      )
+    )
+  )
+);
+
 const NotFoundPage = () => (
   React.createElement('div', { className: 'min-h-screen bg-background flex items-center justify-center' },
     React.createElement('div', { className: 'text-center' },
@@ -272,19 +656,10 @@ export async function renderPage(path: string, pageData: any) {
   let metaTags = '';
 
   // Check if this is a dynamic route that should be handled by client-side routing
-  const isDynamicRoute =
-    path.startsWith('/game/') ||
-    path.startsWith('/dashboard') ||
-    path.startsWith('/setup') ||
-    path.startsWith('/edit-questions/') ||
-    path.startsWith('/game-created') ||
-    path.startsWith('/leaderboard/') ||
-    path.startsWith('/results/') ||
-    path.startsWith('/submissions/');
-
-  if (isDynamicRoute) {
+  if (isDynamicRoute(path)) {
     // For dynamic routes, serve a generic page that will be hydrated by client-side React
-    Component = () => React.createElement('div', { id: 'root' });
+    // Return empty string since the template already provides the root div
+    Component = () => React.createElement(React.Fragment);
     metaTags = `
       <title>QuizBooth - Interactive Trivia Games</title>
       <meta name="description" content="Play engaging trivia games created with QuizBooth. Interactive gameplay with AI-powered questions and real-time scoring.">
@@ -383,6 +758,18 @@ export async function renderPage(path: string, pageData: any) {
           <meta property="og:description" content="Complete your sign-in process">
           <meta property="og:type" content="website">
           <meta property="og:url" content="https://quizbooth.games/auth/complete">
+        `;
+        break;
+
+      case '/setup':
+        Component = SetupPage;
+        metaTags = `
+          <title>Create Trivia Game - QuizBooth</title>
+          <meta name="description" content="Set up your custom trivia game with AI-powered questions and engaging gameplay. Create the perfect game for your trade show or event.">
+          <meta property="og:title" content="Create Trivia Game - QuizBooth">
+          <meta property="og:description" content="Set up your custom trivia game with AI-powered questions">
+          <meta property="og:type" content="website">
+          <meta property="og:url" content="https://quizbooth.games/setup">
         `;
         break;
 

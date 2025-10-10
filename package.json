@@ -21,7 +21,8 @@
     "build:dev": "./scripts/deploy-with-ssr-and-environment.sh development",
     "emulate": "npm run build:functions && firebase emulators:start --import=./emulator-data --export-on-exit",
     "emulate:clean": "npm run build:all:clean && firebase emulators:start --import=./emulator-data --export-on-exit",
-    "test:ssr": "curl http://127.0.0.1:5000/ && curl http://127.0.0.1:5000/about && curl http://127.0.0.1:5000/quiz-games && curl http://127.0.0.1:5000/faq"
+    "test:ssr": "curl http://127.0.0.1:5000/ && curl http://127.0.0.1:5000/about && curl http://127.0.0.1:5000/quiz-games && curl http://127.0.0.1:5000/faq",
+    "validate:ssr": "node scripts/validate-ssr-consistency.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

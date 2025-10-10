@@ -300,6 +300,7 @@ export default function GamePage() {
 			if (event.code === 'Space' || event.key === ' ' || event.keyCode === 32) {
 				event.preventDefault() // Prevent default space behavior (scrolling)
 				if (isAnswered) {
+					console.log('Space key detected')
 					handleNextQuestion()
 				}
 			}
@@ -319,6 +320,7 @@ export default function GamePage() {
 		onSwipeLeft: () => {
 			// Only trigger swipe left if question is answered and on mobile
 			if (isMobile && isAnswered) {
+				console.log('Swipe left detected')
 				handleNextQuestion()
 			}
 		},
@@ -630,7 +632,7 @@ export default function GamePage() {
 						)}
 					</CardContent>
 				</Card>
-				<div className='flex items-center justify-center mb-2'>
+				{/* <div className='flex items-center justify-center mb-2'>
 					<a
 						href='https://www.naknick.com'
 						target='_blank'
@@ -642,7 +644,7 @@ export default function GamePage() {
 							className='h-32 w-auto'
 						/>
 					</a>
-				</div>
+				</div> */}
 			</div>
 		</div>
 	)
