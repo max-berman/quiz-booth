@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useLocation } from 'wouter'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -22,13 +22,6 @@ import {
 	applyGameCustomization,
 	cleanupGameCustomization,
 } from '@/lib/color-utils'
-import { sanitizeUserInput } from '@/lib/sanitize-utils'
-import {
-	createAppError,
-	isFirebaseError,
-	PermissionDeniedError,
-} from '@/types/errors'
-import { QUESTION_TIMER_DURATION } from '@shared/constants'
 
 export default function GamePage() {
 	const { id } = useParams()
@@ -46,7 +39,8 @@ export default function GamePage() {
 		completeSession,
 	} = useGameSession(id)
 
-	// Timer configuration - using shared constant for consistency
+	// Timer configuration - will be moved to database later
+	const QUESTION_TIMER_DURATION = 30 // seconds - can be 30 or 60 in the future
 
 	// Extract state from session
 	const currentQuestionIndex = sessionState?.currentQuestionIndex || 0
@@ -242,7 +236,7 @@ export default function GamePage() {
 		})
 	}
 
-	const handleNextQuestion = useCallback(() => {
+	const handleNextQuestion = () => {
 		if (currentQuestionIndex < (questions?.length || 0) - 1) {
 			// Move to next question - clear the saved timer state and reset timer
 			updateSessionState({
@@ -252,9 +246,8 @@ export default function GamePage() {
 			// Reset timer to full duration for the next question
 			setTimeLeft(QUESTION_TIMER_DURATION)
 		} else {
-			// Game finished - use the accumulated totalTime from individual questions
-			// This is more accurate than calculating from gameStartTime which includes transitions
-			const finalTimeSpent = totalTime
+			// Game finished
+			const finalTimeSpent = Math.floor((Date.now() - gameStartTime) / 1000)
 
 			// Track game completion event
 			analytics.trackGameCompleted({
@@ -282,19 +275,7 @@ export default function GamePage() {
 			completeSession(finalResults)
 			setLocation(`/results/${id}`)
 		}
-	}, [
-		currentQuestionIndex,
-		questions?.length,
-		updateSessionState,
-		QUESTION_TIMER_DURATION,
-		id,
-		score,
-		correctAnswers,
-		streak,
-		sessionState?.sessionId,
-		completeSession,
-		setLocation,
-	])
+	}
 
 	// Keyboard event handler for SPACE key
 	useEffect(() => {
@@ -364,23 +345,15 @@ export default function GamePage() {
 	if (isLoading || !questions || !game) {
 		return (
 			<div className='flex-1 bg-background flex items-center justify-center'>
-				<div className='text-center space-y-6'>
+				<div className='text-center'>
 					<p className='flex items-center justify-center my-4'>
 						<a href='/' target='_blank' rel='noopener noreferrer'>
 							<img src={logoUrl} alt={logoAlt} className='h-32 w-auto' />
 						</a>
 					</p>
-					<div className='space-y-4'>
-						<div className='animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto'></div>
-						<div className='space-y-2'>
-							<p className='text-lg font-medium text-foreground'>
-								Loading game...
-							</p>
-							<p className='text-sm text-muted-foreground'>
-								Preparing your trivia experience
-							</p>
-						</div>
-					</div>
+					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
+
+					<p className='animate-bounce'>Loading game...</p>
 				</div>
 			</div>
 		)
@@ -498,16 +471,9 @@ export default function GamePage() {
 						{/* Question Text */}
 						<div className=''>
 							<div className='bg-gradient-to-r from-primary/20 to-card/10 rounded-none md:rounded-2xl p-4 mb-4'>
-								<h2
-									className='text-lg md:text-2xl font-bold text-primary leading-relaxed text-center'
-									dangerouslySetInnerHTML={{
-										__html: sanitizeUserInput(
-											currentQuestion?.questionText || ''
-										),
-									}}
-									aria-live='polite'
-									aria-atomic='true'
-								/>
+								<h2 className='text-lg md:text-2xl font-bold text-primary leading-relaxed text-center'>
+									{currentQuestion?.questionText}
+								</h2>
 							</div>
 
 							{/* Answer Options */}
@@ -564,15 +530,6 @@ export default function GamePage() {
 											data-testid={`button-answer-${String.fromCharCode(
 												65 + index
 											)}`}
-											aria-label={`Answer ${String.fromCharCode(
-												65 + index
-											)}: ${option}`}
-											aria-pressed={selectedAnswer === index}
-											aria-describedby={
-												isAnswered && selectedAnswer === index
-													? 'answer-feedback'
-													: undefined
-											}
 										>
 											<div className='flex items-center justify-between'>
 												<div className='flex items-center gap-4'>
@@ -612,14 +569,9 @@ export default function GamePage() {
 										</div>
 										<h3 className='font-bold text-lg text-'>Explanation</h3>
 									</div>
-									<p
-										className='text-foreground leading-relaxed text-base'
-										dangerouslySetInnerHTML={{
-											__html: sanitizeUserInput(
-												currentQuestion.explanation || ''
-											),
-										}}
-									/>
+									<p className='text-foreground leading-relaxed text-base'>
+										{currentQuestion.explanation}
+									</p>
 								</div>
 							)}
 						</div>

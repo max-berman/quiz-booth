@@ -1,8 +1,7 @@
 {
   "name": "quiz-booth-functions",
   "scripts": {
-    "build": "tsc && npm run copy-files",
-    "copy-files": "cp -r lib/firebase-functions/src/* lib/",
+    "build": "tsc",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",

@@ -3,127 +3,112 @@ import * as admin from 'firebase-admin';
 
 const db = admin.firestore();
 
-// Helper function to set CORS headers and handle preflight requests
-function setupCorsHeaders(res: functions.Response): void {
-  // In production, you should restrict this to specific origins
-  const allowedOrigins = process.env.NODE_ENV === 'production'
-    ? ['https://yourdomain.com']
-    : ['http://localhost:5173', 'http://localhost:3000'];
-
-  const origin = allowedOrigins[0]; // Use first allowed origin for now
-  res.set('Access-Control-Allow-Origin', origin);
+// Get questions count for a game
+export const getGameQuestionsCount = functions.https.onRequest(async (req, res) => {
+  // Set CORS headers
+  res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-}
 
-// Helper function to handle preflight OPTIONS request
-function handlePreflightRequest(req: functions.Request, res: functions.Response): boolean {
+  // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
-    return true;
+    return;
   }
-  return false;
-}
 
-// Helper function to validate request method
-function validateRequestMethod(req: functions.Request, res: functions.Response, allowedMethods: string[]): boolean {
-  if (!allowedMethods.includes(req.method)) {
-    res.status(405).json({
-      error: 'Method not allowed',
-      allowedMethods
-    });
-    return false;
+  // Only allow GET requests
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
   }
-  return true;
-}
-
-// Helper function to extract game ID from request
-function extractGameId(req: functions.Request): string | null {
-  // Try to get from path parameters first (for rewrites)
-  if (req.params && req.params.gameId) {
-    return req.params.gameId;
-  } else {
-    // Fallback to path parsing for direct function calls
-    const pathParts = req.path.split('/');
-    return pathParts[pathParts.length - 2] || null; // Get the game ID from /api/games/{gameId}/questions
-  }
-}
-
-// Get questions for a game
-export const getGameQuestions = functions.https.onRequest(async (req, res) => {
-  setupCorsHeaders(res);
-
-  if (handlePreflightRequest(req, res)) return;
-  if (!validateRequestMethod(req, res, ['GET'])) return;
 
   try {
-    const gameId = extractGameId(req);
+    // Extract game ID from URL path
+    // Handle both direct function calls and rewrites
+    let gameId: string | undefined;
+
+    // Try to get from path parameters first (for rewrites)
+    if (req.params && req.params.gameId) {
+      gameId = req.params.gameId;
+    } else {
+      // Fallback to path parsing for direct function calls
+      const pathParts = req.path.split('/');
+      gameId = pathParts[pathParts.length - 2]; // Get the game ID from /api/games/{gameId}/questions
+    }
+
     if (!gameId) {
       res.status(400).json({ error: 'Game ID is required' });
       return;
     }
 
-    // Verify game exists and is public
+    // Verify game exists
     const gameDoc = await db.collection('games').doc(gameId).get();
     if (!gameDoc.exists) {
       res.status(404).json({ error: 'Game not found' });
       return;
     }
 
-    const gameData = gameDoc.data();
-    if (!gameData?.isPublic) {
-      res.status(403).json({ error: 'Access denied - game is not public' });
-      return;
-    }
+    // Check if game is public or user has access
+    // For now, we'll allow access to all games via this endpoint
+    // In a production scenario, you might want to add authentication checks
 
-    // Get questions for this game
+    // Get questions count
     const questionsSnapshot = await db
       .collection('questions')
       .where('gameId', '==', gameId)
       .get();
 
-    const questions = questionsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const questions = questionsSnapshot.docs.map(doc => doc.data());
 
-    res.status(200).json({
-      count: questions.length,
-      questions
-    });
+    res.status(200).json(questions);
   } catch (error) {
     console.error('Get game questions error:', error);
-    res.status(500).json({
-      error: 'Failed to get questions',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
+    res.status(500).json({ error: 'Failed to get questions' });
   }
 });
 
 // Get play count for a game
 export const getGamePlayCount = functions.https.onRequest(async (req, res) => {
-  setupCorsHeaders(res);
+  // Set CORS headers
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  if (handlePreflightRequest(req, res)) return;
-  if (!validateRequestMethod(req, res, ['GET'])) return;
+  // Handle preflight OPTIONS request
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  // Only allow GET requests
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
 
   try {
-    const gameId = extractGameId(req);
+    // Extract game ID from URL path
+    // Handle both direct function calls and rewrites
+    let gameId: string | undefined;
+
+    // Try to get from path parameters first (for rewrites)
+    if (req.params && req.params.gameId) {
+      gameId = req.params.gameId;
+    } else {
+      // Fallback to path parsing for direct function calls
+      const pathParts = req.path.split('/');
+      gameId = pathParts[pathParts.length - 2]; // Get the game ID from /api/games/{gameId}/play-count
+    }
+
     if (!gameId) {
       res.status(400).json({ error: 'Game ID is required' });
       return;
     }
 
-    // Verify game exists and is public
+    // Verify game exists
     const gameDoc = await db.collection('games').doc(gameId).get();
     if (!gameDoc.exists) {
       res.status(404).json({ error: 'Game not found' });
-      return;
-    }
-
-    const gameData = gameDoc.data();
-    if (!gameData?.isPublic) {
-      res.status(403).json({ error: 'Access denied - game is not public' });
       return;
     }
 
@@ -138,9 +123,6 @@ export const getGamePlayCount = functions.https.onRequest(async (req, res) => {
     res.status(200).json({ count: playCount });
   } catch (error) {
     console.error('Get game play count error:', error);
-    res.status(500).json({
-      error: 'Failed to get play count',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
+    res.status(500).json({ error: 'Failed to get play count' });
   }
 });

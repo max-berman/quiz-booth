@@ -196,7 +196,7 @@ export function GameCardDashboard({
 									htmlFor={`public-toggle-${game.id}`}
 									className='text-sm font-medium cursor-pointer flex-1'
 								>
-									{isPublic ? `Public` : `Make Public`}
+									Public
 								</label>
 							</div>
 							<Button

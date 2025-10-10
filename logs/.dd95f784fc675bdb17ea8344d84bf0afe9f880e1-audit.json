@@ -49,11 +49,6 @@
             "date": 1759956901939,
             "name": "/home/maxim/Dev/quiz-booth/logs/mcp-puppeteer-2025-10-08.log",
             "hash": "5f534a7e830576f1d4455a9ba5671b322fb36b04efc7bed718ddc53e33effa7e"
-        },
-        {
-            "date": 1760000003219,
-            "name": "/home/maxim/Dev/quiz-booth/logs/mcp-puppeteer-2025-10-09.log",
-            "hash": "3e487d5c5d067c3d507bc5156b3a9eca854f83d7fcabb9ae3bc33cfd1b682486"
         }
     ],
     "hashType": "sha256"
