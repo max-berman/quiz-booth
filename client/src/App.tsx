@@ -79,8 +79,9 @@ function App() {
 							{showFooter && <Footer />}
 						</div>
 						<Toaster />
-						<PWARegistration />
-						<CacheDebug />
+						{/* Temporarily disabled PWA to test timing issues */}
+						{/* <PWARegistration /> */}
+						{/* <CacheDebug /> */}
 					</AuthProvider>
 				</TooltipProvider>
 			</QueryClientProvider>

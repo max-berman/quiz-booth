@@ -9,6 +9,8 @@ import {
   hasValidSession,
   saveGameResults,
   clearGameResults,
+  loadGameResults,
+  getResultsKey,
 } from '@/lib/session-utils';
 
 interface UseGameSessionReturn {
@@ -71,9 +73,34 @@ export function useGameSession(gameId: string | undefined): UseGameSessionReturn
   const completeSession = useCallback((finalResults?: GameFinalResults) => {
     if (!gameId || !sessionStateRef.current) return;
 
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('completeSession called with:', {
+        gameId,
+        finalResults,
+        currentSessionState: sessionStateRef.current,
+      });
+    }
+
     // Save final results if provided
     if (finalResults) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Saving final results:', finalResults);
+      }
       saveGameResults(gameId, finalResults);
+
+      // Verify results were saved
+      setTimeout(() => {
+        const savedResults = loadGameResults(gameId);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Verifying results saved:', {
+            gameId,
+            savedResults,
+            resultsKey: getResultsKey(gameId),
+            storedValue: localStorage.getItem(getResultsKey(gameId)),
+          });
+        }
+      }, 100);
     }
 
     // Update session to mark as completed
@@ -84,14 +111,18 @@ export function useGameSession(gameId: string | undefined): UseGameSessionReturn
       lastUpdated: Date.now(),
     };
 
-    // Save completed state briefly, then clear after a short delay
+    // Save completed state briefly, then clear after a longer delay
+    // to ensure results page has time to load the results
     saveGameSession(gameId, completedState);
 
-    // Clear session after a short delay to ensure results page can access it
+    // Clear session after a longer delay to ensure results page can access it
     setTimeout(() => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Clearing session for game:', gameId);
+      }
       clearGameSession(gameId);
       setSessionState(null);
-    }, 1000);
+    }, 5000); // Increased from 1 second to 5 seconds
   }, [gameId]);
 
   // Clear current session (for manual reset)

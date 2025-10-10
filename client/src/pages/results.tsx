@@ -24,7 +24,12 @@ import type { Game } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { formatTime } from '@/lib/time-utils'
 import { hasSubmittedScore, markScoreSubmitted } from '@/lib/fingerprint-utils'
-import { loadGameResults, hasValidResults } from '@/lib/session-utils'
+import {
+	loadGameResults,
+	hasValidResults,
+	getResultsKey,
+	getSessionKey,
+} from '@/lib/session-utils'
 import {
 	applyGameCustomization,
 	cleanupGameCustomization,
@@ -49,11 +54,21 @@ export default function Results() {
 	// Initialize Firebase Functions
 	const { getGame, savePlayerScore } = useFirebaseFunctions()
 
-	// Load results from session storage
+	// Load results from session storage with retry mechanism
 	useEffect(() => {
-		if (id) {
+		if (!id) return
+
+		let retryCount = 0
+		const maxRetries = 5
+		const retryInterval = 200 // 200ms between retries
+
+		const loadResultsWithRetry = () => {
 			const loadedResults = loadGameResults(id)
+
 			if (loadedResults) {
+				if (process.env.NODE_ENV === 'development') {
+					console.log('Results loaded successfully:', loadedResults)
+				}
 				setResults({
 					score: loadedResults.score,
 					correctAnswers: loadedResults.correctAnswers,
@@ -62,15 +77,41 @@ export default function Results() {
 					streak: loadedResults.streak,
 				})
 			} else {
-				// No valid results found, redirect to game page
-				toast({
-					title: 'No Results Found',
-					description: 'Please complete the game first.',
-					variant: 'destructive',
-				})
-				setLocation(`/game/${id}`)
+				if (process.env.NODE_ENV === 'development') {
+					console.log(
+						`No results found for game: ${id} (attempt ${
+							retryCount + 1
+						}/${maxRetries})`
+					)
+					console.log('Current localStorage state:', {
+						resultsKey: getResultsKey(id),
+						storedResults: localStorage.getItem(getResultsKey(id)),
+						sessionKey: getSessionKey(id),
+						storedSession: localStorage.getItem(getSessionKey(id)),
+					})
+				}
+
+				if (retryCount < maxRetries) {
+					// Try again after a short delay
+					retryCount++
+					setTimeout(loadResultsWithRetry, retryInterval)
+				} else {
+					// Max retries reached, redirect to game
+					if (process.env.NODE_ENV === 'development') {
+						console.log('Max retries reached, redirecting to game page')
+					}
+					toast({
+						title: 'No Results Found',
+						description: 'Please complete the game first.',
+						variant: 'destructive',
+					})
+					setLocation(`/game/${id}`)
+				}
 			}
 		}
+
+		// Start loading results
+		loadResultsWithRetry()
 	}, [id, setLocation, toast])
 
 	// Check if player has already submitted for this game

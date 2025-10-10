@@ -83,6 +83,46 @@ self.addEventListener('fetch', (event) => {
 		return
 	}
 
+	// Skip dynamic routes that should never be cached (game results, etc.)
+	const url = new URL(event.request.url)
+	const pathname = url.pathname
+
+	// Never cache dynamic results pages - they need fresh data each time
+	if (pathname.startsWith('/results/')) {
+		// Always fetch from network for results pages
+		return event.respondWith(
+			fetch(event.request)
+				.then((networkResponse) => {
+					return networkResponse
+				})
+				.catch((error) => {
+					console.error('Fetch failed for results page:', error)
+					return new Response('Network error', {
+						status: 408,
+						headers: { 'Content-Type': 'text/plain' },
+					})
+				})
+		)
+	}
+
+	// Never cache game pages - they need fresh session data
+	if (pathname.startsWith('/game/')) {
+		// Always fetch from network for game pages
+		return event.respondWith(
+			fetch(event.request)
+				.then((networkResponse) => {
+					return networkResponse
+				})
+				.catch((error) => {
+					console.error('Fetch failed for game page:', error)
+					return new Response('Network error', {
+						status: 408,
+						headers: { 'Content-Type': 'text/plain' },
+					})
+				})
+		)
+	}
+
 	event.respondWith(
 		caches.match(event.request).then((cachedResponse) => {
 			// For API calls, always try network first

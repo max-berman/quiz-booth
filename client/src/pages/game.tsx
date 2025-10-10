@@ -287,6 +287,11 @@ export default function GamePage() {
 				completedAt: Date.now(),
 			}
 
+			// Debug logging
+			if (process.env.NODE_ENV === 'development') {
+				console.log('Game completion - final results:', finalResults)
+			}
+
 			// Complete the session with final results and navigate to results
 			completeSession(finalResults)
 			setLocation(`/results/${id}`)
@@ -341,11 +346,7 @@ export default function GamePage() {
 				<div className='bg-background flex items-center justify-center'>
 					<div className='text-center max-w-md mx-auto p-6'>
 						<p className='flex items-center justify-center my-4'>
-							<a
-								href='https://www.naknick.com'
-								target='_blank'
-								rel='noopener noreferrer'
-							>
+							<a href='https://www.naknick.com' rel='noopener noreferrer'>
 								<img
 									src='/assets/logo.png'
 									alt='NaknNick games logo'
@@ -404,7 +405,6 @@ export default function GamePage() {
 						<li className='w-1/4 flex justify-start'>
 							<a
 								href='/'
-								target='_blank'
 								rel='noopener noreferrer'
 								className='flex items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
 							>

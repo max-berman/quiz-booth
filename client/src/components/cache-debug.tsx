@@ -18,6 +18,7 @@ export function CacheDebug() {
 		ReturnType<typeof getCacheInfo>
 	> | null>(null)
 	const [isLoading, setIsLoading] = useState(false)
+	const [isVisible, setIsVisible] = useState(true)
 
 	useEffect(() => {
 		updateDebugInfo()
@@ -84,11 +85,11 @@ export function CacheDebug() {
 		window.location.reload()
 	}
 
-	// Only show on localhost:5000 (development server)
+	// Only show on localhost:5000 (development server) and if visible
 	const isLocalhost5000 =
 		window.location.hostname === 'localhost' && window.location.port === '5000'
 
-	if (!isLocalhost5000) {
+	if (!isLocalhost5000 || !isVisible) {
 		return null
 	}
 
@@ -203,7 +204,7 @@ export function CacheDebug() {
 
 			<div className='mt-2 text-xs text-gray-500'>
 				<button
-					onClick={() => localStorage.removeItem('showCacheDebug')}
+					onClick={() => setIsVisible(false)}
 					className='text-blue-500 hover:text-blue-700'
 				>
 					Hide Debug

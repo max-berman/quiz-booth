@@ -124,20 +124,13 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    chunkSizeWarningLimit: 1000, // Increase warning limit temporarily
-    // PERMANENT SOLUTION: Use static file names to avoid SSR asset resolver issues
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        // Use static file names to avoid SSR asset resolver complexity
-        entryFileNames: 'assets/index.js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name?.endsWith('.css')) {
-            return 'assets/index.css';
-          }
-          // Keep other assets (images, fonts) with their original names
-          return 'assets/[name].[ext]';
-        },
+        // Use standard chunking for better caching
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
           // Group large dependencies into separate chunks
           'vendor-react': ['react', 'react-dom'],

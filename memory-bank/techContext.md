@@ -157,7 +157,7 @@ The following database packages were removed as they were unused and redundant w
 
 ### Deployment Commands
 
-- `npm run deploy:prod` - **PRODUCTION DEPLOYMENT**: Deploy everything with SSR (automatically updates asset resolver)
+- `npm run deploy` - **PRODUCTION DEPLOYMENT**: Build and deploy everything (client + functions)
 
 ### Critical Deployment Procedures
 
@@ -168,32 +168,21 @@ The following database packages were removed as they were unused and redundant w
    - Run `npm run build:client` and `npm run build:functions` to verify builds work
    - Test the application locally with emulators to ensure functionality
 
-2. **ALWAYS use `npm run deploy:prod` for production deployments**
+2. **ALWAYS use `npm run deploy` for production deployments**
 
    - This script invokes all relevant build and deploy scripts
-   - Ensures Assets and SSR pages get correct content types
-   - Ensures assets get matching build file names via SSR asset resolver
-   - Includes the SSR asset resolver which is critical for preventing 404 errors
-   - **CRITICAL**: Uses `firebase deploy --force` to prevent deployment skipping when asset resolver changes
+   - Simple and straightforward deployment process
+   - No SSR complexity to manage
 
-3. **SSR Asset Resolution System**
-
-   - **Automated Asset Updates**: `scripts/update-ssr-assets.js` updates asset file names after each build
-   - **Deployment Hash**: Automatic hash generation based on current asset file names to force redeployment
-   - **Forced Deployment**: `--force` flag ensures deployment even when Firebase doesn't detect changes
-   - **Process**: Build client → Update SSR assets → Rebuild functions → Force deployment
-
-4. **Deployment Checklist**
+3. **Deployment Checklist**
    - [ ] Local build verification completed
    - [ ] All tests pass
-   - [ ] SSR pages render correctly
    - [ ] Authentication flows work
    - [ ] AI question generation functional
    - [ ] Real-time features operational
    - [ ] Timer resume functionality verified
    - [ ] Performance metrics within targets
-   - [ ] `npm run deploy:prod` executed for production deployment
-   - [ ] **CRITICAL**: Verify production site serves correct asset file names with proper MIME types
+   - [ ] `npm run deploy` executed for production deployment
 
 ### Build Process
 

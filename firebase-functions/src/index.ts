@@ -14,9 +14,6 @@ import { generateQuestions, generateSingleQuestion, getQuestions, updateQuestion
 import { trackUsage, getUsage, resetUsage } from './usage/usage';
 import { userSetup } from './auth/userSetup';
 
-// Import SSR handler
-import { ssrHandler } from './ssr';
-
 // Import API endpoints
 import { getGameQuestionsCount, getGamePlayCount } from './api/games';
 import { sendContactForm } from './api/contact';
@@ -46,7 +43,6 @@ export {
   getUsage,
   resetUsage,
   userSetup,
-  ssrHandler,
   getGameQuestionsCount,
   getGamePlayCount,
   sendContactForm
