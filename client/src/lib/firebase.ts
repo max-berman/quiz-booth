@@ -56,6 +56,7 @@ if (existingApps.length > 0) {
       console.error('Failed to set persistence:', error);
     });
 
+    console.log(`Firebase initialized for ${config.environment} environment`);
   } catch (error) {
     console.error('Firebase initialization failed:', error);
     throw error; // Let the error propagate so we can see what's wrong

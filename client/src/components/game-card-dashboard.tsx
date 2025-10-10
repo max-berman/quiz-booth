@@ -110,6 +110,14 @@ export function GameCardDashboard({
 
 	const handlePublicToggle = async (newValue: boolean | 'indeterminate') => {
 		const isPublicValue = newValue === true
+		console.log(
+			'Checkbox changed:',
+			isPublicValue,
+			'Game ID:',
+			game.id,
+			'Current isPublic:',
+			isPublic
+		)
 
 		// Update UI immediately for better UX
 		setIsPublic(isPublicValue)
@@ -122,10 +130,12 @@ export function GameCardDashboard({
 				'updateGamePublicStatus'
 			)
 
-			await updateGamePublicStatus({
+			console.log('Calling updateGamePublicStatus...')
+			const result = await updateGamePublicStatus({
 				gameId: game.id,
 				isPublic: isPublicValue,
 			})
+			console.log('Update result:', result)
 
 			// Success - state is already updated
 		} catch (error) {

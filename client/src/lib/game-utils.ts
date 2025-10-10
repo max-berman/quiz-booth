@@ -3,23 +3,22 @@
 import { Game } from '@shared/firebase-types'
 import { useQuery } from '@tanstack/react-query'
 import { isWebsite, formatWebsite } from './website-utils'
-import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 
 /**
  * Hook for fetching play count for a game
  */
 export function usePlayCount(gameId: string) {
   return useQuery<number>({
-    queryKey: ['getGamePlayCount', gameId],
+    queryKey: ['/api/games', gameId, 'play-count'],
     queryFn: async () => {
       // console.log(`Fetching play count for game ${gameId}`)
-      const response = await fetch(`/api/games/play-count?gameId=${gameId}`);
+      const response = await fetch(`/api/games/${gameId}/play-count`)
       if (!response.ok) {
-        throw new Error(`Failed to fetch play count: ${response.statusText}`);
+        throw new Error(`Failed to fetch play count: ${response.status}`)
       }
-      const result = await response.json();
-      // console.log(`Play count response for game ${gameId}:`, result)
-      return result.count;
+      const data = await response.json()
+      // console.log(`Play count response for game ${gameId}:`, data)
+      return data.count
     },
     enabled: !!gameId,
     staleTime: 2 * 60 * 1000, // 2 minutes
@@ -32,16 +31,16 @@ export function usePlayCount(gameId: string) {
  */
 export function useQuestionCount(gameId: string) {
   return useQuery<number>({
-    queryKey: ['getGameQuestions', gameId],
+    queryKey: ['/api/games', gameId, 'questions'],
     queryFn: async () => {
       // console.log(`Fetching questions for game ${gameId}`)
-      const response = await fetch(`/api/games/questions?gameId=${gameId}`);
+      const response = await fetch(`/api/games/${gameId}/questions`)
       if (!response.ok) {
-        throw new Error(`Failed to fetch questions: ${response.statusText}`);
+        throw new Error(`Failed to fetch questions: ${response.status}`)
       }
-      const result = await response.json();
-      // console.log(`Questions response for game ${gameId}:`, result)
-      return result.count;
+      const questions = await response.json()
+      // console.log(`Questions response for game ${gameId}:`, questions)
+      return questions.length
     },
     enabled: !!gameId,
     staleTime: 5 * 60 * 1000, // 5 minutes

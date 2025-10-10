@@ -22,33 +22,3 @@ export const API_HEADERS = {
   CONTENT_TYPE: 'application/json',
   ACCEPT: 'application/json',
 } as const;
-
-/**
- * CORS Configuration
- * Centralized CORS settings for all API endpoints
- */
-export const CORS_CONFIG = {
-  // Production domains
-  PRODUCTION_ORIGINS: [
-    'https://quizbooth.games',
-    'https://www.quizbooth.games'
-  ],
-
-  // Development domains
-  DEVELOPMENT_ORIGINS: [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5175',
-    'http://localhost:3000',
-    'http://localhost:5000'
-  ],
-
-  // Allowed HTTP methods
-  ALLOWED_METHODS: ['GET', 'OPTIONS'],
-
-  // Allowed HTTP headers
-  ALLOWED_HEADERS: ['Content-Type', 'Authorization'],
-
-  // Allow credentials
-  ALLOW_CREDENTIALS: true
-} as const;

@@ -1,6 +1,6 @@
 // Server-side environment configuration for Firebase Functions
 
-import { getEnvironmentConfig, isDevelopment, isProduction, getEnvironment, type EnvironmentConfig } from '@shared/environment';
+import { getEnvironmentConfig, isDevelopment, isProduction, getEnvironment, type EnvironmentConfig } from '../../../shared/environment';
 
 /**
  * Server-specific environment configuration

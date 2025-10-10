@@ -2,7 +2,7 @@
   "name": "quiz-booth-functions",
   "scripts": {
     "build": "tsc && npm run copy-files",
-    "copy-files": "cp -r lib/firebase-functions/src/* lib/ && cp -r ../shared lib/",
+    "copy-files": "cp -r lib/firebase-functions/src/* lib/",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
@@ -13,9 +13,6 @@
     "node": "18"
   },
   "main": "lib/index.js",
-  "_moduleAliases": {
-    "@shared": "lib/shared"
-  },
   "dependencies": {
     "@types/cors": "^2.8.19",
     "@vitejs/plugin-react": "^4.7.0",
@@ -24,7 +21,6 @@
     "dotenv": "^17.2.2",
     "firebase-admin": "^12.1.0",
     "firebase-functions": "^4.9.0",
-    "module-alias": "^2.2.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "sparkpost": "^2.1.4",

@@ -1,23 +1,19 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { CORS_CONFIG } from '../config/api-config';
 
 const db = admin.firestore();
 
 // Helper function to set CORS headers and handle preflight requests
-function setupCorsHeaders(res: functions.Response, req: functions.Request): void {
-  // Allow all origins in development, restrict in production
-  const allowedOrigins: string[] = process.env.NODE_ENV === 'production'
-    ? [...CORS_CONFIG.PRODUCTION_ORIGINS]
-    : [...CORS_CONFIG.DEVELOPMENT_ORIGINS];
+function setupCorsHeaders(res: functions.Response): void {
+  // In production, you should restrict this to specific origins
+  const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? ['https://yourdomain.com']
+    : ['http://localhost:5173', 'http://localhost:3000'];
 
-  const requestOrigin = req.headers.origin;
-  const origin = allowedOrigins.includes(requestOrigin || '') ? requestOrigin : allowedOrigins[0];
-
-  res.set('Access-Control-Allow-Origin', origin || allowedOrigins[0]);
-  res.set('Access-Control-Allow-Methods', CORS_CONFIG.ALLOWED_METHODS.join(', '));
-  res.set('Access-Control-Allow-Headers', CORS_CONFIG.ALLOWED_HEADERS.join(', '));
-  res.set('Access-Control-Allow-Credentials', CORS_CONFIG.ALLOW_CREDENTIALS.toString());
+  const origin = allowedOrigins[0]; // Use first allowed origin for now
+  res.set('Access-Control-Allow-Origin', origin);
+  res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
 
 // Helper function to handle preflight OPTIONS request
@@ -47,56 +43,15 @@ function extractGameId(req: functions.Request): string | null {
   if (req.params && req.params.gameId) {
     return req.params.gameId;
   } else {
-    // Fallback to query parameter for direct function calls
-    return req.query.gameId as string || null;
+    // Fallback to path parsing for direct function calls
+    const pathParts = req.path.split('/');
+    return pathParts[pathParts.length - 2] || null; // Get the game ID from /api/games/{gameId}/questions
   }
-}
-
-// Helper function to verify user authorization for a game
-async function verifyGameAccess(gameId: string, userId?: string): Promise<boolean> {
-  const gameDoc = await db.collection('games').doc(gameId).get();
-
-  if (!gameDoc.exists) {
-    return false;
-  }
-
-  const gameData = gameDoc.data();
-
-  // In development mode, allow access to all games for testing
-  if (process.env.NODE_ENV !== 'production') {
-    return true;
-  }
-
-  // If game is public, anyone can access it
-  if (gameData?.isPublic) {
-    return true;
-  }
-
-  // If user is provided and owns the game, allow access
-  if (userId && gameData?.userId === userId) {
-    return true;
-  }
-
-  return false;
-}
-
-// Helper function to extract user ID from request (if available)
-function extractUserId(req: functions.Request): string | null {
-  // Check Authorization header for Firebase ID token
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    // In a real implementation, you would verify the Firebase ID token here
-    // For now, we'll return null since we don't have proper auth setup
-    return null;
-  }
-
-  // For development, you could check for a user ID in query params or headers
-  return req.query.userId as string || null;
 }
 
 // Get questions for a game
 export const getGameQuestions = functions.https.onRequest(async (req, res) => {
-  setupCorsHeaders(res, req);
+  setupCorsHeaders(res);
 
   if (handlePreflightRequest(req, res)) return;
   if (!validateRequestMethod(req, res, ['GET'])) return;
@@ -108,11 +63,16 @@ export const getGameQuestions = functions.https.onRequest(async (req, res) => {
       return;
     }
 
-    const userId = extractUserId(req);
-    const hasAccess = await verifyGameAccess(gameId, userId || undefined);
+    // Verify game exists and is public
+    const gameDoc = await db.collection('games').doc(gameId).get();
+    if (!gameDoc.exists) {
+      res.status(404).json({ error: 'Game not found' });
+      return;
+    }
 
-    if (!hasAccess) {
-      res.status(403).json({ error: 'Access denied - game is not public or you do not own this game' });
+    const gameData = gameDoc.data();
+    if (!gameData?.isPublic) {
+      res.status(403).json({ error: 'Access denied - game is not public' });
       return;
     }
 
@@ -142,7 +102,7 @@ export const getGameQuestions = functions.https.onRequest(async (req, res) => {
 
 // Get play count for a game
 export const getGamePlayCount = functions.https.onRequest(async (req, res) => {
-  setupCorsHeaders(res, req);
+  setupCorsHeaders(res);
 
   if (handlePreflightRequest(req, res)) return;
   if (!validateRequestMethod(req, res, ['GET'])) return;
@@ -154,11 +114,16 @@ export const getGamePlayCount = functions.https.onRequest(async (req, res) => {
       return;
     }
 
-    const userId = extractUserId(req);
-    const hasAccess = await verifyGameAccess(gameId, userId || undefined);
+    // Verify game exists and is public
+    const gameDoc = await db.collection('games').doc(gameId).get();
+    if (!gameDoc.exists) {
+      res.status(404).json({ error: 'Game not found' });
+      return;
+    }
 
-    if (!hasAccess) {
-      res.status(403).json({ error: 'Access denied - game is not public or you do not own this game' });
+    const gameData = gameDoc.data();
+    if (!gameData?.isPublic) {
+      res.status(403).json({ error: 'Access denied - game is not public' });
       return;
     }
 

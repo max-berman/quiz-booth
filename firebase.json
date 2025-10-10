@@ -8,11 +8,11 @@
     ],
     "rewrites": [
       {
-        "source": "/api/games/questions",
-        "function": "getGameQuestions"
+        "source": "/api/games/:gameId/questions",
+        "function": "getGameQuestionsCount"
       },
       {
-        "source": "/api/games/play-count",
+        "source": "/api/games/:gameId/play-count",
         "function": "getGamePlayCount"
       },
       {

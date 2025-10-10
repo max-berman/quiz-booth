@@ -1,7 +1,6 @@
 // import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as dotenv from 'dotenv';
-import 'module-alias/register';
 
 // Load environment variables
 dotenv.config();
