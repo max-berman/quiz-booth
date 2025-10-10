@@ -17,24 +17,27 @@ export default defineConfig({
     react(),
     ...(process.env.NODE_ENV === 'production' ? [
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt', // Change from autoUpdate to prompt for better control
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,svg,woff,woff2,ttf}'],
           globIgnores: [
             '**/assets/quiz-booth-icon.png',
             'index.html' // Don't cache index.html since SSR handles it
           ],
+          cleanupOutdatedCaches: true,
+          skipWaiting: false, // Don't skip waiting for updates
+          clientsClaim: false, // Don't claim clients immediately
           // Disable navigation fallback for SSR routes
           navigateFallback: null,
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: 'CacheFirst',
+              handler: 'StaleWhileRevalidate', // Better for fonts
               options: {
                 cacheName: 'google-fonts-cache',
                 expiration: {
                   maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
+                  maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days instead of 365
                 },
                 cacheableResponse: {
                   statuses: [0, 200]
@@ -43,12 +46,12 @@ export default defineConfig({
             },
             {
               urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-              handler: 'CacheFirst',
+              handler: 'StaleWhileRevalidate', // Better for fonts
               options: {
                 cacheName: 'gstatic-fonts-cache',
                 expiration: {
                   maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
+                  maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days instead of 365
                 },
                 cacheableResponse: {
                   statuses: [0, 200]
@@ -63,6 +66,20 @@ export default defineConfig({
                 expiration: {
                   maxEntries: 50,
                   maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
+              urlPattern: /\/api\/.*/i,
+              handler: 'NetworkFirst', // Always try network first for API calls
+              options: {
+                cacheName: 'api-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 5 // 5 minutes for API data
                 },
                 cacheableResponse: {
                   statuses: [0, 200]

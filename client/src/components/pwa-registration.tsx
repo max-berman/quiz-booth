@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
+import { clearAppCache, forceServiceWorkerUpdate } from '@/lib/cache-utils'
 
 export function PWARegistration() {
 	const { toast } = useToast()
@@ -33,17 +34,30 @@ export function PWARegistration() {
 										description:
 											'A new version of QuizBooth is available. Would you like to update?',
 										action: (
-											<button
-												onClick={() => {
-													newWorker.postMessage({ type: 'SKIP_WAITING' })
-													window.location.reload()
-												}}
-												className='bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90 transition-colors'
-											>
-												Update
-											</button>
+											<div className='flex gap-2'>
+												<button
+													onClick={() => {
+														newWorker.postMessage({ type: 'SKIP_WAITING' })
+														window.location.reload()
+													}}
+													className='bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90 transition-colors'
+												>
+													Update
+												</button>
+												<button
+													onClick={async () => {
+														// Clear cache and force update
+														await clearAppCache()
+														await forceServiceWorkerUpdate()
+														window.location.reload()
+													}}
+													className='bg-secondary text-white px-3 py-1 rounded text-sm hover:bg-secondary/90 transition-colors'
+												>
+													Clear Cache & Update
+												</button>
+											</div>
 										),
-										duration: 10000, // Show for 10 seconds
+										duration: 15000, // Show for 15 seconds
 									})
 								}
 							})
@@ -55,10 +69,21 @@ export function PWARegistration() {
 				})
 				.catch((registrationError) => {
 					console.log('SW registration failed: ', registrationError)
+
+					// Show error toast for debugging
+					if (process.env.NODE_ENV === 'development') {
+						toast({
+							title: 'Service Worker Registration Failed',
+							description: 'Check console for details',
+							variant: 'destructive',
+							duration: 5000,
+						})
+					}
 				})
 
 			// Listen for controller change (when update is activated)
 			navigator.serviceWorker.addEventListener('controllerchange', () => {
+				console.log('Service worker controller changed, reloading page')
 				window.location.reload()
 			})
 		}

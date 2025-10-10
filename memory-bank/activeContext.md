@@ -28,6 +28,9 @@
 - **Mobile Swipe Gestures**: Added swipe left functionality for mobile devices to trigger next question navigation
 - **Mobile Button Fix**: Fixed mobile button tapability by disabling preventDefault in swipe gesture handler
 - **Vibration Feedback**: Added vibration feedback (200ms) for wrong answers with browser compatibility checking
+- **SSR Improvements**: Fixed hydration errors and nested div structure in dynamic routes
+- **Dynamic Routes Configuration**: Moved dynamic route logic to config file for better maintainability
+- **FAQ Page Simplification**: Removed Radix UI Accordion components causing hydration errors
 
 ### Current Development State
 
@@ -49,9 +52,69 @@
 6. **SSR Asset Resolution**: Implemented automated asset file name updates for SSR to prevent 404 errors
 7. **Forced Deployment**: Added `--force` flag to Firebase deployment to prevent skipping when asset resolver changes
 
-### Production Deployment Asset Resolution Fix
+### SSR Improvements and Hydration Error Fixes
 
-**Problem Identified:**
+**Problems Identified:**
+
+1. **Hydration Errors on FAQ Page**: `RadioIndicator` must be used within `Radio` errors on hard refresh
+2. **Nested Root Divs**: Dynamic routes had nested `<div id="root"><div id="root"></div></div>` structure
+3. **Inconsistent SSR**: Different frontend experiences between development and production
+
+**Root Causes:**
+
+1. **Complex Radix UI Components**: FAQ page used Accordion components that caused hydration mismatches between SSR and client
+2. **Dynamic Route Structure**: Dynamic routes were returning `<div id="root"></div>` which got wrapped in another `<div id="root">` by the template
+3. **Hardcoded Route Logic**: Dynamic route detection was inline in the renderer, making it hard to maintain
+
+**Solutions Implemented:**
+
+1. **Dynamic Routes Configuration**:
+
+   - Created `firebase-functions/src/ssr/config/dynamic-routes.ts`
+   - Moved route logic to config file for better maintainability
+   - Routes: `/game/`, `/dashboard`, `/edit-questions/`, `/game-created`, `/leaderboard/`, `/results/`, `/submissions/`
+
+2. **FAQ Page Simplification**:
+
+   - Removed Radix UI Accordion components causing hydration errors
+   - Replaced with basic HTML `<details>` and `<summary>` elements
+   - Maintained same visual appearance and functionality
+
+3. **Nested Div Fix**:
+
+   - Changed dynamic route components to use `React.Fragment` instead of creating duplicate root divs
+   - Now dynamic routes have clean: `<div id="root"></div>`
+
+4. **SSR Development Guide**:
+   - Created comprehensive `SSR_DEVELOPMENT_GUIDE.md`
+   - Added validation script: `scripts/validate-ssr-consistency.js`
+
+**Technical Implementation:**
+
+```typescript
+// Dynamic routes configuration
+export const DYNAMIC_ROUTES = [
+	'/game/',
+	'/dashboard',
+	'/edit-questions/',
+	'/game-created',
+	'/leaderboard/',
+	'/results/',
+	'/submissions/',
+] as const
+
+export function isDynamicRoute(path: string): boolean {
+	return DYNAMIC_ROUTES.some((route) => path.startsWith(route))
+}
+
+// SSR renderer now uses config
+if (isDynamicRoute(path)) {
+	// For dynamic routes, serve empty root div for client-side hydration
+	Component = () => React.createElement(React.Fragment)
+}
+```
+
+### Production Deployment Asset Resolution Fix
 
 - Production site was serving old asset file names (`index-Bgbe2GQi.css`, `vendor-icons-lCX8gI2t.js`, `index-TNabJ5o-.js`)
 - SSR handler was using outdated asset references causing 404 errors and incorrect MIME types

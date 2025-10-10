@@ -22,6 +22,7 @@ import {
 	ChartBar,
 	QrCode,
 	Calendar,
+	ChevronDown,
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
@@ -341,15 +342,18 @@ export default function FAQ() {
 												className='border rounded-lg px-4 bg-background group'
 											>
 												<summary className='cursor-pointer py-4 list-none'>
-													<div className='flex items-start gap-3'>
-														<HelpCircle className='h-5 w-5 text-primary mt-0.5 flex-shrink-0' />
-														<span className='font-semibold text-foreground'>
-															{faq.question}
-														</span>
+													<div className='flex items-start justify-between gap-3'>
+														<div className='flex items-start gap-3 flex-1'>
+															<HelpCircle className='h-5 w-5 text-primary mt-0.5 flex-shrink-0' />
+															<span className='font-semibold text-foreground'>
+																{faq.question}
+															</span>
+														</div>
+														<ChevronDown className='h-5 w-5 text-primary mt-0.5 flex-shrink-0 transition-transform duration-200 group-open:rotate-180' />
 													</div>
 												</summary>
 												<div className='pb-4'>
-													<div className='flex items-start gap-3 pl-8'>
+													<div className='flex items-start gap-3 pl-8 text-primary'>
 														<Lightbulb className='h-4 w-4 text-green-500 mt-0.5 flex-shrink-0' />
 														<div className='text-primary leading-relaxed prose max-w-none'>
 															<ReactMarkdown>{faq.answer}</ReactMarkdown>

@@ -10,6 +10,7 @@ import { Footer } from '@/components/footer'
 import { AuthProvider } from '@/contexts/auth-context'
 import { LoadingSpinner } from '@/components/loading-spinner'
 import { PWARegistration } from '@/components/pwa-registration'
+import { CacheDebug } from '@/components/cache-debug'
 import { shouldShowHeader, shouldShowFooter } from '@/config/page-visibility'
 
 // Lazy load pages for code splitting
@@ -79,6 +80,7 @@ function App() {
 						</div>
 						<Toaster />
 						<PWARegistration />
+						<CacheDebug />
 					</AuthProvider>
 				</TooltipProvider>
 			</QueryClientProvider>
