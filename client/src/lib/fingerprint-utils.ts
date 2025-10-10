@@ -44,7 +44,18 @@ export function hasSubmittedScore(gameId: string): boolean {
 
   try {
     const stored = localStorage.getItem(submissionKey);
-    return stored === 'true';
+    const hasSubmitted = stored === 'true';
+
+    // Debug logging to help identify issues
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Submission check for game ${gameId}:`, {
+        submissionKey,
+        stored,
+        hasSubmitted
+      });
+    }
+
+    return hasSubmitted;
   } catch (error) {
     console.error('Failed to check submission status:', error);
     return false;
@@ -59,6 +70,14 @@ export function markScoreSubmitted(gameId: string): void {
 
   try {
     localStorage.setItem(submissionKey, 'true');
+
+    // Debug logging to help identify issues
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Marked score submitted for game ${gameId}:`, {
+        submissionKey,
+        timestamp: new Date().toISOString()
+      });
+    }
   } catch (error) {
     console.error('Failed to mark score as submitted:', error);
   }

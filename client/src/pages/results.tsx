@@ -81,8 +81,38 @@ export default function Results() {
 			if (alreadySubmitted) {
 				setIsScoreSaved(true)
 			}
+
+			// Debug logging to help identify issues
+			if (process.env.NODE_ENV === 'development') {
+				console.log('Results page submission check:', {
+					gameId: id,
+					alreadySubmitted,
+					hasAlreadySubmitted,
+					isScoreSaved,
+				})
+			}
 		}
 	}, [id])
+
+	// Handle Enter key submission
+	useEffect(() => {
+		const handleKeyPress = (event: KeyboardEvent) => {
+			if (
+				event.key === 'Enter' &&
+				!isScoreSaved &&
+				!hasAlreadySubmitted &&
+				results?.score &&
+				playerName.trim() // Only submit if player name is filled
+			) {
+				handleSaveScore()
+			}
+		}
+
+		document.addEventListener('keydown', handleKeyPress)
+		return () => {
+			document.removeEventListener('keydown', handleKeyPress)
+		}
+	}, [isScoreSaved, hasAlreadySubmitted, results?.score, playerName])
 
 	const { data: game } = useQuery<Game>({
 		queryKey: [`game-${id}`],

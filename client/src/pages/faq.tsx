@@ -29,6 +29,7 @@ import {
 	QrCode,
 	Calendar,
 } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 
 export default function FAQ() {
 	// FAQ categories organized by topic
@@ -41,24 +42,24 @@ export default function FAQ() {
 					question:
 						'How can QuizBooth specifically help vendors at trade shows?',
 					answer:
-						'QuizBooth is designed specifically for trade show environments to help vendors stand out, engage attendees, and capture qualified leads. Unlike generic trivia apps, our platform focuses on business-to-business engagement with features like lead capture, company-specific content generation, and event-ready distribution tools.',
+						'QuizBooth is designed specifically for trade show environments to help vendors:\n\n**Stand out** from competitors with engaging trivia\n\n**Engage attendees** with interactive content\n\n**Capture qualified leads** through voluntary participation\n\nUnlike generic trivia apps, our platform focuses on business-to-business engagement with features like lead capture, company-specific content generation, and event-ready distribution tools.',
 				},
 				{
 					question:
 						'What makes QuizBooth better than traditional lead capture methods?',
 					answer:
-						'Traditional lead capture methods like business card drops or sign-up sheets are passive and often ignored. QuizBooth creates active engagement where attendees voluntarily provide contact information while having fun. This results in higher quality leads who are genuinely interested in your products or services.',
+						'Traditional lead capture methods like business card drops or sign-up sheets are **passive** and often ignored. \n\nQuizBooth creates **active engagement** where attendees voluntarily provide contact information while having fun. \n\nThis results in **higher quality leads** who are genuinely interested in your products or services.',
 				},
 				{
 					question: 'How quickly can I set up a game for my trade show booth?',
 					answer:
-						'Most vendors can create and deploy a fully customized trivia game in under 2 minutes using our AI-powered question generation. Simply provide your company information, select your industry, and our AI will generate relevant questions automatically. QR codes and shareable links are generated instantly.',
+						'Most vendors can create and deploy a fully customized trivia game in **under 2 minutes** using our AI-powered question generation.\n\n**Simple process:**\n1. Provide your company information\n2. Select your industry  \n3. AI generates relevant questions automatically\n4. QR codes and shareable links are generated instantly',
 				},
 				{
 					question:
 						'Can I customize the trivia questions for my specific industry?',
 					answer:
-						'Absolutely! QuizBooth supports industry-specific question generation across hundreds of industries. Our AI understands industry terminology, trends, and best practices to create relevant and engaging content that resonates with your target audience.',
+						'**Absolutely!** QuizBooth supports industry-specific question generation across **hundreds of industries**.\n\nOur AI understands:\n- Industry terminology\n- Current trends  \n- Best practices\n\nThis creates relevant and engaging content that resonates with your target audience.',
 				},
 			],
 		},
@@ -69,23 +70,23 @@ export default function FAQ() {
 				{
 					question: 'What are the key benefits for trade show vendors?',
 					answer:
-						'Vendors benefit from: 1) Increased booth traffic and dwell time, 2) Higher quality lead generation, 3) Brand awareness and engagement, 4) Competitive differentiation, 5) Measurable ROI through analytics, 6) Cost-effective alternative to expensive booth activities.',
+						'Vendors benefit from:\n\n**Increased booth traffic** and dwell time\n\n**Higher quality lead generation**\n\n**Brand awareness** and engagement\n\n**Competitive differentiation**\n\n**Measurable ROI** through analytics\n\n**Cost-effective alternative** to expensive booth activities',
 				},
 				{
 					question: 'How does QuizBooth help with lead qualification?',
 					answer:
-						'Our platform provides engagement metrics that help qualify leads. You can see which attendees completed the game, their scores, time spent, and engagement level. This data helps your sales team prioritize follow-ups with the most engaged prospects.',
+						'Our platform provides **engagement metrics** that help qualify leads:\n\n- See which attendees completed the game\n- Track their scores and time spent\n- Measure engagement level\n\nThis data helps your sales team **prioritize follow-ups** with the most engaged prospects.',
 				},
 				{
 					question: 'Can I measure the ROI of using QuizBooth at my events?',
 					answer:
-						'Yes! QuizBooth provides comprehensive analytics including: number of plays, completion rates, average scores, time spent per game, and lead conversion metrics. You can track engagement patterns and measure the direct impact on your trade show success.',
+						'**Yes!** QuizBooth provides comprehensive analytics including:\n\n- Number of plays\n- Completion rates\n- Average scores\n- Time spent per game\n- Lead conversion metrics\n\nYou can track engagement patterns and measure the **direct impact** on your trade show success.',
 				},
 				{
 					question:
 						'How does QuizBooth compare to hiring event staff or expensive activations?',
 					answer:
-						'QuizBooth provides 24/7 engagement at a fraction of the cost of additional staff or complex activations. It works continuously throughout the event, engages multiple attendees simultaneously, and requires minimal supervision while delivering consistent results.',
+						'QuizBooth provides:\n\n**24/7 engagement** at a fraction of the cost\n\n**Works continuously** throughout the event\n\n**Engages multiple attendees** simultaneously\n\n**Requires minimal supervision**\n\n**Delivers consistent results**\n\nCompared to additional staff or complex activations, QuizBooth is more cost-effective and scalable.',
 				},
 			],
 		},
@@ -97,23 +98,23 @@ export default function FAQ() {
 					question:
 						'What technology do I need to use QuizBooth at my trade show?',
 					answer:
-						'You only need a smartphone or tablet with internet access. Attendees can play using their own devices via QR codes, or you can set up a dedicated device at your booth. No special hardware or complex setup required.',
+						'**Minimal requirements:**\n\n- Smartphone or tablet with internet access\n- Attendees can use their own devices via QR codes\n- Option to set up a dedicated device at your booth\n\n**No special hardware** or complex setup required',
 				},
 				{
 					question:
 						'How reliable is the platform during busy trade show hours?',
 					answer:
-						'QuizBooth is built on enterprise-grade infrastructure with automatic scaling to handle peak traffic. We use Firebase with real-time databases and global CDN distribution to ensure fast, reliable performance even during the busiest event hours.',
+						'QuizBooth is built on **enterprise-grade infrastructure** with:\n\n- **Automatic scaling** to handle peak traffic\n- **Firebase** with real-time databases\n- **Global CDN distribution**\n\nThis ensures **fast, reliable performance** even during the busiest event hours.',
 				},
 				{
 					question: 'Can attendees play without downloading an app?',
 					answer:
-						'Yes! QuizBooth is completely web-based and works in any modern browser. Attendees simply scan a QR code or click a link to start playing immediately - no app downloads or installations required.',
+						'**Yes!** QuizBooth is **completely web-based** and works in any modern browser.\n\nAttendees simply:\n- Scan a QR code **OR**\n- Click a link\n\n**No app downloads** or installations required',
 				},
 				{
 					question: 'How do I share my trivia game with event attendees?',
 					answer:
-						'We provide multiple sharing options: 1) Dynamic QR codes for easy scanning, 2) Short URLs for verbal sharing, 3) Embed codes for your website, 4) Social media sharing links. Most vendors use QR codes displayed at their booth for maximum convenience.',
+						'We provide **multiple sharing options**:\n\n1. **Dynamic QR codes** for easy scanning\n2. **Short URLs** for verbal sharing\n3. **Embed codes** for your website\n4. **Social media sharing** links\n\nMost vendors use **QR codes displayed at their booth** for maximum convenience.',
 				},
 			],
 		},
@@ -125,23 +126,23 @@ export default function FAQ() {
 					question:
 						'How does the AI generate relevant questions for my business?',
 					answer:
-						'Our AI analyzes your company information, industry, and product details to create contextually appropriate questions. It uses advanced natural language processing to understand your business and generate engaging, accurate trivia content that showcases your expertise.',
+						'Our AI analyzes:\n\n- **Company information**\n- **Industry**\n- **Product details**\n\nIt uses **advanced natural language processing** to understand your business and generate:\n\n- **Engaging** trivia content\n- **Accurate** information\n- **Expertise-showcasing** questions',
 				},
 				{
 					question: 'Can I edit or add my own custom questions?',
 					answer:
-						'Yes! While our AI generates great starting content, you have full control to edit any question, add custom questions, or modify answers. This ensures the trivia perfectly aligns with your messaging and brand voice.',
+						'**Yes!** While our AI generates great starting content, you have **full control** to:\n\n- **Edit** any question\n- **Add** custom questions\n- **Modify** answers\n\nThis ensures the trivia **perfectly aligns** with your messaging and brand voice.',
 				},
 				{
 					question:
 						'What types of questions work best for trade show audiences?',
 					answer:
-						'We recommend a mix of company-specific questions (highlighting your expertise), industry knowledge (engaging professionals), and fun facts (keeping it entertaining). The ideal balance depends on your audience and goals, which our platform helps you achieve.',
+						'We recommend a **mix of question types**:\n\n**Company-specific** - Highlighting your expertise\n\n**Industry knowledge** - Engaging professionals\n\n**Fun facts** - Keeping it entertaining\n\nThe ideal balance depends on your audience and goals, which our platform helps you achieve.',
 				},
 				{
 					question: 'How many questions should I include in my trivia game?',
 					answer:
-						'For trade show environments, we recommend 5-10 questions. This provides enough engagement without overwhelming attendees who may be moving between booths. Shorter games have higher completion rates and better lead capture results.',
+						'For trade show environments, we recommend **5-10 questions**.\n\nThis provides:\n\n- **Enough engagement** without overwhelming attendees\n- **Higher completion rates**\n- **Better lead capture** results\n\nShorter games work best for attendees moving between booths.',
 				},
 			],
 		},
@@ -152,28 +153,28 @@ export default function FAQ() {
 				{
 					question: 'What kind of analytics does QuizBooth provide?',
 					answer:
-						'We provide comprehensive analytics including: total plays, completion rates, average scores, time spent, engagement patterns, lead capture data, and performance comparisons. You can track real-time engagement during events and access detailed reports afterward.',
+						'We provide **comprehensive analytics** including:\n\n- **Total plays** and completion rates\n- **Average scores** and time spent\n- **Engagement patterns** and lead capture data\n- **Performance comparisons**\n\nYou can track **real-time engagement** during events and access detailed reports afterward.',
 				},
 				{
 					question:
 						'How do I access the leads captured through the trivia games?',
 					answer:
-						'All captured leads are securely stored in your dashboard with export options. You can download contact information, engagement scores, and timestamps for easy integration with your CRM or sales follow-up processes.',
+						'All captured leads are **securely stored** in your dashboard with:\n\n- **Export options** for contact information\n- **Engagement scores** and timestamps\n- **Easy integration** with your CRM or sales processes\n\nDownload everything you need for follow-ups.',
 				},
 				{
 					question: 'Can I see which questions were most engaging?',
 					answer:
-						'Yes! Our analytics show question-level performance including correct/incorrect rates, time spent per question, and engagement metrics. This helps you understand what content resonates best with your audience.',
+						'**Yes!** Our analytics show **question-level performance** including:\n\n- **Correct/incorrect rates**\n- **Time spent** per question\n- **Engagement metrics**\n\nThis helps you understand **what content resonates best** with your audience.',
 				},
 				{
 					question: 'How does the leaderboard feature benefit vendors?',
 					answer:
-						'The leaderboard creates friendly competition that increases engagement and repeat plays. Attendees often return to improve their scores, giving you multiple touchpoints and increasing the likelihood of meaningful conversations at your booth.',
+						'The leaderboard creates **friendly competition** that:\n\n- **Increases engagement** and repeat plays\n- **Encourages attendees** to return and improve scores\n- **Provides multiple touchpoints** for conversations\n- **Increases likelihood** of meaningful booth interactions',
 				},
 				{
 					question: 'How are scores calculated in QuizBooth?',
 					answer:
-						'QuizBooth uses a sophisticated scoring system that rewards both accuracy and speed. For each correct answer, you earn: 1) Base Points: 100 points for getting the answer right, 2) Time Bonus: Up to 60 bonus points based on how quickly you answer (faster answers earn more points), 3) Streak Bonus: 10 points per consecutive correct answer in your current streak. This system encourages both knowledge and quick thinking, creating engaging competition while ensuring fair scoring across all players.',
+						'QuizBooth rewards both accuracy and speed with a simple scoring system:\n\n**Base Points:** 100 points for each correct answer\n\n**Time Bonus:** Up to 60 bonus points for answering quickly (2 points per second saved)\n\n**Streak Bonus:** 10 extra points for each consecutive correct answer\n\n**Example:** If you answer correctly in 10 seconds with a 3-question streak:\n- Base: 100 points\n- Time Bonus: 40 points (20 seconds saved × 2)\n- Streak Bonus: 30 points (3 × 10)\n- **Total:** 170 points for that question\n\nThis system creates fair competition while encouraging both knowledge and quick thinking.',
 				},
 			],
 		},
@@ -184,22 +185,22 @@ export default function FAQ() {
 				{
 					question: 'Is there a free trial available?',
 					answer:
-						'Yes! We offer a free trial that allows you to create and test games with full functionality. This lets you experience the platform and see the engagement results before committing to a paid plan.',
+						'**Yes!** We offer a **free trial** that allows you to:\n\n- **Create and test games** with full functionality\n- **Experience the platform** firsthand\n- **See engagement results** before committing\n\nNo credit card required to get started.',
 				},
 				{
 					question: 'What support is available during my trade show?',
 					answer:
-						'We provide dedicated support during event hours to ensure everything runs smoothly. This includes technical assistance, content guidance, and rapid response to any questions or issues that may arise.',
+						'We provide **dedicated support** during event hours including:\n\n- **Technical assistance** for any issues\n- **Content guidance** and optimization\n- **Rapid response** to questions\n\nEverything runs smoothly with our support team available.',
 				},
 				{
 					question: 'Can I use QuizBooth for multiple events?',
 					answer:
-						'Absolutely! Your account supports unlimited games across multiple events. You can reuse successful game templates or create new ones for different shows, audiences, or marketing campaigns.',
+						'**Absolutely!** Your account supports:\n\n- **Unlimited games** across multiple events\n- **Reuse successful templates**\n- **Create new games** for different shows\n- **Target different audiences** and campaigns\n\nOne account, endless possibilities.',
 				},
 				{
 					question: 'How does pricing work for enterprise clients?',
 					answer:
-						'We offer flexible enterprise pricing based on your specific needs, including volume discounts, white-label options, custom integrations, and dedicated account management for larger organizations.',
+						'We offer **flexible enterprise pricing** including:\n\n- **Volume discounts** for larger organizations\n- **White-label options** for branding\n- **Custom integrations** with your systems\n- **Dedicated account management**\n\nContact us for a customized quote.',
 				},
 			],
 		},
@@ -357,9 +358,9 @@ export default function FAQ() {
 												<AccordionContent className='pb-4'>
 													<div className='flex items-start gap-3 pl-8'>
 														<Lightbulb className='h-4 w-4 text-green-500 mt-0.5 flex-shrink-0' />
-														<p className='text-foreground leading-relaxed'>
-															{faq.answer}
-														</p>
+														<div className='text-primary leading-relaxed prose  max-w-none'>
+															<ReactMarkdown>{faq.answer}</ReactMarkdown>
+														</div>
 													</div>
 												</AccordionContent>
 											</AccordionItem>
