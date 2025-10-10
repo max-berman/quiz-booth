@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin';
 import { randomUUID } from 'crypto';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { rateLimitConfigs, withRateLimit } from '../lib/rate-limit';
+import { SCORE_VALIDATION_CONFIG } from '../config/constants';
 
 const db = admin.firestore();
 
@@ -549,7 +550,7 @@ function validateScoreSubmission(data: {
     errors.push('Invalid correct answers count');
   }
 
-  if (totalQuestions <= 0 || totalQuestions > 100) {
+  if (totalQuestions <= 0 || totalQuestions > SCORE_VALIDATION_CONFIG.MAX_QUESTIONS) {
     errors.push('Invalid total questions count');
   }
 
@@ -563,33 +564,29 @@ function validateScoreSubmission(data: {
   }
 
   // Validate score calculation consistency
-  // Maximum possible score: 100 points per question + time bonus + streak bonus
-  const maxPointsPerQuestion = 100;
-  const maxTimeBonusPerQuestion = 60; // Up to 60 bonus points for speed
-  const maxStreakBonusPerQuestion = 10; // Up to 10 points per streak
-
-  const maxPossibleScore = totalQuestions * (maxPointsPerQuestion + maxTimeBonusPerQuestion + maxStreakBonusPerQuestion);
+  const maxPossibleScore = totalQuestions * (
+    SCORE_VALIDATION_CONFIG.MAX_POINTS_PER_QUESTION +
+    SCORE_VALIDATION_CONFIG.MAX_TIME_BONUS_PER_QUESTION +
+    SCORE_VALIDATION_CONFIG.MAX_STREAK_BONUS_PER_QUESTION
+  );
 
   if (score > maxPossibleScore) {
     errors.push('Score exceeds maximum possible value for this game');
   }
 
   // Validate that total questions matches game configuration
-  if (gameQuestionCount > 0 && totalQuestions !== gameQuestionCount) {
+  if (gameQuestionCount > 0 && Math.abs(totalQuestions - gameQuestionCount) > SCORE_VALIDATION_CONFIG.QUESTION_COUNT_TOLERANCE) {
     errors.push('Submitted question count does not match game configuration');
   }
 
-  // Validate time spent is reasonable (minimum 10 seconds per question, maximum 5 minutes per question)
-  const minTimePerQuestion = 10; // seconds
-  const maxTimePerQuestion = 300; // seconds (5 minutes)
-
+  // Validate time spent is reasonable
   const avgTimePerQuestion = totalQuestions > 0 ? timeSpent / totalQuestions : 0;
 
-  if (avgTimePerQuestion < minTimePerQuestion) {
+  if (avgTimePerQuestion < SCORE_VALIDATION_CONFIG.MIN_TIME_PER_QUESTION) {
     errors.push('Time spent per question is unrealistically low');
   }
 
-  if (avgTimePerQuestion > maxTimePerQuestion) {
+  if (avgTimePerQuestion > SCORE_VALIDATION_CONFIG.MAX_TIME_PER_QUESTION) {
     errors.push('Time spent per question is unrealistically high');
   }
 

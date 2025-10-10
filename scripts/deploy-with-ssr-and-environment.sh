@@ -42,15 +42,8 @@ if [[ "$ENVIRONMENT" == "development" ]]; then
   cp storage.rules.dev storage.rules
   echo "✅ Using development rules (permissive)"
 
-    # Build the client
-  echo "📦 Building client..."
-  npm run build:client
-  
-  # Build Firebase functions for emulator use
-  echo "🔨 Building Firebase functions for emulators..."
-  cd firebase-functions
-  npm run build
-  cd ..
+  # Build the client and Firebase functions for emulator use
+  npm run build:all:clean
   
   echo ""
   echo "🔧 Development environment configured for local emulators"
@@ -71,20 +64,9 @@ else
   cp firestore.rules.prod firestore.rules
   cp storage.rules.prod storage.rules
   echo "✅ Using production rules (strict security)"
-  
-  # Build the client
-  echo "📦 Building client..."
-  npm run build:client
 
-  # Rebuild Firebase functions
-  echo "🔨 Building Firebase functions..."
-  cd firebase-functions
-  npm run build
-  
-  # Fix TypeScript output structure - copy built files to correct location
-  echo "🔄 Fixing TypeScript output structure..."
-  cp -r lib/firebase-functions/src/* lib/
-  cd ..
+  # Build the client and Firebase functions for production
+  npm run build:all:clean
 
   # Generate sitemap
   echo "🗺️  Generating sitemap..."
