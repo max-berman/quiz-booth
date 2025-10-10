@@ -164,6 +164,66 @@ interface Player {
 - **Leaderboards**: 30 seconds TTL
 - Cache invalidation on data modifications
 
+## API Consistency Pattern
+
+### Consistent `httpsCallable` Pattern
+
+**Problem**: Inconsistent API call patterns caused CORS errors and development/production inconsistencies
+
+**Root Cause**:
+
+- Some APIs used `httpsCallable` pattern (Firebase SDK handles environment switching)
+- Some APIs used direct `fetch` calls with manual URL switching
+- This led to CORS errors and inconsistent behavior between environments
+
+**Solution**: Standardized all API calls to use the `httpsCallable` pattern
+
+#### Implementation
+
+**Firebase Functions** (converted to `onCall` pattern):
+
+```typescript
+// BEFORE: HTTP function with manual CORS handling
+export const getGamePlayCount = functions.https.onRequest(async (req, res) => {
+	// Manual CORS headers, query parameter parsing, etc.
+})
+
+// AFTER: Callable function with automatic handling
+export const getGamePlayCount = functions.https.onCall(
+	async (data, context) => {
+		const { gameId } = data
+		// Automatic CORS, authentication, and error handling
+	}
+)
+```
+
+**Client Usage** (consistent pattern):
+
+```typescript
+// BEFORE: Manual fetch with URL switching
+const url = isDevelopment
+	? `http://localhost:5001/.../getGamePlayCount?gameId=${gameId}`
+	: `/api/games/${gameId}/play-count`
+
+// AFTER: Consistent httpsCallable pattern
+const { getGamePlayCount } = useFirebaseFunctions()
+const result = await getGamePlayCount({ gameId })
+```
+
+#### Benefits
+
+- **Automatic Environment Switching**: Firebase SDK handles development vs production
+- **No CORS Issues**: Callable functions handle CORS automatically
+- **Type Safety**: Consistent TypeScript types across all API calls
+- **Error Handling**: Standardized error responses
+- **Authentication**: Built-in authentication handling
+- **Production Safety**: Works identically in both environments
+
+#### Functions Converted
+
+- `getGamePlayCount` - Now uses `httpsCallable` pattern
+- `getGameQuestionsCount` - Now uses `httpsCallable` pattern
+
 ## AI Integration
 
 ### DeepSeek API Integration

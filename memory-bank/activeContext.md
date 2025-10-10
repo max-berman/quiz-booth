@@ -24,6 +24,7 @@
 - **Performance Monitoring**: Ongoing focus on timer reliability and user experience
 - **Firebase Routing Fix**: Resolved 404 error for game-customization page by adding missing route to Firebase hosting configuration
 - **Storage Rules Fix**: Fixed Firebase Storage rules to allow public read access for game logos in public game cards
+- **API Consistency Fix**: Resolved CORS errors by implementing consistent `httpsCallable` pattern across all Firebase Functions
 
 ### Current Development State
 
