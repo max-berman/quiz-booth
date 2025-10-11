@@ -12,6 +12,13 @@ import {
   loadGameResults,
   getResultsKey,
 } from '@/lib/session-utils';
+import {
+  hasFirstCompletion,
+  saveFirstCompletion,
+  isFirstCompletion,
+  getLockedResults,
+  type FirstCompletionData,
+} from '@/lib/first-completion-utils';
 
 interface UseGameSessionReturn {
   sessionState: GameSessionState | null;
@@ -88,6 +95,9 @@ export function useGameSession(gameId: string | undefined): UseGameSessionReturn
         console.log('Saving final results:', finalResults);
       }
       saveGameResults(gameId, finalResults);
+
+      // DO NOT save first completion here - it should only be saved after successful submission
+      // First completion will be saved in the results page after successful score submission
 
       // Verify results were saved
       setTimeout(() => {

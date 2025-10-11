@@ -15,6 +15,7 @@ import {
 	AlertCircle,
 	Loader2,
 	Home,
+	Lock,
 } from 'lucide-react'
 import { Link } from 'wouter'
 import { queryClient } from '@/lib/queryClient'
@@ -24,16 +25,17 @@ import type { Game } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { formatTime } from '@/lib/time-utils'
 import { hasSubmittedScore, markScoreSubmitted } from '@/lib/fingerprint-utils'
-import {
-	loadGameResults,
-	hasValidResults,
-	getResultsKey,
-	getSessionKey,
-} from '@/lib/session-utils'
+import { loadGameResults, hasValidResults } from '@/lib/session-utils'
 import {
 	applyGameCustomization,
 	cleanupGameCustomization,
 } from '@/lib/color-utils'
+import {
+	hasFirstCompletion,
+	getLockedResults,
+	isFirstCompletion,
+	saveFirstCompletion,
+} from '@/lib/first-completion-utils'
 
 export default function Results() {
 	const { id } = useParams()
@@ -50,68 +52,68 @@ export default function Results() {
 		timeSpent: number
 		streak: number
 	} | null>(null)
+	const [isScoreLocked, setIsScoreLocked] = useState(false)
+	const [isReplayedGame, setIsReplayedGame] = useState(false)
 
 	// Initialize Firebase Functions
 	const { getGame, savePlayerScore } = useFirebaseFunctions()
 
-	// Load results from session storage with retry mechanism
+	// Load results and check for locked scores
 	useEffect(() => {
-		if (!id) return
-
-		let retryCount = 0
-		const maxRetries = 5
-		const retryInterval = 200 // 200ms between retries
-
-		const loadResultsWithRetry = () => {
+		if (id) {
 			const loadedResults = loadGameResults(id)
-
 			if (loadedResults) {
-				if (process.env.NODE_ENV === 'development') {
-					console.log('Results loaded successfully:', loadedResults)
-				}
-				setResults({
-					score: loadedResults.score,
-					correctAnswers: loadedResults.correctAnswers,
-					totalQuestions: loadedResults.totalQuestions,
-					timeSpent: loadedResults.timeSpent,
-					streak: loadedResults.streak,
-				})
-			} else {
-				if (process.env.NODE_ENV === 'development') {
-					console.log(
-						`No results found for game: ${id} (attempt ${
-							retryCount + 1
-						}/${maxRetries})`
-					)
-					console.log('Current localStorage state:', {
-						resultsKey: getResultsKey(id),
-						storedResults: localStorage.getItem(getResultsKey(id)),
-						sessionKey: getSessionKey(id),
-						storedSession: localStorage.getItem(getSessionKey(id)),
-					})
-				}
+				// Check if this is a replayed game (first completion exists but current session is different)
+				const firstCompletionExists = hasFirstCompletion(id)
+				const isFirstCompletionSession = isFirstCompletion(
+					id,
+					loadedResults.sessionId
+				)
 
-				if (retryCount < maxRetries) {
-					// Try again after a short delay
-					retryCount++
-					setTimeout(loadResultsWithRetry, retryInterval)
-				} else {
-					// Max retries reached, redirect to game
-					if (process.env.NODE_ENV === 'development') {
-						console.log('Max retries reached, redirecting to game page')
+				if (firstCompletionExists && !isFirstCompletionSession) {
+					// This is a replayed game - show locked score from first completion
+					const lockedResults = getLockedResults(id)
+					if (lockedResults) {
+						setResults({
+							score: lockedResults.score,
+							correctAnswers: lockedResults.correctAnswers,
+							totalQuestions: lockedResults.totalQuestions,
+							timeSpent: lockedResults.timeSpent,
+							streak: lockedResults.streak,
+						})
+						setIsScoreLocked(true)
+						setIsReplayedGame(true)
+
+						// Debug logging
+						if (process.env.NODE_ENV === 'development') {
+							console.log(
+								'Showing locked results from first completion:',
+								lockedResults
+							)
+						}
 					}
-					toast({
-						title: 'No Results Found',
-						description: 'Please complete the game first.',
-						variant: 'destructive',
+				} else {
+					// This is the first completion or same session
+					setResults({
+						score: loadedResults.score,
+						correctAnswers: loadedResults.correctAnswers,
+						totalQuestions: loadedResults.totalQuestions,
+						timeSpent: loadedResults.timeSpent,
+						streak: loadedResults.streak,
 					})
-					setLocation(`/game/${id}`)
+					setIsScoreLocked(firstCompletionExists)
+					setIsReplayedGame(false)
 				}
+			} else {
+				// No valid results found, redirect to game page
+				toast({
+					title: 'No Results Found',
+					description: 'Please complete the game first.',
+					variant: 'destructive',
+				})
+				setLocation(`/game/${id}`)
 			}
 		}
-
-		// Start loading results
-		loadResultsWithRetry()
 	}, [id, setLocation, toast])
 
 	// Check if player has already submitted for this game
@@ -194,6 +196,25 @@ export default function Results() {
 			if (id) {
 				markScoreSubmitted(id)
 			}
+
+			// Save first completion data only after successful submission
+			if (id && results && !hasFirstCompletion(id)) {
+				const firstCompletionData = {
+					...results,
+					gameId: id,
+					sessionId: loadGameResults(id)?.sessionId || '',
+					completedAt: Date.now(),
+				}
+				saveFirstCompletion(firstCompletionData)
+
+				if (process.env.NODE_ENV === 'development') {
+					console.log(
+						'First completion saved after successful submission:',
+						firstCompletionData
+					)
+				}
+			}
+
 			toast({
 				title: 'Success!',
 				description: 'Your score has been saved to the leaderboard.',
@@ -285,8 +306,30 @@ export default function Results() {
 							</div>
 						) : (
 							<>
+								{/* Score Locked Banner */}
+								{isScoreLocked && (
+									<div className='bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6'>
+										<div className='flex items-center justify-center gap-2 mb-2'>
+											<Lock className='h-6 w-6 text-amber-600' />
+											<h3 className='text-base md:text-lg font-semibold text-amber-800'>
+												Score Locked
+											</h3>
+										</div>
+										<p className='text-amber-700 text-sm text-center'>
+											{isReplayedGame
+												? "Your score from your first completion is locked. You can play again for fun, but your score won't be saved to the leaderboard."
+												: 'You’ve already submitted your score for this game. '}
+										</p>
+									</div>
+								)}
+
 								<ul className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-2'>
-									<li className='p-2 md:p-6 rounded-xl bg-primary/30'>
+									<li className='p-2 md:p-6 rounded-xl bg-primary/30 relative'>
+										{isScoreLocked && (
+											<div className='absolute -top-2 -right-2 bg-amber-500 text-white rounded-full p-1'>
+												<Lock className='h-4 w-4' />
+											</div>
+										)}
 										<div className='text-xl md:text-3xl font-bold text-primary mb-2'>
 											{results.score}
 										</div>
@@ -321,48 +364,51 @@ export default function Results() {
 								</ul>
 
 								{/* Player Registration */}
-								{!isScoreSaved && !hasAlreadySubmitted && results.score > 0 && (
-									<div className='bg-accent/10 p-4 rounded-xl mb-6'>
-										<h3 className='text-base md:text-lg font-semibold text-primary mb-4'>
-											Save Your Score to Leaderboard
-										</h3>
-										<div className='grid sm:grid-cols-2 gap-4 mb-4'>
-											<div>
-												<Input
-													id='playerName'
-													placeholder='Enter your name'
-													//className='border-primary'
-													value={playerName}
-													onChange={(e) => setPlayerName(e.target.value)}
-												/>
+								{!isScoreSaved &&
+									!hasAlreadySubmitted &&
+									results.score > 0 &&
+									!isScoreLocked && (
+										<div className='bg-accent/10 p-4 rounded-xl mb-6'>
+											<h3 className='text-base md:text-lg font-semibold text-primary mb-4'>
+												Save Your Score to Leaderboard
+											</h3>
+											<div className='grid sm:grid-cols-2 gap-4 mb-4'>
+												<div>
+													<Input
+														id='playerName'
+														placeholder='Enter your name'
+														//className='border-primary'
+														value={playerName}
+														onChange={(e) => setPlayerName(e.target.value)}
+													/>
+												</div>
+												<div>
+													<Input
+														id='playerEmail'
+														type='email'
+														placeholder='your.email@company.com'
+														//className='border-primary'
+														value={playerEmail}
+														onChange={(e) => setPlayerEmail(e.target.value)}
+													/>
+												</div>
 											</div>
-											<div>
-												<Input
-													id='playerEmail'
-													type='email'
-													placeholder='your.email@company.com'
-													//className='border-primary'
-													value={playerEmail}
-													onChange={(e) => setPlayerEmail(e.target.value)}
-												/>
-											</div>
+											<Button
+												onClick={handleSaveScore}
+												disabled={saveScoreMutation.isPending}
+												className='px-6 py-3 text-lg'
+											>
+												{saveScoreMutation.isPending ? (
+													<>
+														<Loader2 className='mr-2 h-4 w-4 animate-spin' />
+														Saving...
+													</>
+												) : (
+													'Save Score'
+												)}
+											</Button>
 										</div>
-										<Button
-											onClick={handleSaveScore}
-											disabled={saveScoreMutation.isPending}
-											className='px-6 py-3 text-lg'
-										>
-											{saveScoreMutation.isPending ? (
-												<>
-													<Loader2 className='mr-2 h-4 w-4 animate-spin' />
-													Saving...
-												</>
-											) : (
-												'Save Score'
-											)}
-										</Button>
-									</div>
-								)}
+									)}
 
 								{isScoreSaved && !hasAlreadySubmitted && (
 									<div className='bg-accent/10 p-4 rounded-xl mb-6'>
@@ -373,7 +419,7 @@ export default function Results() {
 									</div>
 								)}
 
-								{hasAlreadySubmitted && (
+								{/* {hasAlreadySubmitted && (
 									<div className='bg-accent/10 p-4 rounded-xl mb-6'>
 										<div className='flex items-center justify-center gap-2 mb-2'>
 											<AlertCircle className='h-6 w-6 text-primary' />
@@ -387,12 +433,12 @@ export default function Results() {
 											the leaderboard.
 										</p>
 									</div>
-								)}
+								)} */}
 
-								<div className='flex flex-col gap-3 max-w-sm mx-auto'>
+								<div className='flex mt-4 flex-col gap-3 max-w-sm mx-auto'>
 									{/* Primary Actions Row */}
 									<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-										<Button
+										{/* <Button
 											variant='outline'
 											onClick={() => setLocation(`/game/${id}`)}
 											className='px-6 py-3 w-full'
@@ -400,7 +446,7 @@ export default function Results() {
 										>
 											<RotateCcw className='mr-2 h-4 w-4' />
 											Play Again
-										</Button>
+										</Button> */}
 										<Button
 											variant='outline'
 											onClick={() => setLocation(`/leaderboard/${id}`)}
@@ -410,15 +456,20 @@ export default function Results() {
 											<Eye className='mr-2 h-4 w-4' />
 											View Leaderboard
 										</Button>
+										<ShareEmbedModal
+											gameId={id}
+											gameTitle={game?.companyName}
+											style='py-4'
+										/>
 									</div>
 
 									{/* Share and Creator Actions */}
-									<div className='grid grid-cols-1 gap-3'>
+									{/* <div className='grid grid-cols-1 gap-3'>
 										<ShareEmbedModal
 											gameId={id}
 											gameTitle={game?.companyName}
 										/>
-									</div>
+									</div> */}
 								</div>
 							</>
 						)}

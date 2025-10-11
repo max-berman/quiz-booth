@@ -13,6 +13,7 @@ import {
 	ArrowRight,
 	Lightbulb,
 	RotateCcw,
+	Lock,
 } from 'lucide-react'
 import type { Game, Question } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
@@ -24,6 +25,11 @@ import {
 	applyGameCustomization,
 	cleanupGameCustomization,
 } from '@/lib/color-utils'
+import {
+	hasFirstCompletion,
+	getLockedResults,
+} from '@/lib/first-completion-utils'
+import { loadGameResults } from '@/lib/session-utils'
 
 export default function GamePage() {
 	const { id } = useParams()
@@ -332,6 +338,30 @@ export default function GamePage() {
 		threshold: 50, // Minimum swipe distance in pixels
 		preventDefault: false, // Allow button taps to work properly
 	})
+
+	// Check if game was already completed (either first completion exists OR session is marked as completed)
+	useEffect(() => {
+		if (id && !sessionState?.isCompleted) {
+			const firstCompletionExists = hasFirstCompletion(id)
+			const loadedResults = loadGameResults(id)
+
+			// Redirect if either:
+			// 1. First completion exists (score was submitted) OR
+			// 2. Game results exist but no session (game was completed but score not submitted)
+			if (firstCompletionExists || (loadedResults && !sessionState)) {
+				// Game was already completed, redirect to results page
+				if (process.env.NODE_ENV === 'development') {
+					console.log('Game already completed, redirecting to results:', {
+						gameId: id,
+						firstCompletionExists,
+						hasResults: !!loadedResults,
+						hasSession: !!sessionState,
+					})
+				}
+				setLocation(`/results/${id}`)
+			}
+		}
+	}, [id, sessionState?.isCompleted, sessionState, setLocation])
 
 	// Check for permission denied errors (game is private)
 	if (gameError || questionsError) {

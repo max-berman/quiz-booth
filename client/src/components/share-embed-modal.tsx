@@ -17,12 +17,14 @@ import { useToast } from '@/hooks/use-toast'
 interface ShareEmbedModalProps {
 	gameId?: string
 	gameTitle?: string
+	style?: string
 	isBuilder?: boolean
 }
 
 export function ShareEmbedModal({
 	gameId,
 	gameTitle,
+	style,
 	isBuilder = false,
 }: ShareEmbedModalProps) {
 	const { toast } = useToast()
@@ -67,8 +69,8 @@ export function ShareEmbedModal({
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>
-				<Button variant='outline' size='sm'>
-					<Share className='mr-1 h-4 w-4' />
+				<Button variant='outline'>
+					<Share className={`mr-1 h-4 w-4`} />
 					{isBuilder ? 'Share Trivia Builder' : 'Share'}
 				</Button>
 			</DialogTrigger>
@@ -106,8 +108,8 @@ export function ShareEmbedModal({
 						</div>
 
 						<div className='flex gap-2'>
-							<Button onClick={handleShare} className='flex-1  !text-white '>
-								<LinkIcon className='mr-2 h-4 w-4' />
+							<Button onClick={handleShare} className='flex-1 !text-white '>
+								<LinkIcon className={`mr-2 h-4 w-4 ${style}`} />
 								Share Link
 							</Button>
 						</div>

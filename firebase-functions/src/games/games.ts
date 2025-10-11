@@ -491,6 +491,18 @@ export const savePlayerScore = functions.https.onCall(async (data, context) => {
       );
     }
 
+    // Additional validation: Check for suspicious score improvements
+    // This would require storing player history, but for now we'll log for monitoring
+    console.log('Score submission attempt:', {
+      gameId,
+      playerName,
+      score,
+      correctAnswers,
+      totalQuestions,
+      timeSpent,
+      timestamp: new Date().toISOString(),
+    });
+
     // Usage tracking (if authenticated)
     if (context.auth) {
       await trackUsage(context.auth.uid, 'player_submission', {

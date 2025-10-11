@@ -355,6 +355,63 @@ interface ApiError {
 
 ## Security Patterns
 
+### Anti-Cheating System
+
+#### First Completion Lock
+
+**Problem**: Players could replay games after completion to get better scores with known answers
+
+**Solution**: Implemented comprehensive anti-cheating protection with first completion locking
+
+**Implementation**:
+
+```typescript
+// Game page - prevent replay after completion
+useEffect(() => {
+	if (id && !sessionState?.isCompleted) {
+		const firstCompletionExists = hasFirstCompletion(id)
+		const loadedResults = loadGameResults(id)
+
+		// Redirect if either:
+		// 1. First completion exists (score was submitted) OR
+		// 2. Game results exist but no session (game was completed but score not submitted)
+		if (firstCompletionExists || (loadedResults && !sessionState)) {
+			setLocation(`/results/${id}`)
+		}
+	}
+}, [id, sessionState?.isCompleted, sessionState, setLocation])
+```
+
+**Key Features**:
+
+- **Immediate Protection**: Game completion detected immediately after first play
+- **Session-Based Detection**: Uses both first completion data and session results
+- **UI Feedback**: Clear messaging and visual indicators for locked scores
+- **Graceful Handling**: Players redirected to results page with explanation
+
+#### Score Locking Logic
+
+**First Play Flow**:
+
+1. Player completes game → Results saved to session storage
+2. Player can submit score → Score saved to leaderboard
+3. First completion data saved after successful submission
+
+**Replay Prevention**:
+
+1. Player tries to access game again → System detects completed session
+2. Immediate redirect to results page
+3. Score submission disabled (if already submitted) or available (if not submitted yet)
+
+#### UI Score Locking
+
+**Visual Indicators**:
+
+- Lock icon on final score when score is locked
+- Amber-colored banner explaining score status
+- Clear messaging for replay attempts
+- Disabled submission form for locked scores
+
 ### Input Validation
 
 - **Zod Schemas**: Runtime validation for all API inputs
