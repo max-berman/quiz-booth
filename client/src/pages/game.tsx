@@ -552,7 +552,7 @@ export default function GamePage() {
 										if (selectedAnswer === index) {
 											// This is the selected answer
 											return index === currentQuestion.correctAnswer
-												? 'font-bold bg-primary/20 border-primary text-primary' // Correct answer selected
+												? 'font-bold bg-primary/20 border-primary text-primary scale-[1.02]' // Correct answer selected
 												: 'bg-destructive/20 border-destructive text-destructive' // Wrong answer selected
 										}
 
@@ -596,11 +596,11 @@ export default function GamePage() {
 										>
 											<div className='flex items-center justify-between'>
 												<div className='flex items-center gap-4'>
-													<span
+													{/* <span
 														className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${getLetterBadgeClasses()}`}
 													>
 														{String.fromCharCode(65 + index)}
-													</span>
+													</span> */}
 													<span className='text-base md:text-lg font-medium'>
 														{option}
 													</span>
@@ -608,9 +608,9 @@ export default function GamePage() {
 												{isAnswered &&
 													selectedAnswer === index &&
 													(index === currentQuestion.correctAnswer ? (
-														<CheckCircle className='h-8 w-8 text-primary' />
+														<CheckCircle className='h-9 w-10 text-primary' />
 													) : (
-														<XCircle className='h-8 w-8 text-destructive' />
+														<XCircle className='h-10 w-10 text-destructive' />
 													))}
 												{isAnswered &&
 													selectedAnswer !== index &&
