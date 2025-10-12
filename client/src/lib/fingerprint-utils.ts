@@ -48,11 +48,11 @@ export function hasSubmittedScore(gameId: string): boolean {
 
     // Debug logging to help identify issues
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Submission check for game ${gameId}:`, {
-        submissionKey,
-        stored,
-        hasSubmitted
-      });
+      // console.log(`Submission check for game ${gameId}:`, {
+      //   submissionKey,
+      //   stored,
+      //   hasSubmitted
+      // });
     }
 
     return hasSubmitted;

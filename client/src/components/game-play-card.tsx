@@ -40,7 +40,7 @@ export function GamePlayCard({
 		if (selectedAnswer === index) {
 			// This is the selected answer
 			return index === currentQuestion?.correctAnswer
-				? 'font-bold bg-primary/20 border-primary text-primary scale-[1.02]' // Correct answer selected
+				? 'font-bold bg-primary/20 border-primary text-primary scale-[1.01]' // Correct answer selected
 				: 'bg-destructive/20 border-destructive text-destructive' // Wrong answer selected
 		}
 
@@ -87,7 +87,8 @@ export function GamePlayCard({
 	return (
 		<Card
 			ref={gameCardRef}
-			className='game-card !my-8 bg-card animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'
+			//className='game-card !my-4 bg-card animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'
+			className='game-card overflow-hidden mx-2 my-6 bg-card animate-slide-up rounded-2xl shadow-md border-1'
 		>
 			<CardContent className='p-0 pb-4 md:p-6'>
 				{/* Question Text */}

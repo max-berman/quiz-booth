@@ -24,6 +24,151 @@ import {
 } from '@/lib/first-completion-utils'
 import { loadGameResults } from '@/lib/session-utils'
 
+// Audio elements for reliable sound playback
+let scoreAudio: HTMLAudioElement | null = null
+let errorAudio: HTMLAudioElement | null = null
+let isAudioInitialized = false
+
+// Audio configuration - easily adjustable volume levels
+const audioConfig = {
+	volume: {
+		score: 0.7, // 50% volume for correct answers
+		error: 0.1, // 40% volume for wrong answers
+	},
+	// Audio paths for public directory (production-ready)
+	paths: {
+		score: {
+			mp3: '/assets/audio/output.mp3',
+			m4a: '/assets/audio/output.m4a',
+			ogg: '/assets/audio/output.ogg',
+			wav: '/assets/audio/score_01.wav',
+		},
+		error: {
+			mp3: '/assets/audio/error_01.mp3',
+			m4a: '/assets/audio/error_01.m4a',
+			ogg: '/assets/audio/error_01.ogg',
+			wav: '/assets/audio/error_01.wav',
+		},
+	},
+}
+
+// Initialize audio system using HTML5 Audio (more reliable)
+const initializeAudio = async (): Promise<boolean> => {
+	try {
+		if (isAudioInitialized) return true
+
+		// Try different audio formats in order of preference for score sound
+		const scoreFormats = [
+			{ type: 'mp3', path: audioConfig.paths.score.mp3 },
+			{ type: 'm4a', path: audioConfig.paths.score.m4a },
+			{ type: 'ogg', path: audioConfig.paths.score.ogg },
+			{ type: 'wav', path: audioConfig.paths.score.wav },
+		]
+
+		// Try different audio formats in order of preference for error sound
+		const errorFormats = [
+			{ type: 'mp3', path: audioConfig.paths.error.mp3 },
+			{ type: 'm4a', path: audioConfig.paths.error.m4a },
+			{ type: 'ogg', path: audioConfig.paths.error.ogg },
+			{ type: 'wav', path: audioConfig.paths.error.wav },
+		]
+
+		// Load score sound
+		for (const { type, path } of scoreFormats) {
+			try {
+				scoreAudio = new Audio(path)
+
+				// Test if audio can be loaded
+				await new Promise((resolve, reject) => {
+					if (!scoreAudio) return reject(new Error('Audio element not created'))
+
+					scoreAudio.addEventListener('canplaythrough', resolve)
+					scoreAudio.addEventListener('error', reject)
+					scoreAudio.load()
+				})
+
+				console.log(`Score audio loaded successfully: ${type}`)
+				break
+			} catch (formatError) {
+				console.log(`Failed to load score audio format ${type}:`, formatError)
+				continue
+			}
+		}
+
+		// Load error sound
+		for (const { type, path } of errorFormats) {
+			try {
+				errorAudio = new Audio(path)
+
+				// Test if audio can be loaded
+				await new Promise((resolve, reject) => {
+					if (!errorAudio) return reject(new Error('Audio element not created'))
+
+					errorAudio.addEventListener('canplaythrough', resolve)
+					errorAudio.addEventListener('error', reject)
+					errorAudio.load()
+				})
+
+				console.log(`Error audio loaded successfully: ${type}`)
+				break
+			} catch (formatError) {
+				console.log(`Failed to load error audio format ${type}:`, formatError)
+				continue
+			}
+		}
+
+		if (!scoreAudio && !errorAudio) {
+			throw new Error('All audio formats failed to load')
+		}
+
+		isAudioInitialized = true
+		return true
+	} catch (error) {
+		console.warn('Failed to initialize audio system:', error)
+		return false
+	}
+}
+
+// Play score sound
+const playScoreSound = () => {
+	if (!scoreAudio || !isAudioInitialized) {
+		console.warn('Audio not initialized, cannot play sound')
+		return
+	}
+
+	try {
+		// Clone the audio element to allow overlapping plays
+		const audioClone = scoreAudio.cloneNode() as HTMLAudioElement
+		audioClone.volume = audioConfig.volume.score // Use config volume
+		audioClone.play().catch((error) => {
+			console.warn('Failed to play audio:', error)
+		})
+		console.log('Score sound played')
+	} catch (error) {
+		console.warn('Failed to play score sound:', error)
+	}
+}
+
+// Play error sound
+const playErrorSound = () => {
+	if (!errorAudio || !isAudioInitialized) {
+		console.warn('Audio not initialized, cannot play sound')
+		return
+	}
+
+	try {
+		// Clone the audio element to allow overlapping plays
+		const audioClone = errorAudio.cloneNode() as HTMLAudioElement
+		audioClone.volume = audioConfig.volume.error // Use config volume
+		audioClone.play().catch((error) => {
+			console.warn('Failed to play audio:', error)
+		})
+		console.log('Error sound played')
+	} catch (error) {
+		console.warn('Failed to play error sound:', error)
+	}
+}
+
 /**
  * GamePage component handles the main gameplay experience including questions,
  * timer, scoring, and session management.
@@ -98,6 +243,7 @@ export default function GamePage() {
 
 	const [timeLeft, setTimeLeft] = useState(QUESTION_TIMER_DURATION)
 	const [showExplanation, setShowExplanation] = useState(false)
+	const [isAudioReady, setIsAudioReady] = useState(false)
 
 	const {
 		data: game,
@@ -222,6 +368,20 @@ export default function GamePage() {
 		return () => window.removeEventListener('beforeunload', handleBeforeUnload)
 	}, [timeLeft, isAnswered, updateSessionState])
 
+	// Initialize audio on component mount
+	useEffect(() => {
+		const initAudio = async () => {
+			const success = await initializeAudio()
+			setIsAudioReady(success)
+			if (success) {
+				console.log('Audio ready for score changes')
+			} else {
+				console.warn('Audio initialization failed')
+			}
+		}
+		initAudio()
+	}, [])
+
 	// Reset explanation when moving to new question
 	useEffect(() => {
 		setShowExplanation(false)
@@ -234,16 +394,6 @@ export default function GamePage() {
 
 		const timeSpent = QUESTION_TIMER_DURATION - timeLeft
 		const isCorrect = answerIndex === currentQuestion?.correctAnswer
-
-		// Vibration feedback for wrong answers
-		if (!isCorrect && 'vibrate' in navigator) {
-			// Check if vibration API is supported
-			try {
-				navigator.vibrate(200) // 200ms vibration for wrong answers
-			} catch (error) {
-				console.warn('Vibration API not supported or failed:', error)
-			}
-		}
 
 		// Calculate score updates
 		let newScore = score
@@ -261,9 +411,33 @@ export default function GamePage() {
 			newScore = score + questionPoints
 			newCorrectAnswers = correctAnswers + 1
 			newStreak = streak + 1
+
+			// Play score sound for correct answers
+			if (isAudioReady) {
+				playScoreSound()
+			} else {
+				console.log('Audio not ready yet, skipping sound')
+			}
 		} else {
 			newWrongAnswers = wrongAnswers + 1
 			newStreak = 0
+
+			// Play error sound for wrong answers
+			if (isAudioReady) {
+				playErrorSound()
+			} else {
+				console.log('Audio not ready yet, skipping error sound')
+			}
+
+			// Vibration feedback for wrong answers
+			if ('vibrate' in navigator) {
+				// Check if vibration API is supported
+				try {
+					navigator.vibrate(200) // 200ms vibration for wrong answers
+				} catch (error) {
+					console.warn('Vibration API not supported or failed:', error)
+				}
+			}
 		}
 
 		// Track question answered event
@@ -481,16 +655,9 @@ export default function GamePage() {
 								/> */
 
 	return (
-		<div className='flex-1 bg-background'>
+		<div className='flex-1 flex flex-col bg-background'>
 			{/* Top Navigation Bar */}
-			<GameNavigationBar
-				game={game}
-				isAnswered={isAnswered}
-				currentQuestionIndex={currentQuestionIndex}
-				questionsLength={questions.length}
-				onNextQuestion={handleNextQuestion}
-			/>
-			<div className='max-w-4xl mx-auto px-0 lg:px-6 py-4 space-y-4 text-primary'>
+			<div className='sticky flex justify-center top-0 z-50 bg-background/80 backdrop-blur-sm shadow-md'>
 				{/* Timer and Stats - Compact version */}
 				<GameStatsBar
 					timeLeft={timeLeft}
@@ -499,6 +666,15 @@ export default function GamePage() {
 					progressPercentage={progressPercentage}
 					score={score}
 				/>
+			</div>
+			<div className='max-w-4xl mx-auto px-0  text-primary'>
+				{/* <GameNavigationBar
+					game={game}
+					isAnswered={isAnswered}
+					currentQuestionIndex={currentQuestionIndex}
+					questionsLength={questions.length}
+					onNextQuestion={handleNextQuestion}
+				/> */}
 
 				{/* Question Card */}
 				<GamePlayCard
