@@ -20,6 +20,23 @@
         "destination": "/index.html"
       }
     ],
+    "redirects": [
+      {
+        "source": "https://www.quizbooth.games/**",
+        "destination": "https://quizbooth.games/:splat",
+        "type": 301
+      },
+      {
+        "source": "http://quizbooth.games/**",
+        "destination": "https://quizbooth.games/:splat",
+        "type": 301
+      },
+      {
+        "source": "http://www.quizbooth.games/**",
+        "destination": "https://quizbooth.games/:splat",
+        "type": 301
+      }
+    ],
     "headers": [
       {
         "source": "**",

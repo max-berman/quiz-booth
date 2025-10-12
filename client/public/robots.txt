@@ -1,6 +1,9 @@
 User-agent: *
 Allow: /
 
+# Preferred domain
+Host: https://quizbooth.games
+
 # Sitemap location
 Sitemap: https://quizbooth.games/sitemap.xml
 
