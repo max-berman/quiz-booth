@@ -152,6 +152,24 @@
 		}
 	}
 
+	/* Swipe animation for hand icon */
+	@keyframes swipeAnimation {
+		0% {
+			transform: translateX(140px);
+			opacity: 0;
+		}
+		20% {
+			opacity: 1;
+		}
+		80% {
+			opacity: 1;
+		}
+		100% {
+			transform: translateX(-40px);
+			opacity: 0;
+		}
+	}
+
 	.animate-slide-up {
 		animation: slide-up 0.3s ease-out;
 		animation-fill-mode: both;

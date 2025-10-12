@@ -126,13 +126,16 @@ export function useGameSession(gameId: string | undefined): UseGameSessionReturn
     saveGameSession(gameId, completedState);
 
     // Clear session after a longer delay to ensure results page can access it
-    setTimeout(() => {
+    const clearSessionTimeout = setTimeout(() => {
       if (process.env.NODE_ENV === 'development') {
         console.log('Clearing session for game:', gameId);
       }
       clearGameSession(gameId);
       setSessionState(null);
     }, 5000); // Increased from 1 second to 5 seconds
+
+    // Cleanup timeout on unmount
+    return () => clearTimeout(clearSessionTimeout);
   }, [gameId]);
 
   // Clear current session (for manual reset)

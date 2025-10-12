@@ -87,7 +87,9 @@ const initializeAudio = async (): Promise<boolean> => {
 					scoreAudio.load()
 				})
 
-				console.log(`Score audio loaded successfully: ${type}`)
+				if (process.env.NODE_ENV === 'development') {
+					console.log(`Score audio loaded successfully: ${type}`)
+				}
 				break
 			} catch (formatError) {
 				console.log(`Failed to load score audio format ${type}:`, formatError)
@@ -109,7 +111,9 @@ const initializeAudio = async (): Promise<boolean> => {
 					errorAudio.load()
 				})
 
-				console.log(`Error audio loaded successfully: ${type}`)
+				if (process.env.NODE_ENV === 'development') {
+					console.log(`Error audio loaded successfully: ${type}`)
+				}
 				break
 			} catch (formatError) {
 				console.log(`Failed to load error audio format ${type}:`, formatError)
@@ -143,7 +147,9 @@ const playScoreSound = () => {
 		audioClone.play().catch((error) => {
 			console.warn('Failed to play audio:', error)
 		})
-		console.log('Score sound played')
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Score sound played')
+		}
 	} catch (error) {
 		console.warn('Failed to play score sound:', error)
 	}
@@ -163,7 +169,9 @@ const playErrorSound = () => {
 		audioClone.play().catch((error) => {
 			console.warn('Failed to play audio:', error)
 		})
-		console.log('Error sound played')
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Error sound played')
+		}
 	} catch (error) {
 		console.warn('Failed to play error sound:', error)
 	}
@@ -374,7 +382,9 @@ export default function GamePage() {
 			const success = await initializeAudio()
 			setIsAudioReady(success)
 			if (success) {
-				console.log('Audio ready for score changes')
+				if (process.env.NODE_ENV === 'development') {
+					console.log('Audio ready for score changes')
+				}
 			} else {
 				console.warn('Audio initialization failed')
 			}
@@ -648,12 +658,6 @@ export default function GamePage() {
 		)
 	}
 
-	/* <img
-									src={game?.customization.customLogoUrl}
-									alt='Custom game logo'
-									className='max-h-16 w-auto'
-								/> */
-
 	return (
 		<div className='flex-1 flex flex-col bg-background'>
 			{/* Top Navigation Bar */}
@@ -668,38 +672,18 @@ export default function GamePage() {
 				/>
 			</div>
 			<div className='max-w-4xl mx-auto px-0  text-primary'>
-				{/* <GameNavigationBar
-					game={game}
-					isAnswered={isAnswered}
-					currentQuestionIndex={currentQuestionIndex}
-					questionsLength={questions.length}
-					onNextQuestion={handleNextQuestion}
-				/> */}
-
 				{/* Question Card */}
 				<GamePlayCard
 					currentQuestion={currentQuestion}
 					currentQuestionIndex={currentQuestionIndex}
 					questions={questions}
+					questionsLength={questions.length}
 					selectedAnswer={selectedAnswer}
 					isAnswered={isAnswered}
 					showExplanation={showExplanation}
 					onAnswerSelect={handleAnswerSelect}
 					onNextQuestion={handleNextQuestion}
 				/>
-				{/* <div className='flex items-center justify-center mb-2'>
-					<a
-						href='https://www.naknick.com'
-						target='_blank'
-						rel='noopener noreferrer'
-					>
-						<img
-							src='/assets/logo.png'
-							alt='NaknNick games logo'
-							className='h-32 w-auto'
-						/>
-					</a>
-				</div> */}
 			</div>
 		</div>
 	)

@@ -1,7 +1,14 @@
 import { useRef } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, XCircle, Lightbulb } from 'lucide-react'
+import {
+	CheckCircle,
+	XCircle,
+	Lightbulb,
+	ArrowBigRight,
+	ArrowBigLeft,
+	Hand,
+} from 'lucide-react'
 import type { Question } from '@shared/firebase-types'
 import { useSwipeGesture } from '@/hooks/use-swipe-gesture'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -10,6 +17,7 @@ interface GamePlayCardProps {
 	currentQuestion: Question | undefined
 	currentQuestionIndex: number
 	questions: Question[]
+	questionsLength: number
 	selectedAnswer: number | null
 	isAnswered: boolean
 	showExplanation: boolean
@@ -26,6 +34,7 @@ export function GamePlayCard({
 	showExplanation,
 	onAnswerSelect,
 	onNextQuestion,
+	questionsLength,
 }: GamePlayCardProps) {
 	const isMobile = useIsMobile()
 	const gameCardRef = useRef<HTMLDivElement>(null)
@@ -53,30 +62,14 @@ export function GamePlayCard({
 		return 'bg-background/80 border-primary border-dashed'
 	}
 
-	// Helper function to determine letter badge styling
-	const getLetterBadgeClasses = (index: number) => {
-		if (isAnswered && selectedAnswer === index) {
-			// This is the selected answer
-			return index === currentQuestion?.correctAnswer
-				? 'bg-primary text-primary-foreground' // Correct answer selected
-				: 'bg-destructive text-destructive-foreground' // Wrong answer selected
-		}
-
-		if (isAnswered && index === currentQuestion?.correctAnswer) {
-			// This is the correct answer (but not selected)
-			return 'bg-primary text-primary-foreground'
-		}
-
-		// Default state - not answered or not special case
-		return 'bg-primary/20 text-primary'
-	}
-
 	// Swipe gesture handler for mobile devices
 	useSwipeGesture(gameCardRef, {
 		onSwipeLeft: () => {
 			// Only trigger swipe left if question is answered and on mobile
 			if (isMobile && isAnswered) {
-				console.log('Swipe left detected')
+				if (process.env.NODE_ENV === 'development') {
+					console.log('Swipe left detected')
+				}
 				onNextQuestion()
 			}
 		},
@@ -87,16 +80,33 @@ export function GamePlayCard({
 	return (
 		<Card
 			ref={gameCardRef}
-			//className='game-card !my-4 bg-card animate-slide-up rounded-none md:rounded-2xl shadow-md border-0 md:border-1'
-			className='game-card overflow-hidden mx-2 my-6 bg-card animate-slide-up rounded-2xl shadow-md border-1'
+			className='game-card overflow-hidden mx-2 my-6 bg-card animate-slide-in-right rounded-2xl shadow-md border-1'
 		>
 			<CardContent className='p-0 pb-4 md:p-6'>
 				{/* Question Text */}
 				<div className=''>
-					<div className='bg-gradient-to-r from-primary/20 to-card/10 rounded-none md:rounded-2xl p-4 mb-4'>
+					<div className='bg-gradient-to-r from-primary/20 to-card/10 rounded-none md:rounded-2xl p-4 mb-4 relative'>
 						<h2 className='text-lg md:text-2xl font-bold text-primary leading-relaxed text-center'>
 							{currentQuestion?.questionText}
 						</h2>
+						{isAnswered && (
+							<div className='w-full mt-2 justify-center flex text-primary'>
+								<Hand
+									style={{
+										animationIterationCount: 'infinite',
+										animation: 'swipeAnimation 2s ease-in-out infinite',
+									}}
+									className='h-6 w-6'
+								/>
+							</div>
+						)}
+						{/* {isAnswered && (
+							<Button
+								onClick={onNextQuestion}
+								size='lg'
+								className=' px-4 py-4 absolute rounded-full font-semibold uppercase text-secondary top-0 translate-y-[50%] translate-x-[20px] right-0 '
+							></Button>
+						)} */}
 					</div>
 
 					{/* Answer Options */}
@@ -114,27 +124,26 @@ export function GamePlayCard({
 							>
 								<div className='flex items-center justify-between'>
 									<div className='flex items-center gap-4'>
-										{/* <span
-											className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${getLetterBadgeClasses(index)}`}
-										>
-											{String.fromCharCode(65 + index)}
-										</span> */}
-										<span className='text-base md:text-lg font-medium'>
+										<span className='text-base md:text-xl  font-medium'>
 											{option}
 										</span>
 									</div>
-									{isAnswered &&
-										selectedAnswer === index &&
-										(index === currentQuestion.correctAnswer ? (
-											<CheckCircle className='h-10 w-10 text-primary' />
-										) : (
-											<XCircle className='h-10 w-10 text-destructive' />
-										))}
-									{isAnswered &&
-										selectedAnswer !== index &&
-										index === currentQuestion.correctAnswer && (
-											<CheckCircle className='h-10 w-10 text-primary' />
-										)}
+									<div>
+										{isAnswered &&
+											selectedAnswer === index &&
+											currentQuestion &&
+											(index === currentQuestion.correctAnswer ? (
+												<CheckCircle className='h-10 w-10 text-primary' />
+											) : (
+												<XCircle className='h-10 w-10 text-destructive' />
+											))}
+										{isAnswered &&
+											selectedAnswer !== index &&
+											currentQuestion &&
+											index === currentQuestion.correctAnswer && (
+												<CheckCircle className='h-10 w-10 text-primary' />
+											)}
+									</div>
 								</div>
 							</button>
 						))}
