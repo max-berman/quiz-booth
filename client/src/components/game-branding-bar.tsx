@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { ArrowRight, ExternalLink, ArrowBigRight, Hand } from 'lucide-react'
+import { ArrowRight, ExternalLink, ArrowBigRight, Home } from 'lucide-react'
 import type { Game } from '@shared/firebase-types'
 
 interface GameBrandingBarProps {
@@ -19,6 +19,11 @@ export function GameBrandingBar({
 }: GameBrandingBarProps) {
 	return (
 		<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8 w-full relative'>
+			<a href='/' className='text-sm absolute left-2  bottom-0'>
+				<Button size='sm' variant='ghost' className='px-3 py-0'>
+					<Home className='!h-6 !w-6' />
+				</Button>
+			</a>
 			<div className='flex justify-center p-2 mt-4'>
 				<a
 					href={game.customization?.customLogoLink || 'https://naknick.com'}
@@ -50,7 +55,7 @@ export function GameBrandingBar({
 					<Button
 						onClick={onNextQuestion}
 						size='sm'
-						className='px-4 right-2 py-2 absolute font-semibold text-secondary uppercase justify-self-end self-end bottom-0'
+						className='px-2 right-2 py-2 absolute font-semibold text-secondary uppercase justify-self-end self-end bottom-0'
 					>
 						<ArrowBigRight className='!h-6 !w-6' />
 					</Button>
