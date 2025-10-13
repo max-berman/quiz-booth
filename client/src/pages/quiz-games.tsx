@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Button } from '@/components/ui/button'
 import { PublicGameCard } from '@/components/public-game-card'
+import { GameCardSkeleton } from '@/components/game-card-skeleton'
 import { useQuery } from '@tanstack/react-query'
 import type { Game } from '@shared/firebase-types'
 import {
@@ -29,6 +30,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
+import { logoCache } from '@/lib/logo-cache'
 
 export default function Quizzes() {
 	const [page, setPage] = useState(0)
@@ -55,7 +57,17 @@ export default function Quizzes() {
 				industry: selectedIndustry,
 				categories: selectedCategories,
 			})
-			return result.data as Game[]
+
+			const games = result.data as Game[]
+
+			// Cache logo URLs for all fetched games
+			games.forEach((game) => {
+				if (game.customization?.customLogoUrl) {
+					logoCache.addLogo(game.id, game.customization.customLogoUrl)
+				}
+			})
+
+			return games
 		},
 		staleTime: 5 * 60 * 1000, // 5 minutes
 	})
@@ -321,13 +333,7 @@ export default function Quizzes() {
 
 				{/* Games Grid */}
 				{gamesLoading && page === 0 ? (
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
-						{Array.from({ length: 12 }, (_, i) => (
-							<div key={i} className='animate-pulse'>
-								<div className='bg-muted rounded-lg h-80'></div>
-							</div>
-						))}
-					</div>
+					<GameCardSkeleton count={12} />
 				) : games && games.length > 0 ? (
 					<>
 						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8'>
@@ -337,7 +343,7 @@ export default function Quizzes() {
 									className='animate-slide-up'
 									style={{ animationDelay: `${0.05 * index}s` }}
 								>
-									<PublicGameCard game={game} />
+									<PublicGameCard game={game} showPlayCount={false} />
 								</div>
 							))}
 						</div>

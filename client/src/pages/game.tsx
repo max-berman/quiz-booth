@@ -23,6 +23,7 @@ import {
 	getLockedResults,
 } from '@/lib/first-completion-utils'
 import { loadGameResults } from '@/lib/session-utils'
+import { logoCache } from '@/lib/logo-cache'
 
 // Audio elements for reliable sound playback
 let scoreAudio: HTMLAudioElement | null = null
@@ -32,8 +33,7 @@ let isAudioInitialized = false
 // Audio configuration - easily adjustable volume levels
 const audioConfig = {
 	volume: {
-		score: 0.5, // 5% volume for correct answers
-		//error: 0.05, // 5% volume for wrong answers
+		score: 0.5, // 50% volume for correct answers
 	},
 	// Audio paths for public directory (production-ready)
 	paths: {
@@ -41,6 +41,7 @@ const audioConfig = {
 			mp3: '/assets/audio/ping.mp3',
 			m4a: '/assets/audio/ping.m4a',
 			ogg: '/assets/audio/ping.ogg',
+			wav: '/assets/audio/ping.wav',
 		},
 	},
 }
@@ -55,6 +56,7 @@ const initializeAudio = async (): Promise<boolean> => {
 			{ type: 'mp3', path: audioConfig.paths.score.mp3 },
 			{ type: 'm4a', path: audioConfig.paths.score.m4a },
 			{ type: 'ogg', path: audioConfig.paths.score.ogg },
+			{ type: 'ogg', path: audioConfig.paths.score.wav },
 		]
 
 		// Load score sound
@@ -112,28 +114,6 @@ const playScoreSound = () => {
 		}
 	} catch (error) {
 		console.warn('Failed to play score sound:', error)
-	}
-}
-
-// Play error sound
-const playErrorSound = () => {
-	if (!errorAudio || !isAudioInitialized) {
-		console.warn('Audio not initialized, cannot play sound')
-		return
-	}
-
-	try {
-		// Clone the audio element to allow overlapping plays
-		const audioClone = errorAudio.cloneNode() as HTMLAudioElement
-		audioClone.volume = audioConfig.volume.error // Use config volume
-		audioClone.play().catch((error) => {
-			console.warn('Failed to play audio:', error)
-		})
-		if (process.env.NODE_ENV === 'development') {
-			console.log('Error sound played')
-		}
-	} catch (error) {
-		console.warn('Failed to play error sound:', error)
 	}
 }
 
@@ -252,23 +232,31 @@ export default function GamePage() {
 		? ((currentQuestionIndex + 1) / questions.length) * 100
 		: 0
 
-	// Determine which logo to show - use game data if available, otherwise use default
-	const logoUrl = game?.customization?.customLogoUrl || '/assets/logo.png'
-	const logoAlt = game?.customization?.customLogoUrl
-		? 'Custom game logo'
-		: 'NaknNick games logo'
+	// Determine which logo to show - use cached logo first, then game data, otherwise use default
+	const cachedLogoUrl = logoCache.getLogo(id!)
+	const logoUrl =
+		cachedLogoUrl || game?.customization?.customLogoUrl || '/assets/logo.png'
+	const logoAlt =
+		cachedLogoUrl || game?.customization?.customLogoUrl
+			? 'Custom game logo'
+			: 'NaknNick games logo'
 
-	// Apply customization styles
+	// Apply customization styles and cache logo
 	useEffect(() => {
 		if (game?.customization) {
 			applyGameCustomization(game.customization)
+
+			// Cache the logo URL if it exists
+			if (game.customization.customLogoUrl) {
+				logoCache.addLogo(id!, game.customization.customLogoUrl)
+			}
 		}
 
 		// Cleanup function to reset styles
 		return () => {
 			cleanupGameCustomization()
 		}
-	}, [game?.customization])
+	}, [game?.customization, id])
 
 	// Track game start when game data is loaded
 	useEffect(() => {
@@ -392,12 +380,7 @@ export default function GamePage() {
 			newWrongAnswers = wrongAnswers + 1
 			newStreak = 0
 
-			// Play error sound for wrong answers
-			if (isAudioReady) {
-				playErrorSound()
-			} else {
-				console.log('Audio not ready yet, skipping error sound')
-			}
+			// Play error sound here for wrong answers
 
 			// Vibration feedback for wrong answers
 			if ('vibrate' in navigator) {
@@ -631,6 +614,29 @@ export default function GamePage() {
 					score={score}
 				/>
 			</div>
+
+			<GameNavigationBar
+				game={game}
+				isAnswered={isAnswered}
+				currentQuestionIndex={currentQuestionIndex}
+				questionsLength={questions.length}
+				onNextQuestion={handleNextQuestion}
+			/>
+
+			{/* <div className='flex items-center justify-center mt-4'>
+			
+				<a
+					href='https://www.naknick.com'
+					target='_blank'
+					rel='noopener noreferrer'
+				>
+					<img
+						src='/assets/logo.png'
+						alt='NaknNick games logo'
+						className='h-24 w-auto'
+					/>
+				</a>
+			</div> */}
 			<div className='max-w-4xl mx-auto px-0  text-primary'>
 				{/* Question Card */}
 				<GamePlayCard

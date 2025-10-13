@@ -290,8 +290,8 @@ export default function Results() {
 				<Card className='shadow-sm mb-4 border-border'>
 					<CardContent className='p-4 md:p-8 text-center'>
 						<div className='mb-4'>
-							<div className=' w-16 h-16 md:w-20 md:h-20 border-primary border-2 bg-background  text-4xl rounded-full flex items-center justify-center mx-auto mb-4'>
-								<Trophy className='h-8 w-8 md:h-12 md:w-12 text-primary ' />
+							<div className=' w-16 h-16 md:w-20 md:h-20 border-primary border-2 bg-primary/80  text-4xl rounded-full flex items-center justify-center mx-auto mb-4'>
+								<Trophy className='h-8 w-8 md:h-12 md:w-12 text-secondary ' />
 							</div>
 							<h3 className='text-2xl md:text-3xl font-bold text-dark mb-2 text-primary'>
 								Game Complete!
@@ -324,7 +324,7 @@ export default function Results() {
 								)}
 
 								<ul className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-2'>
-									<li className='p-2 md:p-6 rounded-xl bg-primary/30 relative'>
+									<li className='p-2 md:p-6 rounded-xl border-2 border-primary bg-primary/30 relative'>
 										{isScoreLocked && (
 											<div className='absolute -top-2 -right-2 bg-amber-500 text-white rounded-full p-1'>
 												<Lock className='h-4 w-4' />
@@ -337,7 +337,7 @@ export default function Results() {
 											Final Score
 										</div>
 									</li>
-									<li className='p-2 md:p-6 rounded-xl bg-primary/25'>
+									<li className='p-2 md:p-6 rounded-xl border-2 border-primary bg-primary/25'>
 										<div className='text-xl md:text-3xl font-bold text-primary mb-2'>
 											{results.correctAnswers}/{results.totalQuestions}
 										</div>
@@ -345,7 +345,7 @@ export default function Results() {
 											Correct Answers
 										</div>
 									</li>
-									<li className='p-2 md:p-6 rounded-xl bg-primary/20'>
+									<li className='p-2 md:p-6 rounded-xl border-2 border-primary bg-primary/20'>
 										<div className='text-xl md:text-3xl font-bold text-primary mb-2'>
 											{results.streak}
 										</div>
@@ -353,7 +353,7 @@ export default function Results() {
 											Final Streak
 										</div>
 									</li>
-									<li className='p-2 md:p-6 rounded-xl bg-primary/15'>
+									<li className='p-2 md:p-6 rounded-xl border-2 border-primary bg-primary/15'>
 										<div className='text-xl md:text-3xl font-bold text-primary mb-2'>
 											{formatTime(results.timeSpent)}
 										</div>
@@ -368,7 +368,7 @@ export default function Results() {
 									!hasAlreadySubmitted &&
 									results.score > 0 &&
 									!isScoreLocked && (
-										<div className='bg-accent/10 p-4 rounded-xl mb-6'>
+										<div className='bg-accent/10 py-4 rounded-xl mb-6'>
 											<h3 className='text-base md:text-lg font-semibold text-primary mb-4'>
 												Save Your Score to Leaderboard
 											</h3>

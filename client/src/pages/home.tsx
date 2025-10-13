@@ -21,9 +21,11 @@ import {
 import { ShareEmbedModal } from '@/components/share-embed-modal'
 import { useAuth } from '@/contexts/auth-context'
 import { PublicGameCard } from '@/components/public-game-card'
+import { GameCardSkeleton } from '@/components/game-card-skeleton'
 import { useQuery } from '@tanstack/react-query'
 import type { Game } from '@shared/firebase-types'
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import { logoCache } from '@/lib/logo-cache'
 
 export default function Home() {
 	const { isAuthenticated, user, loading } = useAuth()
@@ -35,7 +37,17 @@ export default function Home() {
 			const functions = getFunctions()
 			const getPublicGames = httpsCallable(functions, 'getPublicGames')
 			const result = await getPublicGames({ limit: 3 })
-			return result.data as Game[]
+
+			const games = result.data as Game[]
+
+			// Cache logo URLs for all fetched games
+			games.forEach((game) => {
+				if (game.customization?.customLogoUrl) {
+					logoCache.addLogo(game.id, game.customization.customLogoUrl)
+				}
+			})
+
+			return games
 		},
 		staleTime: 5 * 60 * 1000, // 5 minutes
 	})
@@ -215,23 +227,8 @@ export default function Home() {
 
 						{/* Games Grid */}
 						{gamesLoading ? (
-							<div className='grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto'>
-								{[1, 2, 3].map((i) => (
-									<Card key={i} className='animate-pulse'>
-										<CardContent className='p-6'>
-											<div className='space-y-3'>
-												<div className='h-4 bg-muted rounded w-3/4 mx-auto'></div>
-												<div className='h-3 bg-muted rounded w-1/2 mx-auto'></div>
-												<div className='space-y-2'>
-													<div className='h-3 bg-muted rounded'></div>
-													<div className='h-3 bg-muted rounded'></div>
-													<div className='h-3 bg-muted rounded w-2/3'></div>
-												</div>
-												<div className='h-10 bg-muted rounded mt-4'></div>
-											</div>
-										</CardContent>
-									</Card>
-								))}
+							<div className='max-w-5xl mx-auto'>
+								<GameCardSkeleton count={3} />
 							</div>
 						) : recentGames && recentGames.length > 0 ? (
 							<>
@@ -242,7 +239,7 @@ export default function Home() {
 											className='animate-slide-up'
 											style={{ animationDelay: `${0.1 * index}s` }}
 										>
-											<PublicGameCard game={game} />
+											<PublicGameCard game={game} showPlayCount={false} />
 										</div>
 									))}
 								</div>

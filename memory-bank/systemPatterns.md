@@ -162,6 +162,7 @@ interface Player {
 - **Games**: 2 minutes TTL
 - **Questions**: 1 minute TTL
 - **Leaderboards**: 30 seconds TTL
+- **Logo URLs**: 24-hour TTL with localStorage persistence
 - Cache invalidation on data modifications
 
 ## API Consistency Pattern

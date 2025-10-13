@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ExternalLink } from 'lucide-react'
 import type { Game } from '@shared/firebase-types'
 
 interface GameNavigationBarProps {
@@ -18,65 +18,33 @@ export function GameNavigationBar({
 	onNextQuestion,
 }: GameNavigationBarProps) {
 	return (
-		<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8'>
-			<ul className='flex items-center justify-between h-20'>
-				<li className='w-1/4 flex justify-start'>
-					<a
-						href='/'
-						rel='noopener noreferrer'
-						className='flex items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
-					>
+		<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8 w-full '>
+			<div className='flex justify-center p-2 mt-4'>
+				<a
+					href={game.customization?.customLogoLink || 'https://naknick.com'}
+					target='_blank'
+					rel='noopener noreferrer'
+				>
+					{game.customization?.customLogoUrl ? (
 						<img
-							src='/assets/logo_.svg'
-							alt='QuizBooth.games logo'
-							className='h-8 w-auto'
+							src={game.customization.customLogoUrl}
+							alt='Custom game logo'
+							className='max-h-12 '
 						/>
-						<span className='hidden lg:block hover:scale-[1.02] transition-all font-medium'>
-							QuizBooth
-						</span>
-					</a>
-				</li>
-
-				<li className='w-2/4 flex justify-center'>
-					<a
-						href={game.customization?.customLogoLink || '/'}
-						target='_blank'
-						rel='noopener noreferrer'
-					>
-						{game.customization?.customLogoUrl ? (
-							<img
-								src={game.customization.customLogoUrl}
-								alt='Custom game logo'
-								className='max-h-16 w-auto'
-							/>
-						) : (
+					) : (
+						<div className='flex flex-col items-center font-medium'>
 							<img
 								src='/assets/naknick-logo.png'
 								alt='QuizBooth.games logo'
-								className='max-h-16 w-auto'
+								className='max-h-12 w-auto'
 							/>
-						)}
-					</a>
-				</li>
-
-				<li className='w-1/4 flex justify-end'>
-					{isAnswered && (
-						<Button
-							size='sm'
-							onClick={onNextQuestion}
-							className='flex items-center gap-2 !text-secondary'
-						>
-							{currentQuestionIndex < questionsLength - 1 ? (
-								<>
-									Next <ArrowRight className='h-4 w-4' />
-								</>
-							) : (
-								'Finish'
-							)}
-						</Button>
+							<span className='text-xs flex items-center mt-2'>
+								Build by Naknick.com <ExternalLink className='ml-1 h-3 w-3' />
+							</span>
+						</div>
 					)}
-				</li>
-			</ul>
+				</a>
+			</div>
 		</div>
 	)
 }

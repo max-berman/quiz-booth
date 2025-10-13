@@ -13,6 +13,7 @@ import type { Question } from '@shared/firebase-types'
 import { useSwipeGesture } from '@/hooks/use-swipe-gesture'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
+import { getResizeHandleElementIndex } from 'react-resizable-panels'
 
 interface GamePlayCardProps {
 	currentQuestion: Question | undefined
@@ -52,16 +53,13 @@ export function GamePlayCard({
 	}, [currentQuestionIndex, currentQuestion])
 
 	// Combine animation classes
-	const animationClasses = cn(
-		'game-card overflow-hidden mx-2 my-6 bg-card rounded-2xl shadow-md border-1 ',
-		isNewQuestion && 'animate-slide-in-right'
-	)
+	const animationClasses = cn('', isNewQuestion && 'animate-slide-in-right')
 
 	// Helper function to determine button styling based on answer state
 	const getButtonClasses = (index: number) => {
 		if (!isAnswered) {
 			// Question not answered yet - interactive state
-			return 'border-primary hover:border-primary bg-background border-dashed hover:scale-[1.02]'
+			return `border-primary hover:border-primary bg-background hover:scale-[1.02] `
 		}
 
 		if (selectedAnswer === index) {
@@ -76,28 +74,27 @@ export function GamePlayCard({
 			return 'font-bold bg-primary/20 border-primary text-primary'
 		}
 
-		// if (index % 2 === 0) {
-		// 	// Apply random angle to button
-		// 	const angle = Math.floor(Math.random() * 10) - 5
-		// 	return `rotate-${angle}`
-		// 	return ''
-		// }
-
 		// Default state - answered but not selected and not correct
-		return 'bg-background/80 border-primary border-dashed'
+		return 'bg-background/80 border-primary '
 	}
 
-	const getAngle = (index: number) => {
-		if (isMobile)
-			if (index % 2 === 0) {
-				// Apply random negative angle between 1 and 3 degrees
-				const angle = Math.floor(Math.random() * 3) + 1
-				return `-rotate-${angle}`
-			} else {
-				// Apply random positive angle between 0 and 2 degrees
-				const angle = Math.floor(Math.random() * 3)
-				return `rotate-${angle}`
+	const getAngle = () => {
+		if (isMobile && isAnswered) {
+			// Apply random angle between -2 and 2 degrees
+			const angle = Math.floor(Math.random() * 5) - 2 // Generates -2, -1, 0, 1, 2
+
+			// Map angle values to Tailwind rotation classes
+			const rotationClasses = {
+				'-2': '-rotate-2',
+				'-1': '-rotate-1',
+				'0': '',
+				'1': 'rotate-1',
+				'2': 'rotate-2',
 			}
+
+			return rotationClasses[angle.toString() as keyof typeof rotationClasses]
+		}
+		return ''
 	}
 
 	// Swipe gesture handler for mobile devices
@@ -116,7 +113,10 @@ export function GamePlayCard({
 	})
 
 	return (
-		<Card ref={gameCardRef} className={animationClasses}>
+		<Card
+			ref={gameCardRef}
+			className={`${animationClasses} game-card overflow-hidden mx-2 my-2 bg-card rounded-2xl shadow-md border-1 `}
+		>
 			<CardContent className='p-0 pb-4 md:p-6'>
 				{/* Question Text */}
 				<div className=''>
@@ -138,7 +138,7 @@ export function GamePlayCard({
 								<Button
 									onClick={onNextQuestion}
 									size='sm'
-									className='px-4 py-2 animate-jiggle font-semibold text-secondary uppercase justify-self-end self-end'
+									className='-rotate-0 px-4 py-2 animate-jiggle font-semibold text-secondary uppercase justify-self-end self-end'
 								>
 									Next
 									{/* Next <ArrowBigRight className='!h-6 !w-6' /> */}
@@ -150,17 +150,17 @@ export function GamePlayCard({
 							<button
 								key={index}
 								type='button'
-								className={`w-full p-3  lg:p-4 md:p-5 rounded-xl border-2 text-left transition-all duration-200 ${getButtonClasses(
+								className={`w-full p-3 lg:p-4 md:p-5 rounded-xl border-2 text-left transition-all duration-300 ${getButtonClasses(
 									index
-								)} ${getAngle(index)}`}
+								)} ${getAngle()}`}
 								onClick={() => onAnswerSelect(index)}
 								disabled={isAnswered}
 								data-testid={`button-answer-${String.fromCharCode(65 + index)}`}
 							>
 								<div className='flex items-center justify-between'>
-									<div className='flex items-center  w-1/5'>
+									<div className='flex items-center mr-4 w-auto'>
 										<span
-											className={`w-10 h-10 rounded-full border-2  flex items-center justify-center font-bold text-sm ${
+											className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2  flex items-center justify-center font-bold text-sm ${
 												isAnswered &&
 												selectedAnswer === index &&
 												currentQuestion &&
@@ -177,22 +177,25 @@ export function GamePlayCard({
 											{option}
 										</span>
 									</div>
-									{isAnswered && (
-										<div className=' w-1/5  flex justify-end'>
-											{selectedAnswer === index &&
-												currentQuestion &&
-												(index === currentQuestion.correctAnswer ? (
-													<CheckCircle className='h-10 w-10 text-primary' />
-												) : (
-													<XCircle className='h-10 w-10 text-destructive' />
-												))}
-											{selectedAnswer !== index &&
-												currentQuestion &&
-												index === currentQuestion.correctAnswer && (
-													<CheckCircle className='h-10 w-10 text-primary' />
-												)}
-										</div>
-									)}
+
+									<div className='w-1/5  flex justify-end'>
+										{isAnswered && (
+											<>
+												{selectedAnswer === index &&
+													currentQuestion &&
+													(index === currentQuestion.correctAnswer ? (
+														<CheckCircle className='h-8 w-8 lg:h-10 lg:w-10 text-primary' />
+													) : (
+														<XCircle className='h-8 w-8 lg:h-10 lg:w-10 text-destructive' />
+													))}
+												{selectedAnswer !== index &&
+													currentQuestion &&
+													index === currentQuestion.correctAnswer && (
+														<CheckCircle className='h-8 w-8 lg:h-10 lg:w-10 text-primary' />
+													)}
+											</>
+										)}
+									</div>
 								</div>
 							</button>
 						))}
@@ -200,14 +203,16 @@ export function GamePlayCard({
 
 					{/* Explanation */}
 					{showExplanation && currentQuestion?.explanation && (
-						<div className='mt-6 mx-4 md:mx-0 p-6 bg-background/70 rounded-2xl shadow-md animate-slide-up'>
-							<div className='flex items-center gap-3 mb-4'>
-								<div className='w-10 h-10 bg-primary rounded-full flex items-center justify-center'>
-									<Lightbulb className='h-6 w-6 text-primary-foreground' />
+						<div className='mt-6 mx-2 md:mx-0 lg:p-6 p-4 bg-background/70 rounded-2xl shadow-md animate-slide-up'>
+							<div className='flex items-center gap-3 mb-2 lg:mb-4'>
+								<div className='h-8 w-8 lg:w-10 lg:h-10 bg-primary rounded-full flex items-center justify-center'>
+									<Lightbulb className='h-6 w-6 lg:h-8 lg:w-8 text-primary-foreground animate-pulse' />
 								</div>
-								<h3 className='font-bold text-lg text-'>Explanation</h3>
+								<h3 className='font-medium text-base lg:text-lg '>
+									Explanation
+								</h3>
 							</div>
-							<p className='text-foreground leading-relaxed text-base'>
+							<p className='text-foreground leading-relaxed text-sm lg:text-xl'>
 								{currentQuestion.explanation}
 							</p>
 						</div>

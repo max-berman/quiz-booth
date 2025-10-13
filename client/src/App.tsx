@@ -1,5 +1,5 @@
 import { Switch, Route, useLocation } from 'wouter'
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 import { queryClient } from './lib/queryClient'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -12,6 +12,7 @@ import { LoadingSpinner } from '@/components/loading-spinner'
 import { PWARegistration } from '@/components/pwa-registration'
 import { CacheDebug } from '@/components/cache-debug'
 import { shouldShowHeader, shouldShowFooter } from '@/config/page-visibility'
+import { logoCache } from '@/lib/logo-cache'
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import('@/pages/home'))
@@ -67,6 +68,11 @@ function App() {
 	const showHeader = shouldShowHeader(location)
 	const showFooter = shouldShowFooter(location)
 
+	// Initialize logo cache on app startup
+	useEffect(() => {
+		logoCache.loadFromStorage()
+	}, [])
+
 	return (
 		<HelmetProvider>
 			<QueryClientProvider client={queryClient}>
@@ -81,7 +87,8 @@ function App() {
 						<Toaster />
 						{/* Temporarily disabled PWA to test timing issues */}
 						{/* <PWARegistration /> */}
-						{/* <CacheDebug /> */}
+						{process.env.NODE_ENV === 'development' &&
+							window.location.hostname === 'localhost' && <CacheDebug />}
 					</AuthProvider>
 				</TooltipProvider>
 			</QueryClientProvider>

@@ -28,9 +28,7 @@ export function GameDetails({
 		data: playCount,
 		isLoading: playCountLoading,
 		error: playCountError,
-	} = showPlayCount
-		? usePlayCount(game.id)
-		: { data: undefined, isLoading: false, error: undefined }
+	} = usePlayCount(game.id, showPlayCount)
 
 	const companyInfo = formatCompanyName(game.companyName)
 

@@ -7,9 +7,13 @@ import { GameDetails } from './game-details'
 
 interface PublicGameCardProps {
 	game: Game
+	showPlayCount?: boolean
 }
 
-export function PublicGameCard({ game }: PublicGameCardProps) {
+export function PublicGameCard({
+	game,
+	showPlayCount = false,
+}: PublicGameCardProps) {
 	return (
 		<Card className='hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-2 h-full flex flex-col'>
 			<GameCardHeader game={game} />
@@ -26,7 +30,7 @@ export function PublicGameCard({ game }: PublicGameCardProps) {
 			<CardContent className='space-y-3 px-4 pb-4 flex flex-col h-full justify-between'>
 				<GameDetails
 					game={game}
-					showPlayCount={true}
+					showPlayCount={showPlayCount}
 					showQuestionCount={true}
 					showModifiedDate={false}
 				/>

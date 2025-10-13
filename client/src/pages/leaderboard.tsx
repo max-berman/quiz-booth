@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Trophy, Home, Users } from 'lucide-react'
+import { Trophy, Home, Users, ExternalLink } from 'lucide-react'
 import { Link } from 'wouter'
 import type { Player, Game } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
@@ -103,65 +103,69 @@ export default function Leaderboard() {
 			{/* Top Navigation Bar - Same as game page */}
 			<div className='sticky top-0 z-50 bg-background/80 backdrop-blur-sm shadow-md'>
 				<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8'>
-					<ul className='flex items-center justify-between h-20'>
-						<li className='w-1/4 flex justify-start'>
+					<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8 w-full '>
+						<div className='flex justify-center p-2 '>
 							<a
-								href='/'
+								href={
+									game?.customization?.customLogoLink || 'https://naknick.com'
+								}
 								target='_blank'
 								rel='noopener noreferrer'
-								className='flex items-center gap-2 text-xl text-foreground hover:text-secondary-foreground'
 							>
-								<img
-									src='/assets/logo_.svg'
-									alt='QuizBooth.games logo'
-									className='h-8 w-auto'
-								/>
-								<span className='hidden lg:block hover:scale-[1.02] transition-all font-medium'>
-									QuizBooth
-								</span>
+								{game?.customization?.customLogoUrl ? (
+									<img
+										src={game?.customization.customLogoUrl}
+										alt='Custom game logo'
+										className='max-h-12 '
+									/>
+								) : (
+									<div className='flex flex-col items-center font-medium'>
+										<img
+											src='/assets/naknick-logo.png'
+											alt='QuizBooth.games logo'
+											className='max-h-12 w-auto'
+										/>
+										<span className='text-xs flex items-center mt-2'>
+											Build by Naknick.com{' '}
+											<ExternalLink className='ml-1 h-3 w-3' />
+										</span>
+									</div>
+								)}
 							</a>
-						</li>
-
-						<li className='w-2/4 flex justify-center'>
-							<a href='/' target='_blank' rel='noopener noreferrer'>
-								<img src={logoUrl} alt={logoAlt} className='max-h-16 w-auto' />
-							</a>
-						</li>
-
-						<li className='w-1/4 flex justify-end'>
-							{/* Empty space to maintain layout balance */}
-						</li>
-					</ul>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div className='max-w-4xl mx-auto px-2 sm:px-4 lg:px-8 py-4'>
-				<Card className='shadow-xl overflow-hidden my-8'>
-					<div className='bg-primary p-4 text-primary-foreground'>
-						<div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
-							<div className='text-center sm:text-left'>
-								<h3 className='text-xl sm:text-2xl font-bold mb-2 flex items-center justify-center sm:justify-start'>
-									<Trophy className='mr-2 h-5 w-5 sm:h-6 sm:w-6' />
-									{isGameSpecific
-										? `${game?.companyName} Leaderboard`
-										: 'Global Leaderboard'}
+				<div className='text-center self-start justify-self-start'>
+					<Link href='/'>
+						<Button className='px-6 py-3'>
+							<Home className='mr-2 h-4 w-4' />
+							Home
+						</Button>
+					</Link>
+				</div>
+
+				<Card className='shadow-sm overflow-hidden my-4'>
+					<div className='bg-card p-1 md:p-4 text-primary'>
+						<div className='flex flex-col sm:flex-row items-center justify-between lg:gap-4'>
+							<Trophy className='m-2 h-6 w-6 self-center' />
+							<div className='flex justify-center'>
+								<h3 className='text-base lg:text-2xl font-medium '>
+									{isGameSpecific ? `${game?.gameTitle}` : 'Global Leaderboard'}
 								</h3>
-								{isGameSpecific && (
-									<p className='text-sm opacity-90 hidden sm:block'>
-										Top performers in this trivia challenge
-									</p>
-								)}
 							</div>
-							<div className='text-center sm:text-right'>
-								<div className='text-2xl sm:text-3xl font-bold'>
-									{leaderboard?.length || 0}
-								</div>
-								<div className='text-xs sm:text-sm opacity-90 flex items-center justify-center sm:justify-end'>
-									<Users className='mr-1 h-3 w-3 sm:h-4 sm:w-4' />
+							<div className='items-center justify-center flex text-base lg:text-2xl font-medium'>
+								<div className='flex items-center mr-2'>
+									<Users className='mr-1 h-4 w-4' />
 									Total Players
 								</div>
+								<div className='text-2xl'>{leaderboard?.length || 0}</div>
 							</div>
 						</div>
 					</div>
+
+					<Separator />
 
 					{/* Prize Information (only for game-specific leaderboard) */}
 					{isGameSpecific &&
@@ -248,17 +252,17 @@ export default function Leaderboard() {
 						)}
 					</CardContent>
 
-					<Separator />
+					{/* <Separator /> */}
 
-					<div className=' p-4 text-center'>
+					<div className=' text-center'>
 						<div className='flex sm:flex-row flex-col gap-4 justify-center'>
-							<Link href='/'>
+							{/* <Link href='/'>
 								<Button className='px-6 py-3'>
 									<Home className='mr-2 h-4 w-4' />
 									Home
 								</Button>
 							</Link>
-							{/* {isGameSpecific && (
+							{isGameSpecific && (
 								<Link href='/leaderboard'>
 									<Button variant='outline' className='px-6 py-3'>
 										<Trophy className='mr-2 h-4 w-4' />
@@ -269,19 +273,6 @@ export default function Leaderboard() {
 						</div>
 					</div>
 				</Card>
-				<div className='flex items-center justify-center mb-2'>
-					<a
-						href='https://www.naknick.com'
-						target='_blank'
-						rel='noopener noreferrer'
-					>
-						<img
-							src='/assets/logo.png'
-							alt='NaknNick games logo'
-							className='h-32 w-auto'
-						/>
-					</a>
-				</div>
 			</div>
 		</div>
 	)

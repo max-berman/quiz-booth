@@ -1,4 +1,4 @@
-import { ExternalLink, Link } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import { useLocation } from 'wouter'
 
 export function Footer() {
