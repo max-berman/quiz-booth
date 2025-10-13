@@ -90,9 +90,7 @@ export function GameStatsBar({
 			</div>
 			<div className='text-center p-2 h-full mr-1'>
 				<div className='text-primary capitalize'>
-					<span className={`block ${isAnimating ? 'animate-ping' : ''}`}>
-						Score{' '}
-					</span>
+					<span>Score </span>
 
 					<strong
 						key={animationKey}

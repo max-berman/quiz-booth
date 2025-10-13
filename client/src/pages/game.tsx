@@ -32,22 +32,15 @@ let isAudioInitialized = false
 // Audio configuration - easily adjustable volume levels
 const audioConfig = {
 	volume: {
-		score: 0.7, // 50% volume for correct answers
-		error: 0.1, // 40% volume for wrong answers
+		score: 0.5, // 5% volume for correct answers
+		//error: 0.05, // 5% volume for wrong answers
 	},
 	// Audio paths for public directory (production-ready)
 	paths: {
 		score: {
-			mp3: '/assets/audio/output.mp3',
-			m4a: '/assets/audio/output.m4a',
-			ogg: '/assets/audio/output.ogg',
-			wav: '/assets/audio/score_01.wav',
-		},
-		error: {
-			mp3: '/assets/audio/error_01.mp3',
-			m4a: '/assets/audio/error_01.m4a',
-			ogg: '/assets/audio/error_01.ogg',
-			wav: '/assets/audio/error_01.wav',
+			mp3: '/assets/audio/ping.mp3',
+			m4a: '/assets/audio/ping.m4a',
+			ogg: '/assets/audio/ping.ogg',
 		},
 	},
 }
@@ -62,15 +55,6 @@ const initializeAudio = async (): Promise<boolean> => {
 			{ type: 'mp3', path: audioConfig.paths.score.mp3 },
 			{ type: 'm4a', path: audioConfig.paths.score.m4a },
 			{ type: 'ogg', path: audioConfig.paths.score.ogg },
-			{ type: 'wav', path: audioConfig.paths.score.wav },
-		]
-
-		// Try different audio formats in order of preference for error sound
-		const errorFormats = [
-			{ type: 'mp3', path: audioConfig.paths.error.mp3 },
-			{ type: 'm4a', path: audioConfig.paths.error.m4a },
-			{ type: 'ogg', path: audioConfig.paths.error.ogg },
-			{ type: 'wav', path: audioConfig.paths.error.wav },
 		]
 
 		// Load score sound
@@ -93,30 +77,6 @@ const initializeAudio = async (): Promise<boolean> => {
 				break
 			} catch (formatError) {
 				console.log(`Failed to load score audio format ${type}:`, formatError)
-				continue
-			}
-		}
-
-		// Load error sound
-		for (const { type, path } of errorFormats) {
-			try {
-				errorAudio = new Audio(path)
-
-				// Test if audio can be loaded
-				await new Promise((resolve, reject) => {
-					if (!errorAudio) return reject(new Error('Audio element not created'))
-
-					errorAudio.addEventListener('canplaythrough', resolve)
-					errorAudio.addEventListener('error', reject)
-					errorAudio.load()
-				})
-
-				if (process.env.NODE_ENV === 'development') {
-					console.log(`Error audio loaded successfully: ${type}`)
-				}
-				break
-			} catch (formatError) {
-				console.log(`Failed to load error audio format ${type}:`, formatError)
 				continue
 			}
 		}

@@ -1,0 +1,114 @@
+/* Animation keyframes and utility classes for QuizBooth */
+
+/* Simple animations */
+@keyframes slide-up {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Swipe animation for hand icon */
+@keyframes swipe {
+	0% {
+		transform: translateX(40px);
+		opacity: 0;
+	}
+	20% {
+		opacity: 1;
+	}
+	80% {
+		opacity: 1;
+	}
+	100% {
+		transform: translateX(-40px);
+		opacity: 0;
+	}
+}
+
+/* New question slide-in animation */
+@keyframes slide-in-right {
+	from {
+		opacity: 0;
+		transform: translateX(40px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes jelly {
+	0% {
+		transform: scale(1, 1);
+	}
+	20% {
+		transform: scale(1.25, 0.75);
+	}
+	40% {
+		transform: scale(0.75, 1.25);
+	}
+	60% {
+		transform: scale(1.15, 0.85);
+	}
+	75% {
+		transform: scale(0.95, 1.05);
+	}
+	85% {
+		transform: scale(1.05, 0.95);
+	}
+	92% {
+		transform: scale(1, 1.02);
+	}
+	100% {
+		transform: scale(1, 1);
+	}
+}
+
+@keyframes jiggle {
+	0% {
+		transform: rotate(-3deg);
+	}
+	50% {
+		transform: rotate(3deg);
+	}
+	100% {
+		transform: rotate(-3deg);
+	}
+}
+
+.animate-slide-up {
+	animation: slide-up 0.3s ease-out;
+	animation-fill-mode: both;
+}
+
+.animate-slide-in-right {
+	animation: slide-in-right 0.4s ease-out;
+	animation-fill-mode: both;
+}
+
+/* Prevent initial flash before animations start */
+.animate-slide-up {
+	opacity: 0;
+	transform: translateY(20px);
+}
+
+.animate-slide-in-right {
+	opacity: 0;
+	transform: translateX(30px);
+}
+
+.animate-jelly {
+	animation: jelly 1s ease-out forwards;
+}
+.animate-swipe {
+	animation: swipe 2s ease-in-out infinite;
+}
+.animate-jiggle {
+	animation: jiggle 0.5s ease-in-out infinite;
+}

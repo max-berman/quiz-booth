@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,6 +12,7 @@ import {
 import type { Question } from '@shared/firebase-types'
 import { useSwipeGesture } from '@/hooks/use-swipe-gesture'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
 
 interface GamePlayCardProps {
 	currentQuestion: Question | undefined
@@ -38,6 +39,23 @@ export function GamePlayCard({
 }: GamePlayCardProps) {
 	const isMobile = useIsMobile()
 	const gameCardRef = useRef<HTMLDivElement>(null)
+	const [isNewQuestion, setIsNewQuestion] = useState(false)
+
+	// Track when a new question appears to trigger animation
+	useEffect(() => {
+		// Only trigger animation if we have a valid question and it's not the first question
+		if (currentQuestion && currentQuestionIndex > 0) {
+			setIsNewQuestion(true)
+			const timer = setTimeout(() => setIsNewQuestion(false), 500)
+			return () => clearTimeout(timer)
+		}
+	}, [currentQuestionIndex, currentQuestion])
+
+	// Combine animation classes
+	const animationClasses = cn(
+		'game-card overflow-hidden mx-2 my-6 bg-card rounded-2xl shadow-md border-1 ',
+		isNewQuestion && 'animate-slide-in-right'
+	)
 
 	// Helper function to determine button styling based on answer state
 	const getButtonClasses = (index: number) => {
@@ -55,11 +73,31 @@ export function GamePlayCard({
 
 		if (index === currentQuestion?.correctAnswer) {
 			// This is the correct answer (but not selected by user)
-			return 'font-bold bg-primary/20 border-primary text-primaryed'
+			return 'font-bold bg-primary/20 border-primary text-primary'
 		}
+
+		// if (index % 2 === 0) {
+		// 	// Apply random angle to button
+		// 	const angle = Math.floor(Math.random() * 10) - 5
+		// 	return `rotate-${angle}`
+		// 	return ''
+		// }
 
 		// Default state - answered but not selected and not correct
 		return 'bg-background/80 border-primary border-dashed'
+	}
+
+	const getAngle = (index: number) => {
+		if (isMobile)
+			if (index % 2 === 0) {
+				// Apply random negative angle between 1 and 3 degrees
+				const angle = Math.floor(Math.random() * 3) + 1
+				return `-rotate-${angle}`
+			} else {
+				// Apply random positive angle between 0 and 2 degrees
+				const angle = Math.floor(Math.random() * 3)
+				return `rotate-${angle}`
+			}
 	}
 
 	// Swipe gesture handler for mobile devices
@@ -78,72 +116,83 @@ export function GamePlayCard({
 	})
 
 	return (
-		<Card
-			ref={gameCardRef}
-			className='game-card overflow-hidden mx-2 my-6 bg-card animate-slide-in-right rounded-2xl shadow-md border-1'
-		>
+		<Card ref={gameCardRef} className={animationClasses}>
 			<CardContent className='p-0 pb-4 md:p-6'>
 				{/* Question Text */}
 				<div className=''>
-					<div className='bg-gradient-to-r from-primary/20 to-card/10 rounded-none md:rounded-2xl p-4 mb-4 relative'>
-						<h2 className='text-lg md:text-2xl font-bold text-primary leading-relaxed text-center'>
+					<div className='bg-gradient-to-r from-primary/20 to-card/10 rounded-none md:rounded-2xl p-4 mb-4 '>
+						<h2 className='text-lg md:text-2xl font-medium lg:font-bold text-primary leading-6 lg:leading-relaxed '>
 							{currentQuestion?.questionText}
 						</h2>
-						{isAnswered && (
-							<div className='w-full mt-2 justify-center flex text-primary'>
-								<Hand
-									style={{
-										animationIterationCount: 'infinite',
-										animation: 'swipeAnimation 2s ease-in-out infinite',
-									}}
-									className='h-6 w-6'
-								/>
-							</div>
-						)}
-						{/* {isAnswered && (
-							<Button
-								onClick={onNextQuestion}
-								size='lg'
-								className=' px-4 py-4 absolute rounded-full font-semibold uppercase text-secondary top-0 translate-y-[50%] translate-x-[20px] right-0 '
-							></Button>
-						)} */}
 					</div>
 
 					{/* Answer Options */}
-					<div className='space-y-4 px-4 md:px-0'>
+					<div className='space-y-4 px-2 lg:px-4 md:px-0'>
+						{isAnswered && isMobile && (
+							<div className='mt-2 justify-end text-primary items-center flex animate-slide-up'>
+								<div className='flex-col flex mr-4 items-center '>
+									<span className='text-xs '>Swipe to next question</span>
+									<Hand className='h-6 w-6 animate-swipe ' />
+								</div>
+
+								<Button
+									onClick={onNextQuestion}
+									size='sm'
+									className='px-4 py-2 animate-jiggle font-semibold text-secondary uppercase justify-self-end self-end'
+								>
+									Next
+									{/* Next <ArrowBigRight className='!h-6 !w-6' /> */}
+								</Button>
+							</div>
+						)}
+
 						{currentQuestion?.options.map((option, index) => (
 							<button
 								key={index}
 								type='button'
-								className={`w-full p-4 md:p-5 rounded-xl border-2 text-left transition-all duration-200 ${getButtonClasses(
+								className={`w-full p-3  lg:p-4 md:p-5 rounded-xl border-2 text-left transition-all duration-200 ${getButtonClasses(
 									index
-								)}`}
+								)} ${getAngle(index)}`}
 								onClick={() => onAnswerSelect(index)}
 								disabled={isAnswered}
 								data-testid={`button-answer-${String.fromCharCode(65 + index)}`}
 							>
 								<div className='flex items-center justify-between'>
-									<div className='flex items-center gap-4'>
-										<span className='text-base md:text-xl  font-medium'>
+									<div className='flex items-center  w-1/5'>
+										<span
+											className={`w-10 h-10 rounded-full border-2  flex items-center justify-center font-bold text-sm ${
+												isAnswered &&
+												selectedAnswer === index &&
+												currentQuestion &&
+												index !== currentQuestion.correctAnswer
+													? 'border-destructive'
+													: 'border-primary'
+											}`}
+										>
+											{String.fromCharCode(65 + index)}
+										</span>
+									</div>
+									<div className='flex w-4/5 gap-4 '>
+										<span className='text-base md:text-xl font-medium'>
 											{option}
 										</span>
 									</div>
-									<div>
-										{isAnswered &&
-											selectedAnswer === index &&
-											currentQuestion &&
-											(index === currentQuestion.correctAnswer ? (
-												<CheckCircle className='h-10 w-10 text-primary' />
-											) : (
-												<XCircle className='h-10 w-10 text-destructive' />
-											))}
-										{isAnswered &&
-											selectedAnswer !== index &&
-											currentQuestion &&
-											index === currentQuestion.correctAnswer && (
-												<CheckCircle className='h-10 w-10 text-primary' />
-											)}
-									</div>
+									{isAnswered && (
+										<div className=' w-1/5  flex justify-end'>
+											{selectedAnswer === index &&
+												currentQuestion &&
+												(index === currentQuestion.correctAnswer ? (
+													<CheckCircle className='h-10 w-10 text-primary' />
+												) : (
+													<XCircle className='h-10 w-10 text-destructive' />
+												))}
+											{selectedAnswer !== index &&
+												currentQuestion &&
+												index === currentQuestion.correctAnswer && (
+													<CheckCircle className='h-10 w-10 text-primary' />
+												)}
+										</div>
+									)}
 								</div>
 							</button>
 						))}

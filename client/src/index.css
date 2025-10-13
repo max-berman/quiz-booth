@@ -1,3 +1,6 @@
+/* Import animation styles */
+@import './animation.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -137,48 +140,6 @@
 	body {
 		@apply font-sans antialiased bg-background text-foreground;
 		font-feature-settings: 'rlig' 1, 'calt' 1;
-	}
-
-	/* Simple animations */
-	@keyframes slide-up {
-		from {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	/* Swipe animation for hand icon */
-	@keyframes swipeAnimation {
-		0% {
-			transform: translateX(140px);
-			opacity: 0;
-		}
-		20% {
-			opacity: 1;
-		}
-		80% {
-			opacity: 1;
-		}
-		100% {
-			transform: translateX(-40px);
-			opacity: 0;
-		}
-	}
-
-	.animate-slide-up {
-		animation: slide-up 0.3s ease-out;
-		animation-fill-mode: both;
-	}
-
-	/* Prevent initial flash before animations start */
-	.animate-slide-up {
-		opacity: 0;
-		transform: translateY(20px);
 	}
 }
 
