@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { GamePlayCard } from '@/components/game-play-card'
-import { GameNavigationBar } from '@/components/game-navigation-bar'
+import { GameBrandingBar } from '@/components/game-branding-bar'
 import { GameStatsBar } from '@/components/game-stats-bar'
 import { Progress } from '@/components/ui/progress'
 import { XCircle } from 'lucide-react'
@@ -13,6 +13,7 @@ import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { useGameSession } from '@/hooks/use-game-session'
 import { useSwipeGesture } from '@/hooks/use-swipe-gesture'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useGameLogo } from '@/hooks/use-game-logo'
 import { analytics } from '@/lib/analytics'
 import {
 	applyGameCustomization,
@@ -23,7 +24,6 @@ import {
 	getLockedResults,
 } from '@/lib/first-completion-utils'
 import { loadGameResults } from '@/lib/session-utils'
-import { logoCache } from '@/lib/logo-cache'
 
 // Audio elements for reliable sound playback
 let scoreAudio: HTMLAudioElement | null = null
@@ -74,7 +74,7 @@ const initializeAudio = async (): Promise<boolean> => {
 				})
 
 				if (process.env.NODE_ENV === 'development') {
-					console.log(`Score audio loaded successfully: ${type}`)
+					// console.log(`Score audio loaded successfully: ${type}`)
 				}
 				break
 			} catch (formatError) {
@@ -232,31 +232,23 @@ export default function GamePage() {
 		? ((currentQuestionIndex + 1) / questions.length) * 100
 		: 0
 
-	// Determine which logo to show - use cached logo first, then game data, otherwise use default
-	const cachedLogoUrl = logoCache.getLogo(id!)
-	const logoUrl =
-		cachedLogoUrl || game?.customization?.customLogoUrl || '/assets/logo.png'
-	const logoAlt =
-		cachedLogoUrl || game?.customization?.customLogoUrl
-			? 'Custom game logo'
-			: 'NaknNick games logo'
+	// Use custom hook for logo caching and retrieval
+	const { logoUrl, logoAlt } = useGameLogo(
+		id,
+		game?.customization?.customLogoUrl
+	)
 
-	// Apply customization styles and cache logo
+	// Apply customization styles
 	useEffect(() => {
 		if (game?.customization) {
 			applyGameCustomization(game.customization)
-
-			// Cache the logo URL if it exists
-			if (game.customization.customLogoUrl) {
-				logoCache.addLogo(id!, game.customization.customLogoUrl)
-			}
 		}
 
 		// Cleanup function to reset styles
 		return () => {
 			cleanupGameCustomization()
 		}
-	}, [game?.customization, id])
+	}, [game?.customization])
 
 	// Track game start when game data is loaded
 	useEffect(() => {
@@ -588,11 +580,18 @@ export default function GamePage() {
 		return (
 			<div className='flex-1 bg-background flex items-center justify-center'>
 				<div className='text-center'>
-					<p className='flex items-center justify-center my-4'>
-						<a href='/' target='_blank' rel='noopener noreferrer'>
-							<img src={logoUrl} alt={logoAlt} className='h-32 w-auto' />
-						</a>
-					</p>
+					<a
+						href='/'
+						target='_blank'
+						rel='noopener noreferrer'
+						className='flex items-center justify-center my-4'
+					>
+						<img
+							src={logoUrl}
+							alt={logoAlt}
+							className='h-auto w-auto max-w-[90%]'
+						/>
+					</a>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
 
 					<p className='animate-bounce'>Loading game...</p>
@@ -615,7 +614,7 @@ export default function GamePage() {
 				/>
 			</div>
 
-			<GameNavigationBar
+			<GameBrandingBar
 				game={game}
 				isAnswered={isAnswered}
 				currentQuestionIndex={currentQuestionIndex}
@@ -623,21 +622,7 @@ export default function GamePage() {
 				onNextQuestion={handleNextQuestion}
 			/>
 
-			{/* <div className='flex items-center justify-center mt-4'>
-			
-				<a
-					href='https://www.naknick.com'
-					target='_blank'
-					rel='noopener noreferrer'
-				>
-					<img
-						src='/assets/logo.png'
-						alt='NaknNick games logo'
-						className='h-24 w-auto'
-					/>
-				</a>
-			</div> */}
-			<div className='max-w-4xl mx-auto px-0  text-primary'>
+			<div className='max-w-4xl w-full mx-auto px-0 text-primary'>
 				{/* Question Card */}
 				<GamePlayCard
 					currentQuestion={currentQuestion}

@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button'
-import { ArrowRight, ExternalLink } from 'lucide-react'
+import { ArrowRight, ExternalLink, ArrowBigRight, Hand } from 'lucide-react'
 import type { Game } from '@shared/firebase-types'
 
-interface GameNavigationBarProps {
+interface GameBrandingBarProps {
 	game: Game
 	isAnswered: boolean
 	currentQuestionIndex: number
@@ -10,15 +10,15 @@ interface GameNavigationBarProps {
 	onNextQuestion: () => void
 }
 
-export function GameNavigationBar({
+export function GameBrandingBar({
 	game,
 	isAnswered,
 	currentQuestionIndex,
 	questionsLength,
 	onNextQuestion,
-}: GameNavigationBarProps) {
+}: GameBrandingBarProps) {
 	return (
-		<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8 w-full '>
+		<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8 w-full relative'>
 			<div className='flex justify-center p-2 mt-4'>
 				<a
 					href={game.customization?.customLogoLink || 'https://naknick.com'}
@@ -45,6 +45,17 @@ export function GameNavigationBar({
 					)}
 				</a>
 			</div>
+			{isAnswered && (
+				<div>
+					<Button
+						onClick={onNextQuestion}
+						size='sm'
+						className='px-4 right-2 py-2 absolute font-semibold text-secondary uppercase justify-self-end self-end bottom-0'
+					>
+						<ArrowBigRight className='!h-6 !w-6' />
+					</Button>
+				</div>
+			)}
 		</div>
 	)
 }

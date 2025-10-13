@@ -20,7 +20,7 @@ export const INDUSTRY_OPTIONS = [
   'Consumer Goods & Electronics',
   'Automotive & Mobility',
   'Blockchain, Crypto & Web3',
-  'Fintech & Digital Finance',
+  'Fintech & DeFi',
   'Clean Energy & Climate Tech',
   'Creator Economy & Influencer Marketing',
 

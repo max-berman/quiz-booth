@@ -14,6 +14,7 @@ import {
 	applyGameCustomization,
 	cleanupGameCustomization,
 } from '@/lib/color-utils'
+import { useGameLogo } from '@/hooks/use-game-logo'
 
 export default function Leaderboard() {
 	const { id } = useParams()
@@ -63,11 +64,11 @@ export default function Leaderboard() {
 		}
 	}, [isGameSpecific, game?.customization])
 
-	// Determine which logo to show - use game data if available, otherwise use default
-	const logoUrl = game?.customization?.customLogoUrl || '/assets/logo.png'
-	const logoAlt = game?.customization?.customLogoUrl
-		? 'Custom game logo'
-		: 'NaknNick games logo'
+	// Use custom hook for logo caching and retrieval
+	const { logoUrl, logoAlt, cachedLogoUrl } = useGameLogo(
+		id,
+		game?.customization?.customLogoUrl
+	)
 
 	const getRankIcon = (rank: number) => {
 		switch (rank) {
@@ -86,13 +87,21 @@ export default function Leaderboard() {
 		return (
 			<div className='flex-1 bg-background flex items-center justify-center'>
 				<div className='text-center'>
-					<p className='flex items-center justify-center my-4'>
-						<a href='/' target='_blank' rel='noopener noreferrer'>
-							<img src={logoUrl} alt={logoAlt} className='h-32 w-auto' />
-						</a>
-					</p>
+					<a
+						href='/'
+						target='_blank'
+						rel='noopener noreferrer'
+						className='flex items-center justify-center my-4'
+					>
+						<img
+							src={logoUrl}
+							alt={logoAlt}
+							className='h-auto w-auto max-w-[90%]'
+						/>
+					</a>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
-					<p className='animate-bounce'>Loading leaderboard...</p>
+
+					<p className='animate-bounce'>Loading game...</p>
 				</div>
 			</div>
 		)
@@ -112,9 +121,9 @@ export default function Leaderboard() {
 								target='_blank'
 								rel='noopener noreferrer'
 							>
-								{game?.customization?.customLogoUrl ? (
+								{cachedLogoUrl || game?.customization?.customLogoUrl ? (
 									<img
-										src={game?.customization.customLogoUrl}
+										src={cachedLogoUrl || game?.customization?.customLogoUrl}
 										alt='Custom game logo'
 										className='max-h-12 '
 									/>

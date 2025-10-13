@@ -87,8 +87,7 @@ function App() {
 						<Toaster />
 						{/* Temporarily disabled PWA to test timing issues */}
 						{/* <PWARegistration /> */}
-						{process.env.NODE_ENV === 'development' &&
-							window.location.hostname === 'localhost' && <CacheDebug />}
+						{/* <CacheDebug /> */}
 					</AuthProvider>
 				</TooltipProvider>
 			</QueryClientProvider>

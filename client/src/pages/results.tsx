@@ -86,10 +86,10 @@ export default function Results() {
 
 						// Debug logging
 						if (process.env.NODE_ENV === 'development') {
-							console.log(
-								'Showing locked results from first completion:',
-								lockedResults
-							)
+							// console.log(
+							// 	'Showing locked results from first completion:',
+							// 	lockedResults
+							// )
 						}
 					}
 				} else {
@@ -127,12 +127,12 @@ export default function Results() {
 
 			// Debug logging to help identify issues
 			if (process.env.NODE_ENV === 'development') {
-				console.log('Results page submission check:', {
-					gameId: id,
-					alreadySubmitted,
-					hasAlreadySubmitted,
-					isScoreSaved,
-				})
+				// console.log('Results page submission check:', {
+				// 	gameId: id,
+				// 	alreadySubmitted,
+				// 	hasAlreadySubmitted,
+				// 	isScoreSaved,
+				// })
 			}
 		}
 	}, [id])
@@ -208,10 +208,10 @@ export default function Results() {
 				saveFirstCompletion(firstCompletionData)
 
 				if (process.env.NODE_ENV === 'development') {
-					console.log(
-						'First completion saved after successful submission:',
-						firstCompletionData
-					)
+					// console.log(
+					// 	'First completion saved after successful submission:',
+					// 	firstCompletionData
+					// )
 				}
 			}
 

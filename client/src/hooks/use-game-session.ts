@@ -81,7 +81,7 @@ export function useGameSession(gameId: string | undefined): UseGameSessionReturn
     if (!gameId || !sessionStateRef.current) return;
 
     // Debug logging
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'dev') {
       console.log('completeSession called with:', {
         gameId,
         finalResults,
@@ -91,7 +91,7 @@ export function useGameSession(gameId: string | undefined): UseGameSessionReturn
 
     // Save final results if provided
     if (finalResults) {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'dev') {
         console.log('Saving final results:', finalResults);
       }
       saveGameResults(gameId, finalResults);
@@ -102,7 +102,7 @@ export function useGameSession(gameId: string | undefined): UseGameSessionReturn
       // Verify results were saved
       setTimeout(() => {
         const savedResults = loadGameResults(gameId);
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'dev') {
           console.log('Verifying results saved:', {
             gameId,
             savedResults,
@@ -127,7 +127,7 @@ export function useGameSession(gameId: string | undefined): UseGameSessionReturn
 
     // Clear session after a longer delay to ensure results page can access it
     const clearSessionTimeout = setTimeout(() => {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'dev') {
         console.log('Clearing session for game:', gameId);
       }
       clearGameSession(gameId);

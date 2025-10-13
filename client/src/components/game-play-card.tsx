@@ -15,6 +15,32 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 import { getResizeHandleElementIndex } from 'react-resizable-panels'
 
+// Tutorial management utilities
+const TUTORIAL_KEY = 'quizbooth_swipe_tutorial_seen'
+
+/**
+ * Check if the user has seen the swipe tutorial
+ */
+function hasSeenTutorial(): boolean {
+	try {
+		return localStorage.getItem(TUTORIAL_KEY) === 'true'
+	} catch (error) {
+		console.warn('Failed to check tutorial status:', error)
+		return false
+	}
+}
+
+/**
+ * Mark the tutorial as seen by the user
+ */
+function markTutorialSeen(): void {
+	try {
+		localStorage.setItem(TUTORIAL_KEY, 'true')
+	} catch (error) {
+		console.warn('Failed to mark tutorial as seen:', error)
+	}
+}
+
 interface GamePlayCardProps {
 	currentQuestion: Question | undefined
 	currentQuestionIndex: number
@@ -41,6 +67,57 @@ export function GamePlayCard({
 	const isMobile = useIsMobile()
 	const gameCardRef = useRef<HTMLDivElement>(null)
 	const [isNewQuestion, setIsNewQuestion] = useState(false)
+	const [hasSeenTutorialState, setHasSeenTutorialState] = useState(false)
+
+	// Check tutorial status on component mount
+	useEffect(() => {
+		const seen = hasSeenTutorial()
+		setHasSeenTutorialState(seen)
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Tutorial localStorage check:', {
+				seen,
+				localStorageValue: localStorage.getItem(TUTORIAL_KEY),
+				TUTORIAL_KEY,
+			})
+		}
+	}, [])
+
+	// Determine if we should show the tutorial
+	const shouldShowTutorial =
+		isAnswered && isMobile && currentQuestionIndex < 2 && !hasSeenTutorialState
+
+	// Debug logging
+	useEffect(() => {
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Tutorial debug:', {
+				isAnswered,
+				isMobile,
+				currentQuestionIndex,
+				hasSeenTutorialState,
+				shouldShowTutorial,
+			})
+		}
+	}, [
+		isAnswered,
+		isMobile,
+		currentQuestionIndex,
+		hasSeenTutorialState,
+		shouldShowTutorial,
+	])
+
+	// Mark tutorial as seen after user completes second question
+	useEffect(() => {
+		if (currentQuestionIndex >= 2 && !hasSeenTutorialState) {
+			// User completed first 2 questions, mark tutorial as seen
+			if (process.env.NODE_ENV === 'development') {
+				console.log(
+					'User completed first 2 questions, marking tutorial as seen'
+				)
+			}
+			markTutorialSeen()
+			setHasSeenTutorialState(true)
+		}
+	}, [currentQuestionIndex, hasSeenTutorialState])
 
 	// Track when a new question appears to trigger animation
 	useEffect(() => {
@@ -79,7 +156,7 @@ export function GamePlayCard({
 	}
 
 	const getAngle = () => {
-		if (isMobile && isAnswered) {
+		if (isMobile && !isAnswered) {
 			// Apply random angle between -2 and 2 degrees
 			const angle = Math.floor(Math.random() * 5) - 2 // Generates -2, -1, 0, 1, 2
 
@@ -103,7 +180,7 @@ export function GamePlayCard({
 			// Only trigger swipe left if question is answered and on mobile
 			if (isMobile && isAnswered) {
 				if (process.env.NODE_ENV === 'development') {
-					console.log('Swipe left detected')
+					// console.log('Swipe left detected')
 				}
 				onNextQuestion()
 			}
@@ -128,21 +205,12 @@ export function GamePlayCard({
 
 					{/* Answer Options */}
 					<div className='space-y-4 px-2 lg:px-4 md:px-0'>
-						{isAnswered && isMobile && (
+						{shouldShowTutorial && (
 							<div className='mt-2 justify-end text-primary items-center flex animate-slide-up'>
 								<div className='flex-col flex mr-4 items-center '>
-									<span className='text-xs '>Swipe to next question</span>
 									<Hand className='h-6 w-6 animate-swipe ' />
+									<span className='text-xs '>Swipe to the next question</span>
 								</div>
-
-								<Button
-									onClick={onNextQuestion}
-									size='sm'
-									className='-rotate-0 px-4 py-2 animate-jiggle font-semibold text-secondary uppercase justify-self-end self-end'
-								>
-									Next
-									{/* Next <ArrowBigRight className='!h-6 !w-6' /> */}
-								</Button>
 							</div>
 						)}
 
@@ -152,7 +220,7 @@ export function GamePlayCard({
 								type='button'
 								className={`w-full p-3 lg:p-4 md:p-5 rounded-xl border-2 text-left transition-all duration-300 ${getButtonClasses(
 									index
-								)} ${getAngle()}`}
+								)} `}
 								onClick={() => onAnswerSelect(index)}
 								disabled={isAnswered}
 								data-testid={`button-answer-${String.fromCharCode(65 + index)}`}
@@ -172,30 +240,30 @@ export function GamePlayCard({
 											{String.fromCharCode(65 + index)}
 										</span>
 									</div>
-									<div className='flex w-4/5 gap-4 '>
+									<div
+										className={`flex ${isAnswered ? 'w-4/5' : 'w-full'} gap-4 `}
+									>
 										<span className='text-base md:text-xl font-medium'>
 											{option}
 										</span>
 									</div>
 
-									<div className='w-1/5  flex justify-end'>
-										{isAnswered && (
-											<>
-												{selectedAnswer === index &&
-													currentQuestion &&
-													(index === currentQuestion.correctAnswer ? (
-														<CheckCircle className='h-8 w-8 lg:h-10 lg:w-10 text-primary' />
-													) : (
-														<XCircle className='h-8 w-8 lg:h-10 lg:w-10 text-destructive' />
-													))}
-												{selectedAnswer !== index &&
-													currentQuestion &&
-													index === currentQuestion.correctAnswer && (
-														<CheckCircle className='h-8 w-8 lg:h-10 lg:w-10 text-primary' />
-													)}
-											</>
-										)}
-									</div>
+									{isAnswered && (
+										<div className='w-1/5  flex justify-end'>
+											{selectedAnswer === index &&
+												currentQuestion &&
+												(index === currentQuestion.correctAnswer ? (
+													<CheckCircle className='h-8 w-8 lg:h-10 lg:w-10 text-primary' />
+												) : (
+													<XCircle className='h-8 w-8 lg:h-10 lg:w-10 text-destructive' />
+												))}
+											{selectedAnswer !== index &&
+												currentQuestion &&
+												index === currentQuestion.correctAnswer && (
+													<CheckCircle className='h-8 w-8 lg:h-10 lg:w-10 text-primary' />
+												)}
+										</div>
+									)}
 								</div>
 							</button>
 						))}
