@@ -98,6 +98,7 @@ export const createGame = functions.runWith({
       industry: description || '',
       productDescription: productDescription || null,
       questionCount,
+      actualQuestionCount: 0, // Initialize with 0 actual questions
       difficulty,
       categories,
       customCategoryDescription: customCategoryDescription || null,
@@ -833,6 +834,12 @@ export const deleteGame = functions.https.onCall(async (data, context) => {
 
     questionsSnapshot.docs.forEach(doc => {
       batch.delete(doc.ref);
+    });
+
+    // Reset actualQuestionCount to 0 when all questions are deleted
+    batch.update(db.collection('games').doc(gameId), {
+      actualQuestionCount: 0,
+      modifiedAt: Timestamp.fromDate(new Date()),
     });
 
     // Delete all player submissions for this game

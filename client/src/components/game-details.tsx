@@ -1,11 +1,17 @@
 // Common component for displaying game details to eliminate duplication
 
 import { Badge } from '@/lib/ui-imports-basic'
-import { Building, Calendar, Target, Gift, BarChart3 } from 'lucide-react'
+import {
+	Building,
+	Calendar,
+	Target,
+	Gift,
+	BarChart3,
+	GalleryVerticalEnd,
+} from 'lucide-react'
 import type { Game } from '@shared/firebase-types'
 import { formatCompanyName } from '@/lib/game-utils'
 import { formatDate } from '@/lib/date-utils'
-import { usePlayCount } from '@/lib/game-utils'
 
 interface GameDetailsProps {
 	game: Game
@@ -24,12 +30,6 @@ export function GameDetails({
 	showCategories = true,
 	showPrizes = true,
 }: GameDetailsProps) {
-	const {
-		data: playCount,
-		isLoading: playCountLoading,
-		error: playCountError,
-	} = usePlayCount(game.id, showPlayCount)
-
 	const companyInfo = formatCompanyName(game.companyName)
 
 	return (
@@ -59,42 +59,28 @@ export function GameDetails({
 					</div>
 				)}
 
-			{/* Play Count */}
-			{showPlayCount && (
-				<>
-					{playCountLoading && (
-						<div className='flex items-center gap-2'>
-							<BarChart3 className='h-4 w-4' />
-							<span className='text-muted-foreground'>Loading plays...</span>
-						</div>
-					)}
-					{playCountError && (
-						<div className='flex items-center gap-2'>
-							<BarChart3 className='h-4 w-4 text-destructive' />
-							<span className='text-destructive text-xs'>
-								Error loading plays
-							</span>
-						</div>
-					)}
-					{playCount !== undefined && !playCountLoading && !playCountError && (
-						<div className='flex items-center gap-2'>
-							<BarChart3 className='h-4 w-4' />
-							<span>
-								<strong>{playCount}</strong>{' '}
-								{playCount === 1 ? 'play' : 'plays'}
-							</span>
-						</div>
-					)}
-				</>
-			)}
-
 			{/* Question Count */}
 			{showQuestionCount && (
 				<div className='flex items-center gap-2'>
-					<BarChart3 className='h-4 w-4' />
+					<GalleryVerticalEnd className='h-4 w-4' />
 					<span>
-						<strong>{game.questionCount}</strong> questions • {game.difficulty}{' '}
-						difficulty
+						{game.actualQuestionCount !== undefined ? (
+							<>
+								<strong>{game.actualQuestionCount}</strong> of{' '}
+								<strong>{game.questionCount}</strong> questions generated •{' '}
+								{game.difficulty} difficulty
+								{game.actualQuestionCount < game.questionCount && (
+									<span className='text-amber-600 ml-1 text-xs'>
+										(Incomplete)
+									</span>
+								)}
+							</>
+						) : (
+							<>
+								<strong>{game.questionCount}</strong> questions •{' '}
+								{game.difficulty} difficulty
+							</>
+						)}
 					</span>
 				</div>
 			)}

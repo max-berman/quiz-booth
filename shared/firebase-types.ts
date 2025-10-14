@@ -22,7 +22,8 @@ export interface Game {
   companyName: string;
   industry: string;
   productDescription: string | null;
-  questionCount: number;
+  questionCount: number; // Intended/target question count
+  actualQuestionCount?: number; // Actual number of questions in database
   difficulty: string;
   categories: string[];
   customCategoryDescription?: string; // Store actual custom category description separately

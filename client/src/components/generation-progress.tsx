@@ -49,19 +49,19 @@ export function GenerationProgress({
 	const getStatusIcon = (status: string) => {
 		switch (status) {
 			case 'starting':
-				return <Clock className='h-5 w-5 text-blue-500' />
+				return <Clock className='h-5 w-5 text-primary' />
 			case 'generating_title':
-				return <Building className='h-5 w-5 text-blue-500' />
+				return <Building className='h-5 w-5 text-primary' />
 			case 'generating_questions':
-				return <Wand2 className='h-5 w-5 text-purple-500' />
+				return <Wand2 className='h-5 w-5 text-accent' />
 			case 'saving_questions':
-				return <Database className='h-5 w-5 text-green-500' />
+				return <Database className='h-5 w-5 text-chart-2' />
 			case 'completed':
-				return <CheckCircle className='h-5 w-5 text-green-500' />
+				return <CheckCircle className='h-5 w-5 text-chart-2' />
 			case 'error':
-				return <AlertCircle className='h-5 w-5 text-red-500' />
+				return <AlertCircle className='h-5 w-5 text-destructive' />
 			default:
-				return <Settings className='h-5 w-5 text-gray-500' />
+				return <Settings className='h-5 w-5 text-muted-foreground' />
 		}
 	}
 
@@ -69,19 +69,19 @@ export function GenerationProgress({
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case 'starting':
-				return 'bg-blue-100 text-blue-800 border-blue-200'
+				return 'bg-primary/10 text-primary border-primary/20'
 			case 'generating_title':
-				return 'bg-blue-100 text-blue-800 border-blue-200'
+				return 'bg-primary/10 text-primary border-primary/20'
 			case 'generating_questions':
-				return 'bg-purple-100 text-purple-800 border-purple-200'
+				return 'bg-accent/10 text-accent-foreground border-accent/20'
 			case 'saving_questions':
-				return 'bg-green-100 text-green-800 border-green-200'
+				return 'bg-chart-2/10 text-chart-2 border-chart-2/20'
 			case 'completed':
-				return 'bg-green-100 text-green-800 border-green-200'
+				return 'bg-chart-2/10 text-chart-2 border-chart-2/20'
 			case 'error':
-				return 'bg-red-100 text-red-800 border-red-200'
+				return 'bg-destructive/10 text-destructive border-destructive/20'
 			default:
-				return 'bg-gray-100 text-gray-800 border-gray-200'
+				return 'bg-muted text-muted-foreground border-border'
 		}
 	}
 
@@ -266,12 +266,12 @@ export function GenerationProgress({
 
 				{/* Error Display */}
 				{progress.status === 'error' && progress.error && (
-					<div className='p-3 bg-red-50 border border-red-200 rounded-lg'>
-						<div className='flex items-center space-x-2 text-red-800'>
+					<div className='p-3 bg-destructive/10 border border-destructive/20 rounded-lg'>
+						<div className='flex items-center space-x-2 text-destructive'>
 							<AlertCircle className='h-4 w-4' />
 							<span className='font-medium'>Error:</span>
 						</div>
-						<p className='text-sm text-red-700 mt-1'>{progress.error}</p>
+						<p className='text-sm text-destructive mt-1'>{progress.error}</p>
 					</div>
 				)}
 
@@ -280,7 +280,7 @@ export function GenerationProgress({
 					<div
 						className={`flex items-center space-x-3 p-2 rounded-lg ${
 							progress.status === 'starting'
-								? 'bg-blue-50 border border-blue-200'
+								? 'bg-primary/10 border border-primary/20'
 								: ''
 						}`}
 					>
@@ -292,10 +292,10 @@ export function GenerationProgress({
 									'saving_questions',
 									'completed',
 								].includes(progress.status)
-									? 'bg-green-500 text-white'
+									? 'bg-chart-2 text-white'
 									: progress.status === 'starting'
-									? 'bg-blue-500 text-white'
-									: 'bg-gray-200 text-gray-500'
+									? 'bg-primary text-white'
+									: 'bg-muted text-muted-foreground'
 							}`}
 						>
 							{[
@@ -315,7 +315,7 @@ export function GenerationProgress({
 					<div
 						className={`flex items-center space-x-3 p-2 rounded-lg ${
 							progress.status === 'generating_title'
-								? 'bg-blue-50 border border-blue-200'
+								? 'bg-primary/10 border border-primary/20'
 								: ''
 						}`}
 					>
@@ -326,10 +326,10 @@ export function GenerationProgress({
 									'saving_questions',
 									'completed',
 								].includes(progress.status)
-									? 'bg-green-500 text-white'
+									? 'bg-chart-2 text-white'
 									: progress.status === 'generating_title'
-									? 'bg-blue-500 text-white'
-									: 'bg-gray-200 text-gray-500'
+									? 'bg-primary text-white'
+									: 'bg-muted text-muted-foreground'
 							}`}
 						>
 							{[
@@ -348,17 +348,17 @@ export function GenerationProgress({
 					<div
 						className={`flex items-center space-x-3 p-2 rounded-lg ${
 							progress.status === 'generating_questions'
-								? 'bg-purple-50 border border-purple-200'
+								? 'bg-accent/10 border border-accent/20'
 								: ''
 						}`}
 					>
 						<div
 							className={`w-6 h-6 rounded-full flex items-center justify-center ${
 								['saving_questions', 'completed'].includes(progress.status)
-									? 'bg-green-500 text-white'
+									? 'bg-chart-2 text-white'
 									: progress.status === 'generating_questions'
-									? 'bg-purple-500 text-white'
-									: 'bg-gray-200 text-gray-500'
+									? 'bg-accent text-accent-foreground'
+									: 'bg-muted text-muted-foreground'
 							}`}
 						>
 							{['saving_questions', 'completed'].includes(progress.status) ? (
@@ -373,17 +373,17 @@ export function GenerationProgress({
 					<div
 						className={`flex items-center space-x-3 p-2 rounded-lg ${
 							progress.status === 'saving_questions'
-								? 'bg-green-50 border border-green-200'
+								? 'bg-chart-2/10 border border-chart-2/20'
 								: ''
 						}`}
 					>
 						<div
 							className={`w-6 h-6 rounded-full flex items-center justify-center ${
 								progress.status === 'completed'
-									? 'bg-green-500 text-white'
+									? 'bg-chart-2 text-white'
 									: progress.status === 'saving_questions'
-									? 'bg-green-500 text-white'
-									: 'bg-gray-200 text-gray-500'
+									? 'bg-chart-2 text-white'
+									: 'bg-muted text-muted-foreground'
 							}`}
 						>
 							{progress.status === 'completed' ? (

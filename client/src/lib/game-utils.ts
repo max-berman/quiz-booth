@@ -14,26 +14,6 @@ interface QuestionCountResponse {
   questions: any[]
 }
 
-/**
- * Hook for fetching play count for a game
- */
-export function usePlayCount(gameId: string, enabled: boolean = true) {
-  const { getGamePlayCount } = useFirebaseFunctions()
-
-  return useQuery<number>({
-    queryKey: ['/api/games', gameId, 'play-count'],
-    queryFn: async () => {
-      // console.log(`Fetching play count for game ${gameId}`)
-      const result = await getGamePlayCount({ gameId })
-      const data = result.data as PlayCountResponse
-      // console.log(`Play count response for game ${gameId}:`, data)
-      return data.count
-    },
-    enabled: !!gameId && enabled,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    retry: 2,
-  })
-}
 
 /**
  * Hook for fetching question count for a game

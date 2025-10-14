@@ -569,6 +569,13 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
     await batch.commit();
     console.log(`Successfully saved ${questionsToInsert.length} questions to database`);
 
+    // Update the game's actualQuestionCount field
+    await db.collection('games').doc(gameId).update({
+      actualQuestionCount: questionsToInsert.length,
+      modifiedAt: Timestamp.now(),
+    });
+    console.log(`Updated actualQuestionCount to ${questionsToInsert.length} for game ${gameId}`);
+
     // Mark generation as completed
     await progressTracker.completed();
 
@@ -587,6 +594,189 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
 
     await progressTracker.error(errorMessage);
     throw new functions.https.HttpsError('internal', 'Failed to generate questions');
+  }
+});
+
+// Delete a question
+export const deleteQuestion = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'User must be authenticated'
+    );
+  }
+
+  const userId = context.auth.uid;
+  const { questionId } = data;
+
+  try {
+    // Get the question to verify ownership
+    const questionDoc = await db.collection('questions').doc(questionId).get();
+    if (!questionDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Question not found');
+    }
+
+    const questionData = questionDoc.data();
+    const gameId = questionData?.gameId;
+
+    // Verify user owns the game that contains this question
+    const gameDoc = await db.collection('games').doc(gameId).get();
+    if (!gameDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Game not found');
+    }
+
+    const gameData = gameDoc.data();
+    if (gameData?.userId !== userId) {
+      throw new functions.https.HttpsError('permission-denied', 'Access denied');
+    }
+
+    // Delete the question
+    await db.collection('questions').doc(questionId).delete();
+
+    // Update the game's actualQuestionCount
+    const questionsSnapshot = await db
+      .collection('questions')
+      .where('gameId', '==', gameId)
+      .get();
+
+    const newQuestionCount = questionsSnapshot.size;
+
+    await db.collection('games').doc(gameId).update({
+      actualQuestionCount: newQuestionCount,
+      modifiedAt: Timestamp.fromDate(new Date()),
+    });
+
+    console.log(`Question ${questionId} deleted successfully`);
+    return { success: true, message: 'Question deleted successfully' };
+  } catch (error) {
+    console.error('Delete question error:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError('internal', 'Failed to delete question');
+  }
+});
+
+// Update a question
+export const updateQuestion = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'User must be authenticated'
+    );
+  }
+
+  const userId = context.auth.uid;
+  const { questionId, updates } = data;
+
+  try {
+    // Get the question to verify ownership
+    const questionDoc = await db.collection('questions').doc(questionId).get();
+    if (!questionDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Question not found');
+    }
+
+    const questionData = questionDoc.data();
+    const gameId = questionData?.gameId;
+
+    // Verify user owns the game that contains this question
+    const gameDoc = await db.collection('games').doc(gameId).get();
+    if (!gameDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Game not found');
+    }
+
+    const gameData = gameDoc.data();
+    if (gameData?.userId !== userId) {
+      throw new functions.https.HttpsError('permission-denied', 'Access denied');
+    }
+
+    // Filter out fields that shouldn't be updated
+    const allowedUpdates = { ...updates };
+    delete (allowedUpdates as any).id;
+    delete (allowedUpdates as any).gameId;
+    delete (allowedUpdates as any).userId;
+
+    // Update the question
+    await db.collection('questions').doc(questionId).update({
+      ...allowedUpdates,
+    });
+
+    console.log(`Question ${questionId} updated successfully`);
+    return { success: true, message: 'Question updated successfully' };
+  } catch (error) {
+    console.error('Update question error:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError('internal', 'Failed to update question');
+  }
+});
+
+// Add a new question
+export const addQuestion = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'User must be authenticated'
+    );
+  }
+
+  const userId = context.auth.uid;
+  const { gameId, questionData } = data;
+
+  try {
+    // Verify user owns the game
+    const gameDoc = await db.collection('games').doc(gameId).get();
+    if (!gameDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Game not found');
+    }
+
+    const gameData = gameDoc.data();
+    if (gameData?.userId !== userId) {
+      throw new functions.https.HttpsError('permission-denied', 'Access denied');
+    }
+
+    // Get current questions to determine the next order
+    const questionsSnapshot = await db
+      .collection('questions')
+      .where('gameId', '==', gameId)
+      .get();
+
+    const currentQuestions = questionsSnapshot.docs.map(doc => doc.data());
+    const nextOrder = currentQuestions.length + 1;
+
+    // Create the new question
+    const questionId = randomUUID();
+    const newQuestion = {
+      id: questionId,
+      gameId,
+      questionText: questionData.questionText,
+      options: questionData.options,
+      correctAnswer: questionData.correctAnswer,
+      explanation: questionData.explanation || null,
+      order: nextOrder,
+    };
+
+    await db.collection('questions').doc(questionId).set(newQuestion);
+
+    // Update the game's actualQuestionCount
+    await db.collection('games').doc(gameId).update({
+      actualQuestionCount: nextOrder,
+      modifiedAt: Timestamp.fromDate(new Date()),
+    });
+
+    console.log(`Question ${questionId} added successfully to game ${gameId}`);
+    return {
+      success: true,
+      message: 'Question added successfully',
+      question: newQuestion
+    };
+  } catch (error) {
+    console.error('Add question error:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError('internal', 'Failed to add question');
   }
 });
 

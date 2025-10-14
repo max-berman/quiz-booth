@@ -31,11 +31,7 @@ import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
 import { GameCardHeader } from './game-card-header'
 import { GameDetails } from './game-details'
-import {
-	getExistingPrizes,
-	useQuestionCount,
-	usePlayCount,
-} from '@/lib/game-utils'
+import { getExistingPrizes } from '@/lib/game-utils'
 import app from '@/lib/firebase'
 
 interface GameCardEnhancedProps {
@@ -55,19 +51,6 @@ export function GameCardDashboard({
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 	const { toast } = useToast()
 	const queryClient = useQueryClient()
-
-	// Use the new helper hooks
-	const {
-		data: actualQuestionCount,
-		isLoading: questionsLoading,
-		error: questionsError,
-	} = useQuestionCount(game.id)
-
-	const {
-		data: playCount,
-		isLoading: playCountLoading,
-		error: playCountError,
-	} = usePlayCount(game.id)
 
 	// Delete game mutation
 	const deleteGameMutation = useMutation({
@@ -154,32 +137,10 @@ export function GameCardDashboard({
 					{/* Game Details */}
 					<GameDetails
 						game={game}
-						showPlayCount={true}
+						showPlayCount={false}
 						showModifiedDate={true}
 						showQuestionCount={true}
 					/>
-
-					{/* Question Count with Loading States */}
-					{/* <div className='flex items-center gap-2 !mt-2'>
-						<GalleryVerticalEnd className='h-4 w-4' />
-						{questionsLoading ? (
-							<span className='text-muted-foreground'>
-								Loading questions...
-							</span>
-						) : questionsError ? (
-							<span className='text-destructive text-xs'>
-								Error loading questions
-							</span>
-						) : actualQuestionCount !== undefined ? (
-							<span className=' text-sm'>
-								{actualQuestionCount} questions • {game.difficulty} difficulty
-							</span>
-						) : (
-							<span className=' text-sm'>
-								{game.questionCount} questions • {game.difficulty} difficulty
-							</span>
-						)}
-					</div> */}
 
 					{/* Action Buttons */}
 					<div className='space-y-3'>

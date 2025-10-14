@@ -60,6 +60,9 @@
 - **Batch Size Optimization**: Increased batch size from 2 to 5 questions per API call, reducing API requests by 62.5%
 - **Custom Industry Processing**: Fixed custom industry field handling in setup form to properly pass custom industry values to AI
 - **Performance Testing**: Comprehensive testing of question generation flow with improved timeout handling
+- **Dashboard Performance Optimization**: Eliminated N+1 API calls by removing redundant question count and play count API requests
+- **Question Count Field Enhancement**: Added `actualQuestionCount` field to game documents for efficient data access
+- **Play Count Display Optimization**: Moved play count display exclusively to submissions page for better data relevance
 
 ### Current Development State
 
