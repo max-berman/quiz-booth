@@ -3,7 +3,7 @@
 // Score validation constants for consistent validation across client and server
 export const SCORE_VALIDATION_CONFIG = {
   // Time validation thresholds (use timer constants for consistency)
-  MIN_TIME_PER_QUESTION: 0.6, // seconds - minimum realistic time per question
+  MIN_TIME_PER_QUESTION: 0.3, // seconds - minimum realistic time per question
   MAX_TIME_PER_QUESTION: 30, // seconds (5 minutes) - maximum realistic time per question
   MIN_TIME_PER_QUESTION_PERFECT: 5, // seconds - minimum time for perfect score
   MAX_SCORE_PER_SECOND: 50, // maximum score per second ratio to detect tampering

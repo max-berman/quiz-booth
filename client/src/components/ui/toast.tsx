@@ -4,6 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { X } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import { useSwipeGesture } from '@/hooks/use-swipe-gesture'
 
 const ToastProvider = ToastPrimitives.Provider
 
@@ -38,15 +39,43 @@ const toastVariants = cva(
 	}
 )
 
+interface SwipeableToastProps
+	extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> {
+	variant?: 'default' | 'destructive'
+	onOpenChange?: (open: boolean) => void
+}
+
 const Toast = React.forwardRef<
 	React.ElementRef<typeof ToastPrimitives.Root>,
-	React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
-		VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
+	SwipeableToastProps & VariantProps<typeof toastVariants>
+>(({ className, variant, onOpenChange, ...props }, ref) => {
+	const toastRef = React.useRef<HTMLLIElement>(null)
+
+	const handleSwipeLeft = React.useCallback(() => {
+		if (onOpenChange) {
+			onOpenChange(false)
+		}
+	}, [onOpenChange])
+
+	const handleSwipeRight = React.useCallback(() => {
+		if (onOpenChange) {
+			onOpenChange(false)
+		}
+	}, [onOpenChange])
+
+	// Use swipe gesture hook for both left and right swipes
+	useSwipeGesture(toastRef as React.RefObject<HTMLElement>, {
+		onSwipeLeft: handleSwipeLeft,
+		onSwipeRight: handleSwipeRight,
+		threshold: 50,
+		preventDefault: false, // Allow default touch behavior for better UX
+	})
+
 	return (
 		<ToastPrimitives.Root
-			ref={ref}
+			ref={toastRef}
 			className={cn(toastVariants({ variant }), className)}
+			onOpenChange={onOpenChange}
 			{...props}
 		/>
 	)

@@ -1,6 +1,6 @@
 // Client-side environment configuration for Quiz Booth application
 
-import { getEnvironmentConfig, isDevelopment, isProduction, getEnvironment, type EnvironmentConfig } from '../../../shared/environment';
+import { getEnvironmentConfig, isDevelopment, isProduction, getEnvironment, type EnvironmentConfig, type Environment } from '../../../shared/environment';
 
 /**
  * Client-specific environment configuration
@@ -72,12 +72,44 @@ export const getClientEnvironmentConfig = (): ClientEnvironmentConfig => {
 };
 
 /**
+ * Client-specific environment detection
+ */
+export const isClientDevelopment = (): boolean => {
+  // Check if running on localhost or with Vite dev server
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '';
+
+    // Check for Vite's development mode indicator
+    const isViteDev = import.meta.env?.DEV === true ||
+      import.meta.env?.MODE === 'development' ||
+      port === '5173' || // Vite default port
+      port === '5174' || // Vite alternate port
+      port === '3000';   // Common dev port
+
+    // Check for Firebase Hosting emulator
+    const isFirebaseEmulator = port === '5000'; // Firebase Hosting emulator port
+
+    return isLocalhost && (isViteDev || isFirebaseEmulator);
+  }
+
+  // Default to production for unknown environments
+  return false;
+};
+
+export const isClientProduction = (): boolean => !isClientDevelopment();
+
+export const getClientEnvironment = (): Environment =>
+  isClientDevelopment() ? 'development' : 'production';
+
+/**
  * Client-specific environment utilities
  */
 export const clientEnvironment = {
-  isDevelopment,
-  isProduction,
-  getEnvironment,
+  isDevelopment: isClientDevelopment,
+  isProduction: isClientProduction,
+  getEnvironment: getClientEnvironment,
   getConfig: getClientEnvironmentConfig,
 
   // Client-specific environment checks
@@ -94,7 +126,7 @@ export const clientEnvironment = {
   validateFirebaseConfig: (): boolean => {
     const config = getClientEnvironmentConfig();
 
-    if (isProduction()) {
+    if (isClientProduction()) {
       const requiredVars = [
         config.firebase.config.apiKey,
         config.firebase.config.authDomain,

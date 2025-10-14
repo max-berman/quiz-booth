@@ -51,5 +51,15 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if false; // Only backend can write
     }
+
+    // Generation progress: users can read their own game progress, backend can write
+    match /generationProgress/{gameId} {
+      allow read: if request.auth != null && 
+                   exists(/databases/$(database)/documents/games/$(gameId)) &&
+                   resource != null &&
+                   resource.data != null &&
+                   resource.data.gameId == gameId;
+      allow write: if false; // Only backend can write (via Firebase Functions)
+    }
   }
 }

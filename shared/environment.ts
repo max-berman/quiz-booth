@@ -10,18 +10,12 @@ export const isDevelopment = (): boolean => {
   if (typeof process !== 'undefined' && process.env) {
     return process.env.NODE_ENV === 'development' ||
       process.env.FUNCTIONS_EMULATOR === 'true' ||
-      process.env.FIREBASE_EMULATOR === 'true';
+      process.env.FIREBASE_EMULATOR === 'true' ||
+      process.env.VITE_DEV_SERVER_URL !== undefined;
   }
 
-  // Check for Vite development mode (client-side)
-  // Use a simple check that won't break server-side builds
-  if (typeof window !== 'undefined') {
-    // Client-side environment - check for localhost or development indicators
-    const hostname = window.location.hostname;
-    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '';
-  }
-
-  // Default to production for safety
+  // For client-side, we'll use a simpler approach that can be overridden
+  // The client environment will handle the detailed detection
   return false;
 };
 

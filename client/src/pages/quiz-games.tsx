@@ -16,6 +16,7 @@ import {
 import { Link } from 'wouter'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { INDUSTRY_OPTIONS } from '@shared/constants'
+import app from '@/lib/firebase'
 import {
 	Command,
 	CommandEmpty,
@@ -49,7 +50,7 @@ export default function Quizzes() {
 	const { data: games, isLoading: gamesLoading } = useQuery<Game[]>({
 		queryKey: ['public-games', page, selectedIndustry, selectedCategories],
 		queryFn: async () => {
-			const functions = getFunctions()
+			const functions = getFunctions(app)
 			const getPublicGames = httpsCallable(functions, 'getPublicGames')
 			const result = await getPublicGames({
 				limit,
@@ -76,7 +77,7 @@ export default function Quizzes() {
 	const { data: totalCount } = useQuery<{ count: number }>({
 		queryKey: ['public-games-count'],
 		queryFn: async () => {
-			const functions = getFunctions()
+			const functions = getFunctions(app)
 			const getPublicGamesCount = httpsCallable(
 				functions,
 				'getPublicGamesCount'

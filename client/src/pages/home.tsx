@@ -26,15 +26,18 @@ import { useQuery } from '@tanstack/react-query'
 import type { Game } from '@shared/firebase-types'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { logoCache } from '@/lib/logo-cache'
+import { useToast } from '@/hooks/use-toast'
+import app from '@/lib/firebase'
 
 export default function Home() {
 	const { isAuthenticated, user, loading } = useAuth()
+	const { toast } = useToast()
 
 	// Fetch recent public games
 	const { data: recentGames, isLoading: gamesLoading } = useQuery<Game[]>({
 		queryKey: ['public-games'],
 		queryFn: async () => {
-			const functions = getFunctions()
+			const functions = getFunctions(app)
 			const getPublicGames = httpsCallable(functions, 'getPublicGames')
 			const result = await getPublicGames({ limit: 3 })
 
@@ -145,6 +148,24 @@ export default function Home() {
 								</Link>
 
 								<ShareEmbedModal isBuilder={true} />
+
+								{/* Test Toast Button - Development Only */}
+								{process.env.NODE_ENV === 'development' && (
+									<Button
+										variant='outline'
+										className='px-4 py-2 text-sm'
+										onClick={() => {
+											toast({
+												title: 'Test Toast',
+												description:
+													'Swipe left or right to dismiss this toast!',
+												duration: 10000, // 10 seconds for testing
+											})
+										}}
+									>
+										Test Swipe Toast
+									</Button>
+								)}
 							</div>
 						</div>
 					</div>

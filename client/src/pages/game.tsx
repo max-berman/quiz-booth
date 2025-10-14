@@ -27,7 +27,6 @@ import { loadGameResults } from '@/lib/session-utils'
 
 // Audio elements for reliable sound playback
 let scoreAudio: HTMLAudioElement | null = null
-let errorAudio: HTMLAudioElement | null = null
 let isAudioInitialized = false
 
 // Audio configuration - easily adjustable volume levels
@@ -83,7 +82,7 @@ const initializeAudio = async (): Promise<boolean> => {
 			}
 		}
 
-		if (!scoreAudio && !errorAudio) {
+		if (!scoreAudio) {
 			throw new Error('All audio formats failed to load')
 		}
 

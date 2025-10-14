@@ -47,6 +47,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { LoadingSpinner } from '@/components/loading-spinner'
+import { GenerationProgress } from '@/components/generation-progress'
 import type { InsertGame } from '@shared/firebase-types'
 import { INDUSTRY_OPTIONS } from '@shared/constants'
 
@@ -166,6 +167,7 @@ export default function Setup() {
 	const {
 		createGame: createGameFunction,
 		generateQuestions: generateQuestionsFunction,
+		deleteGame: deleteGameFunction,
 	} = useFirebaseFunctions()
 
 	// Game creation mutation
@@ -174,7 +176,8 @@ export default function Setup() {
 			// Use the correct data format expected by Firebase Functions
 			const firebaseGameData = {
 				title: gameData.gameTitle || null,
-				description: gameData.industry,
+				description:
+					formData.industry === 'Other' ? customIndustry : gameData.industry,
 				companyName: gameData.companyName,
 				productDescription: gameData.productDescription || null,
 				questionCount: gameData.questionCount,
@@ -189,55 +192,46 @@ export default function Setup() {
 		},
 		onSuccess: async (game: { id: string }) => {
 			setIsGenerating(true)
+
+			// Track game creation event
+			analytics.trackGameCreated({
+				gameId: game.id,
+				companyName: formData.companyName,
+				industry: formData.industry,
+				questionCount: parseInt(formData.questionCount),
+				difficulty: difficulty,
+				categories: Object.entries(categories)
+					.filter(([, selected]) => selected)
+					.map(([key]) => {
+						switch (key) {
+							case 'companyFacts':
+								return 'Company Facts'
+							case 'industryKnowledge':
+								return 'Industry Knowledge'
+							case 'funFacts':
+								return 'Fun Facts'
+							case 'generalKnowledge':
+								return 'General Knowledge'
+							case 'other':
+								return customCategory.trim() || 'Custom Questions'
+							default:
+								return key
+						}
+					}),
+			})
+
+			// Start question generation asynchronously - don't wait for completion
+			// The GenerationProgress component will handle monitoring the progress
 			try {
-				// Track game creation event
-				analytics.trackGameCreated({
-					gameId: game.id,
-					companyName: formData.companyName,
-					industry: formData.industry,
-					questionCount: parseInt(formData.questionCount),
-					difficulty: difficulty,
-					categories: Object.entries(categories)
-						.filter(([, selected]) => selected)
-						.map(([key]) => {
-							switch (key) {
-								case 'companyFacts':
-									return 'Company Facts'
-								case 'industryKnowledge':
-									return 'Industry Knowledge'
-								case 'funFacts':
-									return 'Fun Facts'
-								case 'generalKnowledge':
-									return 'General Knowledge'
-								case 'other':
-									return customCategory.trim() || 'Custom Questions'
-								default:
-									return key
-							}
-						}),
+				// Start the generation process but don't wait for it to complete
+				generateQuestionsFunction({ gameId: game.id }).catch((error) => {
+					console.error('Question generation function call failed:', error)
+					// Don't delete the game here - let the progress tracker handle errors
+					// The function might still be running on the server even if client times out
 				})
-
-				// Generate questions using Firebase Function
-				await generateQuestionsFunction({ gameId: game.id })
-
-				// Invalidate dashboard queries to refresh the games list
-				queryClient.invalidateQueries({ queryKey: ['getGamesByUser'] })
-
-				setLocation(`/game-created/${game.id}`)
 			} catch (error) {
-				console.error('Question generation failed:', error)
-				// Track AI generation error
-				analytics.trackError({
-					type: 'ai_generation',
-					message: 'Failed to generate questions',
-					context: `Game ID: ${game.id}`,
-				})
-				toast({
-					title: 'Error',
-					description: 'Failed to generate questions. Please try again.',
-					variant: 'destructive',
-				})
-				setIsGenerating(false)
+				console.error('Failed to start question generation:', error)
+				// Don't delete the game - let the progress tracker handle it
 			}
 		},
 		onError: (error) => {
@@ -356,11 +350,27 @@ export default function Setup() {
 
 	if (isGenerating) {
 		return (
-			<div className='flex-1 flex bg-background py-6 items-center'>
-				<LoadingSpinner
-					message='Generating Your Trivia Questions'
-					showTriviaContent={true}
-				/>
+			<div className='flex-1 bg-background py-6'>
+				<div className='max-w-4xl mx-auto px-2 lg:px-6'>
+					<GenerationProgress
+						gameId={createGameMutation.data?.id || ''}
+						onComplete={() => {
+							// Navigate to game created page when generation is complete
+							if (createGameMutation.data?.id) {
+								setLocation(`/game-created/${createGameMutation.data.id}`)
+							}
+						}}
+						onError={(error) => {
+							console.error('Question generation failed:', error)
+							toast({
+								title: 'Error',
+								description: 'Failed to generate questions. Please try again.',
+								variant: 'destructive',
+							})
+							setIsGenerating(false)
+						}}
+					/>
+				</div>
 			</div>
 		)
 	}
@@ -398,47 +408,6 @@ export default function Setup() {
 							booth in just a few minutes
 						</p>
 					</div>
-
-					{/* Progress Steps */}
-					{/* <div className='mb-8'>
-					<div className='flex items-center justify-center space-x-8 mb-6 '>
-						{steps.map((step, index) => (
-							<div key={step.id} className='flex items-center'>
-								<div
-									className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
-										step.complete
-											? 'bg-primary border-primary text-primary-foreground'
-											: 'bg-background border-border text-muted-foreground'
-									}`}
-								>
-									{step.complete ? (
-										<CheckCircle className='h-6 w-6' />
-									) : (
-										<step.icon className='h-6 w-6' />
-									)}
-								</div>
-								<div className='ml-3 hidden sm:block'>
-									<p
-										className={`text-sm font-medium ${
-											step.complete
-												? 'text-foreground'
-												: 'text-muted-foreground'
-										}`}
-									>
-										{step.title}
-									</p>
-								</div>
-								{index < steps.length - 1 && (
-									<div
-										className={`w-16 h-1 mx-4 rounded ${
-											step.complete ? 'bg-primary' : 'bg-border'
-										}`}
-									/>
-								)}
-							</div>
-						))}
-					</div>
-				</div> */}
 
 					<Card className='border-none bg-background shadow-none py-2'>
 						{!isAuthenticated && (
@@ -606,12 +575,12 @@ export default function Setup() {
 											</Label>
 											<Textarea
 												id='productDescription'
-												placeholder='Describe your main products or services to get more targeted questions ...'
+												placeholder='Briefly describe your main products or services (max 100 characters) ...'
 												value={formData.productDescription}
 												onChange={(e) =>
 													setFormData((prev) => ({
 														...prev,
-														productDescription: e.target.value,
+														productDescription: e.target.value.slice(0, 100),
 													}))
 												}
 												className={`mt-2  ${
@@ -619,8 +588,12 @@ export default function Setup() {
 														? 'border-primary'
 														: 'border-border'
 												}`}
-												rows={3}
+												rows={2}
 											/>
+											<div className='flex justify-between text-sm text-muted-foreground mt-1'>
+												<span>Keep it brief for better AI performance</span>
+												<span>{formData.productDescription.length}/100</span>
+											</div>
 										</div>
 
 										{/* TODO: Provide the key messages that represent your brand. */}

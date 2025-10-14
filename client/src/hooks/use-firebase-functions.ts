@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { logger } from "@/lib/logger";
-
-const functions = getFunctions();
+import app from "@/lib/firebase";
 
 // Firebase Functions API client
 export const useFirebaseFunctions = () => {
+  const functions = getFunctions(app);
   const queryClient = useQueryClient();
 
   // Game functions
@@ -19,6 +19,7 @@ export const useFirebaseFunctions = () => {
   const getGameLeaderboard = httpsCallable(functions, 'getGameLeaderboard');
   const getGamePlayCount = httpsCallable(functions, 'getGamePlayCount');
   const getGameQuestionsCount = httpsCallable(functions, 'getGameQuestionsCount');
+  const deleteGame = httpsCallable(functions, 'deleteGame');
 
   // Question functions
   const generateQuestions = httpsCallable(functions, 'generateQuestions');
@@ -126,6 +127,7 @@ export const useFirebaseFunctions = () => {
     getGameLeaderboard,
     getGamePlayCount,
     getGameQuestionsCount,
+    deleteGame,
     generateQuestions,
     generateSingleQuestion,
     getQuestions,

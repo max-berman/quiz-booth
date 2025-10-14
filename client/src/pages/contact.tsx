@@ -23,6 +23,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, Mail, MessageSquare, User, Send } from 'lucide-react'
+import app from '@/lib/firebase'
 
 // Contact form validation schema
 const contactFormSchema = z.object({
@@ -71,17 +72,8 @@ export default function Contact() {
 
 		try {
 			// Import the Firebase function
-			const { getFunctions, httpsCallable, connectFunctionsEmulator } =
-				await import('firebase/functions')
-			const functions = getFunctions()
-
-			// Use local emulator for development
-			if (
-				window.location.hostname === 'localhost' ||
-				window.location.hostname === '127.0.0.1'
-			) {
-				connectFunctionsEmulator(functions, 'localhost', 5001)
-			}
+			const { getFunctions, httpsCallable } = await import('firebase/functions')
+			const functions = getFunctions(app)
 
 			const sendContactForm = httpsCallable(functions, 'sendContactForm')
 

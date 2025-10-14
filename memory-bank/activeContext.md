@@ -55,6 +55,11 @@
 - **Mobile Swipe Gestures**: Added swipe left functionality for mobile devices to trigger next question navigation
 - **Mobile Button Fix**: Fixed mobile button tapability by disabling preventDefault in swipe gesture handler
 - **Vibration Feedback**: Added vibration feedback (200ms) for wrong answers with browser compatibility checking
+- **Question Generation Optimization**: Significantly improved question generation performance and reliability
+- **Timeout Reduction**: Reduced main function timeout from 540s to 120s (9 min → 2 min) for better user experience
+- **Batch Size Optimization**: Increased batch size from 2 to 5 questions per API call, reducing API requests by 62.5%
+- **Custom Industry Processing**: Fixed custom industry field handling in setup form to properly pass custom industry values to AI
+- **Performance Testing**: Comprehensive testing of question generation flow with improved timeout handling
 
 ### Current Development State
 

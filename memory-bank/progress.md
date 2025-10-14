@@ -109,6 +109,8 @@
 - **Test Coverage**: Expand test suite coverage
 - **SSR Asset Resolution**: ✅ RESOLVED - Automated asset file name updates with forced deployment
 - **API Consistency**: ✅ RESOLVED - Implemented consistent `httpsCallable` pattern across all Firebase Functions
+- **Question Generation Performance**: ✅ RESOLVED - Optimized timeouts and batch processing for faster generation
+- **Custom Industry Processing**: ✅ RESOLVED - Fixed custom industry field handling in setup form
 
 ### User Experience Issues
 

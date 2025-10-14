@@ -36,6 +36,7 @@ import {
 	useQuestionCount,
 	usePlayCount,
 } from '@/lib/game-utils'
+import app from '@/lib/firebase'
 
 interface GameCardEnhancedProps {
 	game: Game
@@ -72,7 +73,7 @@ export function GameCardDashboard({
 	const deleteGameMutation = useMutation({
 		mutationFn: async (gameId: string) => {
 			const { getFunctions, httpsCallable } = await import('firebase/functions')
-			const functions = getFunctions()
+			const functions = getFunctions(app)
 			const deleteGameFunction = httpsCallable(functions, 'deleteGame')
 			const result = await deleteGameFunction({ gameId })
 			return result.data
@@ -124,7 +125,7 @@ export function GameCardDashboard({
 
 		try {
 			const { getFunctions, httpsCallable } = await import('firebase/functions')
-			const functions = getFunctions()
+			const functions = getFunctions(app)
 			const updateGamePublicStatus = httpsCallable(
 				functions,
 				'updateGamePublicStatus'

@@ -107,11 +107,7 @@ export default function Pricing() {
 			title: 'Easy Sharing',
 			description: 'QR codes and embed options for any platform',
 		},
-		{
-			icon: Shield,
-			title: 'Enterprise Security',
-			description: 'Secure authentication and data protection',
-		},
+
 		{
 			icon: Clock,
 			title: 'Timer System',
@@ -303,9 +299,7 @@ export default function Pricing() {
 								</CardHeader>
 								<CardContent>
 									<p className='text-muted-foreground'>
-										The beta period will be free for at least one month. We'll
-										provide 30 days notice before any pricing changes take
-										effect.
+										The beta period will be free for at least one month.
 									</p>
 								</CardContent>
 							</Card>
@@ -366,13 +360,19 @@ export default function Pricing() {
 							for free. No credit card required.
 						</p>
 						<div className='flex flex-col sm:flex-row gap-4 justify-center'>
-							<Button size='lg' className='bg-primary hover:bg-primary/90'>
+							<Button
+								size='lg'
+								className='bg-primary hover:bg-primary/90'
+								onClick={() => setShowBetaModal(true)}
+							>
 								<Star className='h-4 w-4 mr-2' />
 								Start Free Beta
 							</Button>
-							<Button variant='outline' size='lg'>
-								Learn More About Features
-							</Button>
+							<a href='/about'>
+								<Button variant='outline' size='lg'>
+									Learn More About Features
+								</Button>
+							</a>
 						</div>
 					</div>
 				</section>

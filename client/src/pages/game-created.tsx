@@ -34,6 +34,7 @@ import type { Game } from '@shared/firebase-types'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { auth } from '@/lib/firebase'
 import { getExistingPrizes } from '@/lib/game-utils'
+import app from '@/lib/firebase'
 
 export default function GameCreated() {
 	const { id } = useParams<{ id: string }>()
@@ -53,7 +54,7 @@ export default function GameCreated() {
 	const { data: game, isLoading } = useQuery<Game>({
 		queryKey: [`game-${id}`],
 		queryFn: async () => {
-			const functions = getFunctions()
+			const functions = getFunctions(app)
 			const getGame = httpsCallable(functions, 'getGame')
 			const result = await getGame({ gameId: id })
 			return result.data as Game
@@ -243,7 +244,7 @@ export default function GameCreated() {
 						{/* Action Buttons - Enhanced styling to match game-card-enhanced */}
 						<div className='space-y-2 mb-4'>
 							{/* Customization Action */}
-							<div className='grid grid-cols-3 gap-2'>
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
 								<Button
 									variant='outline'
 									className='w-full'
@@ -275,6 +276,19 @@ export default function GameCreated() {
 									)}{' '}
 									Prizes
 								</Button>
+							</div>
+
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
+								<Button
+									variant='outline'
+									className='w-full'
+									size='sm'
+									onClick={() => setLocation(`/game/${id}`)}
+									data-testid='button-play-game'
+								>
+									<Play className='mr-2 h-4 w-4' />
+									Play Game
+								</Button>
 								<Button
 									variant='outline'
 									className='w-full'
@@ -287,17 +301,7 @@ export default function GameCreated() {
 								</Button>
 							</div>
 
-							<div className='grid grid-cols-3 gap-2'>
-								<Button
-									variant='outline'
-									className='w-full'
-									size='sm'
-									onClick={() => setLocation(`/game/${id}`)}
-									data-testid='button-play-game'
-								>
-									<Play className='mr-2 h-4 w-4' />
-									Play Game
-								</Button>
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
 								<Button
 									variant='outline'
 									className='w-full'

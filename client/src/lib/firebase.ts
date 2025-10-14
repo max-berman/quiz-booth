@@ -1,11 +1,13 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, connectAuthEmulator, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import clientEnvironment from '../config/environment';
 
 let app: any;
 let auth: any;
+let db: any;
 let storage: any;
 
 // Check if Firebase is already initialized
@@ -24,6 +26,7 @@ if (existingApps.length > 0) {
   try {
     app = initializeApp(config.firebase.config);
     auth = getAuth(app);
+    db = getFirestore(app);
 
     if (clientEnvironment.isDevelopment()) {
       // Set emulator settings IMMEDIATELY after getting auth
@@ -34,6 +37,9 @@ if (existingApps.length > 0) {
         connectAuthEmulator(auth, config.firebase.emulator.auth, {
           disableWarnings: true
         });
+
+        // Connect Firestore emulator
+        connectFirestoreEmulator(db, 'localhost', 8081);
 
         // Connect Functions emulator
         const functions = getFunctions(app);
@@ -63,5 +69,5 @@ if (existingApps.length > 0) {
   }
 }
 
-export { auth, storage };
+export { auth, db, storage };
 export default app;

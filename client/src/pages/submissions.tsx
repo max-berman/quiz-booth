@@ -16,6 +16,7 @@ import { ArrowLeft, Download, Users, Trophy, Clock, Mail } from 'lucide-react'
 import type { Player, Game } from '@shared/schema'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { auth } from '@/lib/firebase'
+import app from '@/lib/firebase'
 import { formatTime } from '@/lib/time-utils'
 import { formatDateTime } from '@/lib/date-utils'
 
@@ -26,7 +27,7 @@ export default function Submissions() {
 		queryKey: [`game-${id}`],
 		enabled: !!id,
 		queryFn: async () => {
-			const functions = getFunctions()
+			const functions = getFunctions(app)
 			const getGame = httpsCallable(functions, 'getGame')
 			const result = await getGame({ gameId: id })
 			return result.data as Game
@@ -41,7 +42,7 @@ export default function Submissions() {
 		queryKey: [`game-${id}-players`],
 		enabled: !!id && !!auth.currentUser,
 		queryFn: async () => {
-			const functions = getFunctions()
+			const functions = getFunctions(app)
 			const getGamePlayers = httpsCallable(functions, 'getGamePlayers')
 			const result = await getGamePlayers({ gameId: id })
 			return result.data as Player[]
