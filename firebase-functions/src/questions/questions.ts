@@ -8,6 +8,295 @@ import { ProgressTracker } from '../lib/progress-tracker';
 
 const db = admin.firestore();
 
+// Comprehensive error handling configuration
+interface ErrorClassification {
+  userMessage: string;
+  shouldRetry: boolean;
+  errorType: string;
+  fallbackPossible: boolean;
+}
+
+
+/**
+ * Enhanced error classification for LLM API errors
+ * @param status - HTTP status code
+ * @param errorText - Error response text
+ * @returns Error classification with user message and retry logic
+ */
+function classifyLLMError(status: number, errorText: string): ErrorClassification {
+  switch (status) {
+    case 400:
+      return {
+        userMessage: 'Invalid request format. Please check your input and try again.',
+        shouldRetry: false,
+        errorType: 'bad_request',
+        fallbackPossible: true
+      };
+    case 401:
+    case 403:
+      return {
+        userMessage: 'AI service authentication failed. Please contact support.',
+        shouldRetry: false,
+        errorType: 'authentication',
+        fallbackPossible: false
+      };
+    case 404:
+      return {
+        userMessage: 'AI service endpoint not found. Please contact support.',
+        shouldRetry: false,
+        errorType: 'not_found',
+        fallbackPossible: false
+      };
+    case 408:
+      return {
+        userMessage: 'AI service request timed out. Please try again with fewer questions.',
+        shouldRetry: true,
+        errorType: 'timeout',
+        fallbackPossible: true
+      };
+    case 413:
+      return {
+        userMessage: 'Request too large. Please reduce the number of questions or simplify your prompt.',
+        shouldRetry: false,
+        errorType: 'payload_too_large',
+        fallbackPossible: true
+      };
+    case 422:
+      return {
+        userMessage: 'Invalid content format. Please adjust your company information and try again.',
+        shouldRetry: false,
+        errorType: 'validation',
+        fallbackPossible: true
+      };
+    case 429:
+      return {
+        userMessage: 'AI service is temporarily overloaded. Please try again in a few moments.',
+        shouldRetry: true,
+        errorType: 'rate_limit',
+        fallbackPossible: true
+      };
+    case 500:
+      return {
+        userMessage: 'AI service is experiencing technical difficulties. Please try again later.',
+        shouldRetry: true,
+        errorType: 'server_error',
+        fallbackPossible: true
+      };
+    case 502:
+    case 503:
+    case 504:
+      return {
+        userMessage: 'AI service is temporarily unavailable. Please try again in a few minutes.',
+        shouldRetry: true,
+        errorType: 'service_unavailable',
+        fallbackPossible: true
+      };
+    default:
+      return {
+        userMessage: 'An unexpected error occurred. Please try again.',
+        shouldRetry: status >= 500, // Retry on server errors
+        errorType: 'unknown',
+        fallbackPossible: true
+      };
+  }
+}
+
+/**
+ * Detect network-related errors
+ * @param error - Error object to check
+ * @returns True if the error is network-related
+ */
+function isNetworkError(error: any): boolean {
+  return error instanceof TypeError && (
+    error.message.includes('fetch') ||
+    error.message.includes('network') ||
+    error.message.includes('ECONNREFUSED') ||
+    error.message.includes('ENOTFOUND') ||
+    error.message.includes('ETIMEDOUT') ||
+    error.message.includes('ECONNRESET')
+  );
+}
+
+/**
+ * Enhanced error handler for LLM API calls
+ * @param error - The caught error
+ * @param context - Additional context for logging
+ * @returns User-friendly error message and retry decision
+ */
+function handleLLMError(error: any, context: { batchIndex?: number; totalBatches?: number; batchSize?: number } = {}): {
+  userMessage: string;
+  shouldRetry: boolean;
+  errorType: string;
+  fallbackPossible: boolean;
+} {
+  console.error('LLM API Error:', {
+    message: error.message,
+    status: error.status,
+    context,
+    stack: error.stack
+  });
+
+  // Network errors
+  if (isNetworkError(error)) {
+    return {
+      userMessage: 'Network connection issue. Please check your internet connection and try again.',
+      shouldRetry: true,
+      errorType: 'network',
+      fallbackPossible: true
+    };
+  }
+
+  // HTTP status code errors
+  if (error.status) {
+    return classifyLLMError(error.status, error.message);
+  }
+
+  // Timeout errors
+  if (error.name === 'AbortError' || error.message.includes('timeout') || error.message.includes('deadline')) {
+    return {
+      userMessage: 'AI service request timed out. Please try again with fewer questions.',
+      shouldRetry: true,
+      errorType: 'timeout',
+      fallbackPossible: true
+    };
+  }
+
+  // Generic errors
+  return {
+    userMessage: 'An unexpected error occurred with the AI service. Please try again.',
+    shouldRetry: false,
+    errorType: 'generic',
+    fallbackPossible: true
+  };
+}
+
+// LLM Provider interface for extensibility
+interface LLMProvider {
+  name: string;
+  isAvailable(): boolean;
+  generateQuestions(prompt: string, batchSize: number): Promise<any[]>;
+  generateSingleQuestion(prompt: string): Promise<any>;
+}
+
+// Base DeepSeek provider implementation
+class DeepSeekProvider implements LLMProvider {
+  name = 'DeepSeek';
+
+  isAvailable(): boolean {
+    return !!process.env.DEEPSEEK_API_KEY;
+  }
+
+  async generateQuestions(prompt: string, batchSize: number): Promise<any[]> {
+    const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
+    if (!deepseekApiKey) {
+      throw new Error('DeepSeek API key not configured');
+    }
+
+    const response = await fetch(`${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${deepseekApiKey}`,
+        'Content-Type': API_HEADERS.CONTENT_TYPE,
+      },
+      body: JSON.stringify({
+        model: DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' }
+      }),
+    });
+
+    if (!response.ok) {
+      const error = new Error(`DeepSeek API error: ${response.status} ${response.statusText}`);
+      (error as any).status = response.status;
+      throw error;
+    }
+
+    const dataResponse = await response.json() as any;
+    const content = dataResponse.choices[0].message.content;
+
+    if (!content) {
+      throw new Error('No content received from DeepSeek API');
+    }
+
+    const parsed = JSON.parse(content);
+
+    // Handle different response formats
+    if (Array.isArray(parsed)) {
+      return parsed;
+    } else if (parsed.questions && Array.isArray(parsed.questions)) {
+      return parsed.questions;
+    } else if (parsed.question || parsed.questionText) {
+      return [parsed];
+    } else {
+      throw new Error(`Unexpected response format: ${JSON.stringify(parsed)}`);
+    }
+  }
+
+  async generateSingleQuestion(prompt: string): Promise<any> {
+    return this.generateQuestions(prompt, 1).then(questions => questions[0]);
+  }
+}
+
+// LLM Service for managing multiple providers
+class LLMService {
+  private providers: LLMProvider[] = [new DeepSeekProvider()];
+
+  async generateQuestionsWithFallback(
+    prompt: string,
+    batchSize: number,
+    onProviderSwitch?: (from: string, to: string) => void
+  ): Promise<any[]> {
+    let lastError: Error | null = null;
+
+    for (const provider of this.providers) {
+      if (!provider.isAvailable()) {
+        console.log(`Provider ${provider.name} is not available, skipping`);
+        continue;
+      }
+
+      try {
+        console.log(`Attempting to generate questions with ${provider.name}`);
+        const questions = await provider.generateQuestions(prompt, batchSize);
+        console.log(`Successfully generated ${questions.length} questions with ${provider.name}`);
+        return questions;
+      } catch (error) {
+        console.error(`Provider ${provider.name} failed:`, error);
+        lastError = error as Error;
+
+        // Check if we should try next provider
+        const errorInfo = handleLLMError(error);
+        if (errorInfo.fallbackPossible && this.providers.indexOf(provider) < this.providers.length - 1) {
+          const nextProvider = this.providers[this.providers.indexOf(provider) + 1];
+          console.log(`Falling back to ${nextProvider.name} due to error: ${errorInfo.errorType}`);
+          onProviderSwitch?.(provider.name, nextProvider.name);
+          continue;
+        }
+
+        // If no fallback possible or last provider, throw the error
+        throw error;
+      }
+    }
+
+    throw lastError || new Error('No LLM providers available');
+  }
+
+  async generateSingleQuestionWithFallback(
+    prompt: string,
+    onProviderSwitch?: (from: string, to: string) => void
+  ): Promise<any> {
+    const questions = await this.generateQuestionsWithFallback(prompt, 1, onProviderSwitch);
+    return questions[0];
+  }
+
+  // Method to add additional providers in the future
+  addProvider(provider: LLMProvider): void {
+    this.providers.push(provider);
+  }
+}
+
+// Global LLM service instance
+const llmService = new LLMService();
+
 // Helper function to track usage
 /**
  * Track usage events and update usage counters
@@ -189,11 +478,6 @@ async function generateSingleBatch(
   batchIndex: number,
   totalBatches: number
 ): Promise<any[]> {
-  const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
-  if (!deepseekApiKey) {
-    throw new Error('DeepSeek API key not configured');
-  }
-
   // Determine if company name contains a website URL
   const isWebsite = isWebsiteURL(gameData?.companyName || '');
   const companyInfo = isWebsite ? `Company website: ${gameData?.companyName}` : `Company name: ${gameData?.companyName}`;
@@ -261,168 +545,53 @@ async function generateSingleBatch(
   - Approximately 15% of questions include a relevant emoji in questionText
   - Return valid JSON only, no additional text`;
 
-  console.log(`Sending request to DeepSeek API for batch ${batchIndex + 1}/${totalBatches} (${batchSize} questions)`);
+  console.log(`Generating batch ${batchIndex + 1}/${totalBatches} with ${batchSize} questions`);
 
-  // Log the exact API request details
-  console.log(`=== DEEPSEEK API REQUEST DETAILS ===`);
-  console.log(`URL: ${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`);
-  console.log(`Model: ${DEEPSEEK_API_CONFIG.DEFAULT_MODEL}`);
+  // Log the prompt details
+  console.log(`=== LLM PROMPT DETAILS ===`);
   console.log(`Batch: ${batchIndex + 1}/${totalBatches}`);
   console.log(`Questions in batch: ${batchSize}`);
   console.log(`Prompt length: ${prompt.length} characters`);
   console.log(`Prompt preview: ${prompt.substring(0, 200)}...`);
-  console.log(`====================================`);
+  console.log(`==========================`);
 
-  // Add timeout handling for DeepSeek API call with retry logic
-  const maxRetries = 1; // Reduced retries for faster timeout
-  let retryCount = 0;
-  let lastError: Error | null = null;
-
-  while (retryCount <= maxRetries) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // Reduced to 1 minute per batch
-
-    try {
-      console.log(`Attempt ${retryCount + 1}/${maxRetries + 1} for batch ${batchIndex + 1}/${totalBatches}`);
-
-      const response = await fetch(`${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${deepseekApiKey}`,
-          'Content-Type': API_HEADERS.CONTENT_TYPE,
-        },
-        body: JSON.stringify({
-          model: DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
-          messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          response_format: { type: 'json_object' }
-        }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`DeepSeek API error for batch ${batchIndex + 1}: ${response.status} ${response.statusText}`);
-        console.error(`Error details: ${errorText}`);
-        console.error(`Request URL: ${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`);
-        console.error(`Request headers: ${JSON.stringify({
-          'Authorization': 'Bearer [REDACTED]',
-          'Content-Type': API_HEADERS.CONTENT_TYPE,
-        })}`);
-        console.error(`Request body length: ${prompt.length} characters`);
-        console.error(`Batch details: batch ${batchIndex + 1}/${totalBatches}, size: ${batchSize}`);
-
-        // Enhanced error classification
-        let errorMessage = `DeepSeek API error: ${response.status} ${response.statusText}`;
-
-        if (response.status === 429) {
-          errorMessage = 'AI service is temporarily overloaded. Please try again in a few moments.';
-        } else if (response.status >= 500) {
-          errorMessage = 'AI service is experiencing technical difficulties. Please try again later.';
-        } else if (response.status === 401 || response.status === 403) {
-          errorMessage = 'AI service authentication failed. Please contact support.';
-        } else if (response.status === 408) {
-          errorMessage = 'AI service request timed out. Please try again with fewer questions.';
-        }
-
-        lastError = new Error(errorMessage);
-
-        // Don't retry on authentication errors
-        if (response.status === 401 || response.status === 403) {
-          break;
-        }
-
-        // Retry on rate limits and server errors
-        if (retryCount < maxRetries && (response.status === 429 || response.status >= 500)) {
-          retryCount++;
-          console.log(`Retrying batch ${batchIndex + 1} in ${retryCount * 2000}ms...`);
-          await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
-          continue;
-        }
-
-        throw lastError;
+  try {
+    // Use the LLM service with fallback capability
+    const generatedQuestions = await llmService.generateQuestionsWithFallback(
+      prompt,
+      batchSize,
+      (from, to) => {
+        console.log(`Provider switched from ${from} to ${to} for batch ${batchIndex + 1}`);
       }
+    );
 
-      const dataResponse = await response.json() as any;
-      console.log(`Received response from DeepSeek API for batch ${batchIndex + 1}`);
-      console.log(`Response status: ${response.status}`);
-      console.log(`Response ID: ${dataResponse.id}`);
-      console.log(`Usage: ${JSON.stringify(dataResponse.usage)}`);
+    console.log(`Successfully generated ${generatedQuestions.length} questions for batch ${batchIndex + 1}`);
 
-      let generatedQuestions;
-      let content: string | null = null;
-      try {
-        content = dataResponse.choices[0].message.content;
-        if (!content) {
-          throw new Error('No content received from DeepSeek API');
-        }
-
-        console.log(`Raw AI response for batch ${batchIndex + 1}:`, content);
-
-        // Log full response for debugging (truncated if too long)
-        if (content.length > 1000) {
-          console.log(`Full response (truncated): ${content.substring(0, 1000)}...`);
-        } else {
-          console.log(`Full response: ${content}`);
-        }
-
-        const parsed = JSON.parse(content);
-
-        // Handle different response formats
-        if (Array.isArray(parsed)) {
-          generatedQuestions = parsed;
-        } else if (parsed.questions && Array.isArray(parsed.questions)) {
-          generatedQuestions = parsed.questions;
-        } else if (parsed.question || parsed.questionText) {
-          generatedQuestions = [parsed];
-        } else {
-          throw new Error(`Unexpected response format: ${JSON.stringify(parsed)}`);
-        }
-
-        console.log(`Successfully parsed ${generatedQuestions.length} questions for batch ${batchIndex + 1}`);
-
-        // Validate each question
-        generatedQuestions.forEach((q: any, index: number) => {
-          if (!q.questionText && !q.question) {
-            throw new Error(`Question ${index + 1} missing question text`);
-          }
-          if (!Array.isArray(q.options) || q.options.length !== 4) {
-            throw new Error(`Question ${index + 1} has invalid options: ${JSON.stringify(q.options)}`);
-          }
-          if (typeof q.correctAnswer !== 'number' || q.correctAnswer < 0 || q.correctAnswer > 3) {
-            throw new Error(`Question ${index + 1} has invalid correct answer: ${q.correctAnswer}`);
-          }
-        });
-
-      } catch (parseError) {
-        console.error(`Failed to parse DeepSeek response for batch ${batchIndex + 1}:`, parseError);
-        console.error(`Raw content that failed to parse:`, content || 'No content available');
-        throw new Error(`Failed to parse DeepSeek response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+    // Validate each question
+    generatedQuestions.forEach((q: any, index: number) => {
+      if (!q.questionText && !q.question) {
+        throw new Error(`Question ${index + 1} missing question text`);
       }
-
-      return generatedQuestions;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      lastError = error as Error;
-
-      if (retryCount < maxRetries && !(error instanceof TypeError && error.message.includes('fetch'))) {
-        retryCount++;
-        console.log(`Retrying batch ${batchIndex + 1} in ${retryCount * 2000}ms...`);
-        await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
-        continue;
+      if (!Array.isArray(q.options) || q.options.length !== 4) {
+        throw new Error(`Question ${index + 1} has invalid options: ${JSON.stringify(q.options)}`);
       }
+      if (typeof q.correctAnswer !== 'number' || q.correctAnswer < 0 || q.correctAnswer > 3) {
+        throw new Error(`Question ${index + 1} has invalid correct answer: ${q.correctAnswer}`);
+      }
+    });
 
-      throw lastError;
-    }
+    return generatedQuestions;
+  } catch (error) {
+    console.error(`Failed to generate batch ${batchIndex + 1}:`, error);
+
+    // Use enhanced error handling to provide better error messages
+    const errorInfo = handleLLMError(error, { batchIndex, totalBatches, batchSize });
+
+    // Create a user-friendly error with the enhanced classification
+    const enhancedError = new Error(errorInfo.userMessage);
+    (enhancedError as any).errorType = errorInfo.errorType;
+    throw enhancedError;
   }
-
-  throw lastError || new Error(`Failed to generate batch ${batchIndex + 1} after ${maxRetries + 1} attempts`);
 }
 
 /**
@@ -799,12 +968,6 @@ export const generateSingleQuestion = functions.runWith({
       });
     }
 
-    // Call DeepSeek API to generate a single question
-    const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
-    if (!deepseekApiKey) {
-      throw new functions.https.HttpsError('internal', 'DeepSeek API key not configured');
-    }
-
     // Determine if company name contains a website URL
     const isWebsite = isWebsiteURL(gameData?.companyName || '');
     const companyInfo = isWebsite ? `Company website: ${gameData?.companyName}` : `Company name: ${gameData?.companyName}`;
@@ -850,7 +1013,7 @@ export const generateSingleQuestion = functions.runWith({
     
     Return ONLY a JSON object with a single question in this exact format:
     {
-      "questionText": "Clear and concise question? �",
+      "questionText": "Clear and concise question? ",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctAnswer": 0,
       "explanation": "Brief educational explanation citing verifiable facts"
@@ -866,72 +1029,61 @@ export const generateSingleQuestion = functions.runWith({
     - Use emojis sparingly and only when they enhance understanding or engagement
     - Return valid JSON only, no additional text or formatting`;
 
-    const response = await fetch(`${DEEPSEEK_API_CONFIG.BASE_URL}${DEEPSEEK_API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${deepseekApiKey}`,
-        'Content-Type': API_HEADERS.CONTENT_TYPE,
-      },
-      body: JSON.stringify({
-        model: DEEPSEEK_API_CONFIG.DEFAULT_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        response_format: { type: 'json_object' }
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`DeepSeek API error: ${response.status} ${response.statusText}`);
-    }
-
-    const dataResponse = await response.json() as any;
-    let generatedQuestion;
+    console.log('Generating single question with LLM service');
 
     try {
-      const content = dataResponse.choices[0].message.content;
-      const parsed = JSON.parse(content);
+      // Use the LLM service with fallback capability
+      const generatedQuestion = await llmService.generateSingleQuestionWithFallback(
+        prompt,
+        (from, to) => {
+          console.log(`Provider switched from ${from} to ${to} for single question generation`);
+        }
+      );
 
-      // Handle different response formats
-      if (parsed.questionText && parsed.options) {
-        generatedQuestion = parsed;
-      } else if (parsed.question || parsed.text) {
-        generatedQuestion = {
-          questionText: parsed.questionText || parsed.question || parsed.text,
-          options: parsed.options || parsed.choices || [],
-          correctAnswer: typeof parsed.correctAnswer === 'number' ? parsed.correctAnswer : (parsed.correct || 0),
-          explanation: parsed.explanation || parsed.answer_explanation || '',
-        };
-      } else {
-        throw new Error(`Unexpected response format: ${JSON.stringify(parsed)}`);
+      console.log('Successfully generated single question');
+
+      // Validate the question structure
+      if (!generatedQuestion.questionText || !Array.isArray(generatedQuestion.options) || generatedQuestion.options.length !== 4) {
+        throw new Error('Invalid question format received from AI');
       }
-    } catch (parseError) {
-      throw new Error(`Failed to parse DeepSeek response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+
+      // Shuffle the options
+      const { shuffled: shuffledOptions, newIndex: newCorrectAnswer } = shuffleArrayAndTrackIndex(
+        generatedQuestion.options,
+        generatedQuestion.correctAnswer
+      );
+
+      const randomizedQuestion = {
+        ...generatedQuestion,
+        options: shuffledOptions,
+        correctAnswer: newCorrectAnswer
+      };
+
+      return randomizedQuestion;
+    } catch (error) {
+      console.error('LLM service error for single question:', error);
+
+      // Use enhanced error handling to provide better error messages
+      const errorInfo = handleLLMError(error);
+
+      // Create a user-friendly error with the enhanced classification
+      const enhancedError = new Error(errorInfo.userMessage);
+      (enhancedError as any).errorType = errorInfo.errorType;
+      throw enhancedError;
     }
-
-    // Validate the question structure
-    if (!generatedQuestion.questionText || !Array.isArray(generatedQuestion.options) || generatedQuestion.options.length !== 4) {
-      throw new Error('Invalid question format received from AI');
-    }
-
-    // Shuffle the options
-    const { shuffled: shuffledOptions, newIndex: newCorrectAnswer } = shuffleArrayAndTrackIndex(
-      generatedQuestion.options,
-      generatedQuestion.correctAnswer
-    );
-
-    const randomizedQuestion = {
-      ...generatedQuestion,
-      options: shuffledOptions,
-      correctAnswer: newCorrectAnswer
-    };
-
-    return randomizedQuestion;
   } catch (error) {
     console.error('Generate single question error:', error);
-    throw new functions.https.HttpsError('internal', 'Failed to generate question');
+
+    // Enhanced error handling for the main function
+    let errorMessage = `Failed to generate question: ${error instanceof Error ? error.message : String(error)}`;
+
+    // Check for specific error types and provide better messages
+    if (errorMessage.includes('deadline-exceeded') || errorMessage.includes('timeout')) {
+      errorMessage = 'Question generation timed out. The AI service is taking too long to respond. Please try again.';
+    } else if (errorMessage.includes('network') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('ENOTFOUND')) {
+      errorMessage = 'Network connection issue. Please check your internet connection and try again.';
+    }
+
+    throw new functions.https.HttpsError('internal', errorMessage);
   }
 });
