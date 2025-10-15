@@ -13,7 +13,6 @@ import type { Question } from '@shared/firebase-types'
 import { useSwipeGesture } from '@/hooks/use-swipe-gesture'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
-import { getResizeHandleElementIndex } from 'react-resizable-panels'
 
 // Tutorial management utilities
 const TUTORIAL_KEY = 'quizbooth_swipe_tutorial_seen'

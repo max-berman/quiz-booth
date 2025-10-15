@@ -13,6 +13,7 @@ import { PWARegistration } from '@/components/pwa-registration'
 import { CacheDebug } from '@/components/cache-debug'
 import { shouldShowHeader, shouldShowFooter } from '@/config/page-visibility'
 import { logoCache } from '@/lib/logo-cache'
+import ErrorBoundary from '@/components/error-boundary'
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import('@/pages/home'))
@@ -81,7 +82,9 @@ function App() {
 						<div className='h-screen bg-background flex flex-col'>
 							{/* CreatorHeader is intentionally hidden on game pages and customization pages to maintain immersive experience */}
 							{showHeader && <CreatorHeader />}
-							<Router />
+							<ErrorBoundary>
+								<Router />
+							</ErrorBoundary>
 							{showFooter && <Footer />}
 						</div>
 						<Toaster />

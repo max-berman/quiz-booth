@@ -279,11 +279,7 @@ export default function GamePage() {
 				setTimeLeft(QUESTION_TIMER_DURATION)
 			}
 		}
-	}, [
-		isSessionLoaded,
-		sessionState?.currentQuestionTimeLeft,
-		QUESTION_TIMER_DURATION,
-	])
+	}, [isSessionLoaded, sessionState?.currentQuestionTimeLeft])
 
 	// Timer effect
 	useEffect(() => {
@@ -460,9 +456,7 @@ export default function GamePage() {
 		currentQuestionIndex,
 		questions?.length,
 		updateSessionState,
-		QUESTION_TIMER_DURATION,
 		gameStartTime,
-		analytics,
 		id,
 		score,
 		correctAnswers,
