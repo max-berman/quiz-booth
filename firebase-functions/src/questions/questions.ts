@@ -9,6 +9,12 @@ import { ProgressTracker } from '../lib/progress-tracker';
 const db = admin.firestore();
 
 // Helper function to track usage
+/**
+ * Track usage events and update usage counters
+ * @param userId - User ID for tracking
+ * @param eventType - Type of event (e.g., 'game_created', 'ai_question_generated')
+ * @param metadata - Additional metadata for the event
+ */
 async function trackUsage(userId: string, eventType: string, metadata?: any): Promise<void> {
   try {
     await db.collection('usageEvents').add({
@@ -30,7 +36,8 @@ async function trackUsage(userId: string, eventType: string, metadata?: any): Pr
       { merge: true }
     );
   } catch (error) {
-    console.error('Usage tracking error:', error);
+    // Usage tracking should not break main functionality
+    console.error(`Usage tracking failed for ${eventType}:`, error instanceof Error ? error.message : String(error));
   }
 }
 
@@ -47,8 +54,20 @@ function getCounterField(eventType: string): string {
   return fieldMap[eventType] || 'currentPeriodGamesCreated';
 }
 
-// Helper function to shuffle array and track the new position of an element
+/**
+ * Shuffles an array using Fisher-Yates algorithm and tracks the new position of a specific element
+ * @param array - Array to shuffle
+ * @param trackedIndex - Index of the element whose new position should be returned
+ * @returns Object with shuffled array and new index of the tracked element
+ */
 function shuffleArrayAndTrackIndex<T>(array: T[], trackedIndex: number): { shuffled: T[], newIndex: number } {
+  if (!Array.isArray(array) || array.length === 0) {
+    throw new Error('Array must be non-empty for shuffling');
+  }
+  if (trackedIndex < 0 || trackedIndex >= array.length) {
+    throw new Error('Tracked index must be within array bounds');
+  }
+
   const shuffled = [...array];
   const originalValue = shuffled[trackedIndex];
 
@@ -406,48 +425,29 @@ async function generateSingleBatch(
   throw lastError || new Error(`Failed to generate batch ${batchIndex + 1} after ${maxRetries + 1} attempts`);
 }
 
-// Generate questions using DeepSeek API with progress tracking and batching
+/**
+ * Generate multiple questions using DeepSeek AI with progress tracking and batching
+ * @param data - Request data containing gameId
+ * @param context - Firebase functions context
+ * @returns Array of generated questions
+ */
 export const generateQuestions = functions.runWith({
   timeoutSeconds: 120, // 2 minutes for AI generation (reduced from 9 minutes)
-  memory: '1GB'
+  memory: '512MB' // Reduced from 1GB as batching is more efficient
 }).https.onCall(async (data, context) => {
   const { gameId } = data;
   const progressTracker = new ProgressTracker(gameId);
 
-  // Create progress document immediately to ensure UI can see it even if function times out
   try {
-    console.log(`[DEBUG] Step 1: Starting progress tracking for game: ${gameId}`);
-    await progressTracker.startGeneration();
-    console.log(`[DEBUG] Step 1: Progress tracking started for game: ${gameId}`);
-
-    // Force immediate progress update to ensure UI sees it
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Verify progress document was created
-    const progressDoc = await db.collection('generationProgress').doc(gameId).get();
-    if (progressDoc.exists) {
-      console.log(`✅ Progress document successfully created for game: ${gameId}`);
-    } else {
-      console.error(`❌ Progress document NOT created for game: ${gameId}`);
-    }
-  } catch (progressError) {
-    console.error('Failed to create initial progress document:', progressError);
-    // Continue anyway - we'll try to update progress later
-  }
-
-  try {
-    console.log(`[DEBUG] Step 2: Starting question generation for game: ${gameId}`);
-
     // Rate limiting check for AI generation
-    console.log(`[DEBUG] Step 2a: Checking rate limits...`);
     await withRateLimit(rateLimitConfigs.aiGeneration)(data, context);
-    console.log(`[DEBUG] Step 2a: Rate limit check passed for game: ${gameId}`);
+
+    // Initialize progress tracking
+    await progressTracker.startGeneration();
 
     // Get game data
-    console.log(`[DEBUG] Step 2b: Fetching game data from Firestore...`);
     const gameDoc = await db.collection('games').doc(gameId).get();
     if (!gameDoc.exists) {
-      console.error(`Game not found: ${gameId}`);
       await progressTracker.error('Game not found');
       throw new functions.https.HttpsError('not-found', 'Game not found');
     }
@@ -455,17 +455,12 @@ export const generateQuestions = functions.runWith({
     const gameData = gameDoc.data();
     const questionCount = gameData?.questionCount || 5;
 
-    console.log(`[DEBUG] Step 2b: Game data loaded: company=${gameData?.companyName}, industry=${gameData?.industry}, questionCount=${questionCount}`);
-
-    // Check if DeepSeek API key is available
-    console.log(`[DEBUG] Step 2c: Checking DeepSeek API key...`);
+    // Check DeepSeek API configuration
     const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
     if (!deepseekApiKey) {
-      console.error('DeepSeek API key not configured');
       await progressTracker.error('AI service configuration error');
       throw new functions.https.HttpsError('internal', 'AI service not configured');
     }
-    console.log(`[DEBUG] Step 2c: DeepSeek API key is available`);
 
     // Track AI question generation usage for authenticated users
     if (gameData?.userId) {
@@ -525,15 +520,12 @@ Return ONLY the title as plain text, no JSON or additional formatting.`;
       }
     }
 
-    console.log(`Starting DeepSeek API call for ${questionCount} questions using batched approach (batch size: 5)`);
-
     // Generate questions in batches to avoid timeout
     const generatedQuestions = await generateQuestionsInBatches(
       gameId,
       gameData,
       questionCount,
-      progressTracker,
-      5 // Increased to 5 for fewer API requests
+      progressTracker
     );
 
     console.log(`Successfully generated ${generatedQuestions.length} questions`);
