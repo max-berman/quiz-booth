@@ -9,7 +9,7 @@ admin.initializeApp();
 
 // Import function modules
 import { createGame, getGame, getGamesByUser, updateGame, updateGameTitle, updateGamePublicStatus, updateGamePrizes, savePlayerScore, getGameLeaderboard, getGamePlayers, getPublicGames, getPublicGamesCount, deleteGame } from './games/games';
-import { generateQuestions, generateSingleQuestion, deleteQuestion, updateQuestion, addQuestion } from './questions/questions';
+import { generateQuestions, generateSingleQuestion, deleteQuestion, updateQuestion, addQuestion, forceLLMProvider } from './questions';
 import { trackUsage, getUsage, resetUsage } from './usage/usage';
 import { userSetup } from './auth/userSetup';
 
@@ -37,6 +37,7 @@ export {
   deleteQuestion,
   updateQuestion,
   addQuestion,
+  forceLLMProvider,
   trackUsage,
   getUsage,
   resetUsage,

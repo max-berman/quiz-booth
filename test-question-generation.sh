@@ -20,7 +20,7 @@ GAME_RESPONSE=$(curl -s -X POST \
       "companyName": "naknick.com",
       "industry": "Other",
       "productDescription": "games for trade shows and events",
-      "questionCount": 15,
+      "questionCount": 2,
       "difficulty": "medium",
       "categories": ["Company Facts", "Fun Facts"],
       "customCategoryDescription": ""
