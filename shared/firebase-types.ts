@@ -37,6 +37,7 @@ export interface Game {
   modifiedAt?: Date; // Track when game was last modified
   isPublic?: boolean; // Whether the game is publicly accessible
   customization?: GameCustomization; // Game customization settings
+  llm?: string; // LLM provider that generated the game (DeepSeek, OpenAI, etc.)
 }
 
 export interface Question {

@@ -143,12 +143,12 @@ interface Player {
 
 #### Question Management
 
-- `generateQuestions` - Generate AI questions for game
-- `generateSingleQuestion` - Generate single question
+- `generateQuestions` - Generate AI questions for game (modular architecture)
+- `generateSingleQuestion` - Generate single question (modular architecture)
 - `getQuestions` - Get all questions for a game
-- `addQuestion` - Add single question to game
-- `updateQuestion` - Update question
-- `deleteQuestion` - Delete question
+- `addQuestion` - Add single question to game (modular architecture)
+- `updateQuestion` - Update question (modular architecture)
+- `deleteQuestion` - Delete question (modular architecture)
 
 #### Player & Analytics
 
@@ -224,6 +224,65 @@ const result = await getGamePlayCount({ gameId })
 
 - `getGamePlayCount` - Now uses `httpsCallable` pattern
 - `getGameQuestionsCount` - Now uses `httpsCallable` pattern
+
+## Firebase Functions Modular Architecture
+
+### Question Generation Module Structure
+
+The Firebase Functions questions module has been modularized from a monolithic 1000+ line file into a clean, maintainable architecture:
+
+```
+firebase-functions/src/questions/
+├── index.ts                 # Barrel exports for all functions
+├── types.ts                 # TypeScript interfaces and type definitions
+├── utils.ts                 # Shared utility functions
+├── error-handler.ts         # Enhanced LLM error handling
+├── llm-service.ts           # LLM service with provider fallback logic
+├── generateQuestions.ts     # Main question generation with batching
+├── generateSingleQuestion.ts # Single question generation
+├── addQuestion.ts           # CRUD operation for adding questions
+├── updateQuestion.ts        # CRUD operation for updating questions
+├── deleteQuestion.ts        # CRUD operation for deleting questions
+└── providers/               # LLM provider implementations
+    ├── deepseek-provider.ts # DeepSeek API implementation
+    └── openai-provider.ts   # OpenAI API implementation
+```
+
+### LLM Provider Architecture
+
+#### Provider Interface
+
+```typescript
+interface LLMProvider {
+	name: string
+	isAvailable(): boolean
+	generateQuestions(prompt: string, batchSize: number): Promise<any[]>
+	generateSingleQuestion(prompt: string): Promise<any>
+	generatePlainText(prompt: string): Promise<string>
+}
+```
+
+#### Priority Configuration
+
+- **DeepSeek Provider**: Priority 1 (Primary provider)
+- **OpenAI Provider**: Priority 2 (Fallback provider)
+- **Automatic Fallback**: Seamless switching between providers on errors
+- **Forced Provider**: Testing capability to force specific providers
+
+#### Error Handling & Fallback
+
+- **Enhanced Error Classification**: Network, timeout, HTTP status, and generic errors
+- **User-Friendly Messages**: Clear error messages for different error types
+- **Automatic Retry**: Network and timeout errors trigger fallback
+- **Provider Switching**: Logs provider switches for debugging
+
+### Key Benefits of Modularization
+
+- **Maintainability**: Each function in its own file with clear responsibilities
+- **Testability**: Individual components can be tested in isolation
+- **Extensibility**: Easy to add new LLM providers in the future
+- **Reusability**: Shared utilities and error handling across functions
+- **Type Safety**: Proper TypeScript interfaces and type definitions
 
 ## AI Integration
 

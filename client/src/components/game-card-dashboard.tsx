@@ -316,6 +316,13 @@ export function GameCardDashboard({
 									</AlertDialogFooter>
 								</AlertDialogContent>
 							</AlertDialog>
+
+							{/* Add here the LLM Model that generated the game */}
+							{game.llm && (
+								<div className='flex items-center justify-center text-xs text-muted-foreground opacity-70'>
+									<span>LLM: {game.llm}</span>
+								</div>
+							)}
 						</div>
 
 						{/* Sharing Actions */}

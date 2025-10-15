@@ -60,5 +60,10 @@ service cloud.firestore {
                     (resource.data != null && resource.data.gameId == gameId));
       allow write: if false; // Only backend can write (via Firebase Functions)
     }
+
+    // LLM Configuration: Only backend can read/write (for forced provider testing)
+    match /llmConfig/{docId} {
+      allow read, write: if false; // Only backend can access (via Firebase Functions)
+    }
   }
 }
