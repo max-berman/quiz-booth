@@ -350,7 +350,7 @@ export default function Setup() {
 
 	if (isGenerating) {
 		return (
-			<div className='flex-1 bg-background py-6'>
+			<div className='flex-1 flex items-center justify-center bg-background py-6'>
 				<div className='max-w-4xl mx-auto px-2 lg:px-6'>
 					<GenerationProgress
 						gameId={createGameMutation.data?.id || ''}

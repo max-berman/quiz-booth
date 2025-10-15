@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { GamePlayCard } from '@/components/game-play-card'
 import { GameBrandingBar } from '@/components/game-branding-bar'
 import { GameStatsBar } from '@/components/game-stats-bar'
-import { Progress } from '@/components/ui/progress'
 import { XCircle } from 'lucide-react'
 import type { Game, Question } from '@shared/firebase-types'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
@@ -409,7 +408,9 @@ export default function GamePage() {
 	}
 
 	const handleNextQuestion = useCallback(() => {
-		if (currentQuestionIndex < (questions?.length || 0) - 1) {
+		const questionsLength = questions?.length || 0
+
+		if (currentQuestionIndex < questionsLength - 1) {
 			// Move to next question - clear the saved timer state and reset timer
 			updateSessionState({
 				currentQuestionIndex: currentQuestionIndex + 1,
@@ -426,7 +427,7 @@ export default function GamePage() {
 				gameId: id!,
 				finalScore: score,
 				correctAnswers: correctAnswers,
-				totalQuestions: questions?.length || 0,
+				totalQuestions: questionsLength,
 				totalTime: finalTimeSpent,
 				maxStreak: streak,
 			})
@@ -435,7 +436,7 @@ export default function GamePage() {
 			const finalResults = {
 				score,
 				correctAnswers,
-				totalQuestions: questions?.length || 0,
+				totalQuestions: questionsLength,
 				timeSpent: finalTimeSpent,
 				streak,
 				gameId: id!,
@@ -450,7 +451,10 @@ export default function GamePage() {
 
 			// Complete the session with final results and navigate to results
 			completeSession(finalResults)
-			setLocation(`/results/${id}`)
+			// Use setTimeout to ensure redirect happens after render cycle
+			setTimeout(() => {
+				setLocation(`/results/${id}`)
+			}, 0)
 		}
 	}, [
 		currentQuestionIndex,
@@ -524,7 +528,10 @@ export default function GamePage() {
 						hasSession: !!sessionState,
 					})
 				}
-				setLocation(`/results/${id}`)
+				// Use setTimeout to ensure redirect happens after render cycle
+				setTimeout(() => {
+					setLocation(`/results/${id}`)
+				}, 0)
 			}
 		}
 	}, [id, sessionState?.isCompleted, sessionState, setLocation])

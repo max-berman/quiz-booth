@@ -29,7 +29,7 @@ export function GameCardHeader({
 				</CardTitle>
 				<Badge
 					title={game.industry}
-					className='font-semibold whitespace-nowrap block truncate text-ellipsis overflow-hidden mb-2'
+					className='font-semibold max-w-[90%] truncate h-6 leading-normal inline'
 				>
 					{game.industry}
 				</Badge>

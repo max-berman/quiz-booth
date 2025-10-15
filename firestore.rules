@@ -56,9 +56,8 @@ service cloud.firestore {
     match /generationProgress/{gameId} {
       allow read: if request.auth != null && 
                    exists(/databases/$(database)/documents/games/$(gameId)) &&
-                   resource != null &&
-                   resource.data != null &&
-                   resource.data.gameId == gameId;
+                   (resource == null || 
+                    (resource.data != null && resource.data.gameId == gameId));
       allow write: if false; // Only backend can write (via Firebase Functions)
     }
   }

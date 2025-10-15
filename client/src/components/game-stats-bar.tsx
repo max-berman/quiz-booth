@@ -1,4 +1,4 @@
-import { Progress } from '@/components/ui/progress'
+import { SimpleProgress } from '@/components/ui/simple-progress'
 import { Timer } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -18,49 +18,38 @@ export function GameStatsBar({
 	score,
 }: GameStatsBarProps) {
 	const [animationKey, setAnimationKey] = useState(0)
-	const [previousScore, setPreviousScore] = useState(score)
 	const [isAnimating, setIsAnimating] = useState(false)
 	const animationTimerRef = useRef<NodeJS.Timeout | null>(null)
+	const previousScoreRef = useRef(score)
 
 	// Detect when score changes and trigger animation
 	useEffect(() => {
-		console.log('Score effect:', { score, previousScore, isAnimating })
-		if (score !== previousScore) {
-			console.log('Score changed! Starting animation')
-
+		if (score !== previousScoreRef.current) {
 			// Clear any existing timer
 			if (animationTimerRef.current) {
-				console.log('Clearing existing timer')
 				clearTimeout(animationTimerRef.current)
 			}
 
 			setAnimationKey((prev) => prev + 1)
-			setPreviousScore(score)
+			previousScoreRef.current = score
 			setIsAnimating(true)
 
 			// Reset animation state after animation completes
 			animationTimerRef.current = setTimeout(() => {
-				console.log('Animation completed, resetting state')
 				setIsAnimating(false)
 				animationTimerRef.current = null
 			}, 1000) // Match animate-duration-slow duration
 		}
-	}, [score, previousScore])
+	}, [score])
 
 	// Cleanup timer on unmount
 	useEffect(() => {
 		return () => {
 			if (animationTimerRef.current) {
-				console.log('Component unmount - cleaning up timer')
 				clearTimeout(animationTimerRef.current)
 			}
 		}
 	}, [])
-
-	// Log animation state changes
-	useEffect(() => {
-		console.log('isAnimating state changed:', isAnimating)
-	}, [isAnimating])
 
 	return (
 		<div className='flex justify-between items-center w-full max-w-4xl'>
@@ -86,7 +75,7 @@ export function GameStatsBar({
 					Question <strong>{currentQuestionIndex + 1}</strong> of{' '}
 					{questionsLength}
 				</div>
-				<Progress value={progressPercentage} className='h-4 bg-card' />
+				<SimpleProgress value={progressPercentage} className='h-4 bg-card' />
 			</div>
 			<div className='text-center p-2 h-full mr-1'>
 				<div className='text-primary capitalize'>

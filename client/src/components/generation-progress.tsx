@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { collection, doc, onSnapshot, Timestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { isClientDevelopment } from '@/config/environment'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -258,10 +259,12 @@ export function GenerationProgress({
 						<span className='text-muted-foreground'>Game ID:</span>
 						<p className='font-mono text-xs truncate'>{progress.gameId}</p>
 					</div>
-					<div>
-						<span className='text-muted-foreground'>Last Update:</span>
-						<p>{progress.timestamp.toDate().toLocaleTimeString()}</p>
-					</div>
+					{isClientDevelopment() && (
+						<div>
+							<span className='text-muted-foreground'>Last Update:</span>
+							<p>{progress.timestamp.toDate().toLocaleTimeString()}</p>
+						</div>
+					)}
 				</div>
 
 				{/* Error Display */}

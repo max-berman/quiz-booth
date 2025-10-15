@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { SimpleSeparator } from '@/components/ui/simple-separator'
 import {
 	Trophy,
 	RotateCcw,
@@ -62,9 +62,12 @@ export default function Results() {
 	useEffect(() => {
 		if (id) {
 			const loadedResults = loadGameResults(id)
+			const firstCompletionExists = hasFirstCompletion(id)
+			const lockedResults = getLockedResults(id)
+
+			// Check different scenarios for showing results
 			if (loadedResults) {
-				// Check if this is a replayed game (first completion exists but current session is different)
-				const firstCompletionExists = hasFirstCompletion(id)
+				// Current session results exist
 				const isFirstCompletionSession = isFirstCompletion(
 					id,
 					loadedResults.sessionId
@@ -72,7 +75,6 @@ export default function Results() {
 
 				if (firstCompletionExists && !isFirstCompletionSession) {
 					// This is a replayed game - show locked score from first completion
-					const lockedResults = getLockedResults(id)
 					if (lockedResults) {
 						setResults({
 							score: lockedResults.score,
@@ -83,14 +85,6 @@ export default function Results() {
 						})
 						setIsScoreLocked(true)
 						setIsReplayedGame(true)
-
-						// Debug logging
-						if (process.env.NODE_ENV === 'development') {
-							// console.log(
-							// 	'Showing locked results from first completion:',
-							// 	lockedResults
-							// )
-						}
 					}
 				} else {
 					// This is the first completion or same session
@@ -104,6 +98,17 @@ export default function Results() {
 					setIsScoreLocked(firstCompletionExists)
 					setIsReplayedGame(false)
 				}
+			} else if (firstCompletionExists && lockedResults) {
+				// No current session results, but first completion exists - show locked results
+				setResults({
+					score: lockedResults.score,
+					correctAnswers: lockedResults.correctAnswers,
+					totalQuestions: lockedResults.totalQuestions,
+					timeSpent: lockedResults.timeSpent,
+					streak: lockedResults.streak,
+				})
+				setIsScoreLocked(true)
+				setIsReplayedGame(true)
 			} else {
 				// No valid results found, redirect to game page
 				toast({
@@ -111,7 +116,9 @@ export default function Results() {
 					description: 'Please complete the game first.',
 					variant: 'destructive',
 				})
-				setLocation(`/game/${id}`)
+				setTimeout(() => {
+					setLocation(`/game/${id}`)
+				}, 0)
 			}
 		}
 	}, [id, setLocation, toast])
