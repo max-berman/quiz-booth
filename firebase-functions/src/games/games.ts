@@ -823,10 +823,7 @@ export const deleteGame = functions.https.onCall(async (data, context) => {
     // Start a batch write for atomic operations
     const batch = db.batch();
 
-    // Delete the game document
-    batch.delete(db.collection('games').doc(gameId));
-
-    // Delete all questions for this game
+    // Delete all questions for this game first
     const questionsSnapshot = await db
       .collection('questions')
       .where('gameId', '==', gameId)
@@ -834,12 +831,6 @@ export const deleteGame = functions.https.onCall(async (data, context) => {
 
     questionsSnapshot.docs.forEach(doc => {
       batch.delete(doc.ref);
-    });
-
-    // Reset actualQuestionCount to 0 when all questions are deleted
-    batch.update(db.collection('games').doc(gameId), {
-      actualQuestionCount: 0,
-      modifiedAt: Timestamp.fromDate(new Date()),
     });
 
     // Delete all player submissions for this game
@@ -851,6 +842,9 @@ export const deleteGame = functions.https.onCall(async (data, context) => {
     playersSnapshot.docs.forEach(doc => {
       batch.delete(doc.ref);
     });
+
+    // Finally, delete the game document itself
+    batch.delete(db.collection('games').doc(gameId));
 
     // Commit the batch deletion
     await batch.commit();

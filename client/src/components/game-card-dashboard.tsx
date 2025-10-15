@@ -281,22 +281,24 @@ export function GameCardDashboard({
 										<AlertDialogTitle>
 											Are you absolutely sure?
 										</AlertDialogTitle>
-										<AlertDialogDescription className='text-foreground'>
-											This action cannot be undone. This will permanently delete
-											the game{' '}
-											<strong>"{game.gameTitle || game.companyName}"</strong>{' '}
-											and all related data including:
-											<ul className='mt-2 ml-4 list-disc space-y-1'>
+										<div className='text-sm text-foreground space-y-2'>
+											<p>
+												This action cannot be undone. This will permanently
+												delete the game{' '}
+												<strong>"{game.gameTitle || game.companyName}"</strong>{' '}
+												and all related data including:
+											</p>
+											<ul className='ml-4 list-disc space-y-1'>
 												<li>All questions and answers</li>
 												<li>All player submissions and scores</li>
 												<li>Leaderboard data</li>
 												<li>Any associated analytics</li>
 											</ul>
-											<p className='mt-2 font-semibold text-destructive'>
+											<p className='font-semibold text-destructive'>
 												All data will be permanently lost and cannot be
 												recovered.
 											</p>
-										</AlertDialogDescription>
+										</div>
 									</AlertDialogHeader>
 									<AlertDialogFooter>
 										<AlertDialogCancel disabled={deleteGameMutation.isPending}>
