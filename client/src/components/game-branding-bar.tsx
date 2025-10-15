@@ -20,7 +20,7 @@ export function GameBrandingBar({
 	return (
 		<div className='max-w-4xl mx-auto px-2 sm:px-6 lg:px-8 w-full relative'>
 			<a href='/' className='text-sm absolute left-2  bottom-0'>
-				<Button size='sm' className='px-2 py-0'>
+				<Button size='sm' className='px-2 py-0 text-secondary'>
 					<Home className='!h-5 !w-5' />
 				</Button>
 			</a>

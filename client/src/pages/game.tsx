@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useLocation } from 'wouter'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { GamePlayCard } from '@/components/game-play-card'
 import { GameBrandingBar } from '@/components/game-branding-bar'
 import { GameStatsBar } from '@/components/game-stats-bar'
@@ -149,7 +148,7 @@ export default function GamePage() {
 						</p>
 					</div>
 					<Button onClick={() => setLocation('/')} className='mt-4'>
-						Return to Home
+						Home
 					</Button>
 				</div>
 			</div>

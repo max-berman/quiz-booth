@@ -6,11 +6,6 @@
     "auditLog": "/home/maxim/Dev/quiz-booth/logs/.dd95f784fc675bdb17ea8344d84bf0afe9f880e1-audit.json",
     "files": [
         {
-            "date": 1759316933015,
-            "name": "/home/maxim/Dev/quiz-booth/logs/mcp-puppeteer-2025-10-01.log",
-            "hash": "7e4d860a04d5ac753297eed6e1ffa4b33395b05e37bc0547c8ba6a4c1160d082"
-        },
-        {
             "date": 1759413943135,
             "name": "/home/maxim/Dev/quiz-booth/logs/mcp-puppeteer-2025-10-02.log",
             "hash": "3e7477a742791b3bec4998329dd4d791285be88bd772f126ee974a01c20c9db8"
@@ -49,6 +44,11 @@
             "date": 1760456937743,
             "name": "/home/maxim/Dev/quiz-booth/logs/mcp-puppeteer-2025-10-14.log",
             "hash": "704f182ceb3e724b50cab0edcaa78674b99ae65ee0a03f5ee66ad69411dd27df"
+        },
+        {
+            "date": 1760539014564,
+            "name": "/home/maxim/Dev/quiz-booth/logs/mcp-puppeteer-2025-10-15.log",
+            "hash": "e61031fb58b4b31e70af96299131f0dbec861f883230ac164780f859ff924695"
         }
     ],
     "hashType": "sha256"
