@@ -5,6 +5,185 @@ import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { rateLimitConfigs, withRateLimit } from '../lib/rate-limit';
 import { SCORE_VALIDATION_CONFIG } from '../config/constants';
 
+// Validation utilities for setup form
+interface ValidationResult {
+  isValid: boolean;
+  message: string;
+}
+
+// Helper function to check if text is a website
+function isWebsite(text: string): boolean {
+  if (!text.includes('.')) return false;
+  if (text.startsWith('http://') || text.startsWith('https://')) return true;
+
+  const commonTLDs = [
+    '.com', '.net', '.org', '.info', '.biz', '.edu', '.gov', '.mil',
+    '.io', '.ai', '.co', '.dev', '.app', '.tech', '.cloud', '.tools', '.digital', '.xyz',
+    '.site', '.online', '.store', '.blog', '.shop', '.design', '.space', '.world', '.club', '.studio', '.media', '.live', '.solutions', '.agency', '.works', '.company',
+    '.us', '.uk', '.ca', '.au', '.de', '.fr', '.cn', '.jp', '.in', '.nl', '.br', '.it', '.es', '.ru',
+    '.me', '.tv', '.cc', '.to', '.gg', '.fm', '.ly', '.ws', '.io', '.ai',
+    '.finance', '.law', '.legal', '.consulting', '.health', '.care', '.clinic', '.hospital', '.pharmacy', '.eco', '.energy', '.solar', '.green',
+    '.buy', '.sale', '.shop', '.market', '.marketing', '.business', '.money', '.finance', '.cash', '.fund', '.capital', '.investments', '.ventures',
+    '.art', '.photo', '.photography', '.gallery', '.fashion', '.music', '.films', '.movie', '.games', '.game', '.fun', '.play', '.video', '.studio', '.stream',
+    '.academy', '.school', '.college', '.university', '.training', '.courses', '.education', '.news', '.press', '.wiki', '.review',
+    '.africa', '.london', '.paris', '.nyc', '.berlin', '.tokyo', '.madrid', '.sydney', '.melbourne', '.dubai',
+    '.top', '.wow', '.vip', '.pro', '.name', '.page', '.site', '.world', '.zone', '.today', '.global', '.one', '.win', '.cool', '.club', '.link'
+  ];
+
+  return commonTLDs.some((tld) => {
+    const index = text.indexOf(tld);
+    if (index === -1) return false;
+    const afterTLD = text.substring(index + tld.length);
+    const beforeTLD = text.substring(0, index);
+
+    const isValidPosition =
+      afterTLD.length === 0 ||
+      afterTLD.startsWith('/') ||
+      afterTLD.startsWith('?') ||
+      afterTLD.startsWith('#') ||
+      afterTLD.startsWith('.');
+
+    const hasDomainName = beforeTLD.length > 0;
+
+    return isValidPosition && hasDomainName;
+  });
+}
+
+// Validate company name based on the rules
+function validateCompanyName(companyName: string): ValidationResult {
+  const trimmedName = companyName.trim();
+
+  if (!trimmedName) {
+    return {
+      isValid: false,
+      message: "Company name or website is required - our AI needs something to work with!"
+    };
+  }
+
+  // Check if it's a website
+  if (isWebsite(trimmedName)) {
+    return {
+      isValid: true,
+      message: "Great! We'll use your website to generate relevant questions."
+    };
+  }
+
+  // Not a website, check character length
+  if (trimmedName.length < 7) {
+    return {
+      isValid: false,
+      message: "That company name is a bit shy! Give us at least 7 characters to work with."
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "Perfect! We'll create questions based on your company name."
+  };
+}
+
+// Validate custom industry when "Other" is selected
+function validateCustomIndustry(industry: string, customIndustry: string): ValidationResult {
+  if (industry !== 'Other') {
+    return {
+      isValid: true,
+      message: ""
+    };
+  }
+
+  const trimmedCustom = customIndustry.trim();
+
+  if (!trimmedCustom) {
+    return {
+      isValid: false,
+      message: "Custom industry is required when 'Other' is selected - tell us what makes you unique!"
+    };
+  }
+
+  if (trimmedCustom.length < 7) {
+    return {
+      isValid: false,
+      message: "Custom industry? Tell us more! We need at least 7 characters to understand your world."
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "Thanks for sharing your unique industry!"
+  };
+}
+
+// Validate product description based on company name
+function validateProductDescription(
+  companyName: string,
+  productDescription: string
+): ValidationResult {
+  const trimmedCompany = companyName.trim();
+  const trimmedProduct = productDescription.trim();
+
+  // If company name is a website, product description is optional
+  if (isWebsite(trimmedCompany)) {
+    return {
+      isValid: true,
+      message: trimmedProduct ? "Great details! This will help us create better questions." : "Product description is optional when you provide a website."
+    };
+  }
+
+  // Not a website, product description becomes mandatory
+  if (!trimmedProduct) {
+    return {
+      isValid: false,
+      message: "No website detected! Help our AI by describing what you do (at least 7 characters, please)."
+    };
+  }
+
+  if (trimmedProduct.length < 7) {
+    return {
+      isValid: false,
+      message: "Tell us more about your products! We need at least 7 characters to create great questions."
+    };
+  }
+
+  return {
+    isValid: true,
+    message: "Perfect! This information will help us create relevant questions."
+  };
+}
+
+// Comprehensive form validation
+function validateSetupForm(formData: {
+  companyName: string;
+  industry: string;
+  customIndustry: string;
+  productDescription: string;
+}): {
+  isValid: boolean;
+  errors: Record<string, string>;
+} {
+  const companyValidation = validateCompanyName(formData.companyName);
+  const industryValidation = validateCustomIndustry(formData.industry, formData.customIndustry);
+  const productValidation = validateProductDescription(formData.companyName, formData.productDescription);
+
+  const errors: Record<string, string> = {};
+
+  if (!companyValidation.isValid) {
+    errors.companyName = companyValidation.message;
+  }
+
+  if (!industryValidation.isValid) {
+    errors.customIndustry = industryValidation.message;
+  }
+
+  if (!productValidation.isValid) {
+    errors.productDescription = productValidation.message;
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  };
+}
+
 const db = admin.firestore();
 
 // Helper function to track usage
@@ -65,6 +244,22 @@ export const createGame = functions.runWith({
   try {
     // Rate limiting check
     await withRateLimit(rateLimitConfigs.gameCreation)(data, context);
+
+    // Backend validation - same rules as frontend
+    const validation = validateSetupForm({
+      companyName,
+      industry: description || '',
+      customIndustry: description === 'Other' ? description : '',
+      productDescription: productDescription || '',
+    });
+
+    if (!validation.isValid) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Form validation failed',
+        { errors: validation.errors }
+      );
+    }
 
     // Usage tracking
     await trackUsage(userId, 'game_created', {

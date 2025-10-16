@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { Helmet } from 'react-helmet-async'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -6,81 +6,19 @@ import { useAuth } from '@/contexts/auth-context'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
 import { analytics } from '@/lib/analytics'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-	Command,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-} from '@/components/ui/command'
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover'
-import {
-	Building,
-	Settings,
-	Gift,
-	Wand2,
-	Plus,
-	X,
-	CheckCircle,
-	AlertCircle,
-	Info,
-	ChevronsUpDown,
-	Check,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { AlertCircle, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { LoadingSpinner } from '@/components/loading-spinner'
 import { GenerationProgress } from '@/components/generation-progress'
+import { SetupErrorBoundary } from '@/components/setup-error-boundary'
+import {
+	CompanyInformationSection,
+	GameSettingsSection,
+	PrizeSettingsSection,
+} from '@/components/setup-form-sections'
+import { validateSetupForm } from '@/lib/website-utils'
 import type { InsertGame } from '@shared/firebase-types'
-import { INDUSTRY_OPTIONS } from '@shared/constants'
-
-// Difficulty options
-const DIFFICULTY_OPTIONS = [
-	{ level: 'easy', label: 'Easy', desc: 'Basic questions' },
-	{ level: 'medium', label: 'Medium', desc: 'Moderate difficulty' },
-	{ level: 'hard', label: 'Hard', desc: 'Challenging questions' },
-]
-
-// Category options
-const CATEGORY_OPTIONS = [
-	{
-		key: 'companyFacts',
-		label: 'Company Facts',
-		desc: 'Questions about your company',
-	},
-	{
-		key: 'industryKnowledge',
-		label: 'Industry Knowledge',
-		desc: 'Questions about your industry',
-	},
-	{ key: 'funFacts', label: 'Fun Facts', desc: 'Entertaining trivia' },
-	{ key: 'generalKnowledge', label: 'General Knowledge', desc: 'Broad topics' },
-	{ key: 'other', label: 'Custom Questions', desc: 'Your specific topics' },
-]
-
-// Question count options
-const QUESTION_COUNT_OPTIONS = [
-	{ value: '5', label: '5 Questions (Quick)' },
-	{ value: '10', label: '10 Questions (Standard)' },
-	{ value: '15', label: '15 Questions (Extended)' },
-]
+import { clearGameResults } from '@/lib/session-utils'
 
 interface FormData {
 	companyName: string
@@ -102,7 +40,7 @@ interface Categories {
 	other: boolean
 }
 
-export default function Setup() {
+function SetupContent() {
 	const [, setLocation] = useLocation()
 	const { toast } = useToast()
 	const { isAuthenticated } = useAuth()
@@ -130,38 +68,45 @@ export default function Setup() {
 
 	const [prizes, setPrizes] = useState<Prize[]>([{ placement: '', prize: '' }])
 
+	// Validation state
+	const [validationErrors, setValidationErrors] = useState<
+		Record<string, string>
+	>({})
+	const [validationMessages, setValidationMessages] = useState<
+		Record<string, string>
+	>({})
+
+	// Track field interactions and delayed validation display
+	const [fieldInteractions, setFieldInteractions] = useState<
+		Record<string, boolean>
+	>({})
+	const [delayedValidationErrors, setDelayedValidationErrors] = useState<
+		Record<string, string>
+	>({})
+	const [delayedValidationMessages, setDelayedValidationMessages] = useState<
+		Record<string, string>
+	>({})
+
 	// Memoized form state checks
-	const checkCompanyComplete = useCallback(() => {
-		return formData.companyName.trim() && formData.industry
-	}, [formData.companyName, formData.industry])
+	const checkCompanyComplete = useCallback((): boolean => {
+		const companyNameValid = Boolean(formData.companyName.trim())
+		const industryValid = Boolean(formData.industry)
 
-	const checkSettingsComplete = useCallback(() => {
+		// If industry is "Other", custom industry must be valid
+		const customIndustryValid =
+			formData.industry !== 'Other' || Boolean(customIndustry.trim())
+
+		return companyNameValid && industryValid && customIndustryValid
+	}, [formData.companyName, formData.industry, customIndustry])
+
+	const checkSettingsComplete = useCallback((): boolean => {
 		const selectedCategories = Object.values(categories).some(Boolean)
-		const customCategoryValid = !categories.other || customCategory.trim()
-		return selectedCategories && formData.questionCount && customCategoryValid
+		const customCategoryValid =
+			!categories.other || Boolean(customCategory.trim())
+		return Boolean(
+			selectedCategories && formData.questionCount && customCategoryValid
+		)
 	}, [categories, formData.questionCount, customCategory])
-
-	// Memoized steps calculation
-	const steps = useMemo(() => {
-		const companyComplete = checkCompanyComplete()
-		const settingsComplete = checkSettingsComplete()
-
-		return [
-			{
-				id: 1,
-				title: 'Company Info',
-				icon: Building,
-				complete: companyComplete,
-			},
-			{
-				id: 2,
-				title: 'Game Settings',
-				icon: Settings,
-				complete: settingsComplete,
-			},
-			{ id: 3, title: 'Prizes (Optional)', icon: Gift, complete: true },
-		]
-	}, [checkCompanyComplete, checkSettingsComplete])
 
 	// Initialize Firebase Functions
 	const {
@@ -348,6 +293,121 @@ export default function Setup() {
 		}))
 	}
 
+	// Update form data handler
+	const handleFormDataChange = (updates: Partial<FormData>) => {
+		setFormData((prev) => ({ ...prev, ...updates }))
+	}
+
+	// Update custom industry handler
+	const handleCustomIndustryChange = (value: string) => {
+		setCustomIndustry(value)
+	}
+
+	// Update custom category handler
+	const handleCustomCategoryChange = (value: string) => {
+		setCustomCategory(value)
+	}
+
+	// Difficulty change handler
+	const handleDifficultyChange = (level: string) => {
+		setDifficulty(level)
+	}
+
+	// Category toggle handler
+	const handleCategoryToggle = (key: keyof Categories) => {
+		toggleCategory(key)
+	}
+
+	// Industry open change handler
+	const handleIndustryOpenChange = (open: boolean) => {
+		setIndustryOpen(open)
+	}
+
+	// Focused section change handler
+	const handleFocusedSectionChange = (section: number | null) => {
+		setFocusedSection(section)
+	}
+
+	// Real-time validation functions
+	const validateForm = useCallback(() => {
+		const validation = validateSetupForm(
+			{
+				companyName: formData.companyName,
+				industry: formData.industry,
+				customIndustry: customIndustry,
+				productDescription: formData.productDescription,
+			},
+			fieldInteractions
+		)
+		setValidationErrors(validation.errors)
+		setValidationMessages(validation.messages)
+		return validation.isValid
+	}, [
+		formData.companyName,
+		formData.industry,
+		customIndustry,
+		formData.productDescription,
+		fieldInteractions,
+	])
+
+	// Track field interactions
+	const handleFieldInteraction = useCallback((fieldName: string) => {
+		setFieldInteractions((prev) => ({
+			...prev,
+			[fieldName]: true,
+		}))
+	}, [])
+
+	// Update form data with interaction tracking
+	const updateFormData = useCallback(
+		(updates: Partial<FormData>) => {
+			setFormData((prev) => {
+				const newFormData = { ...prev, ...updates }
+				// Track interaction for changed fields
+				Object.keys(updates).forEach((field) => {
+					handleFieldInteraction(field)
+				})
+				// If industry changed to "Other", trigger custom industry validation
+				if (
+					updates.industry === 'Other' ||
+					(prev.industry === 'Other' && updates.industry !== 'Other')
+				) {
+					handleFieldInteraction('customIndustry')
+				}
+
+				validateForm()
+
+				return newFormData
+			})
+		},
+		[validateForm, handleFieldInteraction]
+	)
+
+	// Update custom industry with interaction tracking
+	const updateCustomIndustry = useCallback(
+		(value: string) => {
+			setCustomIndustry(value)
+			handleFieldInteraction('customIndustry')
+			validateForm()
+		},
+		[validateForm, handleFieldInteraction]
+	)
+
+	// Delayed validation effect - shows validation messages after 1-2 seconds of interaction
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDelayedValidationErrors(validationErrors)
+			setDelayedValidationMessages(validationMessages)
+		}, 1000) // 1 second delay
+
+		return () => clearTimeout(timer)
+	}, [validationErrors, validationMessages])
+
+	// Validate on initial render and when dependencies change
+	useEffect(() => {
+		validateForm()
+	}, [validateForm])
+
 	if (isGenerating) {
 		return (
 			<div className='flex-1 flex items-center justify-center bg-background py-6'>
@@ -421,448 +481,52 @@ export default function Setup() {
 						<CardContent className='p-2'>
 							<form onSubmit={handleSubmit} className='space-y-8'>
 								{/* Company Information Section */}
-								<section
-									className={`p-4 lg:p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
-										focusedSection === 1 ? 'shadow-md ' : ''
-									}`}
-									onFocus={() => setFocusedSection(1)}
-									onBlur={() => setFocusedSection(null)}
-									tabIndex={0}
-								>
-									<div className='mb-6'>
-										<h3 className='text-base md:text-xl font-bold text-foreground flex items-center'>
-											<Building className='text-foreground mr-3 h-6 w-6' />
-											Business Information
-											{checkCompanyComplete() && (
-												<CheckCircle className='ml-2 h-5 w-5 text-primary' />
-											)}
-										</h3>
-									</div>
-
-									<div className='grid md:grid-cols-2 gap-6'>
-										<div>
-											<Label
-												htmlFor='companyName'
-												className='text-base font-medium'
-											>
-												Company Name or Website *
-											</Label>
-											<Input
-												id='companyName'
-												placeholder='Enter company name or website URL'
-												value={formData.companyName}
-												onChange={(e) =>
-													setFormData((prev) => ({
-														...prev,
-														companyName: e.target.value,
-													}))
-												}
-												className={`mt-2 h-12  ${
-													formData.companyName.trim()
-														? 'border-primary'
-														: 'border-border'
-												}`}
-												required
-											/>
-											<div className='flex items-start gap-2 mt-2'>
-												<Info className='h-4 w-4 text-primary mt-0.5 flex-shrink-0' />
-												<p className='text-sm text-muted-foreground'>
-													Provide a website URL for more relevant AI-generated
-													questions, or enter your company name.
-												</p>
-											</div>
-										</div>
-
-										<div>
-											<Label
-												htmlFor='industry'
-												className='text-base font-medium'
-											>
-												Industry *
-											</Label>
-											<Popover
-												open={industryOpen}
-												onOpenChange={setIndustryOpen}
-											>
-												<PopoverTrigger asChild>
-													<Button
-														variant='outline'
-														role='combobox'
-														aria-expanded={industryOpen}
-														className={`mt-2 h-12 w-full justify-between text-base ${
-															formData.industry
-																? 'border-primary'
-																: 'border-border text-placeholder'
-														}`}
-													>
-														{formData.industry
-															? formData.industry
-															: 'Select your industry...'}
-														<ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-													</Button>
-												</PopoverTrigger>
-												<PopoverContent className='w-full p-0'>
-													<Command>
-														<CommandInput
-															placeholder='Search industry...'
-															className='h-9'
-														/>
-														<CommandList>
-															<CommandEmpty>No industry found.</CommandEmpty>
-															<CommandGroup>
-																{INDUSTRY_OPTIONS.map((industry) => (
-																	<CommandItem
-																		key={industry}
-																		value={industry}
-																		onSelect={(currentValue) => {
-																			setFormData((prev) => ({
-																				...prev,
-																				industry:
-																					currentValue === formData.industry
-																						? ''
-																						: currentValue,
-																			}))
-																			setIndustryOpen(false)
-																		}}
-																	>
-																		{industry}
-																		<Check
-																			className={cn(
-																				'ml-auto',
-																				formData.industry === industry
-																					? 'opacity-100'
-																					: 'opacity-0'
-																			)}
-																		/>
-																	</CommandItem>
-																))}
-															</CommandGroup>
-														</CommandList>
-													</Command>
-												</PopoverContent>
-											</Popover>
-										</div>
-
-										{formData.industry === 'Other' && (
-											<div>
-												<Label
-													htmlFor='customIndustry'
-													className='text-base font-medium'
-												>
-													Custom Industry *
-												</Label>
-												<Input
-													id='customIndustry'
-													placeholder='Enter your industry'
-													value={customIndustry}
-													onChange={(e) => setCustomIndustry(e.target.value)}
-													className={`mt-2 h-12 text-base ${
-														customIndustry.trim()
-															? 'border-primary'
-															: 'border-border'
-													}`}
-													required
-												/>
-											</div>
-										)}
-
-										<div className='md:col-span-2'>
-											<Label
-												htmlFor='productDescription'
-												className='text-base font-medium'
-											>
-												Product/Service Focus (Optional)
-											</Label>
-											<Textarea
-												id='productDescription'
-												placeholder='Briefly describe your main products or services (max 100 characters) ...'
-												value={formData.productDescription}
-												onChange={(e) =>
-													setFormData((prev) => ({
-														...prev,
-														productDescription: e.target.value.slice(0, 100),
-													}))
-												}
-												className={`mt-2  ${
-													formData.productDescription.trim()
-														? 'border-primary'
-														: 'border-border'
-												}`}
-												rows={2}
-											/>
-											<div className='flex justify-between text-sm text-muted-foreground mt-1'>
-												<span>Keep it brief for better AI performance</span>
-												<span>{formData.productDescription.length}/100</span>
-											</div>
-										</div>
-
-										{/* TODO: Provide the key messages that represent your brand. */}
-									</div>
-								</section>
+								<CompanyInformationSection
+									formData={formData}
+									customIndustry={customIndustry}
+									focusedSection={focusedSection}
+									industryOpen={industryOpen}
+									checkCompanyComplete={checkCompanyComplete}
+									onFormDataChange={updateFormData}
+									onCustomIndustryChange={updateCustomIndustry}
+									onIndustryOpenChange={handleIndustryOpenChange}
+									onFocusedSectionChange={handleFocusedSectionChange}
+									validationErrors={
+										formData.industry === 'Other'
+											? validationErrors
+											: delayedValidationErrors
+									}
+									validationMessages={
+										formData.industry === 'Other'
+											? validationMessages
+											: delayedValidationMessages
+									}
+								/>
 
 								{/* Game Settings Section */}
-								<section
-									className={`p-4 lg:p-6 bg-popover rounded-xl  border-2 transition-all border-accent ${
-										focusedSection === 2 ? 'shadow-md ' : ''
-									}`}
-									onFocus={() => setFocusedSection(2)}
-									onBlur={() => setFocusedSection(null)}
-									tabIndex={0}
-								>
-									<div className='mb-6'>
-										<h3 className='text-base md:text-xl  font-bold text-foreground flex items-center'>
-											<Settings className='text-foreground mr-3 h-6 w-6' />
-											Game Settings
-											{checkSettingsComplete() && (
-												<CheckCircle className='ml-2 h-5 w-5 text-primary' />
-											)}
-										</h3>
-									</div>
-
-									<div className='grid md:grid-cols-2 gap-4'>
-										<div>
-											<Label
-												htmlFor='questionCount'
-												className='text-base font-medium'
-											>
-												Number of Questions
-											</Label>
-											<Select
-												value={formData.questionCount}
-												onValueChange={(value) =>
-													setFormData((prev) => ({
-														...prev,
-														questionCount: value,
-													}))
-												}
-											>
-												<SelectTrigger
-													className={`mt-2 h-12 text-base ${
-														formData.questionCount
-															? 'border-primary'
-															: 'border-border'
-													}`}
-												>
-													<SelectValue />
-												</SelectTrigger>
-												<SelectContent>
-													{QUESTION_COUNT_OPTIONS.map((option) => (
-														<SelectItem key={option.value} value={option.value}>
-															{option.label}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</div>
-
-										<div>
-											<Label className='text-base font-medium'>
-												Difficulty Level
-											</Label>
-											<div className='grid grid-cols-3 gap-3 mt-3'>
-												{DIFFICULTY_OPTIONS.map(({ level, label }) => (
-													<Button
-														key={level}
-														type='button'
-														variant={difficulty === level ? 'outline' : 'link'}
-														className='h-8 flex flex-col hover:scale-100'
-														onClick={() => setDifficulty(level)}
-													>
-														<span
-															className={` ${
-																difficulty === level
-																	? 'font-bold'
-																	: 'font-medium'
-															}`}
-														>
-															{label}
-														</span>
-													</Button>
-												))}
-											</div>
-										</div>
-
-										<div className='md:col-span-2'>
-											<Label className='text-base font-medium'>
-												Question Categories *
-											</Label>
-											<div className='grid grid-cols-1 sm:grid-cols-2 gap-4  mt-3'>
-												{CATEGORY_OPTIONS.map(({ key, label, desc }) => (
-													<div
-														key={key}
-														className={`p-2 border rounded-lg transition-all ${
-															categories[key as keyof typeof categories]
-																? 'border-primary bg-background'
-																: 'border-primary border-dashed hover:border-solid'
-														}`}
-													>
-														<div className='flex items-start space-x-2'>
-															<Checkbox
-																id={key}
-																className='mt-1'
-																checked={
-																	categories[key as keyof typeof categories]
-																}
-																onCheckedChange={() =>
-																	toggleCategory(key as keyof Categories)
-																}
-															/>
-															<label
-																htmlFor={key}
-																className='cursor-pointer flex-1'
-															>
-																<span className='font-bold'>{label}</span>
-																<p className='text-sm text-muted-foreground'>
-																	{desc}
-																</p>
-															</label>
-														</div>
-													</div>
-												))}
-											</div>
-											{categories.other && (
-												<div className='mt-4 rounded-lg'>
-													<Label
-														htmlFor='customCategory'
-														className='text-base font-medium'
-													>
-														Describe your custom questions *
-													</Label>
-													<Textarea
-														id='customCategory'
-														placeholder='e.g., questions about sustainable packaging, our company history, or specific product features'
-														value={customCategory}
-														onChange={(e) => setCustomCategory(e.target.value)}
-														className={`mt-2 ${
-															customCategory.trim()
-																? 'border-primary'
-																: categories.other && !customCategory.trim()
-																? 'border-destructive'
-																: 'border-border'
-														}`}
-														rows={2}
-													/>
-													{categories.other && !customCategory.trim() && (
-														<div className='flex items-center gap-2 mt-2 text-destructive'>
-															<AlertCircle className='h-4 w-4' />
-															<span className='text-sm'>
-																Custom questions description is required when
-																selecting Custom Questions category
-															</span>
-														</div>
-													)}
-												</div>
-											)}
-											{!Object.values(categories).some(Boolean) && (
-												<div className='flex items-center gap-2 mt-2 text-destructive'>
-													<AlertCircle className='h-4 w-4' />
-													<span className='text-sm'>
-														Please select at least one category
-													</span>
-												</div>
-											)}
-										</div>
-									</div>
-								</section>
+								<GameSettingsSection
+									formData={formData}
+									categories={categories}
+									difficulty={difficulty}
+									customCategory={customCategory}
+									focusedSection={focusedSection}
+									checkSettingsComplete={checkSettingsComplete}
+									onFormDataChange={handleFormDataChange}
+									onDifficultyChange={handleDifficultyChange}
+									onCategoryToggle={handleCategoryToggle}
+									onCustomCategoryChange={handleCustomCategoryChange}
+									onFocusedSectionChange={handleFocusedSectionChange}
+								/>
 
 								{/* Prize Settings Section */}
-								<section
-									className={`p-4 lg:p-6 bg-popover rounded-xl border-2 transition-all border-accent ${
-										focusedSection === 3 ? 'shadow-md ' : ''
-									}`}
-									onFocus={() => setFocusedSection(3)}
-									onBlur={() => setFocusedSection(null)}
-									tabIndex={0}
-								>
-									<div className='flex flex-col md:flex-row justify-between mb-6'>
-										<h3 className='text-base mb-2 md:mb-0 md:text-xl font-bold text-foreground flex items-center'>
-											<Gift className='text-foreground mr-2 h-6 w-6' />
-											Prize Information (Optional)
-											{/* <CheckCircle className='ml-2 h-5 w-5 text-primary' /> */}
-										</h3>
-										<Button
-											type='button'
-											variant='outline'
-											size='sm'
-											onClick={addPrize}
-											className='flex items-center gap-1 w-1/3 md:w-auto  self-end'
-										>
-											<Plus className='h-2 w-2' />
-											Add Prize
-										</Button>
-									</div>
-
-									<div className='space-y-4'>
-										{prizes.map((prize, index) => (
-											<div
-												key={index}
-												className='flex gap-3 items-end p-4  rounded-lg border'
-											>
-												<div className='flex-1'>
-													<Label
-														htmlFor={`placement-${index}`}
-														className='text-base font-medium'
-													>
-														Placement
-													</Label>
-													<Input
-														id={`placement-${index}`}
-														placeholder='e.g., 1st Place, Top 10, etc.'
-														value={prize.placement}
-														onChange={(e) =>
-															updatePrize(index, 'placement', e.target.value)
-														}
-														className={`mt-2 h-10 ${
-															prize.placement.trim()
-																? 'border-primary'
-																: 'border-border'
-														}`}
-													/>
-												</div>
-												<div className='flex-1'>
-													<Label
-														htmlFor={`prize-${index}`}
-														className='text-base font-medium'
-													>
-														Prize
-													</Label>
-													<Input
-														id={`prize-${index}`}
-														placeholder='e.g., $100 Gift Card'
-														value={prize.prize}
-														onChange={(e) =>
-															updatePrize(index, 'prize', e.target.value)
-														}
-														className={`mt-2 h-10 ${
-															prize.prize.trim()
-																? 'border-primary'
-																: 'border-border'
-														}`}
-													/>
-												</div>
-												{prizes.length > 1 && (
-													<Button
-														type='button'
-														variant='outline'
-														size='sm'
-														onClick={() => removePrize(index)}
-														className='h-10 w-10 p-0'
-													>
-														<X className='h-2 w-2' />
-													</Button>
-												)}
-											</div>
-										))}
-										<div className='flex items-start gap-2 p-4 bg-muted rounded-lg'>
-											<Info className='h-4 w-4 text-primary mt-0.5 flex-shrink-0' />
-											<p className='text-sm text-primary'>
-												Add prizes to motivate participation. You can customize
-												placements (e.g., "4th Place", "Top 10", "Best Score")
-												to match your event needs.
-											</p>
-										</div>
-									</div>
-								</section>
+								<PrizeSettingsSection
+									prizes={prizes}
+									focusedSection={focusedSection}
+									onAddPrize={addPrize}
+									onRemovePrize={removePrize}
+									onUpdatePrize={updatePrize}
+									onFocusedSectionChange={handleFocusedSectionChange}
+								/>
 
 								{/* Submit Section */}
 								<section className='p-0'>
@@ -876,15 +540,6 @@ export default function Setup() {
 													</span>
 												</div>
 											)}
-
-										{/* {isAuthenticated && (
-										<div className='flex items-center justify-center gap-2 text-primary'>
-											<CheckCircle className='h-5 w-5' />
-											<span className='font-medium'>
-												Our AI will generate your trivia!
-											</span>
-										</div>
-									)} */}
 
 										<Button
 											type='submit'
@@ -912,5 +567,16 @@ export default function Setup() {
 				</div>
 			</div>
 		</>
+	)
+}
+
+/**
+ * Setup page component wrapped with error boundary for better error handling
+ */
+export default function Setup() {
+	return (
+		<SetupErrorBoundary>
+			<SetupContent />
+		</SetupErrorBoundary>
 	)
 }
