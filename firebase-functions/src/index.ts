@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import * as dotenv from 'dotenv';
+import 'module-alias/register';
 
 // Load environment variables
 dotenv.config();
@@ -8,7 +9,7 @@ dotenv.config();
 admin.initializeApp();
 
 // Import function modules
-import { createGame, getGame, getGamesByUser, updateGame, updateGameTitle, updateGamePublicStatus, updateGamePrizes, savePlayerScore, getGameLeaderboard, getGamePlayers, getPublicGames, getPublicGamesCount, deleteGame } from './games/games';
+import { createGame, getGame, getGamesByUser, updateGame, updateGameTitle, updateGamePublicStatus, updateGamePrizes, savePlayerScore, getGameLeaderboard, getGamePlayers, getPublicGames, getPublicGamesCount, deleteGame, getAdminGames } from './games/games-index';
 import { generateQuestions, generateSingleQuestion, deleteQuestion, updateQuestion, addQuestion, forceLLMProvider } from './questions';
 import { trackUsage, getUsage, resetUsage } from './usage/usage';
 import { userSetup } from './auth/userSetup';
@@ -32,6 +33,7 @@ export {
   getPublicGames,
   getPublicGamesCount,
   deleteGame,
+  getAdminGames,
   generateQuestions,
   generateSingleQuestion,
   deleteQuestion,

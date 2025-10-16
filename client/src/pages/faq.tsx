@@ -28,6 +28,7 @@ import ReactMarkdown from 'react-markdown'
 
 export default function FAQ() {
 	// FAQ categories organized by topic
+	// TODO : And if you don't like AI generated questions you can always edit them out
 	const faqCategories = [
 		{
 			title: 'Trade Show & Event Focus',

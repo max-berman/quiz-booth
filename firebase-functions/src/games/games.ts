@@ -4,49 +4,12 @@ import { randomUUID } from 'crypto';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { rateLimitConfigs, withRateLimit } from '../lib/rate-limit';
 import { SCORE_VALIDATION_CONFIG } from '../config/constants';
+import { isWebsite } from '@shared/website-utils';
 
 // Validation utilities for setup form
 interface ValidationResult {
   isValid: boolean;
   message: string;
-}
-
-// Helper function to check if text is a website
-function isWebsite(text: string): boolean {
-  if (!text.includes('.')) return false;
-  if (text.startsWith('http://') || text.startsWith('https://')) return true;
-
-  const commonTLDs = [
-    '.com', '.net', '.org', '.info', '.biz', '.edu', '.gov', '.mil',
-    '.io', '.ai', '.co', '.dev', '.app', '.tech', '.cloud', '.tools', '.digital', '.xyz',
-    '.site', '.online', '.store', '.blog', '.shop', '.design', '.space', '.world', '.club', '.studio', '.media', '.live', '.solutions', '.agency', '.works', '.company',
-    '.us', '.uk', '.ca', '.au', '.de', '.fr', '.cn', '.jp', '.in', '.nl', '.br', '.it', '.es', '.ru',
-    '.me', '.tv', '.cc', '.to', '.gg', '.fm', '.ly', '.ws', '.io', '.ai',
-    '.finance', '.law', '.legal', '.consulting', '.health', '.care', '.clinic', '.hospital', '.pharmacy', '.eco', '.energy', '.solar', '.green',
-    '.buy', '.sale', '.shop', '.market', '.marketing', '.business', '.money', '.finance', '.cash', '.fund', '.capital', '.investments', '.ventures',
-    '.art', '.photo', '.photography', '.gallery', '.fashion', '.music', '.films', '.movie', '.games', '.game', '.fun', '.play', '.video', '.studio', '.stream',
-    '.academy', '.school', '.college', '.university', '.training', '.courses', '.education', '.news', '.press', '.wiki', '.review',
-    '.africa', '.london', '.paris', '.nyc', '.berlin', '.tokyo', '.madrid', '.sydney', '.melbourne', '.dubai',
-    '.top', '.wow', '.vip', '.pro', '.name', '.page', '.site', '.world', '.zone', '.today', '.global', '.one', '.win', '.cool', '.club', '.link'
-  ];
-
-  return commonTLDs.some((tld) => {
-    const index = text.indexOf(tld);
-    if (index === -1) return false;
-    const afterTLD = text.substring(index + tld.length);
-    const beforeTLD = text.substring(0, index);
-
-    const isValidPosition =
-      afterTLD.length === 0 ||
-      afterTLD.startsWith('/') ||
-      afterTLD.startsWith('?') ||
-      afterTLD.startsWith('#') ||
-      afterTLD.startsWith('.');
-
-    const hasDomainName = beforeTLD.length > 0;
-
-    return isValidPosition && hasDomainName;
-  });
 }
 
 // Validate company name based on the rules
@@ -185,6 +148,15 @@ function validateSetupForm(formData: {
 }
 
 const db = admin.firestore();
+
+// Helper function to check if user is admin
+function isAdminUser(userId: string): boolean {
+  const adminUsers = process.env.ADMIN_USERS;
+  if (!adminUsers) return false;
+
+  const adminUserIds = adminUsers.split(',').map(id => id.trim());
+  return adminUserIds.includes(userId);
+}
 
 // Helper function to track usage
 async function trackUsage(userId: string, eventType: string, metadata?: any): Promise<void> {
@@ -973,6 +945,100 @@ export const getPublicGames = functions.https.onCall(async (data, context) => {
   } catch (error) {
     console.error('Get public games error:', error);
     throw new functions.https.HttpsError('internal', 'Failed to get public games');
+  }
+});
+
+// Get admin games (only accessible to admin users)
+export const getAdminGames = functions.https.onCall(async (data, context) => {
+  const { limit = 12, offset = 0, industry, categories } = data;
+
+  // Authentication check - only admin users can access this
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'User must be authenticated'
+    );
+  }
+
+  const userId = context.auth.uid;
+
+  // Check if user is admin
+  if (!isAdminUser(userId)) {
+    throw new functions.https.HttpsError(
+      'permission-denied',
+      'Access denied - admin privileges required'
+    );
+  }
+
+  try {
+    // Get all games (not just public ones), ordered by creation date (newest first)
+    let gamesQuery = db
+      .collection('games')
+      .orderBy('createdAt', 'desc');
+
+    // Apply filters if provided
+    if (industry && industry !== 'all') {
+      gamesQuery = gamesQuery.where('industry', '==', industry);
+    }
+
+    // Apply category filter if provided
+    if (categories && categories.length > 0) {
+      // For categories, we'll filter client-side since Firestore doesn't support array-contains-any with multiple conditions
+    }
+
+    // Apply limit and offset
+    if (limit) {
+      gamesQuery = gamesQuery.limit(limit);
+    }
+    if (offset) {
+      // Note: Firestore doesn't support offset directly, so we'd need to use cursor-based pagination
+      // For now, we'll skip offset and just use limit
+    }
+
+    const gamesSnapshot = await gamesQuery.get();
+
+    let games = gamesSnapshot.docs.map(doc => {
+      const data = doc.data();
+
+      // Convert prizes object to array format for frontend
+      const prizesArray = data?.prizes ? Object.entries(data.prizes).map(([key, value]) => ({
+        placement: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        prize: value
+      })).filter(p => p.prize) : [];
+
+      return {
+        id: data.id,
+        gameTitle: data.gameTitle,
+        companyName: data.companyName,
+        industry: data.industry,
+        productDescription: data.productDescription,
+        questionCount: data.questionCount,
+        actualQuestionCount: data.actualQuestionCount || 0,
+        difficulty: data.difficulty,
+        categories: data.categories,
+        prizes: prizesArray,
+        isPublic: data.isPublic,
+        status: data.status,
+        userId: data.userId,
+        customization: data.customization,
+        createdAt: data.createdAt?.toDate?.()?.toISOString(),
+        modifiedAt: data.modifiedAt?.toDate?.()?.toISOString(),
+      };
+    });
+
+    // Apply category filter client-side if needed
+    if (categories && categories.length > 0) {
+      games = games.filter(game =>
+        game.categories && game.categories.some((category: string) =>
+          categories.includes(category)
+        )
+      );
+    }
+
+    return games;
+  } catch (error) {
+    console.error('Get admin games error:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to get admin games');
   }
 });
 
