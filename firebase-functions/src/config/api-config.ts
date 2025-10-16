@@ -38,6 +38,6 @@ export const API_HEADERS = {
 export const LLM_PROVIDER_PRIORITIES = {
   // 1 highest priority
   // 2 second highest priority
-  DEEPSEEK: 2,
-  OPENAI: 1,
+  DEEPSEEK: 1,
+  OPENAI: 2,
 } as const;

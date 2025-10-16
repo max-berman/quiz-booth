@@ -318,11 +318,6 @@ export function GameCardDashboard({
 							</AlertDialog>
 
 							{/* Add here the LLM Model that generated the game */}
-							{game.llm && (
-								<div className='flex items-center justify-center text-xs text-muted-foreground opacity-70'>
-									<span>LLM: {game.llm}</span>
-								</div>
-							)}
 						</div>
 
 						{/* Sharing Actions */}
@@ -330,6 +325,12 @@ export function GameCardDashboard({
 							<QRCodeModal gameId={game.id} gameTitle={game.companyName} />
 							<ShareEmbedModal gameId={game.id} gameTitle={game.companyName} />
 						</div>
+
+						{game.llm && (
+							<div className='flex items-center text-xs text-muted-foreground '>
+								<span>LLM: {game.llm}</span>
+							</div>
+						)}
 					</div>
 				</CardContent>
 			</Card>

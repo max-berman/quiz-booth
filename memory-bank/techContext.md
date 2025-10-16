@@ -45,17 +45,52 @@
 
 ### Environment Configuration
 
-```env
-# Firebase Configuration
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
+**Client Environment (Root Directory):**
 
-# DeepSeek API Key
-DEEPSEEK_API_KEY=your_deepseek_api_key
+- `.env` - Development client variables (VITE\_\*)
+- `.env.production` - Production client variables (VITE\_\*)
+- `.env.example` - Template for client setup
+
+**Server Environment (firebase-functions):**
+
+- `.env` - Server-side variables (used by emulator)
+- `.env.example` - Template for server setup
+
+**Client Environment Variables (.env):**
+
+```env
+# Firebase Configuration (Client-side)
+VITE_FIREBASE_API_KEY=your_firebase_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abcdef123456
+VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
+
+# Development Configuration
+VITE_USE_EMULATORS=true
+VITE_EMULATOR_HOST=localhost
+VITE_EMULATOR_FIRESTORE_PORT=8080
+VITE_EMULATOR_AUTH_PORT=9099
+VITE_EMULATOR_FUNCTIONS_PORT=5001
+VITE_EMULATOR_STORAGE_PORT=9199
+```
+
+**Server Environment Variables (firebase-functions/.env):**
+
+```env
+# DeepSeek API Configuration
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
+
+# OpenAI API Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Admin Users (comma-separated list of user IDs)
+ADMIN_USERS=
+
+# SparkPost Email API Configuration
+SPARKPOST_API_KEY=your_sparkpost_api_key_here
 ```
 
 ### Installation Steps
