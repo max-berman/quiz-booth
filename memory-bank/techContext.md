@@ -19,7 +19,7 @@
 - **Firebase Functions**: Serverless backend with Node.js runtime
 - **Firebase Firestore**: NoSQL database with real-time capabilities
 - **Firebase Auth**: Authentication service with Google Sign-in
-- **Firebase Hosting**: Global CDN with SSR support
+- **Firebase Hosting**: Global CDN with Client-Side Rendering (CSR)
 - **DeepSeek API**: AI service for question generation
 - **Express**: Web framework for Firebase Functions
 - **Zod**: Runtime type validation
@@ -223,8 +223,7 @@ The following database packages were removed as they were unused and redundant w
 
 1. **Client Build**: Vite builds optimized React application
 2. **Functions Build**: TypeScript compilation to JavaScript
-3. **SSR Setup**: Server-side rendering configuration
-4. **Deployment**: Firebase CLI deployment to hosting and functions
+3. **Deployment**: Firebase CLI deployment to hosting and functions
 
 ## Configuration Files
 
@@ -250,7 +249,7 @@ The following database packages were removed as they were unused and redundant w
 - Functions region: us-central1
 - Memory: 256MB for functions
 - Timeout: 60 seconds for functions
-- SSR enabled for main pages
+- Client-side rendering for all pages
 
 ## Development Workflow
 

@@ -37,7 +37,7 @@ quiz-booth/
 
 - **Firebase Functions**: Scalable, cost-effective backend
 - **Firestore Database**: Real-time NoSQL database
-- **Firebase Hosting**: Global CDN with SSR capabilities
+- **Firebase Hosting**: Global CDN with Client-Side Rendering (CSR)
 
 ### Modern Frontend Stack
 
@@ -495,7 +495,7 @@ useEffect(() => {
 ### Firebase Hosting
 
 - **Global CDN**: Fast content delivery worldwide
-- **SSR Support**: Server-side rendering for SEO
+- **Client-Side Rendering**: Fast client-side rendering for all pages
 - **Custom Domain**: Professional branding
 
 ### Firebase Functions
@@ -513,11 +513,10 @@ useEffect(() => {
    - Run `npm run build:client` and `npm run build:functions` to verify builds work
    - Test the application locally with emulators to ensure functionality
 
-2. **ALWAYS use `npm run deploy:prod` for production deployments**
+2. **ALWAYS use `npm run deploy` for production deployments**
    - This script invokes all relevant build and deploy scripts
-   - Ensures Assets and SSR pages get correct content types
-   - Ensures assets get matching build file names via SSR asset resolver
-   - Includes the SSR asset resolver which is critical for preventing 404 errors
+   - Simple and straightforward deployment process
+   - No SSR complexity to manage
 
 ### Development Workflow
 
