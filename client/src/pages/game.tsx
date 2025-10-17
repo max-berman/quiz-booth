@@ -545,17 +545,8 @@ export default function GamePage() {
 
 		if (isPermissionDenied) {
 			return (
-				<div className='bg-background flex items-center justify-center'>
+				<div className='bg-background flex flex-1 items-center justify-center'>
 					<div className='text-center max-w-md mx-auto p-6'>
-						<p className='flex items-center justify-center my-4'>
-							<a href='https://www.naknick.com' rel='noopener noreferrer'>
-								<img
-									src='/assets/logo.png'
-									alt='NaknNick games logo'
-									className='h-32 w-auto'
-								/>
-							</a>
-						</p>
 						<div className='bg-destructive/10 border border-destructive/20 rounded-lg p-6 mb-6'>
 							<XCircle className='h-16 w-16 text-destructive mx-auto mb-4' />
 							<h2 className='text-xl font-bold text-destructive mb-2'>
@@ -566,6 +557,15 @@ export default function GamePage() {
 								the public.
 							</p>
 						</div>
+						<p className='flex items-center justify-center my-4'>
+							<a href='https://www.naknick.com' rel='noopener noreferrer'>
+								<img
+									src='/assets/logo.png'
+									alt='NaknNick games logo'
+									className='h-auto w-auto max-w-4xl'
+								/>
+							</a>
+						</p>
 						<Button onClick={() => setLocation('/')} className='mt-4'>
 							Return to Home
 						</Button>
@@ -588,7 +588,7 @@ export default function GamePage() {
 						<img
 							src={logoUrl}
 							alt={logoAlt}
-							className='h-auto w-auto max-w-[90%]'
+							className='h-auto w-auto max-w-4xl'
 						/>
 					</a>
 					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>

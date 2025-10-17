@@ -64,16 +64,19 @@ export function GameDetails({
 				<div className='flex items-center gap-2'>
 					<GalleryVerticalEnd className='h-4 w-4' />
 					<span>
-						{game.actualQuestionCount !== undefined ? (
+						{game.actualQuestionCount !== undefined &&
+						game.actualQuestionCount > 0 ? (
 							<>
-								<strong>{game.actualQuestionCount}</strong> of{' '}
+								{/* <strong>{game.actualQuestionCount}</strong> of{' '}
 								<strong>{game.questionCount}</strong> questions generated •{' '}
 								{game.difficulty} difficulty
 								{game.actualQuestionCount < game.questionCount && (
 									<span className='text-amber-600 ml-1 text-xs'>
 										(Incomplete)
 									</span>
-								)}
+								)} */}
+								<strong>{game.actualQuestionCount}</strong> questions •{' '}
+								{game.difficulty} difficulty
 							</>
 						) : (
 							<>
