@@ -1,0 +1,35 @@
+{
+    "child": {
+        "child1": {
+            "directory": "\/home\/maxim\/Dev\/quiz-booth",
+            "height": 307,
+            "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
+            "readOnly": false,
+            "synchronizedInput": true,
+            "type": "Terminal",
+            "uuid": "c461a8a0-7546-4b6c-9d5b-75f79d50b04a",
+            "width": 722
+        },
+        "child2": {
+            "directory": "\/home\/maxim\/Dev\/quiz-booth",
+            "height": 302,
+            "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
+            "readOnly": false,
+            "synchronizedInput": true,
+            "type": "Terminal",
+            "uuid": "7078f8a1-a5e8-48fc-b0cc-141ed28f26f4",
+            "width": 722
+        },
+        "orientation": 1,
+        "position": 50,
+        "ratio": 0.5,
+        "type": "Paned"
+    },
+    "height": 614,
+    "name": "${title}",
+    "synchronizedInput": false,
+    "type": "Session",
+    "uuid": "14db65e4-26f3-423e-899d-81d261105708",
+    "version": "1.0",
+    "width": 722
+}

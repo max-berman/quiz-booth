@@ -23,6 +23,9 @@ export interface ClientEnvironmentConfig extends EnvironmentConfig {
     apiBase: string;
     website: string;
   };
+  admin: {
+    userIds: string[];
+  };
 }
 
 /**
@@ -67,6 +70,9 @@ export const getClientEnvironmentConfig = (): ClientEnvironmentConfig => {
       website: environment === 'development'
         ? 'http://localhost:5173'
         : 'https://quizbooth.app', // Replace with your actual production domain
+    },
+    admin: {
+      userIds: import.meta.env.VITE_ADMIN_USER_IDS?.split(',').map((id: string) => id.trim()) || [],
     },
   };
 };

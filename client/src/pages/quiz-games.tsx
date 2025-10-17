@@ -153,12 +153,13 @@ export default function Quizzes() {
 				<div className='mb-8'>
 					<div className='text-center'>
 						<h1 className='text-3xl md:text-4xl font-bold text-foreground mb-4'>
-							All Quiz Games
+							Public Quiz Games
 						</h1>
 						<p className='text-lg text-foreground max-w-2xl mx-auto'>
-							Discover and play trivia games created by our community. From tech
-							challenges to general knowledge quizzes, there's something for
-							everyone.
+							Browse the curated collection of community-created trivia games.
+							Filter by industry and categories to find your perfect challenge.
+							From business insights to general knowledge, explore diverse
+							topics and compete for top scores.
 						</p>
 					</div>
 				</div>

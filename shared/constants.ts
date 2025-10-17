@@ -17,6 +17,7 @@ export const INDUSTRY_OPTIONS = [
   'Travel, Tourism & Hospitality',
   'Entertainment & Media',
   'Technology & Software',
+  'Tech Hardware & Accessories',
   'Consumer Goods & Electronics',
   'Automotive & Mobility',
   'Blockchain, Crypto & Web3',

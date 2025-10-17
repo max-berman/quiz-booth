@@ -33,6 +33,8 @@ import { GameCardHeader } from './game-card-header'
 import { GameDetails } from './game-details'
 import { getExistingPrizes } from '@/lib/game-utils'
 import app from '@/lib/firebase'
+import { useAuth } from '@/contexts/auth-context'
+import { useIsAdmin } from '@/lib/admin-utils'
 
 interface GameCardEnhancedProps {
 	game: Game
@@ -51,6 +53,7 @@ export function GameCardDashboard({
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 	const { toast } = useToast()
 	const queryClient = useQueryClient()
+	const isAdmin = useIsAdmin()
 
 	// Delete game mutation
 	const deleteGameMutation = useMutation({
@@ -145,25 +148,53 @@ export function GameCardDashboard({
 					{/* Action Buttons */}
 					<div className='space-y-3'>
 						{/* Management Actions */}
-						<div className='grid grid-cols-2 gap-2'>
-							{/* Public/Private Toggle */}
-							<div className='flex items-center justify-center border-primary border px-4 rounded-lg bg-background'>
-								<Checkbox
-									id={`public-toggle-${game.id}`}
-									checked={isPublic}
-									className='mr-2'
-									onCheckedChange={handlePublicToggle}
-								/>
-								<label
-									htmlFor={`public-toggle-${game.id}`}
-									className='text-sm font-medium cursor-pointer flex-1'
-								>
-									Public
-								</label>
-							</div>
+						<div
+							className={`grid ${
+								isAdmin ? `grid-cols-2` : `grid-cols-1`
+							} gap-2`}
+						>
+							{/* Public/Private Toggle - Only for Admin Users */}
+							{isAdmin && (
+								<div className='flex items-center justify-center border-primary border px-4 rounded-lg bg-background'>
+									<Checkbox
+										id={`public-toggle-${game.id}`}
+										checked={isPublic}
+										className='mr-2'
+										onCheckedChange={handlePublicToggle}
+									/>
+									<label
+										htmlFor={`public-toggle-${game.id}`}
+										className='text-sm font-medium cursor-pointer flex-1'
+									>
+										Public
+									</label>
+								</div>
+							)}
+
 							<Button
 								variant='outline'
-								size='sm'
+								className='w-full'
+								onClick={() => setLocation(`/game/${game.id}`)}
+								data-testid={`button-play-game-${game.id}`}
+								aria-label={`Play ${game.companyName} game`}
+							>
+								<Play className='mr-2 h-4 w-4' aria-hidden='true' />
+								Play Game
+							</Button>
+						</div>
+						<div className='grid grid-cols-2 gap-2'>
+							<Button
+								variant='outline'
+								className='w-full'
+								onClick={() => setLocation(`/edit-questions/${game.id}`)}
+								data-testid={`button-edit-questions-${game.id}`}
+								aria-label={`Edit questions for ${game.companyName}`}
+							>
+								<Edit3 className='mr-1 h-4 w-4' aria-hidden='true' />
+								Questions
+							</Button>
+							<Button
+								variant='outline'
 								onClick={handleEditPrizes}
 								data-testid={`button-edit-prizes-${game.id}`}
 								aria-label={`Edit prizes for ${game.companyName}`}
@@ -178,37 +209,12 @@ export function GameCardDashboard({
 								Prizes
 							</Button>
 						</div>
-						<div className='grid grid-cols-2 gap-2'>
-							<Button
-								variant='outline'
-								className='w-full'
-								size='sm'
-								onClick={() => setLocation(`/edit-questions/${game.id}`)}
-								data-testid={`button-edit-questions-${game.id}`}
-								aria-label={`Edit questions for ${game.companyName}`}
-							>
-								<Edit3 className='mr-1 h-4 w-4' aria-hidden='true' />
-								Questions
-							</Button>
-							<Button
-								variant='outline'
-								className='w-full'
-								size='sm'
-								onClick={() => setLocation(`/game/${game.id}`)}
-								data-testid={`button-play-game-${game.id}`}
-								aria-label={`Play ${game.companyName} game`}
-							>
-								<Play className='mr-2 h-4 w-4' aria-hidden='true' />
-								Play Game
-							</Button>
-						</div>
 
 						{/* Analytics Actions */}
 						<div className='grid grid-cols-2 gap-2'>
 							<Button
 								variant='outline'
 								className='w-full'
-								size='sm'
 								onClick={() => setLocation(`/leaderboard/${game.id}`)}
 								data-testid={`button-leaderboard-${game.id}`}
 							>
@@ -218,7 +224,6 @@ export function GameCardDashboard({
 							<Button
 								variant='outline'
 								className='w-full'
-								size='sm'
 								onClick={() => {
 									// Store creator access for raw data
 									localStorage.setItem(
@@ -230,7 +235,7 @@ export function GameCardDashboard({
 								data-testid={`button-submissions-${game.id}`}
 							>
 								<Database className='mr-1 h-4 w-4' />
-								Raw Data
+								Data
 							</Button>
 						</div>
 
@@ -239,7 +244,6 @@ export function GameCardDashboard({
 							<Button
 								variant='outline'
 								className='w-full'
-								size='sm'
 								onClick={() => setLocation(`/game-customization/${game.id}`)}
 								data-testid={`button-customize-game-${game.id}`}
 								aria-label={`Customize appearance for ${game.companyName}`}
@@ -258,7 +262,6 @@ export function GameCardDashboard({
 									<Button
 										variant='destructive'
 										className='w-full'
-										size='sm'
 										disabled={deleteGameMutation.isPending}
 										data-testid={`button-delete-game-${game.id}`}
 										aria-label={`Delete ${game.companyName} game`}
@@ -326,9 +329,11 @@ export function GameCardDashboard({
 							<ShareEmbedModal gameId={game.id} gameTitle={game.companyName} />
 						</div>
 
-						{game.llm && (
-							<div className='flex items-center text-xs text-muted-foreground '>
-								<span>LLM: {game.llm}</span>
+						{game.llm && isAdmin && (
+							<div className='grid grid-cols-1 gap-2'>
+								<div className='flex items-center justify-end text-xs text-muted-foreground '>
+									<span>LLM: {game.llm}</span>
+								</div>
 							</div>
 						)}
 					</div>

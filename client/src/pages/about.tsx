@@ -27,7 +27,7 @@ import {
 } from 'lucide-react'
 
 export default function About() {
-	const appVersion = '1.0.0-beta.1'
+	const appVersion = '1.4.0-beta.2'
 	const lastUpdated = 'October 2025'
 
 	// Core features organized by category
@@ -41,7 +41,7 @@ export default function About() {
 				'Website-based company detection for accurate content',
 				'Batch question generation with duplicate prevention',
 				'Answer option shuffling and explanation generation',
-				'Levenshtein distance-based similarity checking',
+				'Performance-optimized generation with 2-minute timeouts',
 			],
 		},
 		{
@@ -49,7 +49,7 @@ export default function About() {
 			icon: Gamepad2,
 			features: [
 				'Multi-step game creation wizard',
-				'Flexible prize system with multiple tiers',
+				'Flexible prize system with customizable placement tiers',
 				'AI-generated game titles',
 				'User dashboard for game management',
 				'Real-time play count tracking',
@@ -61,30 +61,42 @@ export default function About() {
 			icon: Users,
 			features: [
 				'Immersive gameplay interface with hidden headers',
-				'Multiple choice questions with randomized answers',
+				'30-second timer with session persistence and resume capability',
+				'Mobile swipe gestures and vibration feedback',
 				'Real-time scoring and progress tracking',
 				'Comprehensive results with answer explanations',
 				'Mobile-optimized responsive design',
-				'Time tracking and performance analytics',
 			],
 		},
 		{
-			title: 'Leaderboard & Analytics',
-			icon: BarChart3,
+			title: 'Security & Anti-Cheating',
+			icon: Shield,
 			features: [
-				'Real-time game-specific leaderboards',
-				'Global cross-game rankings',
-				'Intelligent caching with 30-second TTL',
-				'Player submissions and engagement tracking',
-				'Lead capture for trade show events',
-				'Creator analytics and performance metrics',
+				'First completion lock to prevent score manipulation',
+				'Secure session-based results storage',
+				'Server-side score validation',
+				'Cross-device authentication with Firebase Auth',
+				'Rate limiting and security protections',
+				'Real-time cheating detection',
+			],
+		},
+		{
+			title: 'Performance & Optimization',
+			icon: Zap,
+			features: [
+				'Logo caching system for faster game loading',
+				'Intelligent caching with 24-hour TTL for logos',
+				'Performance-optimized question generation',
+				'Real-time leaderboards with intelligent caching',
+				'Mobile-first responsive design',
+				'Fast loading with code splitting',
 			],
 		},
 		{
 			title: 'Sharing & Distribution',
 			icon: Share2,
 			features: [
-				'Dynamic QR code generation',
+				'Dynamic QR code generation for easy event distribution',
 				'Shareable embed codes for websites',
 				'Public URLs for direct game access',
 				'Event-ready distribution system',
@@ -92,25 +104,28 @@ export default function About() {
 				'Quick setup for immediate event use',
 			],
 		},
-		{
-			title: 'Technical Architecture',
-			icon: Cpu,
-			features: [
-				'Full-stack TypeScript with React 18',
-				'Firebase Firestore real-time database',
-				'Performance-optimized caching system',
-				'Intelligent code splitting and lazy loading',
-				'Comprehensive error handling and logging',
-				'Rate limiting and security protections',
-			],
-		},
 	]
 
 	// Recent updates and version history
 	const versionHistory = [
 		{
-			version: '1.0.0',
+			version: '1.4.0-beta.2',
 			date: 'October 2025',
+			changes: [
+				'Advanced anti-cheating system with first completion lock',
+				'Enhanced timer system with session persistence and resume capability',
+				'Mobile swipe gestures and vibration feedback for better UX',
+				'Logo caching system for faster game loading',
+				'Performance-optimized question generation with batch processing',
+				'Flexible prize system with customizable placement tiers',
+				'Real-time leaderboards with intelligent caching',
+				'Cross-device authentication with Firebase Auth',
+				'QR code sharing for easy event distribution',
+			],
+		},
+		{
+			version: '1.0.0',
+			date: 'September 2025',
 			changes: [
 				'Complete UI redesign with modern components',
 				'Enhanced AI question generation with DeepSeek integration',
@@ -118,10 +133,6 @@ export default function About() {
 				'Improved mobile optimization and PWA support',
 				'Comprehensive analytics and tracking system',
 				'Performance optimizations and caching improvements',
-				'Timer system with resume capability to prevent cheating',
-				'Interval-based timer state saving for reliability',
-				'Page unload protection for timer persistence',
-				'Safety buffer implementation for timer resumption',
 			],
 		},
 		{
@@ -159,7 +170,10 @@ export default function About() {
 
 			<div className='flex-1 flex flex-col'>
 				{/* Hero Section */}
-				<section className='relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 to-primary/10'>
+				<section
+					data-info='hero'
+					className='relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 to-primary/10'
+				>
 					<div className='max-w-6xl mx-auto text-center'>
 						<div className='mb-8'>
 							<div className='flex flex-col sm:flex-row gap-2 justify-center items-center mb-4'>
@@ -168,7 +182,7 @@ export default function About() {
 								</Badge>
 								<Badge
 									variant='default'
-									className='text-sm bg-green-500 text-white'
+									className='text-sm bg-yellow-500 text-white'
 								>
 									🚀 Beta Version • Currently Free
 								</Badge>
@@ -220,11 +234,11 @@ export default function About() {
 									<div className='space-y-3'>
 										<div className='flex justify-between'>
 											<span className='font-medium'>Major Version:</span>
-											<Badge variant='secondary'>2</Badge>
+											<Badge variant='secondary'>1</Badge>
 										</div>
 										<div className='flex justify-between'>
 											<span className='font-medium'>Minor Version:</span>
-											<Badge variant='secondary'>0</Badge>
+											<Badge variant='secondary'>4</Badge>
 										</div>
 										<div className='flex justify-between'>
 											<span className='font-medium'>Patch Version:</span>
@@ -232,7 +246,7 @@ export default function About() {
 										</div>
 										<div className='flex justify-between'>
 											<span className='font-medium'>Pre-release:</span>
-											<Badge variant='outline'>beta.1</Badge>
+											<Badge variant='outline'>beta.2</Badge>
 										</div>
 									</div>
 								</CardContent>
@@ -312,7 +326,7 @@ export default function About() {
 									<div className='space-y-3'>
 										<div className='flex justify-between'>
 											<span className='font-medium'>Target Version:</span>
-											<Badge variant='secondary'>2.0.0</Badge>
+											<Badge variant='secondary'>1.4.0</Badge>
 										</div>
 										<div className='flex justify-between'>
 											<span className='font-medium'>Timeline:</span>

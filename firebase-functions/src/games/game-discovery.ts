@@ -1,6 +1,5 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { isAdminUser } from './game-utils';
 
 const db = admin.firestore();
 
@@ -96,32 +95,26 @@ export const getPublicGamesCount = functions.https.onCall(async (data, context) 
   }
 });
 
-// Get admin games (only accessible to admin users)
+// Get admin games (public games from specific admin user)
 export const getAdminGames = functions.https.onCall(async (data, context) => {
-  const { limit = 12, offset = 0, industry, categories } = data;
+  const { limit = 12, offset = 0, industry, categories, adminUserId } = data;
 
-  // Authentication check - only admin users can access this
-  if (!context.auth) {
+  // No authentication check needed - these games are publicly accessible
+  // No admin check needed - anyone can see these public games
+
+  if (!adminUserId) {
     throw new functions.https.HttpsError(
-      'unauthenticated',
-      'User must be authenticated'
-    );
-  }
-
-  const userId = context.auth.uid;
-
-  // Check if user is admin
-  if (!isAdminUser(userId)) {
-    throw new functions.https.HttpsError(
-      'permission-denied',
-      'Access denied - admin privileges required'
+      'invalid-argument',
+      'adminUserId is required'
     );
   }
 
   try {
-    // Get all games (not just public ones), ordered by creation date (newest first)
+    // Get public games from specific admin user, ordered by creation date (newest first)
     let gamesQuery = db
       .collection('games')
+      .where('userId', '==', adminUserId)
+      .where('isPublic', '==', true)
       .orderBy('createdAt', 'desc');
 
     // Apply filters if provided

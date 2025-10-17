@@ -31,7 +31,7 @@ export function ShareEmbedModal({
 	const [isOpen, setIsOpen] = useState(false)
 
 	const baseUrl = window.location.origin
-	const gameUrl = gameId ? `${baseUrl}/game/${gameId}` : `${baseUrl}/setup`
+	const gameUrl = gameId ? `${baseUrl}/game/${gameId}` : `${baseUrl}`
 	const embedCode = gameId
 		? `<iframe src="${gameUrl}" width="100%" height="600" frameborder="0" style="border-radius: 8px;"></iframe>`
 		: `<iframe src="${baseUrl}/setup" width="100%" height="700" frameborder="0" style="border-radius: 8px;"></iframe>`
@@ -74,7 +74,7 @@ export function ShareEmbedModal({
 					{isBuilder ? 'Share Trivia Builder' : 'Share'}
 				</Button>
 			</DialogTrigger>
-			<DialogContent className='max-w-2xl !bg-white !text-black border-4 !border-black shadow-2xl z-50'>
+			<DialogContent className='max-w-2xl  shadow-2xl z-50'>
 				<DialogHeader>
 					<DialogTitle>
 						{isBuilder ? 'Share Trivia Builder' : `Share ${gameTitle} Trivia`}

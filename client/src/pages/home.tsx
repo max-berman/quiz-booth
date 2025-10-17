@@ -28,6 +28,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions'
 import { logoCache } from '@/lib/logo-cache'
 import { useToast } from '@/hooks/use-toast'
 import app from '@/lib/firebase'
+import { getClientEnvironmentConfig } from '@/config/environment'
 
 export default function Home() {
 	const { isAuthenticated, user, loading } = useAuth()
@@ -38,8 +39,22 @@ export default function Home() {
 		queryKey: ['public-games'],
 		queryFn: async () => {
 			const functions = getFunctions(app)
-			const getPublicGames = httpsCallable(functions, 'getPublicGames')
-			const result = await getPublicGames({ limit: 3 })
+			const getAdminGames = httpsCallable(functions, 'getAdminGames')
+			const config = getClientEnvironmentConfig()
+
+			// Use the first admin user ID from the environment configuration
+			const adminUserId = config.admin.userIds[0]
+
+			if (!adminUserId) {
+				throw new Error('No admin user ID configured')
+			}
+
+			const result = await getAdminGames({
+				limit: 3,
+				adminUserId: adminUserId,
+			})
+			// const getPublicGames = httpsCallable(functions, 'getPublicGames')
+			// const result = await getPublicGames({ limit: 3 })
 
 			const games = result.data as Game[]
 
@@ -238,11 +253,13 @@ export default function Home() {
 					<div className='max-w-7xl mx-auto'>
 						<div className='text-center mb-8'>
 							<h2 className='text-2xl md:text-3xl font-bold text-foreground mb-4'>
-								Recently Added Games
+								Daily Trivia Games
 							</h2>
 							<p className='text-lg text-foreground max-w-2xl mx-auto'>
-								Check out the latest trivia games created by our community.
-								Play, learn, and have fun!
+								Discover fresh trivia challenges every day! Play our curated
+								selection of AI-powered trivia games covering business,
+								technology, and industry topics. Test your knowledge and compete
+								for top scores.
 							</p>
 						</div>
 

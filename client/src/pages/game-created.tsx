@@ -182,7 +182,7 @@ export default function GameCreated() {
 						<div className='flex justify-between flex-row'>
 							<CardTitle
 								title={game.companyName}
-								className='font-bold line-clamp-2 text-primary mb-1'
+								className='font-bolds text-primary mb-1 mr-2'
 							>
 								{game.gameTitle || game.companyName}
 							</CardTitle>
