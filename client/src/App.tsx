@@ -11,6 +11,7 @@ import { AuthProvider } from '@/contexts/auth-context'
 import { LoadingSpinner } from '@/components/loading-spinner'
 import { PWARegistration } from '@/components/pwa-registration'
 import { CacheDebug } from '@/components/cache-debug'
+import { AnalyticsDebug } from '@/components/analytics-debug'
 import { shouldShowHeader, shouldShowFooter } from '@/config/page-visibility'
 import { logoCache } from '@/lib/logo-cache'
 import ErrorBoundary from '@/components/error-boundary'
@@ -69,6 +70,11 @@ function App() {
 	const showHeader = shouldShowHeader(location)
 	const showFooter = shouldShowFooter(location)
 
+	// Check if analytics debug should be shown (via query parameter)
+	const showAnalyticsDebug =
+		typeof window !== 'undefined' &&
+		new URLSearchParams(window.location.search).has('analytics_debug')
+
 	// Initialize logo cache on app startup
 	useEffect(() => {
 		logoCache.loadFromStorage()
@@ -88,6 +94,12 @@ function App() {
 							{showFooter && <Footer />}
 						</div>
 						<Toaster />
+						{/* Analytics debug panel - shown when ?analytics_debug is in URL */}
+						{showAnalyticsDebug && (
+							<div className='fixed bottom-4 right-4 z-50 max-w-sm'>
+								<AnalyticsDebug />
+							</div>
+						)}
 						{/* Temporarily disabled PWA to test timing issues */}
 						{/* <PWARegistration /> */}
 						{/* <CacheDebug /> */}

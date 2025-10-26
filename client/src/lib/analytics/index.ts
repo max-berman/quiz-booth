@@ -9,22 +9,41 @@ interface AnalyticsEvent {
 class AnalyticsService {
   private measurementId: string
   private isInitialized = false
+  private isGtagAvailable = false
+  private eventQueue: AnalyticsEvent[] = []
+  private debugMode = import.meta.env.DEV || false
 
   constructor() {
     // Use environment variable or fallback for measurement ID
     this.measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX'
+
+    if (this.debugMode) {
+      console.log('AnalyticsService initialized with measurement ID:', this.measurementId)
+    }
   }
 
   // Initialize Google Analytics
   initialize(): void {
-    if (typeof window === 'undefined' || this.isInitialized) return
-
-    // Check if gtag is already available
-    if (typeof window.gtag === 'function') {
-      this.isInitialized = true
-      console.log('Google Analytics already initialized')
+    if (typeof window === 'undefined') {
+      if (this.debugMode) console.log('Analytics: Window not available (SSR)')
       return
     }
+
+    if (this.isInitialized) {
+      if (this.debugMode) console.log('Analytics: Already initialized')
+      return
+    }
+
+    // Check if gtag is already available
+    if (this.isGtagFunctionAvailable()) {
+      this.isInitialized = true
+      this.isGtagAvailable = true
+      if (this.debugMode) console.log('Analytics: gtag already available')
+      this.processEventQueue()
+      return
+    }
+
+    if (this.debugMode) console.log('Analytics: Starting initialization')
 
     // Initialize dataLayer and gtag function BEFORE loading the script
     window.dataLayer = window.dataLayer || []
@@ -42,24 +61,81 @@ class AnalyticsService {
     // Use onload to detect when the script is ready
     script.onload = () => {
       this.isInitialized = true
-      console.log('Google Analytics initialized via service')
+      this.isGtagAvailable = this.isGtagFunctionAvailable()
+
+      if (this.debugMode) {
+        console.log('Analytics: Script loaded successfully', {
+          isInitialized: this.isInitialized,
+          isGtagAvailable: this.isGtagAvailable,
+          gtagType: typeof window.gtag
+        })
+      }
+
+      if (this.isGtagAvailable) {
+        this.processEventQueue()
+      } else {
+        console.error('Analytics: gtag function not available after script load')
+      }
+    }
+
+    script.onerror = (error) => {
+      console.error('Analytics: Failed to load Google Analytics script:', error)
+      if (this.debugMode) console.log('Analytics: Script load failed')
     }
 
     document.head.appendChild(script)
   }
 
-  // Track custom events
-  trackEvent(event: AnalyticsEvent): void {
-    if (!this.isInitialized) {
-      console.warn('Analytics not initialized. Event not tracked:', event)
+  // Check if gtag function is actually available and working
+  private isGtagFunctionAvailable(): boolean {
+    return typeof window.gtag === 'function'
+  }
+
+  // Process queued events
+  private processEventQueue(): void {
+    if (this.debugMode) console.log(`Analytics: Processing ${this.eventQueue.length} queued events`)
+
+    while (this.eventQueue.length > 0) {
+      const event = this.eventQueue.shift()
+      if (event) {
+        this.sendEvent(event)
+      }
+    }
+  }
+
+  // Queue event if not initialized, otherwise send immediately
+  private queueOrSendEvent(event: AnalyticsEvent): void {
+    if (this.isInitialized && this.isGtagAvailable) {
+      this.sendEvent(event)
+    } else {
+      if (this.debugMode) console.log('Analytics: Queuing event (not ready):', event.name)
+      this.eventQueue.push(event)
+
+      // If we have queued events but aren't initialized, try to initialize
+      if (!this.isInitialized) {
+        this.initialize()
+      }
+    }
+  }
+
+  // Send event to Google Analytics
+  private sendEvent(event: AnalyticsEvent): void {
+    if (!this.isGtagAvailable) {
+      if (this.debugMode) console.warn('Analytics: gtag not available for event:', event.name)
       return
     }
 
-    if (typeof window.gtag === 'function') {
+    try {
+      if (this.debugMode) console.log('Analytics: Sending event:', event.name, event.params)
       window.gtag('event', event.name, event.params)
-    } else {
-      console.warn('gtag not available. Event:', event)
+    } catch (error) {
+      console.error('Analytics: Failed to send event:', event.name, error)
     }
+  }
+
+  // Track custom events
+  trackEvent(event: AnalyticsEvent): void {
+    this.queueOrSendEvent(event)
   }
 
   // Track page views
