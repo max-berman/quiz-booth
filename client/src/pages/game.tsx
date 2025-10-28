@@ -12,7 +12,7 @@ import { useGameSession } from '@/hooks/use-game-session'
 import { useSwipeGesture } from '@/hooks/use-swipe-gesture'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useGameLogo } from '@/hooks/use-game-logo'
-import { analytics } from '@/lib/analytics'
+import { firebaseAnalytics } from '@/lib/firebase-analytics'
 import {
 	applyGameCustomization,
 	cleanupGameCustomization,
@@ -250,7 +250,7 @@ export default function GamePage() {
 	// Track game start when game data is loaded
 	useEffect(() => {
 		if (game && questions && !hasExistingSession) {
-			analytics.trackGameStart({
+			firebaseAnalytics.trackGameStart({
 				gameId: id!,
 				difficulty: game.difficulty,
 				categories: game.categories,
@@ -379,7 +379,7 @@ export default function GamePage() {
 		}
 
 		// Track question answered event
-		analytics.trackQuestionAnswered({
+		firebaseAnalytics.trackQuestionAnswered({
 			gameId: id!,
 			questionIndex: currentQuestionIndex,
 			isCorrect,
@@ -422,7 +422,7 @@ export default function GamePage() {
 			const finalTimeSpent = Math.floor((Date.now() - gameStartTime) / 1000)
 
 			// Track game completion event
-			analytics.trackGameCompleted({
+			firebaseAnalytics.trackGameCompleted({
 				gameId: id!,
 				finalScore: score,
 				correctAnswers: correctAnswers,

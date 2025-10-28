@@ -18,7 +18,7 @@ import {
 	onAuthStateChanged,
 } from 'firebase/auth'
 import { auth } from '../lib/firebase'
-import { analytics } from '../lib/analytics'
+import { firebaseAnalytics } from '../lib/firebase-analytics'
 
 interface AuthContextType {
 	user: User | null
@@ -84,12 +84,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 			localStorage.setItem('emailForSignIn', email)
 
 			// Track email sign-in attempt for analytics
-			analytics.trackUserSignIn('email')
+			firebaseAnalytics.trackUserSignIn('email')
 		} catch (error: any) {
 			console.error('Email link error:', error)
 
 			// Track authentication error
-			analytics.trackError({
+			firebaseAnalytics.trackError({
 				type: 'authentication',
 				message: error.message || 'Email sign-in failed',
 				context: 'sendSignInLink',
@@ -114,10 +114,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 			await signInWithPopup(auth, provider)
 
 			// Track successful sign-in
-			analytics.trackUserSignIn('google')
+			firebaseAnalytics.trackUserSignIn('google')
 		} catch (error: any) {
 			// Track authentication error
-			analytics.trackError({
+			firebaseAnalytics.trackError({
 				type: 'authentication',
 				message: error.message || 'Google sign-in failed',
 				context: 'signInWithGoogle',

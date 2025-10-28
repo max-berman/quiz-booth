@@ -138,6 +138,7 @@ export const clientEnvironment = {
         config.firebase.config.authDomain,
         config.firebase.config.projectId,
         config.firebase.config.appId,
+        config.firebase.config.measurementId,
       ];
 
       const missingVars = requiredVars.filter(v => !v);

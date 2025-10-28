@@ -49,13 +49,16 @@ class ErrorBoundary extends React.Component<
 		})
 
 		// Send error to analytics if available
-		if (typeof window !== 'undefined' && (window as any).analytics) {
+		if (typeof window !== 'undefined') {
 			try {
-				;(window as any).analytics.trackError({
-					type: 'react_error',
-					message: error.message,
-					context: errorInfo.componentStack,
-				})
+				// Use the new Firebase Analytics service
+				if ((window as any).firebaseAnalytics) {
+					;(window as any).firebaseAnalytics.trackError({
+						type: 'react_error',
+						message: error.message,
+						context: errorInfo.componentStack,
+					})
+				}
 			} catch (analyticsError) {
 				console.warn('Failed to send error to analytics:', analyticsError)
 			}

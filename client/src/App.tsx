@@ -14,6 +14,7 @@ import { CacheDebug } from '@/components/cache-debug'
 import { AnalyticsDebug } from '@/components/analytics-debug'
 import { shouldShowHeader, shouldShowFooter } from '@/config/page-visibility'
 import { logoCache } from '@/lib/logo-cache'
+import { firebaseAnalytics } from '@/lib/firebase-analytics'
 import ErrorBoundary from '@/components/error-boundary'
 
 // Lazy load pages for code splitting
@@ -34,6 +35,7 @@ const FAQ = lazy(() => import('@/pages/faq'))
 const Pricing = lazy(() => import('@/pages/pricing'))
 const Contact = lazy(() => import('@/pages/contact'))
 const GameCustomization = lazy(() => import('@/pages/game-customization'))
+const AnalyticsTest = lazy(() => import('@/pages/analytics-test'))
 const NotFound = lazy(() => import('@/pages/not-found'))
 
 function Router() {
@@ -55,6 +57,7 @@ function Router() {
 				<Route path='/pricing' component={Pricing} />
 				<Route path='/contact' component={Contact} />
 				<Route path='/game-customization/:id' component={GameCustomization} />
+				<Route path='/analytics-test' component={AnalyticsTest} />
 				<Route path='/auth/sign-in' component={SignIn} />
 				<Route path='/auth/complete' component={CompleteSignIn} />
 				<Route component={NotFound} />
@@ -79,6 +82,19 @@ function App() {
 	useEffect(() => {
 		logoCache.loadFromStorage()
 	}, [])
+
+	// Track page views when location changes
+	useEffect(() => {
+		// Only track in production
+		if (
+			window.location.hostname !== 'localhost' &&
+			window.location.hostname !== '127.0.0.1'
+		) {
+			// Track page view when location changes
+			const pageTitle = document.title || location
+			firebaseAnalytics.trackPageView(pageTitle)
+		}
+	}, [location])
 
 	return (
 		<HelmetProvider>

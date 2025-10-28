@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react'
 import { useLocation } from 'wouter'
+// import { Separator } from '@/components/ui/separator'
 
 export function Footer() {
 	const [location, setLocation] = useLocation()

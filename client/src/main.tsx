@@ -1,25 +1,20 @@
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './index.css'
-import { analytics } from './lib/analytics'
+import { firebaseAnalytics } from './lib/firebase-analytics'
 
-// Initialize analytics in production only
+// Track initial page view in production only
 if (
 	window.location.hostname !== 'localhost' &&
 	window.location.hostname !== '127.0.0.1'
 ) {
-	analytics.initialize()
-
-	// Track initial page view once analytics is ready
+	// Track initial page view
 	const trackInitialPageView = () => {
-		analytics.trackPageView(document.title || window.location.pathname)
+		firebaseAnalytics.trackPageView(document.title || window.location.pathname)
 	}
 
-	// Try to track immediately if already initialized
-	if (
-		typeof window !== 'undefined' &&
-		typeof (window as any).gtag === 'function'
-	) {
+	// Try to track immediately if analytics is available
+	if (firebaseAnalytics.isAvailable()) {
 		trackInitialPageView()
 	} else {
 		// Wait for analytics to be ready with a timeout fallback
@@ -30,10 +25,7 @@ if (
 		const checkAndTrack = () => {
 			if (pageViewTracked) return
 
-			if (
-				typeof window !== 'undefined' &&
-				typeof (window as any).gtag === 'function'
-			) {
+			if (firebaseAnalytics.isAvailable()) {
 				trackInitialPageView()
 				pageViewTracked = true
 			} else if (Date.now() - startTime < maxWaitTime) {

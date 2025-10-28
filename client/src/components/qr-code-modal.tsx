@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { QrCode, Download } from 'lucide-react'
 import QRCode from 'qrcode'
-import { analytics } from '@/lib/analytics'
+import { firebaseAnalytics } from '@/lib/firebase-analytics'
 
 interface QRCodeModalProps {
 	gameId: string
@@ -24,7 +24,7 @@ export function QRCodeModal({ gameId, gameTitle }: QRCodeModalProps) {
 	useEffect(() => {
 		if (isOpen) {
 			// Track QR code generation event
-			analytics.trackGameShared({
+			firebaseAnalytics.trackGameShared({
 				gameId,
 				shareMethod: 'qr_code',
 			})
@@ -50,7 +50,7 @@ export function QRCodeModal({ gameId, gameTitle }: QRCodeModalProps) {
 	const handleDownload = () => {
 		if (qrCodeDataURL) {
 			// Track QR code download event
-			analytics.trackGameShared({
+			firebaseAnalytics.trackGameShared({
 				gameId,
 				shareMethod: 'qr_code',
 				platform: 'download',

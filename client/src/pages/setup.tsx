@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/auth-context'
 import { useFirebaseFunctions } from '@/hooks/use-firebase-functions'
-import { analytics } from '@/lib/analytics'
+import { firebaseAnalytics } from '@/lib/firebase-analytics'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { AlertCircle, Wand2 } from 'lucide-react'
@@ -139,7 +139,7 @@ function SetupContent() {
 			setIsGenerating(true)
 
 			// Track game creation event
-			analytics.trackGameCreated({
+			firebaseAnalytics.trackGameCreated({
 				gameId: game.id,
 				companyName: formData.companyName,
 				industry: formData.industry,

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { RefreshCw, Play, AlertCircle, CheckCircle } from 'lucide-react'
-import { analytics } from '@/lib/analytics'
+import { firebaseAnalytics } from '@/lib/firebase-analytics'
 
 interface AnalyticsDebugProps {
 	className?: string
@@ -49,12 +49,12 @@ export function AnalyticsDebug({ className }: AnalyticsDebugProps) {
 	}, [])
 
 	const testPageView = () => {
-		analytics.trackPageView('Test Page View')
+		firebaseAnalytics.trackPageView('Test Page View')
 		setTestEvents((prev) => [...prev, 'page_view'])
 	}
 
 	const testGameStart = () => {
-		analytics.trackGameStart({
+		firebaseAnalytics.trackGameStart({
 			gameId: 'test-game-123',
 			difficulty: 'easy',
 			categories: ['Company Facts'],
@@ -64,7 +64,7 @@ export function AnalyticsDebug({ className }: AnalyticsDebugProps) {
 	}
 
 	const testQuestionAnswered = () => {
-		analytics.trackQuestionAnswered({
+		firebaseAnalytics.trackQuestionAnswered({
 			gameId: 'test-game-123',
 			questionIndex: 1,
 			isCorrect: true,
@@ -76,7 +76,7 @@ export function AnalyticsDebug({ className }: AnalyticsDebugProps) {
 	}
 
 	const testGameCompleted = () => {
-		analytics.trackGameCompleted({
+		firebaseAnalytics.trackGameCompleted({
 			gameId: 'test-game-123',
 			finalScore: 500,
 			correctAnswers: 4,
@@ -88,7 +88,7 @@ export function AnalyticsDebug({ className }: AnalyticsDebugProps) {
 	}
 
 	const testError = () => {
-		analytics.trackError({
+		firebaseAnalytics.trackError({
 			type: 'other',
 			message: 'Test error event',
 			context: 'analytics-debug',

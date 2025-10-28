@@ -3,12 +3,15 @@ import { getAuth, connectAuthEmulator, setPersistence, browserLocalPersistence }
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 import clientEnvironment from '../config/environment';
+import { firebaseAnalytics } from './firebase-analytics';
 
 let app: any;
 let auth: any;
 let db: any;
 let storage: any;
+let analytics: any;
 
 // Check if Firebase is already initialized
 const existingApps = getApps();
@@ -62,6 +65,21 @@ if (existingApps.length > 0) {
       console.error('Failed to set persistence:', error);
     });
 
+    // Initialize Firebase Analytics in production only
+    if (!clientEnvironment.isDevelopment()) {
+      isSupported().then((supported) => {
+        if (supported) {
+          analytics = getAnalytics(app);
+          firebaseAnalytics.setAnalytics(analytics);
+          console.log('Firebase Analytics initialized');
+        } else {
+          console.warn('Firebase Analytics not supported in this environment');
+        }
+      }).catch((error) => {
+        console.error('Firebase Analytics initialization failed:', error);
+      });
+    }
+
     console.log(`Firebase initialized for ${config.environment} environment`);
   } catch (error) {
     console.error('Firebase initialization failed:', error);
@@ -69,5 +87,5 @@ if (existingApps.length > 0) {
   }
 }
 
-export { auth, db, storage };
+export { auth, db, storage, analytics };
 export default app;
