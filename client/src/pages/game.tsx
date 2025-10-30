@@ -575,29 +575,29 @@ export default function GamePage() {
 		}
 	}
 
-	//if (isLoading || !questions || !game) {
-	return (
-		<div className='flex-1 bg-background flex items-center justify-center'>
-			<div className='text-center mx-10'>
-				<a
-					href='/'
-					target='_blank'
-					rel='noopener noreferrer'
-					className='flex items-center justify-center my-4'
-				>
-					<img
-						src={logoUrl}
-						alt={logoAlt}
-						className='h-auto w-auto lg:max-w-2xl'
-					/>
-				</a>
-				<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
+	if (isLoading || !questions || !game) {
+		return (
+			<div className='flex-1 bg-background flex items-center justify-center'>
+				<div className='text-center mx-10'>
+					<a
+						href='/'
+						target='_blank'
+						rel='noopener noreferrer'
+						className='flex items-center justify-center my-4'
+					>
+						<img
+							src={logoUrl}
+							alt={logoAlt}
+							className='h-auto w-auto lg:max-w-2xl'
+						/>
+					</a>
+					<div className='animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
 
-				<p className='animate-bounce'>Loading game...</p>
+					<p className='animate-bounce'>Loading game...</p>
+				</div>
 			</div>
-		</div>
-	)
-	//}
+		)
+	}
 
 	return (
 		<div className='flex-1 flex flex-col bg-background'>
