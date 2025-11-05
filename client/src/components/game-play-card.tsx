@@ -141,17 +141,17 @@ export function GamePlayCard({
 		if (selectedAnswer === index) {
 			// This is the selected answer
 			return index === currentQuestion?.correctAnswer
-				? 'font-bold bg-primary/20 border-primary text-primary scale-[1.01]' // Correct answer selected
-				: 'bg-destructive/20 border-destructive text-destructive' // Wrong answer selected
+				? 'font-bold bg-background border-primary scale-[1.02] text-primary' // Correct answer selected
+				: 'bg-destructive/40 border-destructive text-secondary' // Wrong answer selected
 		}
 
 		if (index === currentQuestion?.correctAnswer) {
 			// This is the correct answer (but not selected by user)
-			return 'font-bold bg-primary/20 border-primary text-primary'
+			return 'font-bold bg-background border-primary  text-primary'
 		}
 
 		// Default state - answered but not selected and not correct
-		return 'bg-background/80 border-primary '
+		return 'bg-background/80 border-primary text-primary'
 	}
 
 	const getAngle = () => {
@@ -232,8 +232,8 @@ export function GamePlayCard({
 												selectedAnswer === index &&
 												currentQuestion &&
 												index !== currentQuestion.correctAnswer
-													? 'border-destructive'
-													: 'border-primary'
+													? 'border-secondary '
+													: 'border-primary '
 											}`}
 										>
 											{String.fromCharCode(65 + index)}
@@ -252,9 +252,9 @@ export function GamePlayCard({
 											{selectedAnswer === index &&
 												currentQuestion &&
 												(index === currentQuestion.correctAnswer ? (
-													<CheckCircle className='h-8 w-8 lg:h-10 lg:w-10 text-primary' />
+													<CheckCircle className='h-8 w-8 lg:h-12 lg:w-12 text-primary' />
 												) : (
-													<XCircle className='h-8 w-8 lg:h-10 lg:w-10 text-destructive' />
+													<XCircle className='h-8 w-8 lg:h-10 lg:w-10 text-secondary' />
 												))}
 											{selectedAnswer !== index &&
 												currentQuestion &&

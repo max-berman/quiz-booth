@@ -44,7 +44,7 @@ export function GameBrandingBar({
 								className='max-h-12 w-auto'
 							/>
 							<span className='text-xs flex items-center mt-2'>
-								Build by Naknick.com <ExternalLink className='ml-1 h-3 w-3' />
+								Built by Naknick.com <ExternalLink className='ml-1 h-3 w-3' />
 							</span>
 						</div>
 					)}

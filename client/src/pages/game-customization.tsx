@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useLocation } from 'wouter'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,7 @@ import { GamePreview } from '@/components/game-preview'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 import { colorToHex, isValidHexColor } from '@/lib/color-utils'
+import { HexColorPicker } from 'react-colorful'
 import type { Game, GameCustomization } from '@shared/firebase-types'
 
 const buttonDefaultStyle = `border-[##746c56] bg-[##fcf7e7] shadow-sm hover:bg-[#fcfdfe] hover:border-[##979181] hover:shadow-md ring-offset-[##fcf7e7]`
@@ -113,6 +114,32 @@ export default function GameCustomizationPage() {
 	const [isDragOver, setIsDragOver] = useState(false)
 	const [isEditingTitle, setIsEditingTitle] = useState(false)
 	const [editedTitle, setEditedTitle] = useState('')
+	const [activeColorPicker, setActiveColorPicker] = useState<string | null>(
+		null
+	)
+	const colorPickerRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+	// Close color picker when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (!activeColorPicker) return
+
+			const activeRef = colorPickerRefs.current[activeColorPicker]
+
+			// Check if the click is outside the active color picker container
+			if (activeRef && !activeRef.contains(event.target as Node)) {
+				setActiveColorPicker(null)
+			}
+		}
+
+		if (activeColorPicker) {
+			document.addEventListener('mousedown', handleClickOutside)
+		}
+
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside)
+		}
+	}, [activeColorPicker])
 
 	// Fetch game data
 	const {
@@ -561,76 +588,104 @@ export default function GameCustomizationPage() {
 									<Palette className='h-4 w-4' />
 									<h4 className='text-sm font-semibold '>Color Presets</h4>
 								</div>
-								<div className='grid grid-cols-4 gap-2 mb-4'>
+								<div className='grid grid-cols-4 gap-2 mb-4 '>
 									{COLOR_PRESETS.map((preset) => (
 										<button
 											key={preset.name}
 											onClick={() => handlePresetSelect(preset)}
-											className='p-1 border  rounded hover:border-primary transition-colors text-left text-xs'
+											className='p-0.5 overflow-hidden flex border rounded hover:border-stone-700 transition-colors text-left text-xs'
 										>
-											<div className='flex gap-0.5 justify-around items-center'>
-												<div
-													className='w-6 h-6 rounded-full border-primary'
-													style={{ backgroundColor: preset.primary }}
-												/>
-												{/* <div
-													className='w-6 h-6 rounded-full border'
+											<div
+												className='w-1/3 h-6 border-primary'
+												style={{ backgroundColor: preset.primary }}
+											/>
+											{/* <div
+													className='w-6 h-6 border'
 													style={{ backgroundColor: preset.secondary }}
 												/> */}
-												<div
-													className='w-6 h-6 rounded-full border-background'
-													style={{ backgroundColor: preset.tertiary }}
-												/>
-												<div
-													className='w-6 h-6 rounded-full border-card'
-													style={{ backgroundColor: preset.quaternary }}
-												/>
-											</div>
+											<div
+												className='w-1/3 h-6 border-background'
+												style={{ backgroundColor: preset.tertiary }}
+											/>
+											<div
+												className='w-1/3 h-6 border-card'
+												style={{ backgroundColor: preset.quaternary }}
+											/>
+
 											{/* <span className='font-medium'>{preset.name}</span> */}
 										</button>
 									))}
 								</div>
 							</div>
 
-							<div className='space-y-3  w-full'>
+							<div className='space-y-4 w-full'>
 								{COLOR_FIELDS.map((field) => (
-									<div
-										key={field.id}
-										className='gap-2 flex justify-between items-center'
-									>
-										<Label
-											htmlFor={field.id}
-											className='text-sm w-1/3 font-medium'
-										>
-											{field.label}
-										</Label>
-										<Input
-											id={field.id}
-											type='color'
-											value={
-												formData[field.id as keyof CustomizationForm] as string
-											}
-											onChange={(e) =>
-												handleColorChange(
-													field.id as keyof CustomizationForm,
-													e.target.value
-												)
-											}
-											className='w-1/4 h-8 p-0.5 bg-white'
-										/>
-										<Input
-											value={
-												formData[field.id as keyof CustomizationForm] as string
-											}
-											onChange={(e) =>
-												handleColorChange(
-													field.id as keyof CustomizationForm,
-													e.target.value
-												)
-											}
-											placeholder={field.placeholder}
-											className='text-xs w-2/3 p-1 h-8 bg-white'
-										/>
+									<div key={field.id} className='space-y-2'>
+										<div className='flex items-center w-full b'>
+											<Label
+												htmlFor={field.id}
+												className='text-sm font-medium w-1/2'
+											>
+												{field.label}
+											</Label>
+
+											<div
+												className='relative items-center flex w-auto justify-between '
+												ref={(el) => (colorPickerRefs.current[field.id] = el)}
+											>
+												<button
+													type='button'
+													onClick={() =>
+														setActiveColorPicker(
+															activeColorPicker === field.id ? null : field.id
+														)
+													}
+													className='w-10 h-8 p-0 mr-2 rounded border border-gray-300 shadow-none hover:border-stone-700 transition-shadow'
+													style={{
+														backgroundColor: formData[
+															field.id as keyof CustomizationForm
+														] as string,
+													}}
+													title={`Click to ${
+														activeColorPicker === field.id ? 'close' : 'open'
+													} color picker`}
+												/>
+												<Input
+													id={field.id}
+													value={
+														formData[
+															field.id as keyof CustomizationForm
+														] as string
+													}
+													onChange={(e) =>
+														handleColorChange(
+															field.id as keyof CustomizationForm,
+															e.target.value
+														)
+													}
+													placeholder={field.placeholder}
+													className='text-sm  p-1 h-8 bg-white'
+												/>
+												{activeColorPicker === field.id && (
+													<div className='flex justify-center absolute z-50 top-10'>
+														<HexColorPicker
+															color={
+																formData[
+																	field.id as keyof CustomizationForm
+																] as string
+															}
+															onChange={(color) =>
+																handleColorChange(
+																	field.id as keyof CustomizationForm,
+																	color
+																)
+															}
+															className='react-colorful'
+														/>
+													</div>
+												)}
+											</div>
+										</div>
 									</div>
 								))}
 							</div>
