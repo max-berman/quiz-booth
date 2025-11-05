@@ -375,7 +375,7 @@ export default function Results() {
 									!hasAlreadySubmitted &&
 									results.score > 0 &&
 									!isScoreLocked && (
-										<div className='bg-accent/10 py-4 rounded-xl mb-6'>
+										<div className='py-4 rounded-xl mb-6'>
 											<h3 className='text-base md:text-lg font-semibold text-primary mb-4'>
 												Save Your Score to Leaderboard
 											</h3>
@@ -384,7 +384,7 @@ export default function Results() {
 													<Input
 														id='playerName'
 														placeholder='Enter your name'
-														//className='border-primary'
+														className='border-primary'
 														value={playerName}
 														onChange={(e) => setPlayerName(e.target.value)}
 													/>
@@ -394,7 +394,7 @@ export default function Results() {
 														id='playerEmail'
 														type='email'
 														placeholder='your.email@company.com'
-														//className='border-primary'
+														className='border-primary'
 														value={playerEmail}
 														onChange={(e) => setPlayerEmail(e.target.value)}
 													/>
@@ -491,7 +491,7 @@ export default function Results() {
 						<img
 							src='/assets/logo.png'
 							alt='NaknNick games logo'
-							className='h-32 w-auto'
+							className='h-24 w-auto'
 						/>
 					</a>
 				</div>

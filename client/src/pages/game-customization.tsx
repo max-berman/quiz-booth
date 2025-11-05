@@ -68,7 +68,7 @@ const COLOR_FIELDS = [
 const COLOR_PRESETS = [
 	{
 		name: 'Warm Orange',
-		primary: '#ea580c',
+		primary: '#ff5900',
 		secondary: '#ffffff',
 		tertiary: '#fff2e5',
 		quaternary: '#fffaf5',
@@ -89,7 +89,7 @@ const COLOR_PRESETS = [
 	},
 	{
 		name: 'Vibrant Teal',
-		primary: '#ff004c',
+		primary: '#b42852',
 		secondary: '#ffffff',
 		tertiary: '#ffe5ee',
 		quaternary: '#fffafe',
@@ -522,7 +522,7 @@ export default function GameCustomizationPage() {
 										variant='outline'
 										size='sm'
 										onClick={handleSaveTitle}
-										className={buttonDefaultStyle}
+										className={`${buttonDefaultStyle} py-1 px-2 shadow-none hover:shadow-none`}
 									>
 										<Save className='h-4 w-4' />
 									</Button>
@@ -530,7 +530,7 @@ export default function GameCustomizationPage() {
 										variant='outline'
 										size='sm'
 										onClick={handleCancelEditing}
-										className={buttonDefaultStyle}
+										className={`${buttonDefaultStyle} py-1 px-2 shadow-none hover:shadow-none`}
 									>
 										<X className='h-4 w-4' />
 									</Button>
@@ -553,7 +553,7 @@ export default function GameCustomizationPage() {
 							variant='outline'
 							size='icon'
 							onClick={handleBackToDashboard}
-							className={`ml-auto ${buttonDefaultStyle}`}
+							className={`ml-auto !border-stone-700 border ${buttonDefaultStyle}`}
 						>
 							<X className='h-4 w-4' />
 						</Button>
@@ -564,7 +564,7 @@ export default function GameCustomizationPage() {
 			<div className='grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-7xl mx-auto'>
 				{/* Main Content - Preview Only */}
 				<div className='lg:col-span-2 space-y-6'>
-					<div className='border border-stone-700 rounded-lg overflow-hidden'>
+					<div className=' rounded-lg overflow-hidden'>
 						<GamePreview
 							primaryColor={formData.primaryColor}
 							secondaryColor={formData.secondaryColor}

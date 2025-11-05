@@ -600,9 +600,9 @@ export default function GamePage() {
 	}
 
 	return (
-		<div className='flex-1 flex flex-col bg-background'>
+		<div className='flex-1 flex flex-col bg-background bg-custom-svg bg-cover bg-center bg-no-repeat'>
 			{/* Top Navigation Bar */}
-			<div className='sticky flex justify-center top-0 z-50 bg-background/80 backdrop-blur-sm shadow-md'>
+			<div className='sticky flex justify-center top-0 z-50 bg-background/80 backdrop-blur-sm shadow-md h-20'>
 				{/* Timer and Stats - Compact version */}
 				<GameStatsBar
 					timeLeft={timeLeft}
@@ -612,28 +612,31 @@ export default function GamePage() {
 					score={score}
 				/>
 			</div>
+			<div className='flex-1 flex flex-col justify-center'>
+				<div className='transition-all duration-1000 ease-in-out min-h-0 border flex-1 '>
+					<GameBrandingBar
+						game={game}
+						isAnswered={isAnswered}
+						currentQuestionIndex={currentQuestionIndex}
+						questionsLength={questions.length}
+						onNextQuestion={handleNextQuestion}
+					/>
 
-			<GameBrandingBar
-				game={game}
-				isAnswered={isAnswered}
-				currentQuestionIndex={currentQuestionIndex}
-				questionsLength={questions.length}
-				onNextQuestion={handleNextQuestion}
-			/>
-
-			<div className='max-w-4xl w-full mx-auto px-0 text-primary'>
-				{/* Question Card */}
-				<GamePlayCard
-					currentQuestion={currentQuestion}
-					currentQuestionIndex={currentQuestionIndex}
-					questions={questions}
-					questionsLength={questions.length}
-					selectedAnswer={selectedAnswer}
-					isAnswered={isAnswered}
-					showExplanation={showExplanation}
-					onAnswerSelect={handleAnswerSelect}
-					onNextQuestion={handleNextQuestion}
-				/>
+					<div className='max-w-4xl w-full mx-auto px-0 text-primary '>
+						{/* Question Card */}
+						<GamePlayCard
+							currentQuestion={currentQuestion}
+							currentQuestionIndex={currentQuestionIndex}
+							questions={questions}
+							questionsLength={questions.length}
+							selectedAnswer={selectedAnswer}
+							isAnswered={isAnswered}
+							showExplanation={showExplanation}
+							onAnswerSelect={handleAnswerSelect}
+							onNextQuestion={handleNextQuestion}
+						/>
+					</div>
+				</div>
 			</div>
 		</div>
 	)

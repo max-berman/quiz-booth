@@ -141,17 +141,17 @@ export function GamePlayCard({
 		if (selectedAnswer === index) {
 			// This is the selected answer
 			return index === currentQuestion?.correctAnswer
-				? 'font-bold bg-background border-primary scale-[1.02] text-primary' // Correct answer selected
-				: 'bg-destructive/40 border-destructive text-secondary' // Wrong answer selected
+				? 'font-bold bg-background/80 border-primary scale-[1.02] text-foreground' // Correct answer selected
+				: 'bg-destructive/40 border-destructive text-destructive' // Wrong answer selected
 		}
 
 		if (index === currentQuestion?.correctAnswer) {
 			// This is the correct answer (but not selected by user)
-			return 'font-bold bg-background border-primary  text-primary'
+			return 'font-bold bg-background border-primary text-foreground'
 		}
 
 		// Default state - answered but not selected and not correct
-		return 'bg-background/80 border-primary text-primary'
+		return 'bg-background/70 border-primary text-foreground'
 	}
 
 	const getAngle = () => {
@@ -196,7 +196,7 @@ export function GamePlayCard({
 			<CardContent className='p-0 pb-4 md:p-6'>
 				{/* Question Text */}
 				<div className=''>
-					<div className='bg-gradient-to-r from-primary/20 to-card/10 rounded-none md:rounded-2xl p-4 mb-4 '>
+					<div className='bg-gradient-to-r from-primary/20 to-background/10 rounded-none md:rounded-2xl p-4 mb-4 '>
 						<h2 className='text-lg md:text-2xl font-medium lg:font-bold text-primary leading-6 lg:leading-relaxed '>
 							{currentQuestion?.questionText}
 						</h2>
@@ -227,12 +227,12 @@ export function GamePlayCard({
 								<div className='flex items-center justify-between'>
 									<div className='flex items-center mr-4 w-auto'>
 										<span
-											className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2  flex items-center justify-center font-bold text-sm ${
+											className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm ${
 												isAnswered &&
 												selectedAnswer === index &&
 												currentQuestion &&
 												index !== currentQuestion.correctAnswer
-													? 'border-secondary '
+													? 'border-destructive '
 													: 'border-primary '
 											}`}
 										>
@@ -254,7 +254,7 @@ export function GamePlayCard({
 												(index === currentQuestion.correctAnswer ? (
 													<CheckCircle className='h-8 w-8 lg:h-12 lg:w-12 text-primary' />
 												) : (
-													<XCircle className='h-8 w-8 lg:h-10 lg:w-10 text-secondary' />
+													<XCircle className='h-8 w-8 lg:h-10 lg:w-10 text-destructive' />
 												))}
 											{selectedAnswer !== index &&
 												currentQuestion &&
