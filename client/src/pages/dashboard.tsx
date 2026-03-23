@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { useLocation } from 'wouter'
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/hooks/use-toast'
@@ -154,8 +155,17 @@ export default function Dashboard() {
 	}
 
 	return (
-		<div className='flex-1 py-8'>
-			<div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
+		<>
+			<Helmet>
+				<title>Dashboard - Manage Your Trivia Games | QuizBooth</title>
+				<meta
+					name='description'
+					content='Manage and track all your QuizBooth trivia games. View analytics, edit game settings, and monitor player engagement from your dashboard.'
+				/>
+				<link rel='canonical' href='https://quizbooth.games/dashboard' />
+			</Helmet>
+			<div className='flex-1 py-8'>
+				<div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
 				{/* Header */}
 				<div className='flex items-bottom justify-between mb-8'>
 					<div className='flex  gap-4'>
@@ -226,5 +236,6 @@ export default function Dashboard() {
 				/>
 			</div>
 		</div>
+		</>
 	)
 }

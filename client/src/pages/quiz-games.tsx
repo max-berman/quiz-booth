@@ -136,7 +136,7 @@ export default function Quizzes() {
 					property='og:description'
 					content='Discover and play free trivia games created by our community. Browse through various categories, industries, and difficulty levels.'
 				/>
-				<meta property='og:url' content='https://quizbooth.games/quizzes' />
+				<meta property='og:url' content='https://quizbooth.games/quiz-games' />
 				<meta
 					name='twitter:title'
 					content='Quiz Games - Play Free Trivia Quizzes | QuizBooth'
@@ -145,7 +145,7 @@ export default function Quizzes() {
 					name='twitter:description'
 					content='Discover and play free trivia games created by our community. Browse through various categories, industries, and difficulty levels.'
 				/>
-				<link rel='canonical' href='https://quizbooth.games/quizzes' />
+				<link rel='canonical' href='https://quizbooth.games/quiz-games' />
 			</Helmet>
 
 			<div className='container flex-col flex-1 flex mx-auto px-4 py-8'>

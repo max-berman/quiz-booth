@@ -27,8 +27,8 @@ import {
 } from 'lucide-react'
 
 export default function About() {
-	const appVersion = '1.4.0-beta.2'
-	const lastUpdated = 'October 2025'
+	const appVersion = '1.5.0-beta.2'
+	const lastUpdated = 'February 2026'
 
 	// Core features organized by category
 	const featureCategories = [
@@ -36,12 +36,11 @@ export default function About() {
 			title: 'AI-Powered Question Generation',
 			icon: Brain,
 			features: [
-				'DeepSeek AI Integration for intelligent question generation',
+				'DeepSeek AI Integration with fallback to OpenAI for intelligent question generation',
 				'Category-specific prompts (Company Facts, Industry Knowledge, Fun Facts)',
 				'Website-based company detection for accurate content',
 				'Batch question generation with duplicate prevention',
 				'Answer option shuffling and explanation generation',
-				'Performance-optimized generation with 2-minute timeouts',
 			],
 		},
 		{
@@ -60,7 +59,7 @@ export default function About() {
 			title: 'Player Experience & Engagement',
 			icon: Users,
 			features: [
-				'Immersive gameplay interface with hidden headers',
+				'Immersive gameplay interface',
 				'30-second timer with session persistence and resume capability',
 				'Mobile swipe gestures and vibration feedback',
 				'Real-time scoring and progress tracking',
@@ -75,23 +74,23 @@ export default function About() {
 				'First completion lock to prevent score manipulation',
 				'Secure session-based results storage',
 				'Server-side score validation',
-				'Cross-device authentication with Firebase Auth',
-				'Rate limiting and security protections',
+				'Cross-device authentication and synchronization',
+				'Rate limiting to prevent abuse and spam',
 				'Real-time cheating detection',
 			],
 		},
-		{
-			title: 'Performance & Optimization',
-			icon: Zap,
-			features: [
-				'Logo caching system for faster game loading',
-				'Intelligent caching with 24-hour TTL for logos',
-				'Performance-optimized question generation',
-				'Real-time leaderboards with intelligent caching',
-				'Mobile-first responsive design',
-				'Fast loading with code splitting',
-			],
-		},
+		// {
+		// 	title: 'Performance & Optimization',
+		// 	icon: Zap,
+		// 	features: [
+		// 		'Logo caching system for faster game loading',
+		// 		'Intelligent caching with 24-hour TTL for logos',
+		// 		'Performance-optimized question generation',
+		// 		'Real-time leaderboards with intelligent caching',
+		// 		'Mobile-first responsive design',
+		// 		'Fast loading with code splitting',
+		// 	],
+		// },
 		{
 			title: 'Sharing & Distribution',
 			icon: Share2,
@@ -109,8 +108,8 @@ export default function About() {
 	// Recent updates and version history
 	const versionHistory = [
 		{
-			version: '1.4.0-beta.2',
-			date: 'October 2025',
+			version: '1.5.0-beta.2',
+			date: 'December 2025',
 			changes: [
 				'Advanced anti-cheating system with first completion lock',
 				'Enhanced timer system with session persistence and resume capability',
@@ -201,7 +200,7 @@ export default function About() {
 				</section>
 
 				{/* Version Information */}
-				<section className='py-12 px-4 sm:px-6 lg:px-8'>
+				{/* <section className='py-12 px-4 sm:px-6 lg:px-8'>
 					<div className='max-w-6xl mx-auto'>
 						<div className='text-center mb-12'>
 							<h2 className='text-3xl font-bold text-foreground mb-4'>
@@ -212,17 +211,17 @@ export default function About() {
 									<Package className='h-5 w-5 text-primary' />
 									<span className='text-lg font-semibold'>
 										Current Version: {appVersion}
-									</span>
+									</s50an>
 								</div>
 								<div className='flex items-center gap-2'>
 									<Clock className='h-5 w-5 text-primary' />
 									<span className='text-lg'>Last Updated: {lastUpdated}</span>
 								</div>
 							</div>
-						</div>
+						</div> */}
 
-						{/* Version Breakdown */}
-						<div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-12'>
+				{/* Version Breakdown */}
+				{/* <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-12'>
 							<Card>
 								<CardHeader>
 									<CardTitle className='flex items-center gap-2'>
@@ -343,10 +342,10 @@ export default function About() {
 									</div>
 								</CardContent>
 							</Card>
-						</div>
+						</div> */}
 
-						{/* Version History */}
-						<div className='space-y-8'>
+				{/* Version History */}
+				{/* <div className='space-y-8'>
 							{versionHistory.map((version, index) => (
 								<Card
 									key={version.version}
@@ -378,7 +377,7 @@ export default function About() {
 							))}
 						</div>
 					</div>
-				</section>
+				</section> */}
 
 				{/* Features Overview */}
 				<section className='py-12 px-4 sm:px-6 lg:px-8 bg-muted/30'>

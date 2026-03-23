@@ -613,7 +613,7 @@ export default function GamePage() {
 				/>
 			</div>
 			<div className='flex-1 flex flex-col justify-center'>
-				<div className='transition-all duration-1000 ease-in-out min-h-0 border flex-1 '>
+				<div className='transition-all duration-1000 ease-in-out min-h-0 flex-1 '>
 					<GameBrandingBar
 						game={game}
 						isAnswered={isAnswered}

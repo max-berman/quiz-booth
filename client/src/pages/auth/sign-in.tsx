@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -77,54 +78,73 @@ export default function SignIn() {
 
 	if (emailSent) {
 		return (
-			<div className='flex-1  bg-background py-8 items-center flex'>
-				<div className='max-w-md mx-auto px-4  text-primary'>
-					<Card>
-						<CardHeader>
-							<CardTitle className='text-center'>Check your email</CardTitle>
-						</CardHeader>
-						<CardContent className='space-y-4'>
-							<div className='text-center'>
-								<div className='w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4'>
-									<Mail className='h-8 w-8 text-primary' />
+			<>
+				<Helmet>
+					<title>Check Your Email - Sign In to QuizBooth</title>
+					<meta
+						name='description'
+						content='Check your email for the sign-in link to access your QuizBooth account and manage your trivia games.'
+					/>
+					<link rel='canonical' href='https://quizbooth.games/auth/sign-in' />
+				</Helmet>
+				<div className='flex-1  bg-background py-8 items-center flex'>
+					<div className='max-w-md mx-auto px-4  text-primary'>
+						<Card>
+							<CardHeader>
+								<CardTitle className='text-center'>Check your email</CardTitle>
+							</CardHeader>
+							<CardContent className='space-y-4'>
+								<div className='text-center'>
+									<div className='w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4'>
+										<Mail className='h-8 w-8 text-primary' />
+									</div>
+									<p className=' mb-4'>
+										We've sent a sign-in link to <strong>{email}</strong>
+									</p>
+									<p className='text-sm mb-6'>
+										Click the link in your email to sign in. The link will expire
+										in 1 hour.
+									</p>
 								</div>
-								<p className=' mb-4'>
-									We've sent a sign-in link to <strong>{email}</strong>
-								</p>
-								<p className='text-sm mb-6'>
-									Click the link in your email to sign in. The link will expire
-									in 1 hour.
-								</p>
-							</div>
 
-							<div className='space-y-3'>
-								<Button
-									onClick={() => setEmailSent(false)}
-									variant='outline'
-									className='w-full'
-									data-testid='button-change-email'
-								>
-									Use different email
-								</Button>
-							</div>
-						</CardContent>
-					</Card>
+								<div className='space-y-3'>
+									<Button
+										onClick={() => setEmailSent(false)}
+										variant='outline'
+										className='w-full'
+										data-testid='button-change-email'
+									>
+										Use different email
+									</Button>
+								</div>
+							</CardContent>
+						</Card>
+					</div>
 				</div>
-			</div>
+			</>
 		)
 	}
 
 	return (
-		<div className='flex-1 bg-background py-8 items-center flex'>
-			<div className='max-w-md mx-auto px-4 '>
-				<Card>
-					<CardHeader>
-						<CardTitle className='text-center text-primary'>Sign In</CardTitle>
-						<p className='text-center text-sm'>
-							Choose your preferred sign-in method
-						</p>
-					</CardHeader>
-					<CardContent className='space-y-6'>
+		<>
+			<Helmet>
+				<title>Sign In - Access Your QuizBooth Account</title>
+				<meta
+					name='description'
+					content='Sign in to QuizBooth to create, manage, and play trivia games. Use Google sign-in or email magic link for secure access.'
+				/>
+				<link rel='canonical' href='https://quizbooth.games/auth/sign-in' />
+			</Helmet>
+			<div className='flex-1 bg-background py-8 items-center flex'>
+				<div className='max-w-md mx-auto px-4 '>
+					<Card>
+						<CardHeader>
+							<CardTitle className='text-center text-primary'>Sign In</CardTitle>
+							<p className='text-center text-sm'>
+								Choose your preferred sign-in method
+							</p>
+						</CardHeader>
+						<CardContent className='space-y-6'>
 						{/* Google Sign-in (Primary) */}
 						<Button
 							onClick={handleGoogleSignIn}
@@ -213,5 +233,6 @@ export default function SignIn() {
 				</Card>
 			</div>
 		</div>
+		</>
 	)
 }
