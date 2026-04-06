@@ -17,6 +17,7 @@ import { userSetup } from './auth/userSetup';
 // Import API endpoints
 import { getGameQuestionsCount, getGamePlayCount, getQuestions } from './api/games';
 import { sendContactForm } from './api/contact';
+import { ssrServer } from './ssr';
 
 // Export all functions
 export {
@@ -47,5 +48,6 @@ export {
   getGameQuestionsCount,
   getGamePlayCount,
   getQuestions,
-  sendContactForm
+  sendContactForm,
+  ssrServer
 };

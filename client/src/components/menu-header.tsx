@@ -1,5 +1,6 @@
 import React from 'react'
-import { useLocation, Link } from 'wouter'
+import { Link } from 'wouter'
+import { useSSRLocation } from '@/lib/ssr-router'
 import {
 	BarChart3,
 	LogOut,
@@ -72,7 +73,7 @@ const MENU_ITEMS = [
 ]
 
 export function CreatorHeader() {
-	const [location, setLocation] = useLocation()
+	const [location, setLocation] = useSSRLocation()
 	const { user, isAuthenticated, signOut } = useAuth()
 	const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
 	const isHomePage = location === '/'

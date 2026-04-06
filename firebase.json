@@ -16,6 +16,22 @@
         "function": "getGamePlayCount"
       },
       {
+        "source": "/about",
+        "function": "ssrServer"
+      },
+      {
+        "source": "/pricing",
+        "function": "ssrServer"
+      },
+      {
+        "source": "/quiz-games",
+        "function": "ssrServer"
+      },
+      {
+        "source": "/faq",
+        "function": "ssrServer"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
