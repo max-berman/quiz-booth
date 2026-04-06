@@ -5,6 +5,7 @@
 import express, { Request, Response, NextFunction } from 'express'
 import fs from 'node:fs'
 import path from 'node:path'
+import { renderMarketingPage } from './simple-ssr'
 
 // Mock browser globals for SSR
 if (typeof window === 'undefined') {
@@ -34,7 +35,7 @@ const isProduction = process.env.NODE_ENV === 'production'
 const distPublicPath = path.join(process.cwd(), 'dist', 'public')
 
 // Marketing pages that require SSR
-const SSR_ROUTES = ['/about', '/pricing', '/quiz-games', '/faq']
+const SSR_ROUTES = ['/', '/about', '/pricing', '/quiz-games', '/faq']
 
 // Initialize Express app
 const app = express()
@@ -61,19 +62,10 @@ function loadTemplate(): string {
 /**
  * Inject rendered app into HTML template
  */
-function injectAppIntoTemplate(html: string, appHtml: string): string {
+function injectAppIntoTemplate(html: string, appHtml: string, head: string = ''): string {
   return html
+    .replace('<!--app-head-->', head)
     .replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`)
-    .replace('<!--ssr-mode-->', 'data-ssr="true"')
-}
-
-/**
- * Render app to HTML using SSR
- */
-async function renderAppToHtml(url: string): Promise<string> {
-  // Use dynamic import for ESM module
-  const { render } = await import('../src/entry-server.js')
-  return await render(url, {})
 }
 
 /**
@@ -104,7 +96,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next()
 })
 
-// SSR handler for marketing pages - simple static render
+// SSR handler for marketing pages - using actual React components
 app.use(async (req: Request, res: Response, next: NextFunction) => {
   const { pathname } = new URL(req.url, `http://${req.headers.host}`)
 
@@ -116,35 +108,15 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   try {
     console.log(`[SSR] Rendering: ${pathname}`)
 
-    // Simple static HTML for marketing pages
-    let pageTitle = 'QuizBooth'
-    let pageContent = '<h1>QuizBooth</h1><p>Loading...</p>'
+    // Use the simple SSR renderer for marketing pages
+    const { html: appHtml, head } = renderMarketingPage(pathname)
     
-    switch (pathname) {
-      case '/about':
-        pageTitle = 'About QuizBooth'
-        pageContent = '<h1>About QuizBooth</h1><p>AI-powered trivia platform for creating and playing interactive quiz games.</p>'
-        break
-      case '/pricing':
-        pageTitle = 'Pricing - QuizBooth'
-        pageContent = '<h1>Pricing</h1><p>Flexible plans for individuals and businesses.</p>'
-        break
-      case '/quiz-games':
-        pageTitle = 'Quiz Games - QuizBooth'
-        pageContent = '<h1>Quiz Games</h1><p>Browse and play interactive quiz games.</p>'
-        break
-      case '/faq':
-        pageTitle = 'FAQ - QuizBooth'
-        pageContent = '<h1>Frequently Asked Questions</h1><p>Common questions about QuizBooth.</p>'
-        break
+    if (!appHtml) {
+      return next()
     }
 
     const template = loadTemplate()
-    const html = template
-      .replace('<title>QuizBooth</title>', `<title>${pageTitle}</title>`)
-      .replace('<div id="root"></div>', `<div id="root">${pageContent}</div>`)
-      .replace('<!--ssr-mode-->', 'data-ssr="true"')
-      .replace('<!--app-head-->', `<meta name="description" content="${pageTitle}">`)
+    const html = injectAppIntoTemplate(template, appHtml, head)
 
     res.status(200)
     res.type('html')

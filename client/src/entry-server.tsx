@@ -33,7 +33,6 @@ function injectAppIntoTemplate(appHtml: string, head: string = ''): string {
   return template
     .replace('<!--app-head-->', head)
     .replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`)
-    .replace('<!--ssr-mode-->', 'data-ssr="true"')
 }
 
 /**

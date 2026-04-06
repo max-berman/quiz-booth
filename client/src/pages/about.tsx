@@ -27,8 +27,8 @@ import {
 } from 'lucide-react'
 
 export default function About() {
-	const appVersion = '1.5.0-beta.2'
-	const lastUpdated = 'February 2026'
+	const appVersion = '1.5.0-beta.3'
+	const lastUpdated = 'April 2026'
 
 	// Core features organized by category
 	const featureCategories = [
