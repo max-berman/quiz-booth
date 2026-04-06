@@ -50,7 +50,7 @@ The deployment process now automatically loads environment variables from the `.
 
 1. **Security**: Never commit `.env` files to version control
 2. **Backup**: Keep a secure backup of your environment variables
-3. **Fallback**: The code still supports both methods during transition period
+3. **Migration Complete**: The code now uses only environment variables (`process.env.*`) and no longer uses `functions.config()`
 4. **Migration Deadline**: Functions using `functions.config()` will stop working after December 31, 2025
 
 ### Troubleshooting

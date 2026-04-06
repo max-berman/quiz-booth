@@ -12,7 +12,7 @@ const contactFormSchema = z.object({
 
 
 // Initialize SparkPost client
-const sparkpostApiKey = functions.config().sparkpost?.api_key || process.env.SPARKPOST_API_KEY
+const sparkpostApiKey = process.env.SPARKPOST_API_KEY
 const client = sparkpostApiKey ? new SparkPost(sparkpostApiKey) : null
 
 export const sendContactForm = functions.https.onCall(async (data: unknown, context) => {
